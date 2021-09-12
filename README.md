@@ -1,3 +1,3 @@
 # DynastyMap
 
-[dynastymap.com](https://dynastymap.com)
+[dynastymap.com](http://dynastymap.com)
