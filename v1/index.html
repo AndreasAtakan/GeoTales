@@ -32,6 +32,7 @@
 		<!-- Load lib/ CSS -->
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
@@ -42,22 +43,73 @@
 	</head>
 	<body>
 
-		<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-			<a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Company name</a>
-			<button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" />
-			<div class="navbar-nav">
-				<div class="nav-item text-nowrap">
-					<a class="nav-link px-3" href="#">Sign out</a>
+		<div class="container-fluid p-0">
+			<div class="row g-0">
+				<div class="col">
+					<nav class="navbar navbar-light sticky-top shadow px-2 px-sm-3 justify-content-start" style="background-color: #e3f2fd;">
+						<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" style="font-size: 1rem;">
+							<span class="navbar-toggler-icon"></span>
+						</button>
+
+						<!--a class="navbar-brand px-3" href="#">
+							<img src="assets/logo.jpg" width="30" height="30" />
+						</a-->
+
+						<ul class="navbar-nav flex-row ps-3">
+							<li class="nav-item">
+								<a class="nav-link pe-1 active" aria-current="page" href="#">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link px-1" href="#">Features</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link px-1 disabled">Disabled</a>
+							</li>
+						</ul>
+
+						<button class="btn btn-sm btn-outline-secondary ms-auto" type="button" style="border-color: rgba(0,0,0,.1);">
+							<i class="fas fa-user"></i>
+						</button>
+
+						<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+							<div class="offcanvas-header">
+								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5>
+								<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+							</div>
+							<div class="offcanvas-body">
+								<ul class="navbar-nav justify-content-start flex-grow-1 pe-3">
+									<li class="nav-item">
+										<a class="nav-link active" aria-current="page" href="#">Home</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" href="#">Link</a>
+									</li>
+								</ul>
+								<form class="d-flex">
+									<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+									<button class="btn btn-outline-success" type="submit">Search</button>
+								</form>
+							</div>
+						</div>
+					</nav>
 				</div>
 			</div>
-		</header>
 
-		<div class="container-fluid">
-			<div class="row">
-				<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+
+			<div class="row g-0" style="height: calc(100vh - 56px);">
+				<div class="col-lg-10 col-md-9 col-sm-12 order-md-2" id="mapcol">
+					<div id="map"></div>
+				</div>
+
+				<div class="col-lg-2 col-md-3 col-sm-12 order-md-1 shadow" id="sidecol">
+					<div class="row g-0">
+						<div class="col">
+							1
+						</div>
+					</div>
+				</div>
+
+				<!--nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
 					<div class="position-sticky pt-3">
 						<ul class="nav flex-column">
 							<li class="nav-item">
@@ -141,7 +193,8 @@
 							</tbody>
 						</table>
 					</div>
-				</main>
+				</main-->
+
 			</div>
 		</div>
 
@@ -149,6 +202,7 @@
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
 		<script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/js/main.js"></script>
