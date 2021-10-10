@@ -51,25 +51,37 @@
 							<span class="navbar-toggler-icon"></span>
 						</button>
 
-						<!--a class="navbar-brand px-3" href="#">
-							<img src="assets/logo.jpg" width="30" height="30" />
-						</a-->
-
-						<ul class="navbar-nav flex-row ps-3">
-							<li class="nav-item">
-								<a class="nav-link pe-1 active" aria-current="page" href="#">Home</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link px-1" href="#">Features</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link px-1 disabled">Disabled</a>
-							</li>
-						</ul>
-
-						<button class="btn btn-sm btn-outline-secondary ms-auto" type="button" style="border-color: rgba(0,0,0,.1);">
-							<i class="fas fa-user"></i>
+						<button class="btn btn-sm btn-outline-secondary ms-3 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#objects" aria-expanded="false" aria-controls="objects">
+							<i class="fas fa-sort-down"></i>
 						</button>
+
+						<button class="btn btn-sm btn-secondary ms-3" type="button">
+							Import
+						</button>
+
+						<button class="btn btn-sm btn-outline-secondary ms-3" type="button">
+							Events and triggers
+						</button>
+
+						<button class="btn btn-sm btn-outline-secondary ms-3" type="button">
+							Map options
+						</button>
+
+						<button class="btn btn-sm btn-outline-secondary ms-auto" type="button">
+							Export
+						</button>
+
+						<div class="dropdown ms-3">
+							<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(0,0,0,.1);">
+								<i class="fas fa-user"></i>
+							</button>
+							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+								<li><a class="dropdown-item" href="#">My profile</a></li>
+								<li><a class="dropdown-item" href="#">Settings</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item" href="#">Log out</a></li>
+							</ul>
+						</div>
 
 						<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
 							<div class="offcanvas-header">
@@ -86,7 +98,7 @@
 									</li>
 								</ul>
 								<form class="d-flex">
-									<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+									<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
 									<button class="btn btn-outline-success" type="submit">Search</button>
 								</form>
 							</div>
@@ -96,15 +108,50 @@
 			</div>
 
 
-			<div class="row g-0" style="height: calc(100vh - 56px);">
-				<div class="col-lg-10 col-md-9 col-sm-12 order-md-2" id="mapcol">
+			<div class="row g-0" style="height: calc(100vh - 50px);">
+				<div class="col-12">
 					<div id="map"></div>
-				</div>
 
-				<div class="col-lg-2 col-md-3 col-sm-12 order-md-1 shadow" id="sidecol">
-					<div class="row g-0">
-						<div class="col">
-							1
+					<div class="collapse" id="objects">
+						<div class="card">
+							<div class="card-header">
+								<ul class="nav nav-tabs card-header-tabs nav-fill">
+									<li class="nav-item">
+										<button class="nav-link active" id="route-tab" data-bs-toggle="tab" data-bs-target="#route" type="button" role="tab" aria-controls="route" aria-selected="true" style="color: inherit;">
+											Route
+										</button>
+									</li>
+									<li class="nav-item">
+										<button class="nav-link" id="avatar-tab" data-bs-toggle="tab" data-bs-target="#avatar" type="button" role="tab" aria-controls="avatar" aria-selected="false" style="color: inherit;">
+											Avatar
+										</button>
+									</li>
+									<li class="nav-item">
+										<button class="nav-link" id="fields-tab" data-bs-toggle="tab" data-bs-target="#fields" type="button" role="tab" aria-controls="fields" aria-selected="false" style="color: inherit;">
+											Fields
+										</button>
+									</li>
+								</ul>
+							</div>
+
+							<div class="card-body">
+								<h5 class="card-title text-center">[object title]</h5>
+
+								<div class="tab-content" id="myTabContent">
+									<div class="tab-pane fade show active" id="route" role="tabpanel" aria-labelledby="route-tab">
+										<p class="card-text">route</p>
+									</div>
+
+									<div class="tab-pane fade" id="avatar" role="tabpanel" aria-labelledby="avatar-tab">
+										<p class="card-text">avatar</p>
+									</div>
+
+									<div class="tab-pane fade" id="fields" role="tabpanel" aria-labelledby="fields-tab">
+										<p class="card-text">fields</p>
+									</div>
+								</div>
+
+							</div>
 						</div>
 					</div>
 				</div>
