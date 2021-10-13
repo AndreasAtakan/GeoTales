@@ -1,5 +1,12 @@
 @charset "UTF-8";
 
+/* Hide arrows on type="number" input  */
+input[type=number] { -moz-appearance: textfield; }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
 
 #map {
 	width: 100%;
@@ -12,25 +19,31 @@
 	z-index: 2;
 
 	position: absolute;
-	top: 50px;
+	bottom: 0;
 	left: 0;
 
-	width: 30%;
+	width: 40%;
+	max-height: 50%;
+
+	overflow-y: auto;
+}
+
+@media (max-width: 1199.98px) {
+	#objects {
+		width: 100%;
+	}
+}
+
+@media (max-width: 991.98px) {
+	/**/
 }
 
 @media (max-width: 767.98px) {
-	#objects {
-		width: 40%;
-	}
+	/**/
 }
 
 @media (max-width: 575.98px) {
-	#objects {
-		width: 100%;
-
-		top: auto;
-		bottom: 0;
-	}
+	/**/
 }
 
 
