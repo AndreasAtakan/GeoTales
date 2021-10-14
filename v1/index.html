@@ -33,6 +33,9 @@
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
+		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
+		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
@@ -42,6 +45,8 @@
 		</style>
 	</head>
 	<body>
+
+
 
 		<!-- Import modal -->
 		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
@@ -55,7 +60,7 @@
 						<div class="mb-3">
 							<label for="fileInput" class="form-label">Choose a data-file</label>
 							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GED, CSV, Excel.</div>
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -65,6 +70,8 @@
 				</div>
 			</div>
 		</div>
+
+
 
 		<!-- Events/triggers modal -->
 		<div class="modal fade" id="eventsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="eventsModalLabel" aria-hidden="true">
@@ -87,7 +94,19 @@
 
 							<div class="row mt-2">
 								<div class="col-6 pe-1">
-									<input type="text" class="form-control" id="eventInput" />
+									<input type="text" class="form-control" id="eventInput" value="Birth" />
+								</div>
+								<div class="col-5 px-1">
+									<input type="text" class="form-control" id="triggerInput" />
+								</div>
+								<div class="col-1 ps-1">
+									<button type="button" class="btn-close text-reset"></button>
+								</div>
+							</div>
+
+							<div class="row mt-2">
+								<div class="col-6 pe-1">
+									<input type="text" class="form-control" id="eventInput" value="Death" />
 								</div>
 								<div class="col-5 px-1">
 									<input type="text" class="form-control" id="triggerInput" />
@@ -113,6 +132,8 @@
 			</div>
 		</div>
 
+
+
 		<!-- Map options modal -->
 		<div class="modal fade" id="mapModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-lg">
@@ -125,17 +146,48 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col">
-									<p>Connections</p>
+									<p>Line settings</p>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-6">
+									<label for="relationInput" class="form-label">Relation</label>
+								</div>
+								<div class="col-6">
+									<label for="colorInput" class="form-label">Color</label>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-6 pe-1">
+									<select class="form-select" id="relationInput" aria-label="Relation">
+										<option value="all" selected>All</option>
+										<option value="other">[other]</option>
+									</select>
+								</div>
+								<div class="col-5 px-1">
+									<div class="input-group mb-3">
+										<input type="color" class="form-control form-control-color" id="colorInput" value="#563d7c" title="Choose color" />
+										<input type="number" min="1" max="10" class="form-control" id="thicknessInput" placeholder="Thickness" />
+									</div>
+								</div>
+								<div class="col-1 ps-1">
+									<button type="button" class="btn-close text-reset"></button>
 								</div>
 							</div>
 
 							<div class="row">
 								<div class="col">
-									--
+									<button type="button" class="btn btn-outline-secondary">
+										<i class="fas fa-plus"></i>
+									</button>
 								</div>
 							</div>
 
+							<br />
 							<hr />
+							<br />
 
 							<div class="row mt-2">
 								<div class="col">
@@ -145,11 +197,17 @@
 
 							<div class="row">
 								<div class="col">
-									--
+									<select class="form-select" id="clusterInput" aria-label="Clustering">
+										<option value="default" selected>Default</option>
+										<option value="tree">Tree</option>
+										<option value="spiral">Spiral</option>
+									</select>
 								</div>
 							</div>
 
+							<br />
 							<hr />
+							<br />
 
 							<div class="row mt-2">
 								<div class="col">
@@ -157,9 +215,30 @@
 								</div>
 							</div>
 
-							<div class="row">
+							<div class="row row-cols-1 row-cols-md-3">
 								<div class="col">
-									--
+									<div class="card mt-2">
+										<div class="card-body">
+											<h6 class="card-title mb-0">basemap 1</h6>
+										</div>
+										<img class="card-img-bottom" alt="..." src="https://b.tile.openstreetmap.org/5/15/10.png" />
+									</div>
+								</div>
+								<div class="col">
+									<div class="card mt-2">
+										<div class="card-body">
+											<h6 class="card-title mb-0">basemap 2</h6>
+										</div>
+										<img class="card-img-bottom" alt="..." src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/10/15" />
+									</div>
+								</div>
+								<div class="col">
+									<div class="card mt-2">
+										<div class="card-body">
+											<h6 class="card-title mb-0">basemap 3</h6>
+										</div>
+										<img class="card-img-bottom" alt="..." src="https://stamen-tiles-b.a.ssl.fastly.net/watercolor/5/15/10.jpg" />
+									</div>
 								</div>
 							</div>
 						</div>
@@ -171,32 +250,38 @@
 			</div>
 		</div>
 
+
+
+
+
+
+
 		<div class="container-fluid p-0">
 			<div class="row g-0">
 				<div class="col">
-					<nav class="navbar navbar-light sticky-top shadow px-2 px-sm-3 justify-content-start" style="background-color: #e3f2fd;">
+					<nav class="navbar navbar-dark sticky-top shadow px-2 px-sm-3 justify-content-start" style="background-color: #009973;">
 						<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" style="font-size: 1rem;">
 							<span class="navbar-toggler-icon"></span>
 						</button>
 
-						<button class="btn btn-sm btn-secondary ms-3" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
+						<button class="btn btn-sm btn-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
 							Import
 						</button>
 
-						<button class="btn btn-sm btn-outline-secondary ms-3" type="button" data-bs-toggle="modal" data-bs-target="#eventsModal">
+						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#eventsModal" style="border-color: rgba(255,255,255,.1);">
 							Events and triggers
 						</button>
 
-						<button class="btn btn-sm btn-outline-secondary ms-3" type="button" data-bs-toggle="modal" data-bs-target="#mapModal">
+						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#mapModal" style="border-color: rgba(255,255,255,.1);">
 							Map options
 						</button>
 
-						<button class="btn btn-sm btn-outline-secondary ms-auto" type="button">
+						<button class="btn btn-sm btn-outline-light ms-auto" type="button" style="border-color: rgba(255,255,255,.1);">
 							Export
 						</button>
 
 						<div class="dropdown ms-3">
-							<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(0,0,0,.1);">
+							<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(255,255,255,.1);">
 								<i class="fas fa-user"></i>
 							</button>
 							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -214,19 +299,51 @@
 							</div>
 							<div class="offcanvas-body">
 								<p class="text-muted">[project description]</p>
-								<br />
-								<ul class="navbar-nav justify-content-start flex-grow-1">
-									<li class="nav-item">
-										<a class="nav-link" href="#">Home</a>
+
+								<ul class="navbar-nav justify-content-start flex-grow-1 ms-3">
+									<li class="offcanvasBtn"><hr /></li>
+
+									<li class="nav-item offcanvasBtn">
+										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#importModal" style="color: inherit;">Import</a>
 									</li>
-									<li class="nav-item">
-										<a class="nav-link" href="#">Link</a>
+									<li class="nav-item offcanvasBtn">
+										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#eventsModal" style="color: inherit;">Events and triggers</a>
+									</li>
+									<li class="nav-item offcanvasBtn">
+										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mapModal" style="color: inherit;">Map options</a>
 									</li>
 
-									<li><hr class="dropdown-divider"></li>
+									<li><hr /></li>
 
-									<!-- -->
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-home"></i> &nbsp; Home
+										</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-folder-open"></i> &nbsp; Projects
+										</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-user"></i> &nbsp; My profile
+										</a>
+									</li>
+
+									<li><br /></li>
+
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-map"></i> &nbsp; Gallery
+										</a>
+									</li>
 								</ul>
+
+								<!-- TODO: fix element overflow -->
+								<button type="button" class="btn btn-outline-secondary" style="position: absolute; bottom: 15px;">
+									<i class="fas fa-cog"></i>
+								</button>
 							</div>
 						</div>
 					</nav>
@@ -238,7 +355,7 @@
 				<div class="col-12">
 					<div id="map"></div>
 
-					<div class="collapse show" id="objects">
+					<div class="collapse" id="objects">
 						<div class="card">
 							<div class="card-header">
 								<ul class="nav nav-tabs card-header-tabs nav-fill">
@@ -258,7 +375,7 @@
 										</button>
 									</li>
 									<li class="nav-item flex-grow-0 flex-shrink-1 ms-3">
-										<button type="button" class="btn-close text-reset" data-bs-toggle="collapse" data-bs-target="#objects" aria-expanded="true" aria-controls="objects"></button>
+										<button type="button" class="btn-close text-reset" data-bs-toggle="collapse" data-bs-target="#objects" aria-expanded="false" aria-controls="objects"></button>
 									</li>
 								</ul>
 							</div>
@@ -422,6 +539,9 @@
 		<script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+		<script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/js/main.js"></script>
