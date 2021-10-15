@@ -36,6 +36,7 @@
 		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
 		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.timedimension/leaflet.timedimension.control.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
@@ -215,7 +216,7 @@
 								</div>
 							</div>
 
-							<div class="row row-cols-1 row-cols-md-3">
+							<div class="row row-cols-3 row-cols-md-3">
 								<div class="col">
 									<div class="card mt-2">
 										<div class="card-body">
@@ -340,8 +341,7 @@
 									</li>
 								</ul>
 
-								<!-- TODO: fix element overflow -->
-								<button type="button" class="btn btn-outline-secondary" style="position: absolute; bottom: 15px;">
+								<button type="button" class="btn btn-outline-secondary" style="position: absolute; bottom: 15px; right: 15px;">
 									<i class="fas fa-cog"></i>
 								</button>
 							</div>
@@ -535,6 +535,8 @@
 		</div>
 
 		<!-- Load lib/ JS -->
+		<script type="text/javascript" src="lib/iso8601/iso8601.min.js"></script>
+
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
 		<script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -542,6 +544,7 @@
 		<script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.timedimension/leaflet.timedimension.min.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/js/main.js"></script>
