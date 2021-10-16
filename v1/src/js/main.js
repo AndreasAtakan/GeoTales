@@ -2,8 +2,8 @@
 
 window.onload = function(ev) {
 	let map = L.map("map", {
-		center: [ 49.49667452747045, 12.128906250000002 ],
-		zoom: window.innerWidth < 575.98 ? 3 : 4,
+		center: [ 51.781435604431195, 14.194335937500002 ],
+		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
 		maxZoom: 18,
 		timeDimension: true,
@@ -34,11 +34,13 @@ window.onload = function(ev) {
 		L.control.timeDimension({
 			position: "bottomleft",
 			loopButton: true,
-			//limitSliders: true, // TODO: fix width styling for this
+			limitSliders: true, // TODO: fix width styling for this
+			timeSliderDragUpdate: true,
 			speedSlider: false,
 			//minSpeed: 1,
 			//maxSpeed: 5,
 			//speedStep: 1,
+			//timeSteps: 1,
 			timeZones: [ "Local" ],
 			playerOptions: {
 				startOver: true
@@ -54,4 +56,26 @@ window.onload = function(ev) {
 
 
 	$("div.leaflet-control-attribution a").attr("target", "_blank");
+
+
+	let layer = L.geoJSON(_DATA, {
+		pointToLayer: function(feature, latLng) {
+			/*if (feature.properties.hasOwnProperty('last')) {
+				return new L.Marker(latLng, {
+					icon: icon
+				});
+			}*/
+			return L.circleMarker(latLng);
+		}
+	});
+
+	let tdLayer = L.timeDimension.layer.geoJson(layer, {
+		updateTimeDimension: true,
+		duration: "PT2M",
+		updateTimeDimensionMode: "replace",
+		addlastPoint: true
+	});
+
+	map.addLayer( layer );
+	map.addLayer( tdLayer );
 };

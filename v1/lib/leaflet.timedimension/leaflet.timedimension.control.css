@@ -289,7 +289,7 @@ a.timecontrol-play.loading:before {
 	content: "\e030";
 }
 
-@media (max-width: 600px) {
+@media (max-width: 550px) {
 	.leaflet-bar-timecontrol .timecontrol-date,
 	.leaflet-bar-timecontrol .timecontrol-slider {
 		clear: both;
