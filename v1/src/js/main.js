@@ -58,13 +58,19 @@ window.onload = function(ev) {
 	$("div.leaflet-control-attribution a").attr("target", "_blank");
 
 
+	let icon = L.icon({
+		iconUrl: 'assets/ivar_aasen.jpg',
+		iconSize: [44, 44],
+		iconAnchor: [11, 11]
+	});
+
 	let layer = L.geoJSON(_DATA, {
 		pointToLayer: function(feature, latLng) {
-			/*if (feature.properties.hasOwnProperty('last')) {
+			if (feature.properties.hasOwnProperty('last')) {
 				return new L.Marker(latLng, {
 					icon: icon
 				});
-			}*/
+			}
 			return L.circleMarker(latLng);
 		}
 	});
