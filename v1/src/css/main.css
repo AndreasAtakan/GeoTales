@@ -1,4 +1,25 @@
+/*©agpl*************************************************************************
+*                                                                              *
+* DynastyMap                                                                   *
+* Copyright (C) 2020  DynastyMap AS                                            *
+*                                                                              *
+* This program is free software: you can redistribute it and/or modify         *
+* it under the terms of the GNU Affero General Public License as published by  *
+* the Free Software Foundation, either version 3 of the License, or            *
+* (at your option) any later version.                                          *
+*                                                                              *
+* This program is distributed in the hope that it will be useful,              *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of               *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 *
+* GNU Affero General Public License for more details.                          *
+*                                                                              *
+* You should have received a copy of the GNU Affero General Public License     *
+* along with this program. If not, see <http://www.gnu.org/licenses/>.         *
+*                                                                              *
+*****************************************************************************©*/
+
 @charset "UTF-8";
+
 
 /* Hide arrows on type="number" input  */
 input[type=number] { -moz-appearance: textfield; }
@@ -8,34 +29,25 @@ input::-webkit-inner-spin-button {
 	margin: 0;
 }
 
+.offcanvasBtn { display: none; }
+
+#mapCol {
+	height: 100%;
+}
+
+#sceneCol {
+	height: 100%;
+}
+
 #map {
 	width: 100%;
 	height: 100%;
-
-	z-index: 1;
 }
-
-#objects {
-	z-index: 2;
-
-	position: absolute;
-	bottom: 0;
-	left: 0;
-
-	width: 40%;
-	max-height: 50%;
-
-	overflow-y: auto;
-}
-
-.offcanvasBtn { display: none; }
 
 
 
 @media (max-width: 1199.98px) {
-	#objects {
-		width: 100%;
-	}
+	/**/
 }
 
 @media (max-width: 991.98px) {
@@ -43,10 +55,24 @@ input::-webkit-inner-spin-button {
 }
 
 @media (max-width: 767.98px) {
-	.headerBtn { display: none; }
-	.offcanvasBtn { display: block; }
+	/**/
 }
 
 @media (max-width: 575.98px) {
-	/**/
+	.headerBtn { display: none; }
+	.offcanvasBtn { display: block; }
+
+	#mapCol {
+		height: 70%;
+	}
+
+	#sceneCol {
+		height: 30%;
+	}
+}
+
+@media (max-height: 630px) {
+	.leaflet-bottom.leaflet-left {
+		z-index: 1001;
+	}
 }

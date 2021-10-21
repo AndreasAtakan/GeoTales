@@ -36,7 +36,7 @@
 		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
 		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
-		<link rel="stylesheet" href="lib/leaflet.timedimension/leaflet.timedimension.control.css" />
+		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
@@ -74,67 +74,6 @@
 
 
 
-		<!-- Events/triggers modal -->
-		<div class="modal fade" id="eventsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="eventsModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="eventsModalLabel">Events and triggers</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<div class="container-fluid">
-							<div class="row">
-								<div class="col-6">
-									<label for="eventInput" class="form-label">Event</label>
-								</div>
-								<div class="col-6">
-									<label for="triggerInput" class="form-label">Trigger</label>
-								</div>
-							</div>
-
-							<div class="row mt-2">
-								<div class="col-6 pe-1">
-									<input type="text" class="form-control" id="eventInput" value="Birth" />
-								</div>
-								<div class="col-5 px-1">
-									<input type="text" class="form-control" id="triggerInput" />
-								</div>
-								<div class="col-1 ps-1">
-									<button type="button" class="btn-close text-reset"></button>
-								</div>
-							</div>
-
-							<div class="row mt-2">
-								<div class="col-6 pe-1">
-									<input type="text" class="form-control" id="eventInput" value="Death" />
-								</div>
-								<div class="col-5 px-1">
-									<input type="text" class="form-control" id="triggerInput" />
-								</div>
-								<div class="col-1 ps-1">
-									<button type="button" class="btn-close text-reset"></button>
-								</div>
-							</div>
-
-							<div class="row mt-2">
-								<div class="col">
-									<button type="button" class="btn btn-outline-secondary">
-										<i class="fas fa-plus"></i>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-
 		<!-- Map options modal -->
 		<div class="modal fade" id="mapModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-lg">
@@ -145,7 +84,7 @@
 					</div>
 					<div class="modal-body">
 						<div class="container-fluid">
-							<div class="row">
+							<!--div class="row">
 								<div class="col">
 									<p>Line settings</p>
 								</div>
@@ -208,15 +147,15 @@
 
 							<br />
 							<hr />
-							<br />
+							<br /-->
 
-							<div class="row mt-2">
+							<div class="row">
 								<div class="col">
 									<p>Choose basemap</p>
 								</div>
 							</div>
 
-							<div class="row row-cols-3 row-cols-md-3">
+							<div class="row row-cols-2 row-cols-md-3">
 								<div class="col">
 									<div class="card mt-2">
 										<div class="card-body">
@@ -269,20 +208,12 @@
 							Import
 						</button>
 
-						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#eventsModal" style="border-color: rgba(255,255,255,.1);">
-							Events and triggers
-						</button>
-
-						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#mapModal" style="border-color: rgba(255,255,255,.1);">
+						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#mapModal" style="border-color: rgba(255,255,255,.5);">
 							Map options
 						</button>
 
-						<button class="btn btn-sm btn-outline-light ms-auto" type="button" style="border-color: rgba(255,255,255,.1);">
-							Export
-						</button>
-
-						<div class="dropdown ms-3">
-							<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(255,255,255,.1);">
+						<div class="dropdown ms-auto">
+							<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(255,255,255,.5);">
 								<i class="fas fa-user"></i>
 							</button>
 							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -306,9 +237,6 @@
 
 									<li class="nav-item offcanvasBtn">
 										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#importModal" style="color: inherit;">Import</a>
-									</li>
-									<li class="nav-item offcanvasBtn">
-										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#eventsModal" style="color: inherit;">Events and triggers</a>
 									</li>
 									<li class="nav-item offcanvasBtn">
 										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mapModal" style="color: inherit;">Map options</a>
@@ -352,10 +280,10 @@
 
 
 			<div class="row g-0" style="height: calc(100vh - 50px);">
-				<div class="col-12">
+				<div class="col-12 col-sm-8 col-md-9 order-sm-1" id="mapCol">
 					<div id="map"></div>
 
-					<div class="collapse" id="objects">
+					<!--div class="collapse" id="objects">
 						<div class="card">
 							<div class="card-header">
 								<ul class="nav nav-tabs card-header-tabs nav-fill">
@@ -528,26 +456,36 @@
 
 							</div>
 						</div>
-					</div>
+					</div-->
+
+				</div>
+
+				<div class="col-12 col-sm-4 col-md-3 order-sm-0 shadow" id="sceneCol">
+					<!-- -->
 				</div>
 
 			</div>
 		</div>
 
 		<!-- Load lib/ JS -->
-		<script type="text/javascript" src="lib/iso8601/iso8601.min.js"></script>
-
+		<!--script type="text/javascript" src="lib/iso8601/iso8601.min.js"></script-->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
 		<script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
-		<script type="text/javascript" src="lib/leaflet.timedimension/leaflet.timedimension.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/js/data.js"></script>
+		<script type="text/javascript" src="src/js/uuid.js"></script>
+		<script type="text/javascript" src="src/js/mergeobjects.js"></script>
+
+		<script type="text/javascript" src="src/js/globals.js"></script>
+		<script type="text/javascript" src="src/js/drawinglayer.js"></script>
+		<script type="text/javascript" src="src/js/map.js"></script>
 		<script type="text/javascript" src="src/js/main.js"></script>
 
 	</body>
