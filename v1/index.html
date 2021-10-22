@@ -37,6 +37,7 @@
 		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
 		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
+		<link rel="stylesheet" href="lib/pell/pell.min.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
@@ -280,7 +281,7 @@
 
 
 			<div class="row g-0" style="height: calc(100vh - 50px);">
-				<div class="col-12 col-sm-8 col-md-9 order-sm-1" id="mapCol">
+				<div class="col-12 col-sm-6 col-md-7 col-lg-8 col-xl-9 order-sm-1" id="mapCol">
 					<div id="map"></div>
 
 					<!--div class="collapse" id="objects">
@@ -460,8 +461,81 @@
 
 				</div>
 
-				<div class="col-12 col-sm-4 col-md-3 order-sm-0 shadow" id="sceneCol">
-					<!-- -->
+				<div class="col-12 col-sm-6 col-md-5 col-lg-4 col-xl-3 order-sm-0 shadow" id="sceneCol">
+					<div class="row gx-0 mx-2">
+						<div class="col">
+							<hr />
+						</div>
+					</div>
+
+					<div class="row gx-0">
+						<div class="col">
+							<div class="card m-2" style="border-color: rgba(0,0,0,.4);">
+								<div class="card-body">
+									<form class="container-fluid">
+										<div class="row g-0">
+											<div class="col-1">
+												<span id="reorder">
+													<i class="fas fa-bars"></i>
+												</span>
+											</div>
+											<div class="col-11">
+												<div class="row mb-1">
+													<div class="col">
+														<input type="text" class="form-control" id="titleInput" placeholder="Title" />
+													</div>
+												</div>
+												<div class="row mb-3">
+													<div class="col">
+														<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" />
+													</div>
+												</div>
+												<div class="row">
+													<div class="col-7">
+														<div class="pell" id="textInput"></div>
+													</div>
+													<div class="col-5">
+														<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" multiple />
+														<div id="mediaHelp" class="form-text">Choose one or more media files</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row gx-0 mx-2">
+						<div class="col">
+							<hr />
+						</div>
+					</div>
+
+					<div class="row gx-0 mb-3">
+						<div class="col">
+							<center>
+								<button type="button" class="btn btn-outline-secondary px-5">
+									<strong>+</strong>
+								</button>
+							</center>
+						</div>
+					</div>
+
+					<!--div class="row align-items-center h-100 g-0">
+						<div class="col">
+							<center>
+								<button type="button" class="btn btn-outline-secondary px-5">
+									<strong>+</strong>
+								</button>
+
+								<p class="text-muted mt-3">
+									Click to capture current scene
+								</p>
+							</center>
+						</div>
+					</div-->
 				</div>
 
 			</div>
@@ -478,6 +552,7 @@
 		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
+		<script type="text/javascript" src="lib/pell/pell.min.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/js/uuid.js"></script>

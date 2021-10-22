@@ -23,14 +23,14 @@
 
 L.DrawingLayer = L.FeatureGroup.extend({
 
-	addLayer: function(object, objectType, title, id) {
+	addLayer: function(object, type, title, id) {
 		var id = id || uuid();
 
 		object.options.id = id;
-		object.options.type = objectType;
+		object.options.type = type;
 		object.options.title = title;
 
-		switch(objectType) {
+		switch(type) {
 			/*case "marker":
 				this.markercluster.addLayer(object);
 				break;*/
@@ -56,6 +56,10 @@ L.DrawingLayer = L.FeatureGroup.extend({
 
 			if(object.editing.enabled()) { object.closePopup(); }
 		});
+
+		for(let o of this._objects) {
+			if(o.options.type == "circlemarker") { o.bringToFront(); }
+		}
 
 	},
 

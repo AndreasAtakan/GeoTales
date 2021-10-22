@@ -29,6 +29,8 @@ input::-webkit-inner-spin-button {
 	margin: 0;
 }
 
+.pell-content { height: 200px; overflow-y: auto; }
+
 .offcanvasBtn { display: none; }
 
 #mapCol {
@@ -37,6 +39,19 @@ input::-webkit-inner-spin-button {
 
 #sceneCol {
 	height: 100%;
+}
+
+#sceneCol #reorder {
+	/**/
+}
+#sceneCol #reorder:hover {
+	cursor: move;
+}
+
+#sceneCol #textInput {
+	min-height: 200px;
+	max-height: 200px;
+	overflow-y: auto;
 }
 
 #map {

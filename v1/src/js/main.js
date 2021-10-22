@@ -34,9 +34,48 @@ window.onload = function(ev) {
 
 	$("div.leaflet-control-attribution a").attr("target", "_blank");
 
+
+
+	pell.init({
+		element: document.querySelector("#textInput"),
+		onChange: html => {
+			//console.log(html);
+		},
+		defaultParagraphSeparator: "p",
+		styleWithCSS: false,
+		actions: [
+			"bold",
+			"underline",
+			{
+				name: "italic",
+				result: () => pell.exec("italic")
+			},
+			/*{
+				name: "backColor",
+				icon: "<div style=\"background-color:pink;\">A</div>",
+				title: "Highlight Color",
+				result: () => pell.exec("backColor", "pink")
+			},*/
+			/*{
+				name: "image",
+				result: () => {
+					const url = window.prompt("Enter the image URL");
+					if(url) pell.exec("insertImage", url);
+				}
+			},*/
+			{
+				name: "link",
+				result: () => {
+					const url = window.prompt("Enter the link URL");
+					if(url) pell.exec("createLink", url);
+				}
+			}
+		]
+	});
+
 };
 
-let height;
+/*let height;
 window.onresize = function(ev) {
 
 	if(height >= 630 && window.innerHeight < 630) {
@@ -47,4 +86,4 @@ window.onresize = function(ev) {
 
 	height = window.innerHeight;
 
-};
+};*/

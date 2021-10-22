@@ -28,14 +28,14 @@ L.Map.addInitHook(function() {
 	/*this.addControl( L.control.zoom({ position: "topright" }) );*/
 
 	this.addControl(
+		new L.Control.Fullscreen({ position: "topright" })
+	);
+
+	this.addControl(
 		L.Control.zoomHome({ position: "topright" })
 	);
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
-
-	this.addControl(
-		new L.Control.Fullscreen({ position: "topright" })
-	);
 
 
 
@@ -65,14 +65,14 @@ L.Map.addInitHook(function() {
 
 	this.addLayer( this.drawingLayer );
 
-	this.on("draw:created", ev => {
+	this.on(L.Draw.Event.CREATED, ev => {
 		let object = ev.layer,
-			objectType = ev.layerType;
+			type = ev.layerType;
 
-		this.drawingLayer.addLayer(object, objectType, `${objectType}`);
+		this.drawingLayer.addLayer(object, type, `${type}`);
 	});
 
-	this.on("draw:edited", ev => {
+	this.on(L.Draw.Event.EDITED, ev => {
 		//let layers = ev.layers;
 	});
 
@@ -82,8 +82,12 @@ L.Map.addInitHook(function() {
 
 	// Draw control
 
+	L.EditToolbar.Delete.include({
+		removeAllLayers: false
+	});
+
 	this.drawingControl = new L.Control.Draw({
-		position: window.innerHeight < 630 ? "bottomleft" : "bottomright",
+		position: "topleft", //window.innerHeight < 630 ? "bottomleft" : "bottomright",
 		edit: { featureGroup: this.drawingLayer },
 		draw: {
 			marker: false,
