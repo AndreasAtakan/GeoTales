@@ -39,13 +39,15 @@ input::-webkit-inner-spin-button {
 
 #sceneCol {
 	height: 100%;
+	overflow-y: auto;
 }
 
-#sceneCol #reorder {
-	/**/
-}
 #sceneCol #reorder:hover {
 	cursor: move;
+}
+#sceneCol #recapture:hover,
+#sceneCol #delete:hover {
+	cursor: pointer;
 }
 
 #sceneCol #textInput {

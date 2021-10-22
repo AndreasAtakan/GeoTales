@@ -475,9 +475,27 @@
 									<form class="container-fluid">
 										<div class="row g-0">
 											<div class="col-1">
-												<span id="reorder">
-													<i class="fas fa-bars"></i>
-												</span>
+												<div class="row gx-0 mb-3">
+													<div class="col">
+														<span id="reorder" title="Change ordering">
+															<i class="fas fa-bars"></i>
+														</span>
+													</div>
+												</div>
+												<div class="row gx-0">
+													<div class="col">
+														<span id="recapture" title="Recapture scene">
+															<i class="fas fa-expand"></i>
+														</span>
+													</div>
+												</div>
+												<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
+													<div class="col">
+														<span id="delete" title="Delete scene">
+															<i class="fas fa-trash"></i>
+														</span>
+													</div>
+												</div>
 											</div>
 											<div class="col-11">
 												<div class="row mb-1">
@@ -490,13 +508,15 @@
 														<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" />
 													</div>
 												</div>
-												<div class="row">
-													<div class="col-7">
-														<div class="pell" id="textInput"></div>
-													</div>
-													<div class="col-5">
+												<div class="row mb-3">
+													<div class="col">
+														<div class="form-text" id="mediaHelp">Choose one or more media files</div>
 														<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" multiple />
-														<div id="mediaHelp" class="form-text">Choose one or more media files</div>
+													</div>
+												</div>
+												<div class="row">
+													<div class="col">
+														<div class="pell" id="textInput"></div>
 													</div>
 												</div>
 											</div>
