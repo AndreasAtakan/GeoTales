@@ -18,74 +18,66 @@
 *                                                                              *
 *****************************************************************************©*/
 
-@charset "UTF-8";
+"use strict";
 
 
-/* Hide arrows on type="number" input  */
-input[type=number] { -moz-appearance: textfield; }
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
+L.DrawingLayer = L.FeatureGroup.extend({
 
-.leaflet-bottom.leaflet-left { z-index: 1001; }
+	addLayer: function(object, type, title, id) {
+		var id = id || uuid();
 
-.pell-content { height: 200px; overflow-y: auto; }
+		object.options.id = id;
+		object.options.type = type;
+		object.options.title = title;
 
-.offcanvasBtn { display: none; }
+		switch(type) {
+			/*case "marker":
+				this.markercluster.addLayer(object);
+				break;*/
 
-#mapCol {
-	height: 100%;
-}
+			case "marker":
+			case "polyline":
+			case "polygon":
+			case "rectangle":
+				L.FeatureGroup.prototype.addLayer.call(this, object);
+				break;
 
-#sceneCol {
-	height: 100%;
-	overflow-y: auto;
-}
+			default:
+				console.error("(addLayer) mapobject-type: not recognized");
+		}
+		this._objects.push(object);
 
-#sceneCol #reorder:hover {
-	cursor: move;
-}
-#sceneCol #recapture:hover,
-#sceneCol #delete:hover {
-	cursor: pointer;
-}
+		object.bindPopup(`
+			<h6>${title}</h6>
+		`);
 
-#sceneCol #textInput {
-	min-height: 200px;
-	max-height: 200px;
-	overflow-y: auto;
-}
+		object.on("click", ev => {
+			if(!object.options.original) { object.options.original = object.options; }
 
-#map {
-	width: 100%;
-	height: 100%;
-}
+			if(object.editing.enabled()) { object.closePopup(); }
+		});
 
+	},
 
+	initialize: function(options) {
+		L.FeatureGroup.prototype.initialize.call(this);
 
-@media (max-width: 1199.98px) {
-	/**/
-}
+		this.options.id = uuid();
+		this.options.type = "DRAWING";
 
-@media (max-width: 991.98px) {
-	/**/
-}
+		this.options = mergeObjects(this.options, options);
 
-@media (max-width: 767.98px) {
-	/**/
-}
-
-@media (max-width: 575.98px) {
-	.headerBtn { display: none; }
-	.offcanvasBtn { display: block; }
-
-	#mapCol {
-		height: 70%;
+		this._objects = [];
+		//this.markercluster = L.markerClusterGroup();
+		//L.FeatureGroup.prototype.addLayer.call(this, this.markercluster);
 	}
 
-	#sceneCol {
-		height: 30%;
-	}
-}
+});
+
+
+
+
+L.drawingLayer = function(options) {
+	return new L.DrawingLayer(options);
+};
+

@@ -87,10 +87,10 @@ L.Map.addInitHook(function() {
 	});
 
 	this.drawingControl = new L.Control.Draw({
-		position: "topleft", //window.innerHeight < 630 ? "bottomleft" : "bottomright",
+		position: "bottomleft",
 		edit: { featureGroup: this.drawingLayer },
 		draw: {
-			marker: false,
+			marker: {},
 			polyline: {
 				shapeOptions: {
 					color: "#ff9900",
@@ -110,12 +110,7 @@ L.Map.addInitHook(function() {
 					fillColor: "#ff9900"
 				}
 			},
-			circlemarker: {
-				shapeOptions: {
-					color: "#ff9900",
-					fillColor: "#ff9900"
-				}
-			}
+			circlemarker: false
 		}
 	});
 

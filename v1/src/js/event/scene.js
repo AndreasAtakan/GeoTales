@@ -18,74 +18,7 @@
 *                                                                              *
 *****************************************************************************©*/
 
-@charset "UTF-8";
+"use strict";
 
 
-/* Hide arrows on type="number" input  */
-input[type=number] { -moz-appearance: textfield; }
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
-
-.leaflet-bottom.leaflet-left { z-index: 1001; }
-
-.pell-content { height: 200px; overflow-y: auto; }
-
-.offcanvasBtn { display: none; }
-
-#mapCol {
-	height: 100%;
-}
-
-#sceneCol {
-	height: 100%;
-	overflow-y: auto;
-}
-
-#sceneCol #reorder:hover {
-	cursor: move;
-}
-#sceneCol #recapture:hover,
-#sceneCol #delete:hover {
-	cursor: pointer;
-}
-
-#sceneCol #textInput {
-	min-height: 200px;
-	max-height: 200px;
-	overflow-y: auto;
-}
-
-#map {
-	width: 100%;
-	height: 100%;
-}
-
-
-
-@media (max-width: 1199.98px) {
-	/**/
-}
-
-@media (max-width: 991.98px) {
-	/**/
-}
-
-@media (max-width: 767.98px) {
-	/**/
-}
-
-@media (max-width: 575.98px) {
-	.headerBtn { display: none; }
-	.offcanvasBtn { display: block; }
-
-	#mapCol {
-		height: 70%;
-	}
-
-	#sceneCol {
-		height: 30%;
-	}
-}
+//

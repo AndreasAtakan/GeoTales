@@ -62,7 +62,7 @@
 						<div class="mb-3">
 							<label for="fileInput" class="form-label">Choose a data-file</label>
 							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel</div>
+							<div id="fileHelp" class="form-text">Supported formats: <strong>GEDCOM</strong>, CSV, Excel</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -575,12 +575,14 @@
 		<script type="text/javascript" src="lib/pell/pell.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/js/uuid.js"></script>
-		<script type="text/javascript" src="src/js/mergeobjects.js"></script>
-
 		<script type="text/javascript" src="src/js/globals.js"></script>
-		<script type="text/javascript" src="src/js/drawinglayer.js"></script>
-		<script type="text/javascript" src="src/js/map.js"></script>
+
+		<script type="text/javascript" src="src/js/helper/uuid.js"></script>
+		<script type="text/javascript" src="src/js/helper/mergeobjects.js"></script>
+
+		<script type="text/javascript" src="src/js/map/drawinglayer.js"></script>
+		<script type="text/javascript" src="src/js/map/map.js"></script>
+
 		<script type="text/javascript" src="src/js/main.js"></script>
 
 	</body>
