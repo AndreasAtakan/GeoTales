@@ -21,49 +21,13 @@
 "use strict";
 
 
-L.DrawingLayer = L.FeatureGroup.extend({
+function get_scene(id) {
+	for(let i = 0; i < _SCENES.length; i++) {
+		let s = _SCENES[i];
 
-	addLayer: function(object, type, title, id) {
-		var id = id || uuid();
-
-		if(id) object.options.id = id;
-		if(type) object.options.type = type;
-		if(title) object.options.title = title;
-
-		L.FeatureGroup.prototype.addLayer.call(this, object);
-		this._objects.push(object);
-
-		object.bindPopup(`
-			<h6>${title}</h6>
-		`);
-
-		object.on("click", ev => {
-			if(!object.options.original) { object.options.original = object.options; }
-
-			if(object.editing.enabled()) { object.closePopup(); }
-		});
-
-	},
-
-	initialize: function(options) {
-		L.FeatureGroup.prototype.initialize.call(this);
-
-		this.options.id = uuid();
-		this.options.type = "DRAWING";
-
-		this.options = mergeObjects(this.options, options);
-
-		this._objects = [];
-		//this.markercluster = L.markerClusterGroup();
-		//L.FeatureGroup.prototype.addLayer.call(this, this.markercluster);
+		if(s.id == id) {
+			s.index = i;
+			return s;
+		}
 	}
-
-});
-
-
-
-
-L.drawingLayer = function(options) {
-	return new L.DrawingLayer(options);
-};
-
+}

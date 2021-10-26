@@ -1,7 +1,7 @@
 /*©agpl*************************************************************************
 *                                                                              *
 * DynastyMap                                                                   *
-* Copyright (C) 2020  DynastyMap AS                                            *
+* Copyright (C) 2021  DynastyMap AS                                            *
 *                                                                              *
 * This program is free software: you can redistribute it and/or modify         *
 * it under the terms of the GNU Affero General Public License as published by  *
@@ -25,15 +25,15 @@ L.Map.addInitHook(function() {
 
 	// Plugins
 
-	/*this.addControl( L.control.zoom({ position: "topright" }) );*/
-
 	this.addControl(
 		new L.Control.Fullscreen({ position: "topright" })
 	);
 
 	this.addControl(
-		L.Control.zoomHome({ position: "topright" })
+		L.control.zoom({ position: "topright" })
 	);
+
+	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 

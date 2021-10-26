@@ -462,91 +462,11 @@
 				</div>
 
 				<div class="col-12 col-sm-6 col-md-5 col-lg-4 col-xl-3 order-sm-0 shadow" id="sceneCol">
-					<div class="row gx-0 mx-2">
-						<div class="col">
-							<hr />
-						</div>
-					</div>
 
-					<div class="row gx-0">
-						<div class="col">
-							<div class="card m-2" style="border-color: rgba(0,0,0,.4);">
-								<div class="card-body">
-									<form class="container-fluid">
-										<div class="row g-0">
-											<div class="col-1">
-												<div class="row gx-0 mb-3">
-													<div class="col">
-														<span id="reorder" title="Change ordering">
-															<i class="fas fa-bars"></i>
-														</span>
-													</div>
-												</div>
-												<div class="row gx-0">
-													<div class="col">
-														<span id="recapture" title="Recapture scene">
-															<i class="fas fa-expand"></i>
-														</span>
-													</div>
-												</div>
-												<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
-													<div class="col">
-														<span id="delete" title="Delete scene">
-															<i class="fas fa-trash"></i>
-														</span>
-													</div>
-												</div>
-											</div>
-											<div class="col-11">
-												<div class="row mb-1">
-													<div class="col">
-														<input type="text" class="form-control" id="titleInput" placeholder="Title" />
-													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col">
-														<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" />
-													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col">
-														<div class="form-text" id="mediaHelp">Choose one or more media files</div>
-														<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" multiple />
-													</div>
-												</div>
-												<div class="row">
-													<div class="col">
-														<div class="pell" id="textInput"></div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="row gx-0 mx-2">
-						<div class="col">
-							<hr />
-						</div>
-					</div>
-
-					<div class="row gx-0 mb-3">
+					<div class="row align-items-center h-100 g-0">
 						<div class="col">
 							<center>
-								<button type="button" class="btn btn-outline-secondary px-5">
-									<strong>+</strong>
-								</button>
-							</center>
-						</div>
-					</div>
-
-					<!--div class="row align-items-center h-100 g-0">
-						<div class="col">
-							<center>
-								<button type="button" class="btn btn-outline-secondary px-5">
+								<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
 									<strong>+</strong>
 								</button>
 
@@ -555,7 +475,8 @@
 								</p>
 							</center>
 						</div>
-					</div-->
+					</div>
+
 				</div>
 
 			</div>
@@ -579,6 +500,11 @@
 
 		<script type="text/javascript" src="src/js/helper/uuid.js"></script>
 		<script type="text/javascript" src="src/js/helper/mergeobjects.js"></script>
+		<script type="text/javascript" src="src/js/helper/scene.js"></script>
+
+		<script type="text/javascript" src="src/js/generate/scene.js"></script>
+
+		<script type="text/javascript" src="src/js/event/scene.js"></script>
 
 		<script type="text/javascript" src="src/js/map/drawinglayer.js"></script>
 		<script type="text/javascript" src="src/js/map/map.js"></script>

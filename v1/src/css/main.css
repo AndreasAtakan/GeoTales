@@ -1,7 +1,7 @@
 /*©agpl*************************************************************************
 *                                                                              *
 * DynastyMap                                                                   *
-* Copyright (C) 2020  DynastyMap AS                                            *
+* Copyright (C) 2021  DynastyMap AS                                            *
 *                                                                              *
 * This program is free software: you can redistribute it and/or modify         *
 * it under the terms of the GNU Affero General Public License as published by  *
@@ -31,7 +31,7 @@ input::-webkit-inner-spin-button {
 
 .leaflet-bottom.leaflet-left { z-index: 1001; }
 
-.pell-content { height: 200px; overflow-y: auto; }
+.pell-content { height: auto; overflow-y: auto; }
 
 .offcanvasBtn { display: none; }
 
@@ -53,14 +53,23 @@ input::-webkit-inner-spin-button {
 }
 
 #sceneCol #textInput {
-	min-height: 200px;
-	max-height: 200px;
+	min-height: 100px;
+	max-height: 180px;
 	overflow-y: auto;
 }
 
 #map {
 	width: 100%;
 	height: 100%;
+	opacity: 1;
+}
+.snapshot#map {
+	-webkit-transition: 0.09s;
+	-moz-transition: 0.09s;
+	-ms-transition: 0.09s;
+	-o-transition: 0.09s;
+	transition: 0.09s;
+	opacity: 0.8;
 }
 
 

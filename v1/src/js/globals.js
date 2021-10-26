@@ -1,7 +1,7 @@
 /*©agpl*************************************************************************
 *                                                                              *
 * DynastyMap                                                                   *
-* Copyright (C) 2020  DynastyMap AS                                            *
+* Copyright (C) 2021  DynastyMap AS                                            *
 *                                                                              *
 * This program is free software: you can redistribute it and/or modify         *
 * it under the terms of the GNU Affero General Public License as published by  *
@@ -20,5 +20,7 @@
 
 "use strict";
 
-let _SCENES = [],
-	_OBJECTS;
+let _MAP,
+	_SCENES = [],
+	//_OBJECTS,
+	_EVENTS = {};

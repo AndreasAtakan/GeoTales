@@ -1,7 +1,7 @@
 /*©agpl*************************************************************************
 *                                                                              *
 * DynastyMap                                                                   *
-* Copyright (C) 2020  DynastyMap AS                                            *
+* Copyright (C) 2021  DynastyMap AS                                            *
 *                                                                              *
 * This program is free software: you can redistribute it and/or modify         *
 * it under the terms of the GNU Affero General Public License as published by  *
@@ -21,11 +21,9 @@
 "use strict";
 
 
-let map;
-
 window.onload = function(ev) {
 
-	map = L.map("map", {
+	_MAP = L.map("map", {
 		center: [ 51.781435604431195, 14.194335937500002 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
@@ -34,44 +32,7 @@ window.onload = function(ev) {
 
 	$("div.leaflet-control-attribution a").attr("target", "_blank");
 
-
-
-	pell.init({
-		element: document.querySelector("#textInput"),
-		onChange: html => {
-			//console.log(html);
-		},
-		defaultParagraphSeparator: "p",
-		styleWithCSS: false,
-		actions: [
-			"bold",
-			"underline",
-			{
-				name: "italic",
-				result: () => pell.exec("italic")
-			},
-			/*{
-				name: "backColor",
-				icon: "<div style=\"background-color:pink;\">A</div>",
-				title: "Highlight Color",
-				result: () => pell.exec("backColor", "pink")
-			},*/
-			/*{
-				name: "image",
-				result: () => {
-					const url = window.prompt("Enter the image URL");
-					if(url) pell.exec("insertImage", url);
-				}
-			},*/
-			{
-				name: "link",
-				result: () => {
-					const url = window.prompt("Enter the link URL");
-					if(url) pell.exec("createLink", url);
-				}
-			}
-		]
-	});
+	$("div#sceneCol button#addScene").click( ev => { _EVENTS.scene.setup(); } );
 
 };
 
