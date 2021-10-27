@@ -24,27 +24,33 @@
 function init_scene() {
 
 	$("div#sceneCol").html(`
-		<div class="row gx-0 mx-2">
-			<div class="col">
-				<hr />
-			</div>
-		</div>
+		<div id="_midline"></div>
 
-		<div id="sceneContainer"></div>
-
-		<div class="row gx-0 mx-2">
+		<div class="row align-items-center g-0 h-100">
 			<div class="col">
-				<hr />
-			</div>
-		</div>
+				<div class="row gx-0 mx-2" id="topPadScene">
+					<div class="col">
+						<hr />
+					</div>
+				</div>
 
-		<div class="row gx-0 mb-3">
-			<div class="col">
-				<center>
-					<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
-						<strong>+</strong>
-					</button>
-				</center>
+				<div id="sceneContainer"></div>
+
+				<div class="row gx-0 mx-2">
+					<div class="col">
+						<hr />
+					</div>
+				</div>
+
+				<div class="row gx-0" id="bottomPadScene">
+					<div class="col">
+						<center>
+							<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
+								<strong>+</strong>
+							</button>
+						</center>
+					</div>
+				</div>
 			</div>
 		</div>
 	`);

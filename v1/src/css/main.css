@@ -29,6 +29,14 @@ input::-webkit-inner-spin-button {
 	margin: 0;
 }
 
+#_midline {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	height: 0;
+	visibility: hidden;
+}
+
 .leaflet-bottom.leaflet-left { z-index: 1001; }
 
 .pell-content { height: auto; overflow-y: auto; }
@@ -53,7 +61,7 @@ input::-webkit-inner-spin-button {
 }
 
 #sceneCol #textInput {
-	min-height: 100px;
+	min-height: 160px;
 	max-height: 180px;
 	overflow-y: auto;
 }
@@ -71,6 +79,9 @@ input::-webkit-inner-spin-button {
 	transition: 0.09s;
 	opacity: 0.8;
 }
+
+#topPadScene { margin-top: 100px; }
+#bottomPadScene { margin-bottom: 120px; }
 
 
 
@@ -90,11 +101,10 @@ input::-webkit-inner-spin-button {
 	.headerBtn { display: none; }
 	.offcanvasBtn { display: block; }
 
-	#mapCol {
-		height: 70%;
-	}
+	#mapCol { height: 55%; }
 
-	#sceneCol {
-		height: 30%;
-	}
+	#sceneCol { height: 45%; }
+
+	#topPadScene { margin-top: 0; }
+	#bottomPadScene { margin-bottom: 1.5rem; }
 }

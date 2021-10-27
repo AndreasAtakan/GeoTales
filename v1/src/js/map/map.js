@@ -25,9 +25,7 @@ L.Map.addInitHook(function() {
 
 	// Plugins
 
-	this.addControl(
-		new L.Control.Fullscreen({ position: "topright" })
-	);
+	/*this.addControl( new L.Control.Fullscreen({ position: "topright" }) );*/
 
 	this.addControl(
 		L.control.zoom({ position: "topright" })

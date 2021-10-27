@@ -31,3 +31,23 @@ function get_scene(id) {
 		}
 	}
 }
+
+
+
+function getSceneInView() {
+	for(let s of _SCENES) {
+		if(isSceneInMiddleView(s.id)) {
+			return s;
+		}
+	}
+}
+
+function isSceneInMiddleView(id) {
+	let viewMiddle = $("div#_midline").offset().top; // P.S. This is the best hack of all time
+
+	let rect = $(`div[data-sceneid="${id}"]`)[0].getBoundingClientRect();
+	let elemTop = rect.top,
+		elemBottom = rect.bottom;
+
+	return (elemTop <= viewMiddle) && (elemBottom >= viewMiddle);
+}

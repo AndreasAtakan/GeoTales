@@ -54,25 +54,12 @@ _EVENTS.scene = {
 		$(`div[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`div[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
 
-		textareas[id] = pell.init({
-			element: document.querySelector(`div[data-sceneid="${id}"] div#textInput`),
-			onChange: html => { this.input(id, "text", html); },
-			defaultParagraphSeparator: "p",
-			styleWithCSS: false,
-			actions: [
-				"bold",
-				"underline",
-				{ name: "italic", result: () => pell.exec("italic") },
-				{ name: "link",
-					result: () => {
-						const url = window.prompt("Enter the link URL");
-						if(url) pell.exec("createLink", url);
-					}
-				}
-			]
-		});
+		textareas[id] = this.create_pell(id);
 
 		this.flash_map();
+
+		let el = document.querySelector("div#sceneCol");
+		el.scrollTo(0, el.scrollHeight);
 	},
 
 	input: function(id, type, value) {
@@ -103,9 +90,36 @@ _EVENTS.scene = {
 
 
 
+	set_scene: function() {
+		let s = getSceneInView();
+
+		$("div#sceneContainer>.row").css("background-color", "initial");
+		$(`div[data-sceneid="${s.id}"]`).css("background-color", "green");
+	},
+
 	flash_map: function() {
 		$("div#map").addClass("snapshot");
 		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 180);
+	},
+
+	create_pell: function(id) {
+		return pell.init({
+			element: document.querySelector(`div[data-sceneid="${id}"] div#textInput`),
+			onChange: html => { this.input(id, "text", html); },
+			defaultParagraphSeparator: "p",
+			styleWithCSS: false,
+			actions: [
+				"bold",
+				"underline",
+				{ name: "italic", result: () => pell.exec("italic") },
+				{ name: "link",
+					result: () => {
+						const url = window.prompt("Enter the link URL");
+						if(url) pell.exec("createLink", url);
+					}
+				}
+			]
+		});
 	}
 
 };
