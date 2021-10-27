@@ -141,3 +141,102 @@ function add_scene(id) {
 	`);
 
 }
+
+
+
+function marker_popup() {
+
+	return `
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col">
+					icon
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					border
+				</div>
+			</div>
+		</div>
+	`;
+
+}
+
+function polyline_popup() {
+
+	/*
+	<div class="input-group mb-3">
+		<input type="color" class="form-control form-control-color" id="frameColorInput" value="#563d7c" title="Choose color" />
+		<input type="number" min="1" max="10" class="form-control" id="frameThicknessInput" placeholder="Thickness" />
+	</div>
+	*/
+
+	return `
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col">
+					color
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					thickness
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					transparency
+				</div>
+			</div>
+		</div>
+	`;
+
+}
+
+function polygon_popup() {
+
+	return `
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col">
+					line color
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					line thickness
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					line transparency
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					fill color
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					fill thickness
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					fill transparency
+				</div>
+			</div>
+		</div>
+	`;
+
+}

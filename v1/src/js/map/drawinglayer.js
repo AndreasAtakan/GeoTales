@@ -23,24 +23,41 @@
 
 L.DrawingLayer = L.FeatureGroup.extend({
 
-	addLayer: function(object, type, title, id) {
+	addLayer: function(object, type, id) {
 		var id = id || uuid();
 
 		if(id) object.options.id = id;
 		if(type) object.options.type = type;
-		if(title) object.options.title = title;
 
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 		this._objects.push(object);
 
-		object.bindPopup(`
-			<h6>${title}</h6>
-		`);
+		let popup;
+		switch(type) {
+			case "marker":
+				popup = marker_popup();
+				break;
+
+			case "polyline":
+				popup = polyline_popup();
+				break;
+
+			case "polygon":
+			case "rectangle":
+				popup = polygon_popup();
+				break;
+
+			default:
+				popup = "";
+		}
+		object.bindPopup(popup);
 
 		object.on("click", ev => {
 			if(!object.options.original) { object.options.original = object.options; }
 
 			if(object.editing.enabled()) { object.closePopup(); }
+
+			_EVENTS.object.setup(object.options.type);
 		});
 
 	},

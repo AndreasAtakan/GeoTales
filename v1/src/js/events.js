@@ -153,3 +153,15 @@ _EVENTS.scene = {
 	}
 
 };
+
+
+
+_EVENTS.object = {
+
+	setup: function(type) {
+
+		//
+
+	}
+
+};
