@@ -31,6 +31,22 @@ L.Map.addInitHook(function() {
 		L.control.zoom({ position: "topright" })
 	);
 
+	this.sceneButton = L.easyButton({
+		id: "gotoScene",
+		position: "topright",
+		leafletClasses: true,
+		states: [
+			{
+				stateName: "main",
+				onClick: function(button, map) { _EVENTS.scene.set_scene(); },
+				title: "Go to current scene",
+				icon: "fa-expand"
+			}
+		]
+	});
+	this.addControl( this.sceneButton );
+	this.sceneButton.disable();
+
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
@@ -113,6 +129,14 @@ L.Map.addInitHook(function() {
 	});
 
 	this.addControl( this.drawingControl );
+
+
+
+
+
+	// Move event
+
+	this.on("movestart zoomstart", _EVENTS.scene.unset_scene_style);
 
 });
 

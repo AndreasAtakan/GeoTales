@@ -39,7 +39,7 @@ input::-webkit-inner-spin-button {
 
 .leaflet-bottom.leaflet-left { z-index: 1001; }
 
-.pell-content { height: auto; overflow-y: auto; }
+.pell-content { height: 120px; }
 
 .offcanvasBtn { display: none; }
 
@@ -64,6 +64,14 @@ input::-webkit-inner-spin-button {
 	min-height: 160px;
 	max-height: 180px;
 	overflow-y: auto;
+	background-color: white;
+}
+
+#sceneContainer .active {
+	background-image: linear-gradient(to right, #ffffcc, white);
+}
+#sceneContainer .inactive {
+	background-image: linear-gradient(to right, #d9d9d9, white);
 }
 
 #map {

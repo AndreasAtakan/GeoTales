@@ -27,14 +27,19 @@ _EVENTS.scene = {
 
 	setup: function() {
 		init_scene();
-		this.add();
 
+		this.add();
 		$("div#sceneCol button#addScene").click( ev => { this.add(); } );
+
+		_MAP.sceneButton.enable();
 	},
 
 	reset: function() {
 		reset_scene();
+
 		$("div#sceneCol button#addScene").click( ev => { this.setup(); } );
+
+		_MAP.sceneButton.disable();
 	},
 
 	add: function() {
@@ -57,6 +62,7 @@ _EVENTS.scene = {
 		textareas[id] = this.create_pell(id);
 
 		this.flash_map();
+		this.set_scene_style(id);
 
 		let el = document.querySelector("div#sceneCol");
 		el.scrollTo(0, el.scrollHeight);
@@ -75,6 +81,8 @@ _EVENTS.scene = {
 		_SCENES[s.index].zoom = _MAP.getZoom();
 
 		this.flash_map();
+
+		this.set_scene_style(id);
 	},
 
 	delete: function(id) {
@@ -86,6 +94,7 @@ _EVENTS.scene = {
 		$(`div[data-sceneid="${id}"]`).remove();
 
 		if(_SCENES.length <= 0) { this.reset(); }
+		else { this.set_scene(); }
 	},
 
 
@@ -93,8 +102,29 @@ _EVENTS.scene = {
 	set_scene: function() {
 		let s = getSceneInView();
 
-		$("div#sceneContainer>.row").css("background-color", "initial");
-		$(`div[data-sceneid="${s.id}"]`).css("background-color", "green");
+		this.set_scene_style(s.id);
+
+		_MAP.off("movestart zoomstart", this.unset_scene_style);
+		_MAP.flyTo(s.center, s.zoom, { duration: 1 });
+		_MAP.on("movestart zoomstart", this.unset_scene_style);
+	},
+
+	set_scene_style: function(id) {
+		if( $(`div[data-sceneid="${id}"] .card`).hasClass("active") ) return;
+
+		$("div#sceneContainer .card").removeClass("inactive");
+		$("div#sceneContainer .card").removeClass("active");
+		$(`div[data-sceneid="${id}"] .card`).addClass("active");
+	},
+	unset_scene_style: function() {
+		let id = $("div#sceneContainer .card.active").parent().parent().data("sceneid");
+
+		if(!id) return;
+		if( $(`div[data-sceneid="${id}"] .card`).hasClass("inactive") ) return;
+
+		$("div#sceneContainer .card").removeClass("inactive");
+		$("div#sceneContainer .card").removeClass("active");
+		$(`div[data-sceneid="${id}"] .card`).addClass("inactive");
 	},
 
 	flash_map: function() {
