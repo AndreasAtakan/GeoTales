@@ -22,12 +22,14 @@
 
 
 /* Hide arrows on type="number" input  */
-input[type=number] { -moz-appearance: textfield; }
+/*input[type=number] { -moz-appearance: textfield; }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
-}
+}*/
+
+input, textarea, button, ul { border-radius: 2px !important; }
 
 #_midline {
 	position: absolute;
@@ -50,6 +52,7 @@ input::-webkit-inner-spin-button {
 #sceneCol {
 	height: 100%;
 	overflow-y: auto;
+	background-color: #fafafa;
 }
 
 #sceneCol #reorder:hover {
@@ -68,11 +71,12 @@ input::-webkit-inner-spin-button {
 }
 
 #sceneContainer .active {
-	background-image: linear-gradient(to right, #ffffcc, white);
+	background-image: linear-gradient(to right, #cccccc, white);
 }
 #sceneContainer .inactive {
-	background-image: linear-gradient(to right, #d9d9d9, white);
+	background-image: linear-gradient(to right, #f2f2f2, white);
 }
+#sceneContainer .active #textInput { color: initial; }
 
 #map {
 	width: 100%;
@@ -90,6 +94,13 @@ input::-webkit-inner-spin-button {
 
 #topPadScene { margin-top: 100px; }
 #bottomPadScene { margin-bottom: 120px; }
+
+#markerPopup, #polylinePopup, #polygonPopup {
+	width: 300px;
+}
+.markerIcon {
+	border-radius: 50%;
+}
 
 
 

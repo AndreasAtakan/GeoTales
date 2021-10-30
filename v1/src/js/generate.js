@@ -34,7 +34,11 @@ function init_scene() {
 					</div>
 				</div>
 
-				<div id="sceneContainer"></div>
+				<div class="row mx-2">
+					<div class="col">
+						<ul class="list-group" id="sceneContainer"></ul>
+					</div>
+				</div>
 
 				<div class="row gx-0 mx-2">
 					<div class="col">
@@ -79,65 +83,59 @@ function reset_scene() {
 
 function add_scene(id) {
 
-	$("div#sceneContainer").append(`
-		<div class="row gx-0" data-sceneid="${id}">
-			<div class="col">
-				<div class="card m-2" style="border-color: rgba(0,0,0,.4);">
-					<div class="card-body">
-						<form class="container-fluid">
-							<div class="row g-0">
-								<div class="col-1">
-									<div class="row gx-0 mb-3">
-										<div class="col">
-											<span id="reorder" title="Change ordering">
-												<i class="fas fa-bars"></i>
-											</span>
-										</div>
-									</div>
-									<div class="row gx-0">
-										<div class="col">
-											<span id="recapture" title="Recapture scene">
-												<i class="fas fa-expand"></i>
-											</span>
-										</div>
-									</div>
-									<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
-										<div class="col">
-											<span id="delete" title="Delete scene">
-												<i class="fas fa-trash"></i>
-											</span>
-										</div>
-									</div>
-								</div>
-								<div class="col-11">
-									<div class="row mb-1">
-										<div class="col">
-											<input type="text" class="form-control" id="titleInput" placeholder="Title" />
-										</div>
-									</div>
-									<div class="row mb-3">
-										<div class="col">
-											<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" />
-										</div>
-									</div>
-									<div class="row mb-3">
-										<div class="col">
-											<div class="form-text" id="mediaHelp">Choose one or more media files</div>
-											<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" multiple />
-										</div>
-									</div>
-									<div class="row">
-										<div class="col">
-											<div class="pell" id="textInput"></div>
-										</div>
-									</div>
-								</div>
+	$("ul#sceneContainer").append(`
+		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
+			<form class="container-fluid px-0">
+				<div class="row g-0">
+					<div class="col-1">
+						<div class="row gx-0 mb-3">
+							<div class="col">
+								<span id="reorder" title="Change ordering">
+									<i class="fas fa-bars"></i>
+								</span>
 							</div>
-						</form>
+						</div>
+						<div class="row gx-0">
+							<div class="col">
+								<span id="recapture" title="Recapture scene">
+									<i class="fas fa-compress"></i>
+								</span>
+							</div>
+						</div>
+						<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
+							<div class="col">
+								<span id="delete" title="Delete scene">
+									<i class="fas fa-trash"></i>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-11">
+						<div class="row mb-1">
+							<div class="col">
+								<input type="text" class="form-control" id="titleInput" placeholder="Title" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<div class="form-text" id="mediaHelp">Choose one or more media files</div>
+								<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" accept="image/*" multiple />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col">
+								<div class="pell" id="textInput"></div>
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
-		</div>
+			</form>
+		</li>
 	`);
 
 }
@@ -147,16 +145,22 @@ function add_scene(id) {
 function marker_popup() {
 
 	return `
-		<div class="container-fluid">
+		<div class="container-fluid" id="markerPopup">
 			<div class="row">
 				<div class="col">
-					icon
+					<h6>Icon</h6>
+					<input type="file" class="form-control form-control-sm" id="icon" accept="image/*" />
 				</div>
 			</div>
 
-			<div class="row">
+			<div class="row mt-4">
 				<div class="col">
-					border
+					<h6>Border</h6>
+					<div class="input-group input-group-sm mb-3">
+						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
+						<input type="number" min="1" max="10" class="form-control" id="thickness" placeholder="Thickness" />
+						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+					</div>
 				</div>
 			</div>
 		</div>
@@ -166,30 +170,16 @@ function marker_popup() {
 
 function polyline_popup() {
 
-	/*
-	<div class="input-group mb-3">
-		<input type="color" class="form-control form-control-color" id="frameColorInput" value="#563d7c" title="Choose color" />
-		<input type="number" min="1" max="10" class="form-control" id="frameThicknessInput" placeholder="Thickness" />
-	</div>
-	*/
-
 	return `
-		<div class="container-fluid">
+		<div class="container-fluid" id="polylinePopup">
 			<div class="row">
 				<div class="col">
-					color
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col">
-					thickness
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col">
-					transparency
+					<h6>Color</h6>
+					<div class="input-group input-group-sm mb-3">
+						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
+						<input type="number" min="1" max="10" class="form-control" id="thickness" placeholder="Thickness" />
+						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+					</div>
 				</div>
 			</div>
 		</div>
@@ -200,40 +190,25 @@ function polyline_popup() {
 function polygon_popup() {
 
 	return `
-		<div class="container-fluid">
+		<div class="container-fluid" id="polygonPopup">
 			<div class="row">
 				<div class="col">
-					line color
+					<h6>Line</h6>
+					<div class="input-group input-group-sm mb-3">
+						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
+						<input type="number" min="1" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
+						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
+					</div>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col">
-					line thickness
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col">
-					line transparency
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col">
-					fill color
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col">
-					fill thickness
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col">
-					fill transparency
+					<h6>Fill</h6>
+					<div class="input-group input-group-sm mb-3">
+						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
+						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
+					</div>
 				</div>
 			</div>
 		</div>

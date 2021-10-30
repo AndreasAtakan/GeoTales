@@ -40,7 +40,7 @@ L.Map.addInitHook(function() {
 				stateName: "main",
 				onClick: function(button, map) { _EVENTS.scene.set_scene(); },
 				title: "Go to current scene",
-				icon: "fa-expand"
+				icon: "fa-reply"
 			}
 		]
 	});
@@ -68,12 +68,11 @@ L.Map.addInitHook(function() {
 	// Drawing layer
 
 	this.drawingLayer = L.drawingLayer({
-		id: "0",
 		title: "drawing layer",
-		lineThickness: 4,
-		lineColor: "#ff9900",
-		lineTransparency: 0.5,
-		fillColor: "#ff9900",
+		lineThickness: 3,
+		lineColor: "#563d7c",
+		lineTransparency: 1,
+		fillColor: "#563d7c",
 		fillTransparency: 0.8
 	});
 
@@ -107,21 +106,28 @@ L.Map.addInitHook(function() {
 			marker: {},
 			polyline: {
 				shapeOptions: {
-					color: "#ff9900",
-					fillColor: "#ff9900"
+					weight: 3,
+					color: "#563d7c",
+					opacity: 1
 				}
 			},
 			polygon: {
 				shapeOptions: {
-					color: "#ff9900",
-					fillColor: "#ff9900"
+					weight: 3,
+					color: "#563d7c",
+					opacity: 1,
+					fillColor: "#563d7c",
+					fillOpacity: 0.2
 				}
 			},
 			circle: false,
 			rectangle: {
 				shapeOptions: {
-					color: "#ff9900",
-					fillColor: "#ff9900"
+					weight: 3,
+					color: "#563d7c",
+					opacity: 1,
+					fillColor: "#563d7c",
+					fillOpacity: 0.2
 				}
 			},
 			circlemarker: false

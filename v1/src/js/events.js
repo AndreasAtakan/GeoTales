@@ -29,17 +29,34 @@ _EVENTS.scene = {
 		init_scene();
 
 		this.add();
+		this.set_scoll();
 		$("div#sceneCol button#addScene").click( ev => { this.add(); } );
 
-		_MAP.sceneButton.enable();
+		$("ul#sceneContainer").sortable({
+			cursor: "move",
+			handle: "#reorder",
+			items: "> li",
+			//scroll: false,
+			start: (ev, ui) => {
+				ev.stopPropagation();
+				this.unset_scoll();
+			},
+			update: (ev, ui) => {
+				ev.stopPropagation();
+				$("ul#sceneContainer li.active")[0].scrollIntoView({ block: "center" });
+				setTimeout(() => { this.set_scoll(); }, 250);
+
+				let order = $("ul#sceneContainer").sortable("toArray");
+				this.reorder(order);
+			}
+			//stop: (ev, ui) => {}
+		});
 	},
 
 	reset: function() {
 		reset_scene();
 
 		$("div#sceneCol button#addScene").click( ev => { this.setup(); } );
-
-		_MAP.sceneButton.disable();
 	},
 
 	add: function() {
@@ -52,12 +69,12 @@ _EVENTS.scene = {
 		});
 		add_scene(id);
 
-		$(`div[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
-		$(`div[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
+		$(`li[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
+		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
 
-		$(`div[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
-		$(`div[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
-		$(`div[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
+		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
 
 		textareas[id] = this.create_pell(id);
 
@@ -91,13 +108,29 @@ _EVENTS.scene = {
 		_SCENES.splice(s.index, 1);
 		delete textareas[id];
 
-		$(`div[data-sceneid="${id}"]`).remove();
+		$(`li[data-sceneid="${id}"]`).remove();
 
 		if(_SCENES.length <= 0) { this.reset(); }
 		else { this.set_scene(); }
 	},
 
+	reorder: function(order) {
+		_SCENES.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
+	},
 
+
+
+	set_scoll: function() {
+		let isScrolling;
+
+		$("div#sceneCol").scroll(ev => {
+			window.clearTimeout( isScrolling );
+			isScrolling = setTimeout(() => { this.set_scene(); }, 250);
+		});
+	},
+	unset_scoll: function() {
+		$("div#sceneCol").off("scroll");
+	},
 
 	set_scene: function() {
 		let s = getSceneInView();
@@ -110,21 +143,25 @@ _EVENTS.scene = {
 	},
 
 	set_scene_style: function(id) {
-		if( $(`div[data-sceneid="${id}"] .card`).hasClass("active") ) return;
+		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
 
-		$("div#sceneContainer .card").removeClass("inactive");
-		$("div#sceneContainer .card").removeClass("active");
-		$(`div[data-sceneid="${id}"] .card`).addClass("active");
+		$("ul#sceneContainer li").removeClass("inactive");
+		$("ul#sceneContainer li").removeClass("active");
+		$(`li[data-sceneid="${id}"]`).addClass("active");
+
+		_MAP.sceneButton.disable();
 	},
 	unset_scene_style: function() {
-		let id = $("div#sceneContainer .card.active").parent().parent().data("sceneid");
+		let id = $("ul#sceneContainer li.active").data("sceneid");
 
 		if(!id) return;
-		if( $(`div[data-sceneid="${id}"] .card`).hasClass("inactive") ) return;
+		if( $(`li[data-sceneid="${id}"]`).hasClass("inactive") ) return;
 
-		$("div#sceneContainer .card").removeClass("inactive");
-		$("div#sceneContainer .card").removeClass("active");
-		$(`div[data-sceneid="${id}"] .card`).addClass("inactive");
+		$("ul#sceneContainer li").removeClass("inactive");
+		$("ul#sceneContainer li").removeClass("active");
+		$(`li[data-sceneid="${id}"]`).addClass("inactive");
+
+		_MAP.sceneButton.enable();
 	},
 
 	flash_map: function() {
@@ -134,7 +171,7 @@ _EVENTS.scene = {
 
 	create_pell: function(id) {
 		return pell.init({
-			element: document.querySelector(`div[data-sceneid="${id}"] div#textInput`),
+			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
 			onChange: html => { this.input(id, "text", html); },
 			defaultParagraphSeparator: "p",
 			styleWithCSS: false,
@@ -158,10 +195,96 @@ _EVENTS.scene = {
 
 _EVENTS.object = {
 
-	setup: function(type) {
+	setup: function(id, type) {
 
-		//
+		let o = _MAP.drawingLayer.getLayer(id);
 
+		switch(type) {
+			case "marker":
+				this.setup_marker(o);
+				break;
+
+			case "polyline":
+				this.setup_polyline(o);
+				break;
+
+			case "polygon":
+			case "rectangle":
+				this.setup_polygon(o);
+				break;
+
+			default: break;
+		}
+
+	},
+
+	setup_marker: function(object) {
+		$("#markerPopup input#icon").change(function(ev) {
+			let file = $(this)[0].files[0];
+
+			let fr = new FileReader();
+			fr.onload = function() {
+				let res = fr.result;
+
+				object.setIcon(
+					L.icon({
+						iconUrl: res,
+						iconSize: [50, 50],
+						popupAnchor: [0, -25],
+						className: "markerIcon"
+					})
+				);
+				//$("").attr("id", "");
+			};
+			fr.readAsDataURL(file);
+		});
+
+		$("#markerPopup input#color").change(function(ev) {
+			$(`.markerIcon_${object.options.id}`).css("border-color", $(this).val());
+		});
+
+		$("#markerPopup input#thickness").change(function(ev) {
+			$(`.markerIcon_${object.options.id}`).css("border-width", `${$(this).val()}px`);
+		});
+	},
+
+	setup_polyline: function(object) {
+		$("#polylinePopup input#color").change(function(ev) {
+			object.setStyle({ color: $(this).val() });
+		});
+		$("#polylinePopup input#color").val(object.options.color || "#563d7c");
+
+		$("#polylinePopup input#thickness").change(function(ev) {
+			object.setStyle({ weight: $(this).val() });
+		});
+
+		$("#polylinePopup input#transparency").change(function(ev) {
+			object.setStyle({ opacity: 1 - $(this).val() });
+		});
+	},
+
+	setup_polygon: function(object) {
+		$("#polygonPopup input#lineColor").change(function(ev) {
+			object.setStyle({ color: $(this).val() });
+		});
+		$("#polygonPopup input#lineColor").val(object.options.color || "#563d7c");
+
+		$("#polygonPopup input#lineThickness").change(function(ev) {
+			object.setStyle({ weight: $(this).val() });
+		});
+
+		$("#polygonPopup input#lineTransparency").change(function(ev) {
+			object.setStyle({ opacity: 1 - $(this).val() });
+		});
+
+		$("#polygonPopup input#fillColor").change(function(ev) {
+			object.setStyle({ fillColor: $(this).val() });
+		});
+		$("#polygonPopup input#fillColor").val(object.options.fillColor || "#563d7c");
+
+		$("#polygonPopup input#fillTransparency").change(function(ev) {
+			object.setStyle({ fillOpacity: 1 - $(this).val() });
+		});
 	}
 
 };

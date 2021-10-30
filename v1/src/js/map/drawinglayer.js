@@ -50,16 +50,26 @@ L.DrawingLayer = L.FeatureGroup.extend({
 			default:
 				popup = "";
 		}
-		object.bindPopup(popup);
+		object.bindPopup(popup, {
+			keepInView: true,
+			maxWidth: 350,
+			maxHeight: 450
+		});
 
 		object.on("click", ev => {
 			if(!object.options.original) { object.options.original = object.options; }
 
 			if(object.editing.enabled()) { object.closePopup(); }
 
-			_EVENTS.object.setup(object.options.type);
+			_EVENTS.object.setup(object.options.id, object.options.type);
 		});
 
+	},
+
+	getLayer: function(id) {
+		for(let o of this._objects) {
+			if(o.options.id == id) { return o; }
+		}
 	},
 
 	initialize: function(options) {
