@@ -24,16 +24,29 @@
 L.DrawingLayer = L.FeatureGroup.extend({
 
 	addLayer: function(object, type, id) {
+		L.FeatureGroup.prototype.addLayer.call(this, object);
+
+		if(object.options.id && !type) {
+			if(this._objects.map(o => o.options.id).indexOf(object.options.id) > -1) {
+				this.bind(object);
+				_EVENTS.object.set_marker_style(object);
+				return;
+			}
+		}
+
 		var id = id || uuid();
 
 		if(id) object.options.id = id;
 		if(type) object.options.type = type;
 
-		L.FeatureGroup.prototype.addLayer.call(this, object);
 		this._objects.push(object);
 
+		this.bind(object);
+	},
+
+	bind: function(object) {
 		let popup;
-		switch(type) {
+		switch(object.options.type) {
 			case "marker":
 				popup = marker_popup();
 				break;
@@ -63,7 +76,6 @@ L.DrawingLayer = L.FeatureGroup.extend({
 
 			_EVENTS.object.setup(object.options.id, object.options.type);
 		});
-
 	},
 
 	getLayer: function(id) {

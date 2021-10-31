@@ -234,17 +234,48 @@ _EVENTS.object = {
 						className: "markerIcon"
 					})
 				);
-				//$("").attr("id", "");
+				//$(object._icon).attr("data-objectid", object.options.id);
+				$(object._icon).css("border", "1px solid black");
 			};
 			fr.readAsDataURL(file);
 		});
 
+		/*** $(`.markerIcon[data-objectid="${object.options.id}"]`); ***/
+
 		$("#markerPopup input#color").change(function(ev) {
-			$(`.markerIcon_${object.options.id}`).css("border-color", $(this).val());
+			let val = $(this).val();
+
+			$(object._icon).css("border-color", val);
+			object.options.borderColor = val;
 		});
+		$("#markerPopup input#color").val(object.options.borderColor || "#563d7c");
 
 		$("#markerPopup input#thickness").change(function(ev) {
-			$(`.markerIcon_${object.options.id}`).css("border-width", `${$(this).val()}px`);
+			let val = $(this).val();
+
+			$(object._icon).css("border-width", `${val}px`);
+			object.options.borderThickness = val;
+		});
+
+		$("#markerPopup input#blur").change(function(ev) {
+			let val = $(this).val();
+
+			$(object._icon).css("filter", `blur(${val}px)`);
+			object.options.overlayBlur = val;
+		});
+
+		$("#markerPopup input#transparency").change(function(ev) {
+			let val = $(this).val();
+
+			$(object._icon).css("filter", `opacity(${(1 - val)*100}%)`);
+			object.options.overlayTransparency = val;
+		});
+
+		$("#markerPopup input#grayscale").change(function(ev) {
+			let val = $(this).val();
+
+			$(object._icon).css("filter", `grayscale(${val*100}%)`);
+			object.options.overlayGrayscale = val;
 		});
 	},
 
@@ -285,6 +316,20 @@ _EVENTS.object = {
 		$("#polygonPopup input#fillTransparency").change(function(ev) {
 			object.setStyle({ fillOpacity: 1 - $(this).val() });
 		});
+	},
+
+	set_marker_style: function(object) {
+		let icon = object._icon,
+			borderColor = object.options.borderColor,
+			borderThickness = object.options.borderThickness,
+			overlayBlur = object.options.overlayBlur,
+			overlayTransparency = object.options.overlayTransparency,
+			overlayGrayscale = object.options.overlayGrayscale;
+
+		$(icon).css("border", `${borderThickness}px solid ${borderColor}`);
+		$(icon).css("filter", `blur(${overlayBlur}px)`);
+		$(icon).css("filter", `opacity(${(1 - overlayTransparency)*100}%)`);
+		$(icon).css("filter", `grayscale(${overlayGrayscale*100}%)`);
 	}
 
 };

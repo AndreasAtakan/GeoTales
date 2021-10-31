@@ -156,10 +156,21 @@ function marker_popup() {
 			<div class="row mt-4">
 				<div class="col">
 					<h6>Border</h6>
-					<div class="input-group input-group-sm mb-3">
+					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
 						<input type="number" min="1" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row mt-4">
+				<div class="col">
+					<h6>Overlay</h6>
+					<div class="input-group input-group-sm mb-3">
+						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="grayscale" placeholder="Grayscale" />
 					</div>
 				</div>
 			</div>
@@ -178,7 +189,7 @@ function polyline_popup() {
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
 						<input type="number" min="1" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -197,7 +208,7 @@ function polygon_popup() {
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="1" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
-						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -207,7 +218,7 @@ function polygon_popup() {
 					<h6>Fill</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
-						<input type="number" min="0.1" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>

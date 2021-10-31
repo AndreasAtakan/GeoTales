@@ -84,10 +84,8 @@ L.Map.addInitHook(function() {
 
 		this.drawingLayer.addLayer(object, type);
 	});
-
-	this.on(L.Draw.Event.EDITED, ev => {
-		//let layers = ev.layers;
-	});
+	//this.on(L.Draw.Event.EDITED, ev => { let objects = ev.layers; });
+	//this.on(L.Draw.Event.DELETED, ev => { let objects = ev.layers; });
 
 
 

@@ -34,13 +34,6 @@ window.onload = function(ev) {
 
 	$("div#sceneCol button#addScene").click( ev => { _EVENTS.scene.setup(); } );
 
-
-	/*let isScrolling;
-	$("div#sceneCol").scroll(function(ev) {
-		window.clearTimeout( isScrolling );
-		isScrolling = setTimeout(function() { _EVENTS.scene.set_scene(); }, 250);
-	});*/
-
 };
 
 /*let height;
