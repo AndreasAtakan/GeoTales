@@ -1,3 +1,3 @@
-## DynastyMap
+## TellUs
 
-[dynastymap.com](http://dynastymap.com)
+[tellusmap.com](http://tellusmap.com)

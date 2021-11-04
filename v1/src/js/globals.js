@@ -1,7 +1,7 @@
 /*©agpl*************************************************************************
 *                                                                              *
-* DynastyMap                                                                   *
-* Copyright (C) 2021  DynastyMap AS                                            *
+* TellUs                                                                       *
+* Copyright (C) 2021  TellUs AS                                                *
 *                                                                              *
 * This program is free software: you can redistribute it and/or modify         *
 * it under the terms of the GNU Affero General Public License as published by  *
