@@ -113,18 +113,18 @@ function add_scene(id) {
 					<div class="col-11">
 						<div class="row mb-1">
 							<div class="col">
-								<input type="text" class="form-control" id="titleInput" placeholder="Title" />
+								<input type="text" class="form-control" id="titleInput" placeholder="Title" disabled />
 							</div>
 						</div>
 						<div class="row mb-3">
 							<div class="col">
-								<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" />
+								<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" disabled />
 							</div>
 						</div>
 						<div class="row mb-3">
 							<div class="col">
 								<div class="form-text" id="mediaHelp">Choose one or more media files</div>
-								<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" accept="image/*" multiple />
+								<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" accept="image/*" multiple disabled />
 							</div>
 						</div>
 						<div class="row">
@@ -224,5 +224,28 @@ function polygon_popup() {
 			</div>
 		</div>
 	`;
+
+}
+
+
+
+function init_basemaps() {
+
+	let html = ``;
+
+	for(let b of _BASEMAPS) {
+		html += `
+			<div class="col">
+				<div class="card mt-2">
+					<div class="card-body">
+						<h6 class="card-title mb-0">${b.name}</h6>
+					</div>
+					<img class="card-img-bottom" id="basemaps" src="${b.url}" alt="${b.name}" data-basemap="${b.name}" />
+				</div>
+			</div>
+		`;
+	}
+
+	$("#mapModal #basemapChoose").html(html);
 
 }

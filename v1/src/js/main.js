@@ -27,12 +27,17 @@ window.onload = function(ev) {
 		center: [ 51.781435604431195, 14.194335937500002 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
-		maxZoom: 18
+		maxZoom: 18,
+		keyboard: false,
+		touchZoom: false,
+		tap: false
 	});
 
 	$("div.leaflet-control-attribution a").attr("target", "_blank");
 
-	$("div#sceneCol button#addScene").click( ev => { _EVENTS.scene.setup(); } );
+	$("#sceneCol button#addScene").click( ev => { _EVENTS.scene.setup(); } );
+
+	_EVENTS.mapOptions.setup();
 
 };
 

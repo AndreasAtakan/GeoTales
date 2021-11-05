@@ -55,28 +55,38 @@ input, textarea, button, ul { border-radius: 2px !important; }
 	background-color: #fafafa;
 }
 
-#sceneCol #reorder:hover {
-	cursor: move;
-}
-#sceneCol #recapture:hover,
-#sceneCol #delete:hover {
-	cursor: pointer;
-}
-
-#sceneCol #textInput {
+#sceneContainer #textInput {
 	min-height: 160px;
 	max-height: 180px;
 	overflow-y: auto;
 	background-color: white;
 }
 
+#sceneContainer li {
+	color: #999999;
+}
+#sceneContainer li:hover:not([class*="active"]),
+#sceneContainer li:focus:not([class*="active"]) {
+	background-image: linear-gradient(to right, #9dafab, white, white, white, white, white, white, white, white);
+	cursor: pointer;
+}
 #sceneContainer .active {
-	background-image: linear-gradient(to right, #cccccc, white);
+	background-image: linear-gradient(to right, #b3b3b3, white, white, white, white, white, white, white, white);
+	color: white;
 }
 #sceneContainer .inactive {
-	background-image: linear-gradient(to right, #f2f2f2, white);
+	background-image: linear-gradient(to right, #d9d9d9, white, white, white, white, white, white, white, white);
+	color: black;
 }
-#sceneContainer .active #textInput { color: initial; }
+#sceneContainer [class*="active"] #textInput { color: initial; }
+
+#sceneContainer [class*="active"] #reorder:hover {
+	cursor: move;
+}
+#sceneContainer [class*="active"] #recapture:hover,
+#sceneContainer [class*="active"] #delete:hover {
+	cursor: pointer;
+}
 
 #map {
 	width: 100%;
@@ -100,6 +110,11 @@ input, textarea, button, ul { border-radius: 2px !important; }
 }
 .markerIcon {
 	border-radius: 50%;
+}
+
+#mapModal #basemaps:hover,
+#mapModal #basemaps:focus {
+	cursor: pointer;
 }
 
 

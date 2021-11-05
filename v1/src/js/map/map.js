@@ -38,7 +38,7 @@ L.Map.addInitHook(function() {
 		states: [
 			{
 				stateName: "main",
-				onClick: function(button, map) { _EVENTS.scene.set_scene(); },
+				onClick: function(button, map) { _EVENTS.scene.goto_scene(); },
 				title: "Go to current scene",
 				icon: "fa-reply"
 			}
@@ -57,9 +57,8 @@ L.Map.addInitHook(function() {
 
 	// Basemap
 
-	this.addLayer(
-		L.tileLayer.provider("OpenStreetMap.HOT")
-	);
+	this.basemap = L.tileLayer.provider("OpenStreetMap.HOT");
+	this.addLayer( this.basemap );
 
 
 
@@ -98,7 +97,7 @@ L.Map.addInitHook(function() {
 	});
 
 	this.drawingControl = new L.Control.Draw({
-		position: "bottomleft",
+		position: "topleft",
 		edit: { featureGroup: this.drawingLayer },
 		draw: {
 			marker: {},
@@ -151,6 +150,41 @@ L.Map.include({
 
 	importData: function(data) {
 		console.log(data);
-	}
+	},
+
+	setBasemap: function(img, width, height) {
+		this.removeLayer( this.basemap );
+
+		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
+		let zoom;
+		for(let i = 0; i < 18; i++) {
+			let r = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
+			if(r.lat < 90 && r.lng < 180) {
+				zoom = i;
+				break;
+			}
+		}
+		if(zoom != 0 && !zoom) return;
+
+		let bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), zoom),
+			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), zoom);
+		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
+
+		this.basemap = L.imageOverlay(img, bounds, {
+			zIndex: 0,
+			attribution: "© <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
+		});
+
+		this.addLayer( this.basemap );
+		this.fitBounds(bounds);
+	},
+
+	presetBasemap: function(name) {
+		this.removeLayer( this.basemap );
+		this.basemap = L.tileLayer.provider(name);
+		this.addLayer( this.basemap );
+	},
+
+	resetBasemap: function() { this.presetBasemap("OpenStreetMap.HOT"); }
 
 });

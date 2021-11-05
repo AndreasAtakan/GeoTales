@@ -21,7 +21,7 @@
 "use strict";
 
 
-let textareas = {};
+let textareas = {}, sceneid;
 
 _EVENTS.scene = {
 
@@ -29,8 +29,7 @@ _EVENTS.scene = {
 		init_scene();
 
 		this.add();
-		this.set_scoll();
-		$("div#sceneCol button#addScene").click( ev => { this.add(); } );
+		$("#sceneCol button#addScene").click( ev => { this.add(); } );
 
 		$("ul#sceneContainer").sortable({
 			cursor: "move",
@@ -39,24 +38,39 @@ _EVENTS.scene = {
 			//scroll: false,
 			start: (ev, ui) => {
 				ev.stopPropagation();
-				this.unset_scoll();
+
+				this.unset_click();
 			},
 			update: (ev, ui) => {
 				ev.stopPropagation();
-				$("ul#sceneContainer li.active")[0].scrollIntoView({ block: "center" });
-				setTimeout(() => { this.set_scoll(); }, 250);
 
-				let order = $("ul#sceneContainer").sortable("toArray");
-				this.reorder(order);
+				this.set_click();
+				this.reorder( $("ul#sceneContainer").sortable("toArray") );
 			}
 			//stop: (ev, ui) => {}
+		});
+
+		$(document).keydown(ev => {
+			let keycode = ev.keyCode,
+				id = $("ul#sceneContainer li.active").data("sceneid");
+			if(!id) return;
+
+			let s = get_scene(id);
+
+			if(keycode == 38 && s.index > 0) {
+				this.set_scene( _SCENES[s.index - 1].id );
+			}
+
+			if(keycode == 40 && s.index < _SCENES.length - 1) {
+				this.set_scene( _SCENES[s.index + 1].id );
+			}
 		});
 	},
 
 	reset: function() {
 		reset_scene();
 
-		$("div#sceneCol button#addScene").click( ev => { this.setup(); } );
+		$("#sceneCol button#addScene").click( ev => { this.setup(); } );
 	},
 
 	add: function() {
@@ -69,20 +83,16 @@ _EVENTS.scene = {
 		});
 		add_scene(id);
 
-		$(`li[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
-		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
-
 		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
-
 		textareas[id] = this.create_pell(id);
 
 		this.flash_map();
-		this.set_scene_style(id);
+		this.set_scene(id);
 
-		let el = document.querySelector("div#sceneCol");
-		el.scrollTo(0, el.scrollHeight);
+		//let el = document.querySelector("div#sceneCol");
+		//el.scrollTo(0, el.scrollHeight);
 	},
 
 	input: function(id, type, value) {
@@ -104,6 +114,7 @@ _EVENTS.scene = {
 
 	delete: function(id) {
 		let s = get_scene(id);
+		let i = s.index == _SCENES.length - 1 ? s.index - 1 : s.index;
 
 		_SCENES.splice(s.index, 1);
 		delete textareas[id];
@@ -111,7 +122,10 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`).remove();
 
 		if(_SCENES.length <= 0) { this.reset(); }
-		else { this.set_scene(); }
+		else {
+			this.set_click();
+			this.set_scene( _SCENES[i].id );
+		}
 	},
 
 	reorder: function(order) {
@@ -120,26 +134,51 @@ _EVENTS.scene = {
 
 
 
-	set_scoll: function() {
-		let isScrolling;
+	set_click: function() {
+		$("#sceneContainer li:not([class*=\"active\"])").off("click");
+		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
+			let id = $(ev.target.offsetParent).data("sceneid");
+			if(!id) return;
 
-		$("div#sceneCol").scroll(ev => {
-			window.clearTimeout( isScrolling );
-			isScrolling = setTimeout(() => { this.set_scene(); }, 250);
+			this.set_scene(id);
 		});
 	},
-	unset_scoll: function() {
-		$("div#sceneCol").off("scroll");
+	unset_click: function() {
+		$("#sceneContainer li:not([class*=\"active\"])").off("click");
 	},
 
-	set_scene: function() {
-		let s = getSceneInView();
+	set_scene: function(id) {
+		let s = get_scene(id);
 
-		this.set_scene_style(s.id);
+		this.set_scene_input(id);
+		this.set_scene_style(id);
+		this.set_click();
+
+		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ block: "center" });
 
 		_MAP.off("movestart zoomstart", this.unset_scene_style);
 		_MAP.flyTo(s.center, s.zoom, { duration: 1 });
 		_MAP.on("movestart zoomstart", this.unset_scene_style);
+	},
+	goto_scene: function() {
+		let id = $("ul#sceneContainer li.inactive").data("sceneid");
+		if(!id) return;
+
+		this.set_scene(id);
+	},
+
+	set_scene_input: function(id) {
+		$("ul#sceneContainer span#recapture").off("click");
+		$("ul#sceneContainer span#delete").off("click");
+		$("ul#sceneContainer input#titleInput").prop("disabled", true);
+		$("ul#sceneContainer input#timeInput").prop("disabled", true);
+		$("ul#sceneContainer input#mediaInput").prop("disabled", true);
+
+		$(`li[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
+		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
+		$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
+		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
+		$(`li[data-sceneid="${id}"] input#mediaInput`).prop("disabled", false);
 	},
 
 	set_scene_style: function(id) {
@@ -150,6 +189,13 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`).addClass("active");
 
 		_MAP.sceneButton.disable();
+
+		if(_FONT) {
+			console.log(_FONT);
+			$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
+			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
+			$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
+		}
 	},
 	unset_scene_style: function() {
 		let id = $("ul#sceneContainer li.active").data("sceneid");
@@ -163,6 +209,8 @@ _EVENTS.scene = {
 
 		_MAP.sceneButton.enable();
 	},
+
+
 
 	flash_map: function() {
 		$("div#map").addClass("snapshot");
@@ -330,6 +378,76 @@ _EVENTS.object = {
 		$(icon).css("filter", `blur(${overlayBlur}px)`);
 		$(icon).css("filter", `opacity(${(1 - overlayTransparency)*100}%)`);
 		$(icon).css("filter", `grayscale(${overlayGrayscale*100}%)`);
+	}
+
+};
+
+
+
+_EVENTS.mapOptions = {
+
+	setup: function() {
+
+		$("#mapModal select#clusterInput").change(function(ev) {
+			let val = $(this).val();
+		});
+
+		$("#mapModal select#fontInput").change(function(ev) {
+			let val = $(this).val(), font;
+
+			switch(val) {
+				case "arial":			font = "Arial, sans-serif"; break;
+				case "verdana":			font = "Verdana, sans-serif"; break;
+				case "helvetica":		font = "Helvetica, sans-serif"; break;
+				//case "tahoma":		font = "Tahoma, sans-serif"; break;
+				//case "trebuchet ms":	font = "\"Trebuchet MS\", sans-serif"; break;
+				case "times new roman":	font = "\"Times New Roman\", serif"; break;
+				case "georgia":			font = "Georgia, serif"; break;
+				//case "garamond":		font = "Garamond, serif"; break;
+				case "courier new":		font = "\"Courier New\", monospace"; break;
+				case "brush script mt":	font = "\"Brush Script MT\", cursive"; break;
+				default: break;
+			}
+
+			$("#sceneContainer input#titleInput").css("font-family", font);
+			$("#sceneContainer input#timeInput").css("font-family", font);
+			$("#sceneContainer div#textInput").css("font-family", font);
+
+			_FONT = font;
+		});
+
+		$("#mapModal input#basemapFile").change(function(ev) {
+			let file = $(this)[0].files[0];
+
+			let fr = new FileReader();
+			fr.onload = function() {
+				let res = fr.result;
+
+				let img = new Image();
+				img.onload = function() {
+					let width = this.width,
+						height = this.height;
+
+					_MAP.setBasemap(res, width, height);
+					_BASEMAP = res;
+
+					return true;
+				};
+				img.src = res;
+			};
+			fr.readAsDataURL(file);
+		});
+
+		init_basemaps();
+
+		$("#mapModal #basemaps").click(function(ev) {
+			let basemap = $(this).data("basemap");
+			if(!basemap) return;
+
+			_MAP.presetBasemap(basemap);
+			_BASEMAP = null;
+		});
+
 	}
 
 };

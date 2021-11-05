@@ -89,7 +89,7 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col">
-									<h6>Clustering</h6>
+									<h6>Avatar Clustering</h6>
 								</div>
 							</div>
 
@@ -116,11 +116,17 @@
 							<div class="row mt-2">
 								<div class="col col-md-10">
 									<select class="form-select" id="fontInput" aria-label="Font type">
-										<option value="default" selected>Roboto</option>
-										<option value="arial">Arial</option>
-										<option value="courier new">Courier New</option>
-										<option value="tahoma">Tahoma</option>
-										<option value="times new roman">Times New Roman</option>
+										<option value="default" selected>Default (Roboto)</option>
+										<option value="arial">Arial (sans-serif)</option>
+										<option value="verdana">Verdana (sans-serif)</option>
+										<option value="helvetica">Helvetica (sans-serif)</option>
+										<!--option value="tahoma">Tahoma (sans-serif)</option-->
+										<!--option value="trebuchet ms">Trebuchet MS (sans-serif)</option-->
+										<option value="times new roman">Times New Roman (serif)</option>
+										<option value="georgia">Georgia (serif)</option>
+										<!--option value="garamond">Garamond (serif)</option-->
+										<option value="courier new">Courier New (monospace)</option>
+										<option value="brush script mt">Brush Script MT (cursive)</option>
 									</select>
 								</div>
 							</div>
@@ -146,32 +152,7 @@
 											</h2>
 											<div id="accordionCollapse" class="accordion-collapse collapse" aria-labelledby="accordionHeading" data-bs-parent="#basemapAccordion">
 												<div class="accordion-body">
-													<div class="row row-cols-2 row-cols-md-3">
-														<div class="col">
-															<div class="card mt-2">
-																<div class="card-body">
-																	<h6 class="card-title mb-0">basemap 1</h6>
-																</div>
-																<img class="card-img-bottom" alt="..." src="https://b.tile.openstreetmap.org/5/15/10.png" />
-															</div>
-														</div>
-														<div class="col">
-															<div class="card mt-2">
-																<div class="card-body">
-																	<h6 class="card-title mb-0">basemap 2</h6>
-																</div>
-																<img class="card-img-bottom" alt="..." src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/10/15" />
-															</div>
-														</div>
-														<div class="col">
-															<div class="card mt-2">
-																<div class="card-body">
-																	<h6 class="card-title mb-0">basemap 3</h6>
-																</div>
-																<img class="card-img-bottom" alt="..." src="https://stamen-tiles-b.a.ssl.fastly.net/watercolor/5/15/10.jpg" />
-															</div>
-														</div>
-													</div>
+													<div class="row row-cols-2 row-cols-md-3" id="basemapChoose"></div>
 												</div>
 											</div>
 										  </div>
@@ -183,7 +164,7 @@
 								<div class="col col-md-10">
 									<label for="basemapFile"><small>Or choose custom basemap</small></label>
 									<input type="file" class="form-control" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/*" />
-									<div id="basemapFileHelp" class="form-text">Only image files supported</div>
+									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
 								</div>
 							</div>
 						</div>
