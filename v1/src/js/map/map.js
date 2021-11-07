@@ -83,6 +83,10 @@ L.Map.addInitHook(function() {
 
 		this.drawingLayer.addLayer(object, type);
 	});
+
+	this.on(L.Draw.Event.EDITSTART, ev => { this.drawingLayer.removeAvatarBorders(); });
+	this.on(L.Draw.Event.EDITSTOP, ev => { this.drawingLayer.readdAvatarBorders(); });
+
 	//this.on(L.Draw.Event.EDITED, ev => { let objects = ev.layers; });
 	//this.on(L.Draw.Event.DELETED, ev => { let objects = ev.layers; });
 
@@ -98,9 +102,19 @@ L.Map.addInitHook(function() {
 
 	this.drawingControl = new L.Control.Draw({
 		position: "topleft",
-		edit: { featureGroup: this.drawingLayer },
+		edit: {
+			featureGroup: this.drawingLayer,
+			remove: false
+		},
 		draw: {
-			marker: {},
+			marker: {
+				icon: L.icon({
+					iconUrl: "assets/user-circle-solid.svg",
+					iconSize: [30, 30],
+					popupAnchor: [0, -15],
+					className: "markerIcon"
+				})
+			},
 			polyline: {
 				shapeOptions: {
 					weight: 3,
@@ -130,6 +144,9 @@ L.Map.addInitHook(function() {
 			circlemarker: false
 		}
 	});
+	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
+	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
+	L.drawLocal.edit.handlers.edit.tooltip.text = "Drag handles or avatars to edit features.";
 
 	this.addControl( this.drawingControl );
 
@@ -137,9 +154,16 @@ L.Map.addInitHook(function() {
 
 
 
-	// Move event
+	// Map events
 
 	this.on("movestart zoomstart", _EVENTS.scene.unset_scene_style);
+
+	this.on("move", ev => {
+		if(_PINNED_MARKER) {
+			let o = this.drawingLayer.getObject(_PINNED_MARKER);
+			o.setLatLng(this.getCenter());
+		}
+	});
 
 });
 
@@ -156,18 +180,18 @@ L.Map.include({
 		this.removeLayer( this.basemap );
 
 		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
-		let zoom;
+		let zoom, bl, tr;
 		for(let i = 0; i < 18; i++) {
-			let r = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
-			if(r.lat < 90 && r.lng < 180) {
+			bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
+			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
+			if(bl.lat >= -90 && bl.lng >= -180
+			&& tr.lat <=  90 && tr.lng <=  180) {
 				zoom = i;
 				break;
 			}
 		}
 		if(zoom != 0 && !zoom) return;
 
-		let bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), zoom),
-			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), zoom);
 		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
 
 		this.basemap = L.imageOverlay(img, bounds, {

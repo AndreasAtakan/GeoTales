@@ -158,8 +158,7 @@ function marker_popup() {
 					<h6>Border</h6>
 					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
-						<input type="number" min="1" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="0" max="10" class="form-control" id="thickness" placeholder="Thickness" />
 					</div>
 				</div>
 			</div>
@@ -169,9 +168,23 @@ function marker_popup() {
 					<h6>Overlay</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
-						<input type="number" min="0" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="grayscale" placeholder="Grayscale" />
 					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-11">
+					<div class="form-check mx-1" style="font-size: 14px;">
+						<input class="form-check-input" type="checkbox" id="pin">
+						<label class="form-check-label" for="pin">Pin avatar to map center</label>
+					</div>
+				</div>
+				<div class="col-1">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
+						<i class="fas fa-trash"></i>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -188,9 +201,17 @@ function polyline_popup() {
 					<h6>Color</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
-						<input type="number" min="1" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0" max="1" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="2" max="10" class="form-control" id="thickness" placeholder="Thickness" />
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
+						<i class="fas fa-trash"></i>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -207,8 +228,8 @@ function polygon_popup() {
 					<h6>Line</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
-						<input type="number" min="1" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
-						<input type="number" min="0" max="1" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
+						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -220,6 +241,14 @@ function polygon_popup() {
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
 					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
+						<i class="fas fa-trash"></i>
+					</button>
 				</div>
 			</div>
 		</div>

@@ -35,7 +35,9 @@ window.onload = function(ev) {
 
 	$("div.leaflet-control-attribution a").attr("target", "_blank");
 
-	$("#sceneCol button#addScene").click( ev => { _EVENTS.scene.setup(); } );
+	$("#exportMap").click(ev => { _EVENTS.project.export(); });
+
+	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); });
 
 	_EVENTS.mapOptions.setup();
 

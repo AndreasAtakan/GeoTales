@@ -23,8 +23,10 @@
 let _FONT,
 	_BASEMAP,
 	_CLUSTERING,
-	_MAP,
 	_SCENES = [],
+	_PINNED_MARKER;
+
+let _MAP,
 	_EVENTS = {};
 
 const _BASEMAPS = [

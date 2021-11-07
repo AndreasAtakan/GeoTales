@@ -30,6 +30,7 @@ _EVENTS.scene = {
 
 		this.add();
 		$("#sceneCol button#addScene").click( ev => { this.add(); } );
+		//$("#markerPopup input#pin").prop("disabled", false);
 
 		$("ul#sceneContainer").sortable({
 			cursor: "move",
@@ -52,7 +53,7 @@ _EVENTS.scene = {
 
 		$(document).keydown(ev => {
 			let keycode = ev.keyCode,
-				id = $("ul#sceneContainer li.active").data("sceneid");
+				id = $("#sceneContainer [class*=\"active\"]").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
@@ -71,6 +72,7 @@ _EVENTS.scene = {
 		reset_scene();
 
 		$("#sceneCol button#addScene").click( ev => { this.setup(); } );
+		//$("#markerPopup input#pin").prop("disabled", true);
 	},
 
 	add: function() {
@@ -137,7 +139,8 @@ _EVENTS.scene = {
 	set_click: function() {
 		$("#sceneContainer li:not([class*=\"active\"])").off("click");
 		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
-			let id = $(ev.target.offsetParent).data("sceneid");
+			let id = $(ev.target).data("sceneid");
+			if(!id) id = $(ev.target.offsetParent).data("sceneid");
 			if(!id) return;
 
 			this.set_scene(id);
@@ -161,18 +164,18 @@ _EVENTS.scene = {
 		_MAP.on("movestart zoomstart", this.unset_scene_style);
 	},
 	goto_scene: function() {
-		let id = $("ul#sceneContainer li.inactive").data("sceneid");
+		let id = $("#sceneContainer li.inactive").data("sceneid");
 		if(!id) return;
 
 		this.set_scene(id);
 	},
 
 	set_scene_input: function(id) {
-		$("ul#sceneContainer span#recapture").off("click");
-		$("ul#sceneContainer span#delete").off("click");
-		$("ul#sceneContainer input#titleInput").prop("disabled", true);
-		$("ul#sceneContainer input#timeInput").prop("disabled", true);
-		$("ul#sceneContainer input#mediaInput").prop("disabled", true);
+		$("#sceneContainer span#recapture").off("click");
+		$("#sceneContainer span#delete").off("click");
+		$("#sceneContainer input#titleInput").prop("disabled", true);
+		$("#sceneContainer input#timeInput").prop("disabled", true);
+		$("#sceneContainer input#mediaInput").prop("disabled", true);
 
 		$(`li[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
@@ -184,27 +187,26 @@ _EVENTS.scene = {
 	set_scene_style: function(id) {
 		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
 
-		$("ul#sceneContainer li").removeClass("inactive");
-		$("ul#sceneContainer li").removeClass("active");
+		$("#sceneContainer li").removeClass("inactive");
+		$("#sceneContainer li").removeClass("active");
 		$(`li[data-sceneid="${id}"]`).addClass("active");
 
 		_MAP.sceneButton.disable();
 
 		if(_FONT) {
-			console.log(_FONT);
 			$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
 		}
 	},
 	unset_scene_style: function() {
-		let id = $("ul#sceneContainer li.active").data("sceneid");
+		let id = $("#sceneContainer li.active").data("sceneid");
 
 		if(!id) return;
 		if( $(`li[data-sceneid="${id}"]`).hasClass("inactive") ) return;
 
-		$("ul#sceneContainer li").removeClass("inactive");
-		$("ul#sceneContainer li").removeClass("active");
+		$("#sceneContainer li").removeClass("inactive");
+		$("#sceneContainer li").removeClass("active");
 		$(`li[data-sceneid="${id}"]`).addClass("inactive");
 
 		_MAP.sceneButton.enable();
@@ -244,8 +246,7 @@ _EVENTS.scene = {
 _EVENTS.object = {
 
 	setup: function(id, type) {
-
-		let o = _MAP.drawingLayer.getLayer(id);
+		let o = _MAP.drawingLayer.getObject(id);
 
 		switch(type) {
 			case "marker":
@@ -263,7 +264,6 @@ _EVENTS.object = {
 
 			default: break;
 		}
-
 	},
 
 	setup_marker: function(object) {
@@ -282,13 +282,11 @@ _EVENTS.object = {
 						className: "markerIcon"
 					})
 				);
-				//$(object._icon).attr("data-objectid", object.options.id);
-				$(object._icon).css("border", "1px solid black");
+
+				$(object._icon).css("border", "1px solid #563d7c");
 			};
 			fr.readAsDataURL(file);
 		});
-
-		/*** $(`.markerIcon[data-objectid="${object.options.id}"]`); ***/
 
 		$("#markerPopup input#color").change(function(ev) {
 			let val = $(this).val();
@@ -325,6 +323,41 @@ _EVENTS.object = {
 			$(object._icon).css("filter", `grayscale(${val*100}%)`);
 			object.options.overlayGrayscale = val;
 		});
+
+		$("#markerPopup input#pin").change(function(ev) {
+			let checked = this.checked;
+
+			//let sceneid = $("#sceneContainer [class*=\"active\"]").data("sceneid");
+			//let scene = get_scene(sceneid);
+
+			if(checked) {
+
+				let lastPinned = _PINNED_MARKER;
+
+				_PINNED_MARKER = object.options.id;
+				object.options.lastPos = object.getLatLng();
+				object.setLatLng(_MAP.getCenter());
+
+				if(lastPinned) {
+					let o = _MAP.drawingLayer.getObject(lastPinned);
+					o.setLatLng(o.options.lastPos);
+					delete o.options.lastPos;
+				}
+
+			}else{
+
+				_PINNED_MARKER = "";
+				object.setLatLng(object.options.lastPos);
+				delete object.options.lastPos;
+
+			}
+		});
+		$("#markerPopup input#pin").prop("checked", _PINNED_MARKER == object.options.id);
+		//$("#markerPopup input#pin").prop("disabled", $("#sceneContainer [class*=\"active\"]").length <= 0);
+
+		$("#markerPopup #delete").click(function(ev) {
+			_MAP.drawingLayer.removeLayer(object.options.id);
+		});
 	},
 
 	setup_polyline: function(object) {
@@ -339,6 +372,10 @@ _EVENTS.object = {
 
 		$("#polylinePopup input#transparency").change(function(ev) {
 			object.setStyle({ opacity: 1 - $(this).val() });
+		});
+
+		$("#polylinePopup #delete").click(ev => {
+			_MAP.drawingLayer.removeLayer(object.options.id);
 		});
 	},
 
@@ -363,6 +400,10 @@ _EVENTS.object = {
 
 		$("#polygonPopup input#fillTransparency").change(function(ev) {
 			object.setStyle({ fillOpacity: 1 - $(this).val() });
+		});
+
+		$("#polygonPopup #delete").click(ev => {
+			_MAP.drawingLayer.removeLayer(object.options.id);
 		});
 	},
 
@@ -390,6 +431,7 @@ _EVENTS.mapOptions = {
 
 		$("#mapModal select#clusterInput").change(function(ev) {
 			let val = $(this).val();
+			_CLUSTERING = val;
 		});
 
 		$("#mapModal select#fontInput").change(function(ev) {
@@ -445,9 +487,39 @@ _EVENTS.mapOptions = {
 			if(!basemap) return;
 
 			_MAP.presetBasemap(basemap);
-			_BASEMAP = null;
+			_BASEMAP = basemap;
 		});
 
+	}
+
+};
+
+
+
+_EVENTS.project = {
+
+	export: function() {
+		let el = document.createElement("a");
+
+		let filename = "project.tellus";
+
+		let project = {
+			font: _FONT || "default",
+			basemap: _BASEMAP || "default",
+			clustering: _CLUSTERING || "default",
+			pinned_marker: _PINNED_MARKER || "",
+			scenes: _SCENES,
+			objects: _MAP.drawingLayer.export()
+		};
+		project = JSON.stringify(project);
+
+		el.setAttribute("href", "data:application/json;charset=utf-8," + encodeURIComponent(project));
+		el.setAttribute("download", filename);
+		el.style.display = "none";
+
+		document.body.appendChild(el);
+		el.click();
+		document.body.removeChild(el);
 	}
 
 };

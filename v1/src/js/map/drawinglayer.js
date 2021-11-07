@@ -39,6 +39,12 @@ L.DrawingLayer = L.FeatureGroup.extend({
 		if(id) object.options.id = id;
 		if(type) object.options.type = type;
 
+		if(type == "marker") {
+			object.options.borderColor = "#563d7c";
+			object.options.borderThickness = "0";
+			$(object._icon).css("border", "0px solid #563d7c");
+		}
+
 		this._objects.push(object);
 
 		this.bind(object);
@@ -78,10 +84,91 @@ L.DrawingLayer = L.FeatureGroup.extend({
 		});
 	},
 
-	getLayer: function(id) {
-		for(let o of this._objects) {
-			if(o.options.id == id) { return o; }
+	getObject: function(id) {
+		for(let i = 0; i < this._objects.length; i++) {
+			let o = this._objects[i];
+			if(o.options.id == id) {
+				o.options.index = i;
+				return o;
+			}
 		}
+	},
+
+	removeLayer: function(id) {
+		let object = this.getObject(id);
+
+		this._objects.splice(object.options.index, 1);
+		object.closePopup();
+		object.unbindPopup();
+
+		L.FeatureGroup.prototype.removeLayer.call(this, object);
+	},
+
+	removeAvatarBorders: function() {
+		for(let o of this._objects) {
+			if(o.options.type == "marker") {
+				$(o._icon).css("border", "");
+			}
+		}
+	},
+	readdAvatarBorders: function() {
+		for(let o of this._objects) {
+			if(o.options.type == "marker") {
+				$(o._icon).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
+			}
+		}
+	},
+
+	export: function() {
+		let res = [];
+
+		for(let o of this._objects) {
+			let oo = null;
+
+			switch(o.options.type) {
+				case "marker":
+					oo = {
+						id: o.options.id,
+						type: o.options.type,
+						borderColor: o.options.borderColor,
+						borderThickness: o.options.borderThickness
+					};
+					oo.icon = o.getIcon().options.iconUrl;
+					if(o.options.overlayBlur) oo.blur = o.options.overlayBlur;
+					if(o.options.overlayTransparency) oo.transparency = o.options.overlayTransparency;
+					if(o.options.overlayGrayscale) oo.grayscale = o.options.overlayGrayscale;
+					break;
+
+				case "polyline":
+					oo = {
+						id: o.options.id,
+						type: o.options.type,
+						color: o.options.color,
+						thickness: o.options.weight,
+						transparency: 1 - o.options.opacity
+					};
+					break;
+
+				case "polygon":
+				case "rectangle":
+					oo = {
+						id: o.options.id,
+						type: o.options.type,
+						lineColor: o.options.color,
+						lineThickness: o.options.weight,
+						lineTransparency: 1 - o.options.opacity,
+						fillColor: o.options.fillColor,
+						fillTransparency: 1 - o.options.fillOpacity
+					};
+					break;
+
+				default: break;
+			}
+
+			if(oo) res.push(oo);
+		}
+
+		return res;
 	},
 
 	initialize: function(options) {

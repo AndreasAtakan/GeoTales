@@ -67,15 +67,15 @@ input, textarea, button, ul { border-radius: 2px !important; }
 }
 #sceneContainer li:hover:not([class*="active"]),
 #sceneContainer li:focus:not([class*="active"]) {
-	background-image: linear-gradient(to right, #9dafab, white, white, white, white, white, white, white, white);
+	background-image: linear-gradient(to right, #c9bbdd, white, white, white, white, white, white, white, white);
 	cursor: pointer;
 }
 #sceneContainer .active {
-	background-image: linear-gradient(to right, #b3b3b3, white, white, white, white, white, white, white, white);
+	background-image: linear-gradient(to right, #a6a6a6, white, white, white, white, white, white, white, white);
 	color: white;
 }
 #sceneContainer .inactive {
-	background-image: linear-gradient(to right, #d9d9d9, white, white, white, white, white, white, white, white);
+	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
 	color: black;
 }
 #sceneContainer [class*="active"] #textInput { color: initial; }
