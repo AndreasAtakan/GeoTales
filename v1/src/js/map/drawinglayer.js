@@ -43,6 +43,8 @@ L.DrawingLayer = L.FeatureGroup.extend({
 			object.options.borderColor = "#563d7c";
 			object.options.borderThickness = "0";
 			$(object._icon).css("border", "0px solid #563d7c");
+
+			object.dragging.enable();
 		}
 
 		this._objects.push(object);

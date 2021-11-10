@@ -76,19 +76,33 @@ _EVENTS.scene = {
 	},
 
 	add: function() {
-		let id = uuid();
+		let id = uuid(),
+			prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
 
-		_SCENES.push({
-			id: id,
-			center: _MAP.getCenter(),
-			zoom: _MAP.getZoom()
-		});
 		add_scene(id);
 
 		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
 		textareas[id] = this.create_pell(id);
+
+		let scene = {
+			id: id,
+			center: _MAP.getCenter(),
+			zoom: _MAP.getZoom()
+		};
+
+		if(prevId) {
+			let prevScene = get_scene(prevId);
+
+			scene.date = prevScene.date;
+			scene.time = prevScene.time;
+			$(`li[data-sceneid="${id}"] input#dateInput`).val( scene.date || "" );
+			$(`li[data-sceneid="${id}"] input#timeInput`).val( scene.time || "" );
+		}
+
+		_SCENES.push(scene);
 
 		this.flash_map();
 		this.set_scene(id);
@@ -151,7 +165,7 @@ _EVENTS.scene = {
 	},
 
 	set_scene: function(id) {
-		let s = get_scene(id);
+		let s = get_scene(id); //, currentScene = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 
 		this.set_scene_input(id);
 		this.set_scene_style(id);
@@ -160,7 +174,7 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ block: "center" });
 
 		_MAP.off("movestart zoomstart", this.unset_scene_style);
-		_MAP.flyTo(s.center, s.zoom, { duration: 1 });
+		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
 		_MAP.on("movestart zoomstart", this.unset_scene_style);
 	},
 	goto_scene: function() {
@@ -174,12 +188,14 @@ _EVENTS.scene = {
 		$("#sceneContainer span#recapture").off("click");
 		$("#sceneContainer span#delete").off("click");
 		$("#sceneContainer input#titleInput").prop("disabled", true);
+		$("#sceneContainer input#dateInput").prop("disabled", true);
 		$("#sceneContainer input#timeInput").prop("disabled", true);
 		$("#sceneContainer input#mediaInput").prop("disabled", true);
 
 		$(`li[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
 		$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
+		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#mediaInput`).prop("disabled", false);
 	},
@@ -195,6 +211,7 @@ _EVENTS.scene = {
 
 		if(_FONT) {
 			$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
+			$(`li[data-sceneid="${id}"] input#dateInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
 		}
@@ -216,7 +233,7 @@ _EVENTS.scene = {
 
 	flash_map: function() {
 		$("div#map").addClass("snapshot");
-		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 180);
+		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 240);
 	},
 
 	create_pell: function(id) {
@@ -374,7 +391,9 @@ _EVENTS.object = {
 			object.setStyle({ opacity: 1 - $(this).val() });
 		});
 
-		$("#polylinePopup #delete").click(ev => {
+		$("#polylinePopup #edit").click(ev => { this.set_edit(object); });
+
+		$("#polylinePopup #delete").click(function(ev) {
 			_MAP.drawingLayer.removeLayer(object.options.id);
 		});
 	},
@@ -402,7 +421,9 @@ _EVENTS.object = {
 			object.setStyle({ fillOpacity: 1 - $(this).val() });
 		});
 
-		$("#polygonPopup #delete").click(ev => {
+		$("#polygonPopup #edit").click(ev => { this.set_edit(object); });
+
+		$("#polygonPopup #delete").click(function(ev) {
 			_MAP.drawingLayer.removeLayer(object.options.id);
 		});
 	},
@@ -419,6 +440,19 @@ _EVENTS.object = {
 		$(icon).css("filter", `blur(${overlayBlur}px)`);
 		$(icon).css("filter", `opacity(${(1 - overlayTransparency)*100}%)`);
 		$(icon).css("filter", `grayscale(${overlayGrayscale*100}%)`);
+	},
+
+	set_edit: function(object) {
+		return; // TODO: finish method
+
+		_MAP.editLayer.addLayer(object);
+		_MAP.editHandler.enable();
+
+		object.setPopupContent( edit_popup() );
+		let popup = object.getPopup();
+
+		//_MAP.editHandler.disable();
+		//_MAP.editLayer.removeLayer(object);
 	}
 
 };
@@ -452,6 +486,7 @@ _EVENTS.mapOptions = {
 			}
 
 			$("#sceneContainer input#titleInput").css("font-family", font);
+			$("#sceneContainer input#dateInput").css("font-family", font);
 			$("#sceneContainer input#timeInput").css("font-family", font);
 			$("#sceneContainer div#textInput").css("font-family", font);
 

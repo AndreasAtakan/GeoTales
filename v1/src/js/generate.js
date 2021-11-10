@@ -85,7 +85,7 @@ function add_scene(id) {
 
 	$("ul#sceneContainer").append(`
 		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
-			<form class="container-fluid px-0">
+			<form class="container-fluid needs-validation px-0">
 				<div class="row g-0">
 					<div class="col-1">
 						<div class="row gx-0 mb-3">
@@ -113,12 +113,13 @@ function add_scene(id) {
 					<div class="col-11">
 						<div class="row mb-1">
 							<div class="col">
-								<input type="text" class="form-control" id="titleInput" placeholder="Title" disabled />
+								<input type="text" class="form-control" id="titleInput" placeholder="Title" required disabled />
 							</div>
 						</div>
 						<div class="row mb-3">
 							<div class="col">
-								<input type="datetime-local" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto;" disabled />
+								<input type="date" class="form-control form-control-sm" id="dateInput" style="width: auto; display: inline;" required disabled />
+								<input type="time" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto; display: inline;" required disabled />
 							</div>
 						</div>
 						<div class="row mb-3">
@@ -175,13 +176,12 @@ function marker_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-11">
-					<div class="form-check mx-1" style="font-size: 14px;">
+				<div class="col">
+					<div class="form-check mx-1" style="font-size: 14px; float: left;">
 						<input class="form-check-input" type="checkbox" id="pin">
 						<label class="form-check-label" for="pin">Pin avatar to map center</label>
 					</div>
-				</div>
-				<div class="col-1">
+
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
 						<i class="fas fa-trash"></i>
 					</button>
@@ -209,6 +209,10 @@ function polyline_popup() {
 
 			<div class="row">
 				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="edit">
+						<i class="fas fa-pen"></i>
+					</button>
+
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
 						<i class="fas fa-trash"></i>
 					</button>
@@ -246,8 +250,28 @@ function polygon_popup() {
 
 			<div class="row">
 				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="edit">
+						<i class="fas fa-pen"></i>
+					</button>
+
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
 						<i class="fas fa-trash"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	`;
+
+}
+
+function edit_popup() {
+
+	return `
+		<div class="container-fluid" id="editPopup">
+			<div class="row">
+				<div class="col d-grid">
+					<button type="button" class="btn btn-sm btn-outline-secondary my-4" id="save">
+						<i class="fas fa-check"></i>
 					</button>
 				</div>
 			</div>
@@ -269,7 +293,7 @@ function init_basemaps() {
 					<div class="card-body">
 						<h6 class="card-title mb-0">${b.name}</h6>
 					</div>
-					<img class="card-img-bottom" id="basemaps" src="${b.url}" alt="${b.name}" data-basemap="${b.name}" />
+					<img class="card-img-bottom" id="basemaps" src="${b.preview}" alt="${b.name}" data-basemap="${b.name}" />
 				</div>
 			</div>
 		`;

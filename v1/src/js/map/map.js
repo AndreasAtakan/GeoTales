@@ -64,7 +64,7 @@ L.Map.addInitHook(function() {
 
 
 
-	// Drawing layer
+	// Drawing and edit layer
 
 	this.drawingLayer = L.drawingLayer({
 		title: "drawing layer",
@@ -90,11 +90,13 @@ L.Map.addInitHook(function() {
 	//this.on(L.Draw.Event.EDITED, ev => { let objects = ev.layers; });
 	//this.on(L.Draw.Event.DELETED, ev => { let objects = ev.layers; });
 
+	this.editLayer = L.featureGroup();
 
 
 
 
-	// Draw control
+
+	// Draw and edit control
 
 	L.EditToolbar.Delete.include({
 		removeAllLayers: false
@@ -102,10 +104,7 @@ L.Map.addInitHook(function() {
 
 	this.drawingControl = new L.Control.Draw({
 		position: "topleft",
-		edit: {
-			featureGroup: this.drawingLayer,
-			remove: false
-		},
+		edit: false,
 		draw: {
 			marker: {
 				icon: L.icon({
@@ -131,7 +130,6 @@ L.Map.addInitHook(function() {
 					fillOpacity: 0.2
 				}
 			},
-			circle: false,
 			rectangle: {
 				shapeOptions: {
 					weight: 3,
@@ -141,14 +139,19 @@ L.Map.addInitHook(function() {
 					fillOpacity: 0.2
 				}
 			},
+			circle: false,
 			circlemarker: false
 		}
 	});
 	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
 	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
-	L.drawLocal.edit.handlers.edit.tooltip.text = "Drag handles or avatars to edit features.";
+	L.drawLocal.edit.handlers.edit.tooltip.text = "Drag handles to edit objects.";
 
 	this.addControl( this.drawingControl );
+
+	this.editControl = new L.EditToolbar({ featureGroup: this.editLayer });
+	this.editHandler = this.editControl.getModeHandlers()[0].handler;
+	this.editHandler._map = this; // NOTE: this is a hack, but necessary to make editing work
 
 
 
@@ -161,7 +164,7 @@ L.Map.addInitHook(function() {
 	this.on("move", ev => {
 		if(_PINNED_MARKER) {
 			let o = this.drawingLayer.getObject(_PINNED_MARKER);
-			o.setLatLng(this.getCenter());
+			o.setLatLng(this.getCenter()); // FIX: a bug is here, must investigate
 		}
 	});
 
@@ -196,19 +199,49 @@ L.Map.include({
 
 		this.basemap = L.imageOverlay(img, bounds, {
 			zIndex: 0,
-			attribution: "© <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
+			attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
 		});
+
+		this.presetZoom(0, 18);
 
 		this.addLayer( this.basemap );
 		this.fitBounds(bounds);
 	},
 
 	presetBasemap: function(name) {
+		let basemap = get_basemap(name);
+
 		this.removeLayer( this.basemap );
-		this.basemap = L.tileLayer.provider(name);
+
+		if(basemap.int) {
+			this.basemap = L.tileLayer.provider(name);
+		}else{
+			this.basemap = L.tileLayer(basemap.url, {
+				attribution: basemap.cc,
+				minZoom: basemap.zoom[0],
+				maxZoom: basemap.zoom[1]
+			});
+		}
+
+		this.presetZoom(basemap.zoom[0], basemap.zoom[1]);
+
 		this.addLayer( this.basemap );
+
+		$("div.leaflet-control-attribution a").attr("target", "_blank");
 	},
 
-	resetBasemap: function() { this.presetBasemap("OpenStreetMap.HOT"); }
+	resetBasemap: function() { this.presetBasemap("OpenStreetMap.HOT"); },
+
+	presetZoom: function(min, max) {
+		let zoom = this.getZoom();
+
+		if(zoom < min || zoom > max) {
+			if(zoom < min) { this.setZoom( min ); }
+			if(zoom > max) { this.setZoom( max ); }
+		}
+
+		this.setMinZoom(min);
+		this.setMaxZoom(max);
+	}
 
 });
