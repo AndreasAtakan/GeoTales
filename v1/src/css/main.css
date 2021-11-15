@@ -22,12 +22,12 @@
 
 
 /* Hide arrows on type="number" input  */
-/*input[type=number] { -moz-appearance: textfield; }
+input[type=number] { -moz-appearance: textfield; }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
-}*/
+}
 
 input, textarea, button, ul { border-radius: 2px !important; }
 
@@ -41,12 +41,6 @@ input, textarea, button, ul { border-radius: 2px !important; }
 
 .leaflet-bottom.leaflet-left { z-index: 1001; }
 
-.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
-	background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
-	background-size: 14px 14px;
-	background-position: 8px 8px !important;
-}
-
 .pell-content { height: 120px; }
 
 .offcanvasBtn { display: none; }
@@ -58,7 +52,7 @@ input, textarea, button, ul { border-radius: 2px !important; }
 #sceneCol {
 	height: 100%;
 	overflow-y: auto;
-	background-color: #fafafa;
+	background-color: #f2f2f2;
 }
 
 #sceneContainer #textInput {
@@ -71,27 +65,34 @@ input, textarea, button, ul { border-radius: 2px !important; }
 #sceneContainer li {
 	color: #999999;
 }
+#sceneContainer li:hover:not([class*="prepare"]):not([class*="active"]),
+#sceneContainer li:focus:not([class*="prepare"]):not([class*="active"]) {
+	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
+}
 #sceneContainer li:hover:not([class*="active"]),
 #sceneContainer li:focus:not([class*="active"]) {
-	background-image: linear-gradient(to right, #c9bbdd, white, white, white, white, white, white, white, white);
 	cursor: pointer;
 }
+
 #sceneContainer .active {
+	background-image: linear-gradient(to right, #7a6699, white, white, white, white, white, white, white, white);
+	color: white;
+}
+#sceneContainer .prepare {
 	background-image: linear-gradient(to right, #a6a6a6, white, white, white, white, white, white, white, white);
 	color: white;
 }
-#sceneContainer .inactive {
-	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
-	color: black;
-}
-#sceneContainer [class*="active"] #textInput { color: initial; }
 
+#sceneContainer [class*="active"] #textInput { color: initial; }
 #sceneContainer [class*="active"] #reorder:hover {
 	cursor: move;
 }
-#sceneContainer [class*="active"] #recapture:hover,
+#sceneContainer [class*="active"] #capture:hover,
 #sceneContainer [class*="active"] #delete:hover {
 	cursor: pointer;
+}
+#sceneContainer .prepare #capture {
+	color: darkred;
 }
 
 #map {
@@ -118,8 +119,8 @@ input, textarea, button, ul { border-radius: 2px !important; }
 	border-radius: 50%;
 }
 
-#mapModal #basemaps:hover,
-#mapModal #basemaps:focus {
+#basemapModal #basemaps:hover,
+#basemapModal #basemaps:focus {
 	cursor: pointer;
 }
 

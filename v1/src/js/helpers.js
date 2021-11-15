@@ -42,16 +42,33 @@ function get_scene(id) {
 			return s;
 		}
 	}
+
+	return null;
+}
+
+function get_last_scene_basemap(id) {
+	let s = get_scene(id);
+
+	for(let i = s.index-1; i >= 0; i--) {
+		let s = _SCENES[i];
+
+		if(s.basemap) {
+			s.index = i;
+			return s;
+		}
+	}
+
+	return null;
 }
 
 
 
 function get_basemap(name) {
-	for(let i = 0; i < _BASEMAPS.length; i++) {
-		let b = _BASEMAPS[i];
-
+	for(let b of _BASEMAPS) {
 		if(b.name == name) {
 			return b;
 		}
 	}
+
+	return null;
 }

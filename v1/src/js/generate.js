@@ -72,7 +72,7 @@ function reset_scene() {
 					</button>
 
 					<p class="text-muted mt-3">
-						Click to capture current scene
+						Click to prepare a scene
 					</p>
 				</center>
 			</div>
@@ -84,7 +84,7 @@ function reset_scene() {
 function add_scene(id) {
 
 	$("ul#sceneContainer").append(`
-		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
+		<li class="list-group-item prepare" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
 			<form class="container-fluid needs-validation px-0">
 				<div class="row g-0">
 					<div class="col-1">
@@ -97,8 +97,8 @@ function add_scene(id) {
 						</div>
 						<div class="row gx-0">
 							<div class="col">
-								<span id="recapture" title="Recapture scene">
-									<i class="fas fa-compress"></i>
+								<span id="capture" title="Capture scene">
+									<i class="fas fa-camera"></i>
 								</span>
 							</div>
 						</div>
@@ -169,19 +169,15 @@ function marker_popup() {
 					<h6>Overlay</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
-						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="grayscale" placeholder="Grayscale" />
+						<input type="number" min="0" max="90" step="5" class="form-control" id="transparency" placeholder="Transparency" />
+						<span class="input-group-text">%</span>
 					</div>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col">
-					<div class="form-check mx-1" style="font-size: 14px; float: left;">
-						<input class="form-check-input" type="checkbox" id="pin">
-						<label class="form-check-label" for="pin">Pin avatar to map center</label>
-					</div>
-
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
 						<i class="fas fa-trash"></i>
 					</button>
@@ -202,17 +198,14 @@ function polyline_popup() {
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="number" min="0" max="90" step="5" class="form-control" id="transparency" placeholder="Transparency" />
+						<span class="input-group-text">%</span>
 					</div>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="edit">
-						<i class="fas fa-pen"></i>
-					</button>
-
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
 						<i class="fas fa-trash"></i>
 					</button>
@@ -233,7 +226,8 @@ function polygon_popup() {
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
-						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
+						<input type="number" min="0" max="90" step="5" class="form-control" id="lineTransparency" placeholder="Transparency" />
+						<span class="input-group-text">%</span>
 					</div>
 				</div>
 			</div>
@@ -243,35 +237,16 @@ function polygon_popup() {
 					<h6>Fill</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
-						<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
+						<input type="number" min="0" max="100" step="5" class="form-control" id="fillTransparency" placeholder="Transparency" />
+						<span class="input-group-text">%</span>
 					</div>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="edit">
-						<i class="fas fa-pen"></i>
-					</button>
-
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
 						<i class="fas fa-trash"></i>
-					</button>
-				</div>
-			</div>
-		</div>
-	`;
-
-}
-
-function edit_popup() {
-
-	return `
-		<div class="container-fluid" id="editPopup">
-			<div class="row">
-				<div class="col d-grid">
-					<button type="button" class="btn btn-sm btn-outline-secondary my-4" id="save">
-						<i class="fas fa-check"></i>
 					</button>
 				</div>
 			</div>
@@ -299,6 +274,6 @@ function init_basemaps() {
 		`;
 	}
 
-	$("#mapModal #basemapChoose").html(html);
+	$("#basemapModal #basemapChoose").html(html);
 
 }

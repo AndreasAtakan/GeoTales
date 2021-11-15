@@ -21,7 +21,7 @@
 "use strict";
 
 
-let textareas = {}, sceneid;
+let textareas = {};
 
 _EVENTS.scene = {
 
@@ -30,7 +30,6 @@ _EVENTS.scene = {
 
 		this.add();
 		$("#sceneCol button#addScene").click( ev => { this.add(); } );
-		//$("#markerPopup input#pin").prop("disabled", false);
 
 		$("ul#sceneContainer").sortable({
 			cursor: "move",
@@ -39,16 +38,16 @@ _EVENTS.scene = {
 			//scroll: false,
 			start: (ev, ui) => {
 				ev.stopPropagation();
-
 				this.unset_click();
 			},
 			update: (ev, ui) => {
 				ev.stopPropagation();
-
-				this.set_click();
 				this.reorder( $("ul#sceneContainer").sortable("toArray") );
+			},
+			stop: (ev, ui) => {
+				ev.stopPropagation();
+				this.set_click();
 			}
-			//stop: (ev, ui) => {}
 		});
 
 		$(document).keydown(ev => {
@@ -72,14 +71,25 @@ _EVENTS.scene = {
 		reset_scene();
 
 		$("#sceneCol button#addScene").click( ev => { this.setup(); } );
-		//$("#markerPopup input#pin").prop("disabled", true);
 	},
 
 	add: function() {
 		let id = uuid(),
-			prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
+			prevId = _SCENES.length > 1 ? _SCENES[_SCENES.length - 1].id : null;
 
 		add_scene(id);
+
+		let s = { id: id, bounds: _MAP.getBounds(), prepare: true };
+		_SCENES.push(s);
+
+		if(prevId) {
+			let prevScene = get_scene(prevId);
+			s.date = prevScene.date;
+			s.time = prevScene.time;
+
+			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
+			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
+		}
 
 		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
@@ -87,28 +97,7 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
 		textareas[id] = this.create_pell(id);
 
-		let scene = {
-			id: id,
-			center: _MAP.getCenter(),
-			zoom: _MAP.getZoom()
-		};
-
-		if(prevId) {
-			let prevScene = get_scene(prevId);
-
-			scene.date = prevScene.date;
-			scene.time = prevScene.time;
-			$(`li[data-sceneid="${id}"] input#dateInput`).val( scene.date || "" );
-			$(`li[data-sceneid="${id}"] input#timeInput`).val( scene.time || "" );
-		}
-
-		_SCENES.push(scene);
-
-		this.flash_map();
-		this.set_scene(id);
-
-		//let el = document.querySelector("div#sceneCol");
-		//el.scrollTo(0, el.scrollHeight);
+		this.set_scene(id, true);
 	},
 
 	input: function(id, type, value) {
@@ -117,18 +106,34 @@ _EVENTS.scene = {
 		_SCENES[s.index][type] = value;
 	},
 
-	recapture: function(id) {
+	capture: function(id) {
 		let s = get_scene(id);
 
-		_SCENES[s.index].center = _MAP.getCenter();
-		_SCENES[s.index].zoom = _MAP.getZoom();
+		_SCENES[s.index].bounds = _MAP.getBounds();
+
+		let b = _MAP.getBasemap(),
+			lastB = get_last_scene_basemap(id);
+
+		if(lastB) {
+			if((b.name && lastB.name) || (b.url && lastB.url)) {
+				if((b.name == lastB.name) || (b.url == lastB.url)) { b = null; }
+			}
+		}
+
+		_SCENES[s.index].basemap = b;
+
+		_MAP.captureScene(id);
+
+		delete _SCENES[s.index].prepare;
 
 		this.flash_map();
 
+		$(`li[data-sceneid="${id}"] span#capture`).prop("title", "Recapture scene");
+		$(`li[data-sceneid="${id}"]`).removeClass("prepare");
 		this.set_scene_style(id);
 	},
 
-	delete: function(id) {
+	delete: function(id) { // NOTE: needs testing!
 		let s = get_scene(id);
 		let i = s.index == _SCENES.length - 1 ? s.index - 1 : s.index;
 
@@ -139,60 +144,42 @@ _EVENTS.scene = {
 
 		if(_SCENES.length <= 0) { this.reset(); }
 		else {
-			this.set_click();
 			this.set_scene( _SCENES[i].id );
 		}
+
+		_MAP.deleteScene(id);
 	},
 
 	reorder: function(order) {
 		_SCENES.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
+
+		this.set_scene( $("#sceneContainer li.active").data("sceneid") );
 	},
 
 
 
-	set_click: function() {
-		$("#sceneContainer li:not([class*=\"active\"])").off("click");
-		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
-			let id = $(ev.target).data("sceneid");
-			if(!id) id = $(ev.target.offsetParent).data("sceneid");
-			if(!id) return;
-
-			this.set_scene(id);
-		});
-	},
-	unset_click: function() {
-		$("#sceneContainer li:not([class*=\"active\"])").off("click");
-	},
-
-	set_scene: function(id) {
-		let s = get_scene(id); //, currentScene = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+	set_scene: function(id, _new) {
+		let s = get_scene(id);
 
 		this.set_scene_input(id);
 		this.set_scene_style(id);
 		this.set_click();
 
-		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ block: "center" });
+		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
-		_MAP.off("movestart zoomstart", this.unset_scene_style);
-		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
-		_MAP.on("movestart zoomstart", this.unset_scene_style);
-	},
-	goto_scene: function() {
-		let id = $("#sceneContainer li.inactive").data("sceneid");
-		if(!id) return;
-
-		this.set_scene(id);
+		_MAP.flyToBounds(s.bounds, { maxZoom: _MAP.getMaxZoom() });
+		_MAP.setObjects(id, _new);
 	},
 
 	set_scene_input: function(id) {
-		$("#sceneContainer span#recapture").off("click");
+		$("#sceneContainer span#capture").off("click");
 		$("#sceneContainer span#delete").off("click");
 		$("#sceneContainer input#titleInput").prop("disabled", true);
 		$("#sceneContainer input#dateInput").prop("disabled", true);
 		$("#sceneContainer input#timeInput").prop("disabled", true);
 		$("#sceneContainer input#mediaInput").prop("disabled", true);
 
-		$(`li[data-sceneid="${id}"] span#recapture`).click( ev => { this.recapture(id); } );
+		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
 		$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
@@ -203,11 +190,8 @@ _EVENTS.scene = {
 	set_scene_style: function(id) {
 		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
 
-		$("#sceneContainer li").removeClass("inactive");
 		$("#sceneContainer li").removeClass("active");
 		$(`li[data-sceneid="${id}"]`).addClass("active");
-
-		_MAP.sceneButton.disable();
 
 		if(_FONT) {
 			$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
@@ -216,17 +200,19 @@ _EVENTS.scene = {
 			$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
 		}
 	},
-	unset_scene_style: function() {
-		let id = $("#sceneContainer li.active").data("sceneid");
 
-		if(!id) return;
-		if( $(`li[data-sceneid="${id}"]`).hasClass("inactive") ) return;
+	set_click: function() {
+		$("#sceneContainer li").off("click");
+		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
+			let id = $(ev.target).data("sceneid");
+			if(!id) id = $(ev.target.offsetParent).data("sceneid");
+			if(!id) return;
 
-		$("#sceneContainer li").removeClass("inactive");
-		$("#sceneContainer li").removeClass("active");
-		$(`li[data-sceneid="${id}"]`).addClass("inactive");
-
-		_MAP.sceneButton.enable();
+			this.set_scene(id);
+		});
+	},
+	unset_click: function() {
+		$("#sceneContainer li").off("click");
 	},
 
 
@@ -262,24 +248,24 @@ _EVENTS.scene = {
 
 _EVENTS.object = {
 
-	setup: function(id, type) {
-		let o = _MAP.drawingLayer.getObject(id);
-
-		switch(type) {
+	setup: function(object) {
+		switch(object.options.type) {
 			case "marker":
-				this.setup_marker(o);
+				this.setup_marker(object);
 				break;
 
 			case "polyline":
-				this.setup_polyline(o);
+				this.setup_polyline(object);
 				break;
 
 			case "polygon":
 			case "rectangle":
-				this.setup_polygon(o);
+				this.setup_polygon(object);
 				break;
 
-			default: break;
+			default:
+				console.error("object type invalid");
+				break;
 		}
 	},
 
@@ -327,13 +313,6 @@ _EVENTS.object = {
 			object.options.overlayBlur = val;
 		});
 
-		$("#markerPopup input#transparency").change(function(ev) {
-			let val = $(this).val();
-
-			$(object._icon).css("filter", `opacity(${(1 - val)*100}%)`);
-			object.options.overlayTransparency = val;
-		});
-
 		$("#markerPopup input#grayscale").change(function(ev) {
 			let val = $(this).val();
 
@@ -341,39 +320,15 @@ _EVENTS.object = {
 			object.options.overlayGrayscale = val;
 		});
 
-		$("#markerPopup input#pin").change(function(ev) {
-			let checked = this.checked;
+		$("#markerPopup input#transparency").change(function(ev) {
+			let val = $(this).val() / 100;
 
-			//let sceneid = $("#sceneContainer [class*=\"active\"]").data("sceneid");
-			//let scene = get_scene(sceneid);
-
-			if(checked) {
-
-				let lastPinned = _PINNED_MARKER;
-
-				_PINNED_MARKER = object.options.id;
-				object.options.lastPos = object.getLatLng();
-				object.setLatLng(_MAP.getCenter());
-
-				if(lastPinned) {
-					let o = _MAP.drawingLayer.getObject(lastPinned);
-					o.setLatLng(o.options.lastPos);
-					delete o.options.lastPos;
-				}
-
-			}else{
-
-				_PINNED_MARKER = "";
-				object.setLatLng(object.options.lastPos);
-				delete object.options.lastPos;
-
-			}
+			$(object._icon).css("filter", `opacity(${(1 - val)*100}%)`);
+			object.options.overlayTransparency = val;
 		});
-		$("#markerPopup input#pin").prop("checked", _PINNED_MARKER == object.options.id);
-		//$("#markerPopup input#pin").prop("disabled", $("#sceneContainer [class*=\"active\"]").length <= 0);
 
 		$("#markerPopup #delete").click(function(ev) {
-			_MAP.drawingLayer.removeLayer(object.options.id);
+			_MAP.deleteObject(object.options.id, object.options.type);
 		});
 	},
 
@@ -388,13 +343,11 @@ _EVENTS.object = {
 		});
 
 		$("#polylinePopup input#transparency").change(function(ev) {
-			object.setStyle({ opacity: 1 - $(this).val() });
+			object.setStyle({ opacity: 1 - $(this).val() / 100 });
 		});
 
-		$("#polylinePopup #edit").click(ev => { this.set_edit(object); });
-
 		$("#polylinePopup #delete").click(function(ev) {
-			_MAP.drawingLayer.removeLayer(object.options.id);
+			_MAP.deleteObject(object.options.id, object.options.type);
 		});
 	},
 
@@ -409,7 +362,7 @@ _EVENTS.object = {
 		});
 
 		$("#polygonPopup input#lineTransparency").change(function(ev) {
-			object.setStyle({ opacity: 1 - $(this).val() });
+			object.setStyle({ opacity: 1 - $(this).val() / 100 });
 		});
 
 		$("#polygonPopup input#fillColor").change(function(ev) {
@@ -418,41 +371,12 @@ _EVENTS.object = {
 		$("#polygonPopup input#fillColor").val(object.options.fillColor || "#563d7c");
 
 		$("#polygonPopup input#fillTransparency").change(function(ev) {
-			object.setStyle({ fillOpacity: 1 - $(this).val() });
+			object.setStyle({ fillOpacity: 1 - $(this).val() / 100 });
 		});
-
-		$("#polygonPopup #edit").click(ev => { this.set_edit(object); });
 
 		$("#polygonPopup #delete").click(function(ev) {
-			_MAP.drawingLayer.removeLayer(object.options.id);
+			_MAP.deleteObject(object.options.id, object.options.type);
 		});
-	},
-
-	set_marker_style: function(object) {
-		let icon = object._icon,
-			borderColor = object.options.borderColor,
-			borderThickness = object.options.borderThickness,
-			overlayBlur = object.options.overlayBlur,
-			overlayTransparency = object.options.overlayTransparency,
-			overlayGrayscale = object.options.overlayGrayscale;
-
-		$(icon).css("border", `${borderThickness}px solid ${borderColor}`);
-		$(icon).css("filter", `blur(${overlayBlur}px)`);
-		$(icon).css("filter", `opacity(${(1 - overlayTransparency)*100}%)`);
-		$(icon).css("filter", `grayscale(${overlayGrayscale*100}%)`);
-	},
-
-	set_edit: function(object) {
-		return; // TODO: finish method
-
-		_MAP.editLayer.addLayer(object);
-		_MAP.editHandler.enable();
-
-		object.setPopupContent( edit_popup() );
-		let popup = object.getPopup();
-
-		//_MAP.editHandler.disable();
-		//_MAP.editLayer.removeLayer(object);
 	}
 
 };
@@ -475,14 +399,11 @@ _EVENTS.mapOptions = {
 				case "arial":			font = "Arial, sans-serif"; break;
 				case "verdana":			font = "Verdana, sans-serif"; break;
 				case "helvetica":		font = "Helvetica, sans-serif"; break;
-				//case "tahoma":		font = "Tahoma, sans-serif"; break;
-				//case "trebuchet ms":	font = "\"Trebuchet MS\", sans-serif"; break;
 				case "times new roman":	font = "\"Times New Roman\", serif"; break;
 				case "georgia":			font = "Georgia, serif"; break;
-				//case "garamond":		font = "Garamond, serif"; break;
 				case "courier new":		font = "\"Courier New\", monospace"; break;
 				case "brush script mt":	font = "\"Brush Script MT\", cursive"; break;
-				default: break;
+				default: console.error("font type invalid"); break;
 			}
 
 			$("#sceneContainer input#titleInput").css("font-family", font);
@@ -493,7 +414,17 @@ _EVENTS.mapOptions = {
 			_FONT = font;
 		});
 
-		$("#mapModal input#basemapFile").change(function(ev) {
+	}
+
+};
+
+
+
+_EVENTS.basemapOptions = {
+
+	setup: function() {
+
+		$("#basemapModal input#basemapFile").change(function(ev) {
 			let file = $(this)[0].files[0];
 
 			let fr = new FileReader();
@@ -517,7 +448,7 @@ _EVENTS.mapOptions = {
 
 		init_basemaps();
 
-		$("#mapModal #basemaps").click(function(ev) {
+		$("#basemapModal #basemaps").click(function(ev) {
 			let basemap = $(this).data("basemap");
 			if(!basemap) return;
 
@@ -542,7 +473,6 @@ _EVENTS.project = {
 			font: _FONT || "default",
 			basemap: _BASEMAP || "default",
 			clustering: _CLUSTERING || "default",
-			pinned_marker: _PINNED_MARKER || "",
 			scenes: _SCENES,
 			objects: _MAP.drawingLayer.export()
 		};

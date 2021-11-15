@@ -28,18 +28,23 @@ window.onload = function(ev) {
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
 		maxZoom: 18,
+		doubleClickZoom: false,
+		zoomAnimationThreshold: 100,
+		wheelPxPerZoomLevel: 1500,
 		keyboard: false,
 		touchZoom: false,
-		tap: false
+		tap: false,
+		worldCopyJump: true
 	});
 
-	$("div.leaflet-control-attribution a").attr("target", "_blank");
-
-	$("#exportMap").click(ev => { _EVENTS.project.export(); });
+	$("div.leaflet-control-attribution a").prop("target", "_blank");
 
 	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); });
 
+	$("#exportMap").click(ev => { _EVENTS.project.export(); });
+
 	_EVENTS.mapOptions.setup();
+	_EVENTS.basemapOptions.setup();
 
 };
 

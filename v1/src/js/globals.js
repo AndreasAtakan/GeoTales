@@ -23,8 +23,7 @@
 let _FONT,
 	_BASEMAP,
 	_CLUSTERING,
-	_SCENES = [],
-	_PINNED_MARKER;
+	_SCENES = [];
 
 let _MAP,
 	_EVENTS = {};
@@ -50,9 +49,14 @@ const _BASEMAPS = [
 	{ int: true,	name: "CartoDB.DarkMatter",				zoom: [0, 20],	preview: "https://b.basemaps.cartocdn.com/dark_all/5/15/10.png" },
 	{ int: true,	name: "CartoDB.Voyager",				zoom: [0, 20],	preview: "https://b.basemaps.cartocdn.com/rastertiles/voyager/5/15/10.png" },
 	{ int: true,	name: "HikeBike.HikeBike",				zoom: [0, 19],	preview: "https://tiles.wmflabs.org/hikebike/5/15/10.png" },
-	{ int: true,	name: "NASAGIBS.ViirsEarthAtNight2012",	zoom: [1, 8],	preview: "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default//GoogleMapsCompatible_Level8/5/10/15.jpg" },
+	{ int: true,	name: "NASAGIBS.ViirsEarthAtNight2012",	zoom: [1,  8],	preview: "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default//GoogleMapsCompatible_Level8/5/10/15.jpg" },
 	{ int: true,	name: "USGS.USTopo",					zoom: [0, 20],	preview: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/5/10/15" },
 	{ int: true,	name: "USGS.USImagery",					zoom: [0, 20],	preview: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/5/10/15" },
 	{ int: true,	name: "USGS.USImageryTopo",				zoom: [0, 20],	preview: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/5/10/15" },
-	{ int: false,	name: "University of Gothenburg – Digital Atlas of the Roman Empire",	url: "https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png",	zoom: [4, 11],	cc: "&copy; <a href=\"https://dh.gu.se/dare/\">University of Gothenburg</a>",	preview: "https://dh.gu.se/tiles/imperium/4/8/5.png" }
+
+	{ int: false,	name: "Google Maps – Streets",											url: "https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",	zoom: [0, 20],	cc: "&copy; <a href=\"https://www.google.com/intl/no_no/help/terms_maps/\">Google Maps</a>",		preview: "https://mt2.google.com/vt/lyrs=m&x=15&y=10&z=5" },
+	{ int: false,	name: "Google Maps – Hybrid",											url: "https://mt2.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}",	zoom: [0, 20],	cc: "&copy; <a href=\"https://www.google.com/intl/no_no/help/terms_maps/\">Google Maps</a>",	preview: "https://mt2.google.com/vt/lyrs=s,h&x=15&y=10&z=5" },
+	{ int: false,	name: "Google Maps – Satellite",										url: "https://mt2.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",	zoom: [0, 20],	cc: "&copy; <a href=\"https://www.google.com/intl/no_no/help/terms_maps/\">Google Maps</a>",		preview: "https://mt2.google.com/vt/lyrs=s&x=15&y=10&z=5" },
+	{ int: false,	name: "Google Maps – Terrain",											url: "https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",	zoom: [0, 20],	cc: "&copy; <a href=\"https://www.google.com/intl/no_no/help/terms_maps/\">Google Maps</a>",		preview: "https://mt2.google.com/vt/lyrs=p&x=15&y=10&z=5" },
+	{ int: false,	name: "University of Gothenburg – Digital Atlas of the Roman Empire",	url: "https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png",		zoom: [4, 11],	cc: "&copy; <a href=\"https://dh.gu.se/dare/\">University of Gothenburg</a>",						preview: "https://dh.gu.se/tiles/imperium/4/8/5.png" }
 ];

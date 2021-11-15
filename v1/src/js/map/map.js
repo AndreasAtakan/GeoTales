@@ -31,21 +31,20 @@ L.Map.addInitHook(function() {
 		L.control.zoom({ position: "topright" })
 	);
 
-	this.sceneButton = L.easyButton({
-		id: "gotoScene",
+	this.basemapButton = L.easyButton({
+		id: "chooseBasemap",
 		position: "topright",
 		leafletClasses: true,
 		states: [
 			{
 				stateName: "main",
-				onClick: function(button, map) { _EVENTS.scene.goto_scene(); },
-				title: "Go to current scene",
-				icon: "fa-reply"
+				onClick: function(button, map) { $("#basemapModal").modal("show"); },
+				title: "Choose a basemap",
+				icon: "fa-layer-group"
 			}
 		]
 	});
-	this.addControl( this.sceneButton );
-	this.sceneButton.disable();
+	this.addControl( this.basemapButton );
 
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
@@ -58,39 +57,33 @@ L.Map.addInitHook(function() {
 	// Basemap
 
 	this.basemap = L.tileLayer.provider("OpenStreetMap.HOT");
+	this.basemap.options.source = { name: "OpenStreetMap.HOT" };
 	this.addLayer( this.basemap );
 
 
 
 
 
-	// Drawing and edit layer
+	// Object layers
 
-	this.drawingLayer = L.drawingLayer({
-		title: "drawing layer",
-		lineThickness: 3,
-		lineColor: "#563d7c",
-		lineTransparency: 1,
-		fillColor: "#563d7c",
-		fillTransparency: 0.8
-	});
+	this.objects = [];
+	this.fadeLayer = L.fadeLayer();
+	this.editLayer = L.editLayer();
+	this.markerLayer = L.markerLayer();
 
-	this.addLayer( this.drawingLayer );
+	this.addLayer( this.fadeLayer );
+	this.addLayer( this.editLayer );
+	this.addLayer( this.markerLayer );
 
 	this.on(L.Draw.Event.CREATED, ev => {
 		let object = ev.layer,
 			type = ev.layerType;
 
-		this.drawingLayer.addLayer(object, type);
+		if(type == "marker") this.markerLayer.addLayer(object);
+		else this.editLayer.addLayer(object, type);
+
+		if(!this.editHandler.enabled()) { this.editHandler.enable(); }
 	});
-
-	this.on(L.Draw.Event.EDITSTART, ev => { this.drawingLayer.removeAvatarBorders(); });
-	this.on(L.Draw.Event.EDITSTOP, ev => { this.drawingLayer.readdAvatarBorders(); });
-
-	//this.on(L.Draw.Event.EDITED, ev => { let objects = ev.layers; });
-	//this.on(L.Draw.Event.DELETED, ev => { let objects = ev.layers; });
-
-	this.editLayer = L.featureGroup();
 
 
 
@@ -98,10 +91,7 @@ L.Map.addInitHook(function() {
 
 	// Draw and edit control
 
-	L.EditToolbar.Delete.include({
-		removeAllLayers: false
-	});
-
+	L.EditToolbar.Delete.include({ removeAllLayers: false });
 	this.drawingControl = new L.Control.Draw({
 		position: "topleft",
 		edit: false,
@@ -109,35 +99,19 @@ L.Map.addInitHook(function() {
 			marker: {
 				icon: L.icon({
 					iconUrl: "assets/user-circle-solid.svg",
-					iconSize: [30, 30],
-					popupAnchor: [0, -15],
+					iconSize: [50, 50],
+					popupAnchor: [0, -25],
 					className: "markerIcon"
 				})
 			},
 			polyline: {
-				shapeOptions: {
-					weight: 3,
-					color: "#563d7c",
-					opacity: 1
-				}
+				shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 }
 			},
 			polygon: {
-				shapeOptions: {
-					weight: 3,
-					color: "#563d7c",
-					opacity: 1,
-					fillColor: "#563d7c",
-					fillOpacity: 0.2
-				}
+				shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 }
 			},
 			rectangle: {
-				shapeOptions: {
-					weight: 3,
-					color: "#563d7c",
-					opacity: 1,
-					fillColor: "#563d7c",
-					fillOpacity: 0.2
-				}
+				shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 }
 			},
 			circle: false,
 			circlemarker: false
@@ -145,28 +119,26 @@ L.Map.addInitHook(function() {
 	});
 	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
 	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
-	L.drawLocal.edit.handlers.edit.tooltip.text = "Drag handles to edit objects.";
+	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
+	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
+	L.drawLocal.edit.handlers.remove.tooltip.text = null;
 
 	this.addControl( this.drawingControl );
 
-	this.editControl = new L.EditToolbar({ featureGroup: this.editLayer });
-	this.editHandler = this.editControl.getModeHandlers()[0].handler;
-	this.editHandler._map = this; // NOTE: this is a hack, but necessary to make editing work
-
-
-
-
-
-	// Map events
-
-	this.on("movestart zoomstart", _EVENTS.scene.unset_scene_style);
-
-	this.on("move", ev => {
-		if(_PINNED_MARKER) {
-			let o = this.drawingLayer.getObject(_PINNED_MARKER);
-			o.setLatLng(this.getCenter()); // FIX: a bug is here, must investigate
-		}
+	this.editControl = new L.EditToolbar({
+		edit: {
+			selectedPathOptions: {
+				dashArray: "none",
+				maintainColor: true
+			}
+		},
+		featureGroup: this.editLayer
 	});
+
+	delete this.editControl.options.edit.selectedPathOptions.fillOpacity; // NOTE: this is a crazy hack, but necessary to make use that the fill opacity of the map objects are not changed when entered into editing mode
+	this.editHandler = this.editControl.getModeHandlers()[0].handler;
+	this.editHandler._map = this; // NOTE: this is also a hack, but necessary to make editing work
+	//L.Edit.Marker = null; // NOTE: to no one's surprise, this is also a hack. Removes the marker editing-style
 
 });
 
@@ -175,8 +147,108 @@ L.Map.addInitHook(function() {
 
 L.Map.include({
 
-	importData: function(data) {
-		console.log(data);
+	captureScene: function(sceneId) {
+		let bounds = this.getBounds(), os = {};
+
+		for(let m of this.markerLayer.getLayers()) {
+			if( bounds.contains( m.getLatLng() ) ) {
+				m.options.sceneId = sceneId;
+				os[m.options.id] = this.extractObject(m);
+			}
+		}
+
+		for(let o of this.editLayer.getLayers()) {
+			if( bounds.overlaps( o.getBounds() ) ) {
+				o.options.sceneId = sceneId;
+				os[o.options.id] = this.extractObject(o);
+			}
+		}
+
+		for(let i = 0; i < this.objects.length; i++) {
+			let o = this.objects[i];
+			if(os[o.id] && o.sceneId == sceneId) {
+				this.objects[i] = os[o.id];
+				delete os[o.id];
+			}
+		}
+		for(let o in os) { this.objects.push( os[o] ); }
+	},
+
+	deleteScene: function(sceneId) {
+		let newO = [];
+
+		for(let o of this.objects) {
+			if(o.sceneId != sceneId) {
+				newO.push(o);
+			}
+		}
+
+		this.objects = newO;
+	},
+
+	setObjects: function(sceneId, _new) {
+		let s = get_scene(sceneId),
+			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
+
+		for(let o of this.editLayer.getLayers()) { if(o.options.sceneId) this.editLayer.removeLayer(o); }
+		for(let o of this.markerLayer.getLayers()) { if(o.options.sceneId) this.markerLayer.removeLayer(o); }
+		for(let o of this.objects) {
+			if(o.sceneId == sceneId) {
+				if(o.type == "marker") this.markerLayer.addLayer(this.createObject(o), o.id);
+				else this.editLayer.addLayer(this.createObject(o), o.type, o.id);
+			}
+		}
+
+		this.fadeLayer.clearLayers();
+		if(prevSceneId) {
+			for(let o of this.objects) {
+				if(o.sceneId == prevSceneId) {
+					this.fadeLayer.addLayer(this.createObject(o), o.type, o.id);
+
+					if(_new) {
+						let oo = this.createObject(o);
+						delete oo.options.sceneId;
+
+						if(o.type == "marker") this.markerLayer.addLayer(oo, o.id);
+						else this.editLayer.addLayer(oo, o.type, o.id);
+					}
+				}
+			}
+		}
+	},
+
+	deleteObject: function(id, type) {
+		let object = null;
+
+		if(type == "marker") {
+			for(let m of this.markerLayer.getLayers()) {
+				if(m.options.id == id) {
+					object = m;
+					this.markerLayer.removeLayer(m);
+				}
+			}
+		}else{
+			for(let o of this.editLayer.getLayers()) {
+				if(o.options.id == id) {
+					object = o;
+					this.editLayer.removeLayer(o);
+				}
+			}
+		}
+
+		if(object.options.sceneId) {
+			for(let i = 0; i < this.objects.length; i++) {
+				let o = this.objects[i];
+				if(o.id == id && o.sceneId == object.options.sceneId) {
+					this.objects.splice(i, 1);
+					break;
+				}
+			}
+		}
+	},
+
+	getBasemap: function() {
+		return this.basemap.options.source;
 	},
 
 	setBasemap: function(img, width, height) {
@@ -201,6 +273,7 @@ L.Map.include({
 			zIndex: 0,
 			attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
 		});
+		this.basemap.options.source = { url: img };
 
 		this.presetZoom(0, 18);
 
@@ -222,12 +295,13 @@ L.Map.include({
 				maxZoom: basemap.zoom[1]
 			});
 		}
+		this.basemap.options.source = { name: name };
 
 		this.presetZoom(basemap.zoom[0], basemap.zoom[1]);
 
 		this.addLayer( this.basemap );
 
-		$("div.leaflet-control-attribution a").attr("target", "_blank");
+		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 
 	resetBasemap: function() { this.presetBasemap("OpenStreetMap.HOT"); },
@@ -236,12 +310,133 @@ L.Map.include({
 		let zoom = this.getZoom();
 
 		if(zoom < min || zoom > max) {
-			if(zoom < min) { this.setZoom( min ); }
-			if(zoom > max) { this.setZoom( max ); }
+			if(zoom < min) { this.setZoom(min); }
+			if(zoom > max) { this.setZoom(max); }
 		}
 
 		this.setMinZoom(min);
 		this.setMaxZoom(max);
+	},
+
+	createObject: function(o) {
+		let oo = null;
+
+		switch(o.type) {
+			case "marker":
+				oo = L.marker(o.pos, {
+					icon: L.icon({
+						iconUrl: o.icon,
+						iconSize: [50, 50],
+						popupAnchor: [0, -25],
+						className: "markerIcon"
+					})
+				});
+				oo.options.borderColor = o.borderColor;
+				oo.options.borderThickness = o.borderThickness;
+				oo.options.overlayBlur = o.blur;
+				oo.options.overlayTransparency = o.transparency;
+				oo.options.overlayGrayscale = o.grayscale;
+				break;
+
+			case "polyline":
+				oo = L.polyline(o.pos, {
+					color:		o.color,
+					weight:		o.thickness,
+					opacity:	1 - o.transparency
+				});
+				break;
+
+			case "polygon":
+				oo = L.polygon(o.pos, {
+					color:			o.lineColor,
+					weight:			o.lineThickness,
+					opacity:		1 - o.lineTransparency,
+					fillColor:		o.fillColor,
+					fillOpacity:	1 - o.fillTransparency
+				});
+				break;
+
+			case "rectangle":
+				oo = L.rectangle(o.pos, {
+					color:			o.lineColor,
+					weight:			o.lineThickness,
+					opacity:		1 - o.lineTransparency,
+					fillColor:		o.fillColor,
+					fillOpacity:	1 - o.fillTransparency
+				});
+				break;
+
+			default:
+				console.error("object type invalid");
+				break;
+		}
+
+		oo.options.id = o.id;
+		oo.options.sceneId = o.sceneId;
+
+		return oo;
+	},
+
+	extractObject: function(o) {
+		let oo = null;
+
+		switch(o.options.type) {
+			case "marker":
+				oo = {
+					id:					o.options.id,
+					sceneId:			o.options.sceneId,
+					type:				o.options.type,
+					pos:				o.getLatLng(),
+					icon:				o.getIcon().options.iconUrl,
+					borderColor:		o.options.borderColor,
+					borderThickness:	o.options.borderThickness,
+					blur:				o.options.overlayBlur,
+					transparency:		o.options.overlayTransparency,
+					grayscale:			o.options.overlayGrayscale
+				};
+				break;
+
+			case "polyline":
+				oo = {
+					id:				o.options.id,
+					sceneId:		o.options.sceneId,
+					type:			o.options.type,
+					pos:			o.getLatLngs(),
+					color:			o.options.color,
+					thickness:		o.options.weight,
+					transparency:	1 - o.options.opacity
+				};
+				break;
+
+			case "polygon":
+			case "rectangle":
+				oo = {
+					id:					o.options.id,
+					sceneId:			o.options.sceneId,
+					type:				o.options.type,
+					pos:				o.getLatLngs(),
+					lineColor:			o.options.color,
+					lineThickness:		o.options.weight,
+					lineTransparency:	1 - o.options.opacity,
+					fillColor:			o.options.fillColor,
+					fillTransparency:	1 - o.options.fillOpacity
+				};
+				break;
+
+			default:
+				console.error("object type invalid");
+				break;
+		}
+
+		return oo;
+	},
+
+	importData: function(data) {
+		console.log(data);
+	},
+
+	exportData: function() {
+		return this.objects;
 	}
 
 });

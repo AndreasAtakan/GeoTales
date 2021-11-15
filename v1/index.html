@@ -43,6 +43,14 @@
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
+
+		<style type="text/css">
+			.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
+				background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
+				background-size: 14px 14px;
+				background-position: 8px 8px !important;
+			}
+		</style>
 	</head>
 	<body>
 
@@ -109,18 +117,15 @@
 								</div>
 							</div>
 
-							<div class="row mt-2">
+							<div class="row my-2">
 								<div class="col col-md-10">
 									<select class="form-select" id="fontInput" aria-label="Font type">
 										<option value="default" selected>Default (Roboto)</option>
 										<option value="arial">Arial (sans-serif)</option>
 										<option value="verdana">Verdana (sans-serif)</option>
 										<option value="helvetica">Helvetica (sans-serif)</option>
-										<!--option value="tahoma">Tahoma (sans-serif)</option-->
-										<!--option value="trebuchet ms">Trebuchet MS (sans-serif)</option-->
 										<option value="times new roman">Times New Roman (serif)</option>
 										<option value="georgia">Georgia (serif)</option>
-										<!--option value="garamond">Garamond (serif)</option-->
 										<option value="courier new">Courier New (monospace)</option>
 										<option value="brush script mt">Brush Script MT (cursive)</option>
 									</select>
@@ -133,10 +138,57 @@
 
 							<div class="row">
 								<div class="col">
-									<h6>Basemap</h6>
+									<h6>Theme</h6>
 								</div>
 							</div>
 
+							<div class="row my-2">
+								<div class="col">
+									<div class="accordion" id="basemapAccordion">
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="accordionHeading">
+												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCollapse" aria-expanded="false" aria-controls="accordionCollapse">
+													Choose a theme
+												</button>
+											</h2>
+											<div id="accordionCollapse" class="accordion-collapse collapse" aria-labelledby="accordionHeading" data-bs-parent="#basemapAccordion">
+												<div class="accordion-body">
+													<div class="row row-cols-2 row-cols-md-3" id="basemapChoose"></div>
+												</div>
+											</div>
+										  </div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row my-2">
+								<div class="col">
+									<p class="text-muted">
+										<small>Only applies to presentation mode</small>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Basemap modal -->
+		<div class="modal fade" id="basemapModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="basemapModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="basemapModalLabel">Choose basemap</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
 							<div class="row mt-2">
 								<div class="col">
 									<div class="accordion" id="basemapAccordion">
@@ -156,7 +208,7 @@
 								</div>
 							</div>
 
-							<div class="row mt-3">
+							<div class="row mt-2">
 								<div class="col col-md-10">
 									<label for="basemapFile"><small>Or choose custom basemap</small></label>
 									<input type="file" class="form-control" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/*" />
@@ -281,7 +333,7 @@
 								</button>
 
 								<p class="text-muted mt-3">
-									Click to capture current scene
+									Click to prepare a scene
 								</p>
 							</center>
 						</div>
@@ -322,7 +374,7 @@
 
 		<script type="text/javascript" src="src/js/events.js"></script>
 
-		<script type="text/javascript" src="src/js/map/drawinglayer.js"></script>
+		<script type="text/javascript" src="src/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/js/map/map.js"></script>
 
 		<script type="text/javascript" src="src/js/main.js"></script>

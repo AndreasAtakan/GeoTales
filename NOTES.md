@@ -28,6 +28,12 @@
 ###### Misc.
 
 - Form in scenes needs validation. i.e. the "time" input is not set unless the user gives values for both hour, minute and seconds. If seconds is missing, the time field is not set at all. Add some sort of validation on the set_scene mehtod in events to give a message to the user to set the value in its entirety.
+- Source for object-editing enable and disable: https://github.com/Leaflet/Leaflet.draw/issues/129#issuecomment-466672085
+
+- Skal scenene fange et rent snap-shot av kart-objecter, eller skal kart-objekene sine instillinger vedvare over alle scenene?
+	- Alternativ 1: avatarer vedvarer og alle andre kart-objekter gjør ikke
+	- Alternativ 2: alle kart-objekter vedvarer
+	- Alternativ 3: ingen kart-objekter vedvarer (heller ikke avatar)
 
 
 
