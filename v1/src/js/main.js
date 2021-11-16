@@ -1,87 +1,62 @@
-//
+/*©agpl*************************************************************************
+*                                                                              *
+* TellUs                                                                       *
+* Copyright (C) 2021  TellUs AS                                                *
+*                                                                              *
+* This program is free software: you can redistribute it and/or modify         *
+* it under the terms of the GNU Affero General Public License as published by  *
+* the Free Software Foundation, either version 3 of the License, or            *
+* (at your option) any later version.                                          *
+*                                                                              *
+* This program is distributed in the hope that it will be useful,              *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of               *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 *
+* GNU Affero General Public License for more details.                          *
+*                                                                              *
+* You should have received a copy of the GNU Affero General Public License     *
+* along with this program. If not, see <http://www.gnu.org/licenses/>.         *
+*                                                                              *
+*****************************************************************************©*/
+
+"use strict";
+
 
 window.onload = function(ev) {
-	let map = L.map("map", {
+
+	_MAP = L.map("map", {
 		center: [ 51.781435604431195, 14.194335937500002 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
 		maxZoom: 18,
-		timeDimension: true,
-		timeDimensionOptions: {
-			timeInterval: "P1D/2021-10-15",
-			period: "PT5M"
-		},
-		//timeDimensionControl: true
+		doubleClickZoom: false,
+		zoomAnimationThreshold: 100,
+		wheelPxPerZoomLevel: 1500,
+		keyboard: false,
+		touchZoom: false,
+		tap: false,
+		worldCopyJump: true
 	});
 
-	/*map.addControl(
-		L.control.zoom({ position: "topright" })
-	);*/
+	$("div.leaflet-control-attribution a").prop("target", "_blank");
 
-	map.addControl(
-		L.Control.zoomHome({ position: "topright" })
-	);
+	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); });
 
-	/*map.addControl(
-		L.control.locate({ position: "topright" })
-	);*/
+	$("#exportMap").click(ev => { _EVENTS.project.export(); });
 
-	map.addControl(
-		new L.Control.Fullscreen({ position: "topright" })
-	);
+	_EVENTS.mapOptions.setup();
+	_EVENTS.basemapOptions.setup();
 
-	map.addControl(
-		L.control.timeDimension({
-			position: "bottomleft",
-			loopButton: true,
-			limitSliders: true, // TODO: fix width styling for this
-			timeSliderDragUpdate: true,
-			speedSlider: false,
-			//minSpeed: 1,
-			//maxSpeed: 5,
-			//speedStep: 1,
-			//timeSteps: 1,
-			timeZones: [ "Local" ],
-			playerOptions: {
-				startOver: true
-			}
-		})
-	);
-
-	let OSM = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-		attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OSM</a>",
-		subdomains: "abc"
-	});
-	map.addLayer(OSM);
-
-
-	$("div.leaflet-control-attribution a").attr("target", "_blank");
-
-
-	let icon = L.icon({
-		iconUrl: 'assets/ivar_aasen.jpg',
-		iconSize: [44, 44],
-		iconAnchor: [11, 11]
-	});
-
-	let layer = L.geoJSON(_DATA, {
-		pointToLayer: function(feature, latLng) {
-			if (feature.properties.hasOwnProperty('last')) {
-				return new L.Marker(latLng, {
-					icon: icon
-				});
-			}
-			return L.circleMarker(latLng);
-		}
-	});
-
-	let tdLayer = L.timeDimension.layer.geoJson(layer, {
-		updateTimeDimension: true,
-		duration: "PT2M",
-		updateTimeDimensionMode: "replace",
-		addlastPoint: true
-	});
-
-	map.addLayer( layer );
-	map.addLayer( tdLayer );
 };
+
+/*let height;
+window.onresize = function(ev) {
+
+	if(height >= 630 && window.innerHeight < 630) {
+		map.drawingControl.setPosition("bottomleft");
+	}else if(height < 630 && window.innerHeight >= 630) {
+		map.drawingControl.setPosition("bottomright");
+	}
+
+	height = window.innerHeight;
+
+};*/

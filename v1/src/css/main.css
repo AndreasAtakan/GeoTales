@@ -1,4 +1,25 @@
+/*©agpl*************************************************************************
+*                                                                              *
+* TellUs                                                                       *
+* Copyright (C) 2021  TellUs AS                                                *
+*                                                                              *
+* This program is free software: you can redistribute it and/or modify         *
+* it under the terms of the GNU Affero General Public License as published by  *
+* the Free Software Foundation, either version 3 of the License, or            *
+* (at your option) any later version.                                          *
+*                                                                              *
+* This program is distributed in the hope that it will be useful,              *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of               *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 *
+* GNU Affero General Public License for more details.                          *
+*                                                                              *
+* You should have received a copy of the GNU Affero General Public License     *
+* along with this program. If not, see <http://www.gnu.org/licenses/>.         *
+*                                                                              *
+*****************************************************************************©*/
+
 @charset "UTF-8";
+
 
 /* Hide arrows on type="number" input  */
 input[type=number] { -moz-appearance: textfield; }
@@ -8,34 +29,105 @@ input::-webkit-inner-spin-button {
 	margin: 0;
 }
 
+input, textarea, button, ul { border-radius: 2px !important; }
+
+#_midline {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	height: 0;
+	visibility: hidden;
+}
+
+.leaflet-bottom.leaflet-left { z-index: 1001; }
+
+.pell-content { height: 120px; }
+
+.offcanvasBtn { display: none; }
+
+#mapCol {
+	height: 100%;
+}
+
+#sceneCol {
+	height: 100%;
+	overflow-y: auto;
+	background-color: #f2f2f2;
+}
+
+#sceneContainer #textInput {
+	min-height: 160px;
+	max-height: 180px;
+	overflow-y: auto;
+	background-color: white;
+}
+
+#sceneContainer li {
+	color: #999999;
+}
+#sceneContainer li:hover:not([class*="prepare"]):not([class*="active"]),
+#sceneContainer li:focus:not([class*="prepare"]):not([class*="active"]) {
+	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
+}
+#sceneContainer li:hover:not([class*="active"]),
+#sceneContainer li:focus:not([class*="active"]) {
+	cursor: pointer;
+}
+
+#sceneContainer .active {
+	background-image: linear-gradient(to right, #7a6699, white, white, white, white, white, white, white, white);
+	color: white;
+}
+#sceneContainer .prepare {
+	background-image: linear-gradient(to right, #a6a6a6, white, white, white, white, white, white, white, white);
+	color: white;
+}
+
+#sceneContainer [class*="active"] #textInput { color: initial; }
+#sceneContainer [class*="active"] #reorder:hover {
+	cursor: move;
+}
+#sceneContainer [class*="active"] #capture:hover,
+#sceneContainer [class*="active"] #delete:hover {
+	cursor: pointer;
+}
+#sceneContainer .prepare #capture {
+	color: darkred;
+}
+
 #map {
 	width: 100%;
 	height: 100%;
-
-	z-index: 1;
+	opacity: 1;
+}
+.snapshot#map {
+	-webkit-transition: 0.12s;
+	-moz-transition: 0.12s;
+	-ms-transition: 0.12s;
+	-o-transition: 0.12s;
+	transition: 0.12s;
+	opacity: 0.6;
 }
 
-#objects {
-	z-index: 2;
+#topPadScene { margin-top: 100px; }
+#bottomPadScene { margin-bottom: 120px; }
 
-	position: absolute;
-	bottom: 0;
-	left: 0;
-
-	width: 40%;
-	max-height: 50%;
-
-	overflow-y: auto;
+#markerPopup, #polylinePopup, #polygonPopup, #editPopup {
+	width: 300px;
+}
+.markerIcon {
+	border-radius: 50%;
 }
 
-.offcanvasBtn { display: none; }
+#basemapModal #basemaps:hover,
+#basemapModal #basemaps:focus {
+	cursor: pointer;
+}
 
 
 
 @media (max-width: 1199.98px) {
-	#objects {
-		width: 100%;
-	}
+	/**/
 }
 
 @media (max-width: 991.98px) {
@@ -43,10 +135,17 @@ input::-webkit-inner-spin-button {
 }
 
 @media (max-width: 767.98px) {
-	.headerBtn { display: none; }
-	.offcanvasBtn { display: block; }
+	/**/
 }
 
 @media (max-width: 575.98px) {
-	/**/
+	.headerBtn { display: none; }
+	.offcanvasBtn { display: block; }
+
+	#mapCol { height: 55%; }
+
+	#sceneCol { height: 45%; }
+
+	#topPadScene { margin-top: 0; }
+	#bottomPadScene { margin-bottom: 1.5rem; }
 }
