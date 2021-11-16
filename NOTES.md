@@ -25,6 +25,13 @@
 8. Skifte grunnkart fra scene-til-scene, med glidende overgang
 9. Gjør om på objekt redigering slik at det ikke lenger er bygd inn i leaflet.draw, men heller i objektets popup
 
+##### Endringer – tilbakemeldinger runde 3:
+
+1. Lage en markering av koblingen mellom objekters nåværende posisjon og forrige posisjon
+2. Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
+3. Når man oppretter en ny scene, så skal objektene fra tidligere scene IKKE kopieres inn med en gang. Objektene fra tidligere scene skal kun kopieres inn i nåværende scene når brukeren trykker på objektet fra this.fadeLayer (og drar objektet).
+
+
 ###### Misc.
 
 - Form in scenes needs validation. i.e. the "time" input is not set unless the user gives values for both hour, minute and seconds. If seconds is missing, the time field is not set at all. Add some sort of validation on the set_scene mehtod in events to give a message to the user to set the value in its entirety.
