@@ -1,35 +1,29 @@
 ## Notes
 
-##### Endringer basert på tilbakemelding:
+##### Endringer – tilbakemeldinger runde 1:
 
-1. X Gjøre om på scroll slik at scene-valg gjøres av brukerklikk i stedet for scolling (også med tastatur-pil navigering)
-2. Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
-3. X Bygge inn valg for bakgrunnskart
-4. X Mulighet til å lenke avatar og scene (avataren følger scene-overgangen)
-5. Misc:
-	- X Eget icon på avatar (marker-drawing, eget icon og eget navn)
-	- Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
-	- Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
-	- X Navn-endring: I map-options, "Clustering"->"Avatar Clustering", "Or choose custom basemap"->"Or choose custom basemap (this can be any image file)"
-	- Bugs: Safari browser, map-object popup vises ikke på klikk
+1. Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
+2. X Mulighet til å lenke avatar og scene (avataren følger scene-overgangen)
+3. Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
+4. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
 ##### Endringer – tilbakemeldinger runde 2:
 
 1. Font-valg: font-alternativene må være i de spesifikke font-ene
 2. Alle modal-er bør være flyttbar av bruker (som frittstående vinduer)
 3. Redigere avatar icon før icon blir satt på avataren (litt som twitter-profilbilde)
-4. Utforske alternative muligheter for pin-to-map funksjonalitet på avatar
-5. X Automatisk legg inn tidspunkt fra forrige scene på ny scene (tidspunkt fortsettelse)
-6. En scene skal følge flere kart-posisjoner (gjør dette ved å ha valg om å "keep prevoius scene", altså lag en ny scene på ny posisjon med samme innhold som forrige svene)
-7. Legge inn tekst-boks som som alternativ i kart-tegning
-8. Skifte grunnkart fra scene-til-scene, med glidende overgang
-9. Gjør om på objekt redigering slik at det ikke lenger er bygd inn i leaflet.draw, men heller i objektets popup
+4. X Automatisk legg inn tidspunkt fra forrige scene på ny scene (tidspunkt fortsettelse)
+5. X En scene skal følge flere kart-posisjoner (gjør dette ved å ha valg om å "keep prevoius scene", altså lag en ny scene på ny posisjon med samme innhold som forrige svene)
+6. Legge inn tekst-boks som som alternativ i kart-tegning
+7. X Skifte grunnkart fra scene-til-scene, med glidende overgang
+8. X Gjør om på objekt redigering slik at det ikke lenger er bygd inn i leaflet.draw, men heller i objektets popup
 
 ##### Endringer – tilbakemeldinger runde 3:
 
 1. Lage en markering av koblingen mellom objekters nåværende posisjon og forrige posisjon
 2. Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
-3. Når man oppretter en ny scene, så skal objektene fra tidligere scene IKKE kopieres inn med en gang. Objektene fra tidligere scene skal kun kopieres inn i nåværende scene når brukeren trykker på objektet fra this.fadeLayer (og drar objektet).
+3. Legge inn glidende transition for avatar mellom scenene
+4. X Når man oppretter en ny scene, så skal objektene fra tidligere scene IKKE kopieres inn med en gang. Objektene fra tidligere scene skal kun kopieres inn i nåværende scene når brukeren trykker på objektet fra this.fadeLayer (og drar objektet).
 
 
 ###### Misc.
@@ -48,8 +42,9 @@
 
 ------------------------
 
-- Profile bar: kan slås av og på ved valg (både i pres.- og redigerings modus)
-	- Når en person eller sted (element på profile bar) er markert, og bruker scroller forbi denne personen, vil det elementet henge igjen for at det ikke skal forsvinne av skjermen
+### Endringer gjort i /lib
 
-- Flytte timeline options til tannhjulet på tidslinjen
-- Flytte cluster mode til tannhjul på profile bar-en
+- **leaflet.draw**
+	- Erstattet alle `L.Point(20,20)` med `L.Point(12,12)` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å gjøre resize/move boksene på polyline/polygon objekter mindre
+	- ~Fjernet alle kall til `_toggleMarkerHighlight` og fjernet selve metoden og medfølgende hjelpe-metoder på `L.Edit.Marker` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å fjerne objekt-styling på markers i editLayer~
+	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~

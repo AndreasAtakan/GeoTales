@@ -82,6 +82,13 @@ L.Map.addInitHook(function() {
 		if(type == "marker") this.markerLayer.addLayer(object);
 		else this.editLayer.addLayer(object, type);
 
+		let sceneId = $("#sceneContainer li.active:not([class*=\"prepare\"])").data("sceneid");
+		if( sceneId ) {
+			object.options.sceneId = sceneId;
+			let o = this.extractObject(object);
+			this.objects.push( o );
+		}
+
 		if(!this.editHandler.enabled()) { this.editHandler.enable(); }
 	});
 
@@ -99,8 +106,8 @@ L.Map.addInitHook(function() {
 			marker: {
 				icon: L.icon({
 					iconUrl: "assets/user-circle-solid.svg",
-					iconSize: [50, 50],
-					popupAnchor: [0, -25],
+					iconSize: [30, 30],
+					popupAnchor: [0, -15],
 					className: "markerIcon"
 				})
 			},
@@ -125,6 +132,11 @@ L.Map.addInitHook(function() {
 
 	this.addControl( this.drawingControl );
 
+	// Disable drawing-control
+	this._drawingClick = function(ev) { ev.preventDefault(); return false; };
+	this.disableDrawing();
+
+
 	this.editControl = new L.EditToolbar({
 		edit: {
 			selectedPathOptions: {
@@ -138,7 +150,6 @@ L.Map.addInitHook(function() {
 	delete this.editControl.options.edit.selectedPathOptions.fillOpacity; // NOTE: this is a crazy hack, but necessary to make use that the fill opacity of the map objects are not changed when entered into editing mode
 	this.editHandler = this.editControl.getModeHandlers()[0].handler;
 	this.editHandler._map = this; // NOTE: this is also a hack, but necessary to make editing work
-	//L.Edit.Marker = null; // NOTE: to no one's surprise, this is also a hack. Removes the marker editing-style
 
 });
 
@@ -147,18 +158,48 @@ L.Map.addInitHook(function() {
 
 L.Map.include({
 
+	setup: function() {
+		this.enableDrawing();
+	},
+	reset: function() {
+		this.markerLayer.clearLayers();
+		this.editLayer.clearLayers();
+		this.fadeLayer.clearLayers();
+
+		this.disableDrawing();
+	},
+
+	enableDrawing: function() {
+		let buttons = [
+			$(".leaflet-draw-draw-polyline"),
+			$(".leaflet-draw-draw-polygon"),
+			$(".leaflet-draw-draw-rectangle"),
+			$(".leaflet-draw-draw-marker")
+		];
+		for(let b of buttons) {
+			b.removeClass("draw-control-disabled");
+			b.unbind("click", this._drawingClick);
+		}
+	},
+	disableDrawing: function() {
+		let buttons = [
+			$(".leaflet-draw-draw-polyline"),
+			$(".leaflet-draw-draw-polygon"),
+			$(".leaflet-draw-draw-rectangle"),
+			$(".leaflet-draw-draw-marker")
+		];
+		for(let b of buttons) {
+			b.addClass("draw-control-disabled");
+			b.click(this._drawingClick);
+		}
+	},
+
 	captureScene: function(sceneId) {
 		let bounds = this.getBounds(), os = {};
 
-		for(let m of this.markerLayer.getLayers()) {
-			if( bounds.contains( m.getLatLng() ) ) {
-				m.options.sceneId = sceneId;
-				os[m.options.id] = this.extractObject(m);
-			}
-		}
-
-		for(let o of this.editLayer.getLayers()) {
-			if( bounds.overlaps( o.getBounds() ) ) {
+		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
+			let t = o.options.type == "marker" ? bounds.contains( o.getLatLng() ) : bounds.overlaps( o.getBounds() );
+			if( t ) {
 				o.options.sceneId = sceneId;
 				os[o.options.id] = this.extractObject(o);
 			}
@@ -178,20 +219,25 @@ L.Map.include({
 		let newO = [];
 
 		for(let o of this.objects) {
-			if(o.sceneId != sceneId) {
-				newO.push(o);
-			}
+			if(o.sceneId != sceneId) newO.push(o);
 		}
 
 		this.objects = newO;
 	},
 
-	setObjects: function(sceneId, _new) {
+	setObjects: function(sceneId) {
 		let s = get_scene(sceneId),
 			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
 
-		for(let o of this.editLayer.getLayers()) { if(o.options.sceneId) this.editLayer.removeLayer(o); }
-		for(let o of this.markerLayer.getLayers()) { if(o.options.sceneId) this.markerLayer.removeLayer(o); }
+		/*for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
+			if(o.options.sceneId) {
+				if(o.options.type == "marker") this.markerLayer.removeLayer(o);
+				else this.editLayer.removeLayer(o);
+			}
+		}*/
+
+		this.markerLayer.clearLayers();
+		this.editLayer.clearLayers();
 		for(let o of this.objects) {
 			if(o.sceneId == sceneId) {
 				if(o.type == "marker") this.markerLayer.addLayer(this.createObject(o), o.id);
@@ -202,37 +248,37 @@ L.Map.include({
 		this.fadeLayer.clearLayers();
 		if(prevSceneId) {
 			for(let o of this.objects) {
-				if(o.sceneId == prevSceneId) {
-					this.fadeLayer.addLayer(this.createObject(o), o.type, o.id);
-
-					if(_new) {
-						let oo = this.createObject(o);
-						delete oo.options.sceneId;
-
-						if(o.type == "marker") this.markerLayer.addLayer(oo, o.id);
-						else this.editLayer.addLayer(oo, o.type, o.id);
-					}
-				}
+				if(o.sceneId == prevSceneId) this.fadeLayer.addLayer(this.createObject(o), o.type, o.id);
 			}
 		}
+	},
+	insertObject: function(o) {
+		for(let oo of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
+			if(oo.options.id == o.options.id) return;
+		}
+
+		let object;
+		for(let oo of this.objects) {
+			if(oo.id == o.options.id && oo.sceneId == o.options.sceneId) {
+				object = this.createObject(oo);
+				break;
+			}
+		}
+		delete object.options.sceneId;
+
+		if(object.options.type == "marker") this.markerLayer.addLayer(object, object.options.id);
+		else this.editLayer.addLayer(object, object.options.type, object.options.id);
 	},
 
 	deleteObject: function(id, type) {
 		let object = null;
 
-		if(type == "marker") {
-			for(let m of this.markerLayer.getLayers()) {
-				if(m.options.id == id) {
-					object = m;
-					this.markerLayer.removeLayer(m);
-				}
-			}
-		}else{
-			for(let o of this.editLayer.getLayers()) {
-				if(o.options.id == id) {
-					object = o;
-					this.editLayer.removeLayer(o);
-				}
+		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
+			if(o.options.id == id) {
+				object = o;
+
+				if(type == "marker") this.markerLayer.removeLayer(o);
+				else this.editLayer.removeLayer(o);
 			}
 		}
 
@@ -252,6 +298,9 @@ L.Map.include({
 	},
 
 	setBasemap: function(img, width, height) {
+		if(this.basemap.options.source.url
+		&& this.basemap.options.source.url == img) return;
+
 		this.removeLayer( this.basemap );
 
 		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
@@ -273,15 +322,18 @@ L.Map.include({
 			zIndex: 0,
 			attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
 		});
-		this.basemap.options.source = { url: img };
+		this.basemap.options.source = { url: img, width: width, height: height };
 
 		this.presetZoom(0, 18);
 
 		this.addLayer( this.basemap );
-		this.fitBounds(bounds);
+		//this.fitBounds(bounds);
 	},
 
 	presetBasemap: function(name) {
+		if(this.basemap.options.source.name
+		&& this.basemap.options.source.name == name) return;
+
 		let basemap = get_basemap(name);
 
 		this.removeLayer( this.basemap );
@@ -325,9 +377,9 @@ L.Map.include({
 			case "marker":
 				oo = L.marker(o.pos, {
 					icon: L.icon({
-						iconUrl: o.icon,
-						iconSize: [50, 50],
-						popupAnchor: [0, -25],
+						iconUrl: o.icon.url,
+						iconSize: o.icon.size,
+						popupAnchor: [0, o.icon.size[1] * (-1)],
 						className: "markerIcon"
 					})
 				});
@@ -373,6 +425,7 @@ L.Map.include({
 
 		oo.options.id = o.id;
 		oo.options.sceneId = o.sceneId;
+		oo.options.type = o.type;
 
 		return oo;
 	},
@@ -387,7 +440,10 @@ L.Map.include({
 					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				o.getLatLng(),
-					icon:				o.getIcon().options.iconUrl,
+					icon:				{
+						url: o.getIcon().options.iconUrl,
+						size: o.getIcon().options.iconSize
+					},
 					borderColor:		o.options.borderColor,
 					borderThickness:	o.options.borderThickness,
 					blur:				o.options.overlayBlur,

@@ -65,31 +65,25 @@ _EVENTS.scene = {
 				this.set_scene( _SCENES[s.index + 1].id );
 			}
 		});
+
+		_MAP.setup();
 	},
 
 	reset: function() {
 		reset_scene();
-
 		$("#sceneCol button#addScene").click( ev => { this.setup(); } );
+
+		_MAP.reset();
 	},
 
 	add: function() {
-		let id = uuid(),
-			prevId = _SCENES.length > 1 ? _SCENES[_SCENES.length - 1].id : null;
+		let id = uuid();
 
 		add_scene(id);
 
-		let s = { id: id, bounds: _MAP.getBounds(), prepare: true };
-		_SCENES.push(s);
-
-		if(prevId) {
-			let prevScene = get_scene(prevId);
-			s.date = prevScene.date;
-			s.time = prevScene.time;
-
-			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
-			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
-		}
+		let ne = _MAP.getBounds().getNorthEast(),
+			sw = _MAP.getBounds().getSouthWest();
+		let s = { id: id, bounds: [[sw.lat, sw.lng], [ne.lat, ne.lng]], prepare: true };
 
 		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
@@ -97,7 +91,24 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
 		textareas[id] = this.create_pell(id);
 
-		this.set_scene(id, true);
+		let prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
+		if(prevId) {
+			let prevScene = get_scene(prevId);
+			if(prevScene.title)	s.title = prevScene.title;
+			if(prevScene.date)	s.date = prevScene.date;
+			if(prevScene.time)	s.time = prevScene.time;
+			if(prevScene.media)	s.media = prevScene.media;
+			if(prevScene.text)	s.text = prevScene.text;
+
+			$(`li[data-sceneid="${id}"] input#titleInput`).val( s.title || "" );
+			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
+			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
+			//$(`li[data-sceneid="${id}"] input#mediaInput`).val( s.media || "" );
+			textareas[id].content.innerHTML = s.text || "";
+		}
+
+		_SCENES.push(s);
+		this.set_scene(id);
 	},
 
 	input: function(id, type, value) {
@@ -109,17 +120,15 @@ _EVENTS.scene = {
 	capture: function(id) {
 		let s = get_scene(id);
 
-		_SCENES[s.index].bounds = _MAP.getBounds();
+		let ne = _MAP.getBounds().getNorthEast(),
+			sw = _MAP.getBounds().getSouthWest();
+		_SCENES[s.index].bounds = [[sw.lat, sw.lng], [ne.lat, ne.lng]];
 
-		let b = _MAP.getBasemap(),
-			lastB = get_last_scene_basemap(id);
-
+		let b = _MAP.getBasemap(), lastB = get_last_scene_basemap(id);
 		if(lastB) {
-			if((b.name && lastB.name) || (b.url && lastB.url)) {
-				if((b.name == lastB.name) || (b.url == lastB.url)) { b = null; }
-			}
+			if(b.name && b.name == lastB.name) { b = null; }
+			else if(b.url && b.url == lastB.url) { b = null; }
 		}
-
 		_SCENES[s.index].basemap = b;
 
 		_MAP.captureScene(id);
@@ -133,7 +142,7 @@ _EVENTS.scene = {
 		this.set_scene_style(id);
 	},
 
-	delete: function(id) { // NOTE: needs testing!
+	delete: function(id) {
 		let s = get_scene(id);
 		let i = s.index == _SCENES.length - 1 ? s.index - 1 : s.index;
 
@@ -143,9 +152,7 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`).remove();
 
 		if(_SCENES.length <= 0) { this.reset(); }
-		else {
-			this.set_scene( _SCENES[i].id );
-		}
+		else { this.set_scene( _SCENES[i].id ); }
 
 		_MAP.deleteScene(id);
 	},
@@ -158,7 +165,7 @@ _EVENTS.scene = {
 
 
 
-	set_scene: function(id, _new) {
+	set_scene: function(id) {
 		let s = get_scene(id);
 
 		this.set_scene_input(id);
@@ -167,8 +174,20 @@ _EVENTS.scene = {
 
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
+		_MAP.setObjects(id);
+
+		if(s.basemap) {
+			if(s.basemap.name) _MAP.presetBasemap(s.basemap.name);
+			else if(s.basemap.url) _MAP.setBasemap(s.basemap.url, s.basemap.width, s.basemap.height);
+		}else{
+			let b = get_last_scene_basemap(id);
+			if(b) {
+				if(b.name) _MAP.presetBasemap(b.name);
+				else if(b.url) _MAP.setBasemap(b.url, b.width, b.height);
+			}
+		}
+
 		_MAP.flyToBounds(s.bounds, { maxZoom: _MAP.getMaxZoom() });
-		_MAP.setObjects(id, _new);
 	},
 
 	set_scene_input: function(id) {
@@ -462,7 +481,7 @@ _EVENTS.basemapOptions = {
 
 
 
-_EVENTS.project = {
+_EVENTS.project = { // TODO: reimplement
 
 	export: function() {
 		let el = document.createElement("a");

@@ -29,7 +29,7 @@ input::-webkit-inner-spin-button {
 	margin: 0;
 }
 
-input, textarea, button, ul { border-radius: 2px !important; }
+input, textarea, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
 #_midline {
 	position: absolute;
@@ -40,6 +40,8 @@ input, textarea, button, ul { border-radius: 2px !important; }
 }
 
 .leaflet-bottom.leaflet-left { z-index: 1001; }
+
+.draw-control-disabled { filter: contrast(22%) brightness(157%); pointer-events: none; }
 
 .pell-content { height: 120px; }
 
@@ -82,6 +84,8 @@ input, textarea, button, ul { border-radius: 2px !important; }
 	background-image: linear-gradient(to right, #a6a6a6, white, white, white, white, white, white, white, white);
 	color: white;
 }
+#sceneContainer .active div#textInput,
+#sceneContainer .prepare div#textInput { color: initial; }
 
 #sceneContainer [class*="active"] #textInput { color: initial; }
 #sceneContainer [class*="active"] #reorder:hover {

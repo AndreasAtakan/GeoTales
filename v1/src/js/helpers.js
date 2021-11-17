@@ -47,15 +47,11 @@ function get_scene(id) {
 }
 
 function get_last_scene_basemap(id) {
-	let s = get_scene(id);
+	let scene = get_scene(id);
 
-	for(let i = s.index-1; i >= 0; i--) {
+	for(let i = scene.index-1; i >= 0; i--) {
 		let s = _SCENES[i];
-
-		if(s.basemap) {
-			s.index = i;
-			return s;
-		}
+		if(s.basemap) return s.basemap;
 	}
 
 	return null;

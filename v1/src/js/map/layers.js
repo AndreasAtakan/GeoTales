@@ -51,6 +51,8 @@ L.FadeLayer = L.FeatureGroup.extend({
 				console.error("object type invalid");
 				break;
 		}
+
+		object.on("click", ev => { _MAP.insertObject(object); object.off("click"); });
 	},
 
 	getObject: function(id) {
