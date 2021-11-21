@@ -84,7 +84,7 @@ function reset_scene() {
 function add_scene(id) {
 
 	$("ul#sceneContainer").append(`
-		<li class="list-group-item prepare" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
+		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
 			<form class="container-fluid needs-validation px-0">
 				<div class="row g-0">
 					<div class="col-1">
@@ -97,7 +97,7 @@ function add_scene(id) {
 						</div>
 						<div class="row gx-0">
 							<div class="col">
-								<span id="capture" title="Capture scene">
+								<span id="capture" title="Recapture scene">
 									<i class="fas fa-camera"></i>
 								</span>
 							</div>
@@ -167,11 +167,13 @@ function marker_popup() {
 			<div class="row mt-4">
 				<div class="col">
 					<h6>Overlay</h6>
-					<div class="input-group input-group-sm mb-3">
+					<div class="input-group input-group-sm">
 						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="grayscale" placeholder="Grayscale" />
-						<input type="number" min="0" max="90" step="5" class="form-control" id="transparency" placeholder="Transparency" />
-						<span class="input-group-text">%</span>
+					</div>
+					<div class="input-group input-group-sm mb-3">
+						<input type="number" min="0" max="6" step="1" class="form-control" id="brightness" placeholder="Brightness" />
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -198,8 +200,7 @@ function polyline_popup() {
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0" max="90" step="5" class="form-control" id="transparency" placeholder="Transparency" />
-						<span class="input-group-text">%</span>
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -226,8 +227,7 @@ function polygon_popup() {
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
-						<input type="number" min="0" max="90" step="5" class="form-control" id="lineTransparency" placeholder="Transparency" />
-						<span class="input-group-text">%</span>
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -237,8 +237,7 @@ function polygon_popup() {
 					<h6>Fill</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
-						<input type="number" min="0" max="100" step="5" class="form-control" id="fillTransparency" placeholder="Transparency" />
-						<span class="input-group-text">%</span>
+						<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>

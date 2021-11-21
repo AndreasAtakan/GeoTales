@@ -79,17 +79,24 @@ L.Map.addInitHook(function() {
 		let object = ev.layer,
 			type = ev.layerType;
 
+		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		object.options.sceneId = sceneId || console.error("No active scene found");
+
 		if(type == "marker") this.markerLayer.addLayer(object);
 		else this.editLayer.addLayer(object, type);
 
-		let sceneId = $("#sceneContainer li.active:not([class*=\"prepare\"])").data("sceneid");
-		if( sceneId ) {
-			object.options.sceneId = sceneId;
-			let o = this.extractObject(object);
-			this.objects.push( o );
-		}
+		this.objects.push( this.extractObject(object) );
 
 		if(!this.editHandler.enabled()) { this.editHandler.enable(); }
+	});
+
+	this.on(`${L.Draw.Event.EDITMOVE} ${L.Draw.Event.EDITRESIZE}`, ev => {
+		let object = ev.layer;
+		this.updateObject(object.options.id);
+	});
+	this.on(L.Draw.Event.EDITVERTEX, ev => {
+		let object = ev.poly;
+		this.updateObject(object.options.id);
 	});
 
 
@@ -170,49 +177,18 @@ L.Map.include({
 	},
 
 	enableDrawing: function() {
-		let buttons = [
-			$(".leaflet-draw-draw-polyline"),
-			$(".leaflet-draw-draw-polygon"),
-			$(".leaflet-draw-draw-rectangle"),
-			$(".leaflet-draw-draw-marker")
-		];
+		let buttons = [ $(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker") ];
 		for(let b of buttons) {
 			b.removeClass("draw-control-disabled");
 			b.unbind("click", this._drawingClick);
 		}
 	},
 	disableDrawing: function() {
-		let buttons = [
-			$(".leaflet-draw-draw-polyline"),
-			$(".leaflet-draw-draw-polygon"),
-			$(".leaflet-draw-draw-rectangle"),
-			$(".leaflet-draw-draw-marker")
-		];
+		let buttons = [ $(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker") ];
 		for(let b of buttons) {
 			b.addClass("draw-control-disabled");
 			b.click(this._drawingClick);
 		}
-	},
-
-	captureScene: function(sceneId) {
-		let bounds = this.getBounds(), os = {};
-
-		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
-			let t = o.options.type == "marker" ? bounds.contains( o.getLatLng() ) : bounds.overlaps( o.getBounds() );
-			if( t ) {
-				o.options.sceneId = sceneId;
-				os[o.options.id] = this.extractObject(o);
-			}
-		}
-
-		for(let i = 0; i < this.objects.length; i++) {
-			let o = this.objects[i];
-			if(os[o.id] && o.sceneId == sceneId) {
-				this.objects[i] = os[o.id];
-				delete os[o.id];
-			}
-		}
-		for(let o in os) { this.objects.push( os[o] ); }
 	},
 
 	deleteScene: function(sceneId) {
@@ -225,22 +201,46 @@ L.Map.include({
 		this.objects = newO;
 	},
 
-	setObjects: function(sceneId) {
+	highlightObject: function(id) {
+		let o = this.fadeLayer.getObject(id);
+		if(!o) return;
+
+		if(o.options.type == "marker") $(o._icon).css("filter", `opacity(70%)`);
+		else o.setStyle({ opacity: 0.8 });
+	},
+	unhighlightObject: function(id) {
+		let o = this.fadeLayer.getObject(id);
+		if(!o) return;
+
+		if(o.options.type == "marker") $(o._icon).css("filter", `opacity(40%)`);
+		else o.setStyle({ opacity: 0.3 });
+	},
+
+	setObjects: function(sceneId, animate) {
 		let s = get_scene(sceneId),
 			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
 
-		/*for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
-			if(o.options.sceneId) {
-				if(o.options.type == "marker") this.markerLayer.removeLayer(o);
-				else this.editLayer.removeLayer(o);
-			}
-		}*/
-
+		let os = this.markerLayer.getLayers().map(o => {
+			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
+		});
 		this.markerLayer.clearLayers();
 		this.editLayer.clearLayers();
 		for(let o of this.objects) {
 			if(o.sceneId == sceneId) {
-				if(o.type == "marker") this.markerLayer.addLayer(this.createObject(o), o.id);
+				if(o.type == "marker") {
+					let m = this.createObject(o);
+					this.markerLayer.addLayer(m, o.id);
+
+					if(animate) {
+						for(let oo of os) {
+							if(o.id == oo.id) {
+								m.setLatLng(oo.pos);
+								m.slideTo(o.pos, { duration: 200 });
+								break;
+							}
+						}
+					}
+				}
 				else this.editLayer.addLayer(this.createObject(o), o.type, o.id);
 			}
 		}
@@ -252,6 +252,7 @@ L.Map.include({
 			}
 		}
 	},
+
 	insertObject: function(o) {
 		for(let oo of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
 			if(oo.options.id == o.options.id) return;
@@ -264,31 +265,52 @@ L.Map.include({
 				break;
 			}
 		}
-		delete object.options.sceneId;
+
+		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		object.options.sceneId = sceneId || console.error("No active scene found");
 
 		if(object.options.type == "marker") this.markerLayer.addLayer(object, object.options.id);
 		else this.editLayer.addLayer(object, object.options.type, object.options.id);
+
+		this.objects.push( this.extractObject(object) );
 	},
 
-	deleteObject: function(id, type) {
-		let object = null;
+	updateObject: function(id) {
+		let object;
 
 		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
 			if(o.options.id == id) {
 				object = o;
+				break;
+			}
+		}
+
+		for(let i = 0; i < this.objects.length; i++) {
+			let o = this.objects[i];
+			if(o.id == id && o.sceneId == object.options.sceneId) {
+				this.objects[i] = this.extractObject(object);
+				break;
+			}
+		}
+	},
+
+	deleteObject: function(id, type) {
+		let sceneId;
+
+		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
+			if(o.options.id == id) {
+				sceneId = o.options.sceneId;
 
 				if(type == "marker") this.markerLayer.removeLayer(o);
 				else this.editLayer.removeLayer(o);
 			}
 		}
 
-		if(object.options.sceneId) {
-			for(let i = 0; i < this.objects.length; i++) {
-				let o = this.objects[i];
-				if(o.id == id && o.sceneId == object.options.sceneId) {
-					this.objects.splice(i, 1);
-					break;
-				}
+		for(let i = 0; i < this.objects.length; i++) {
+			let o = this.objects[i];
+			if(o.id == id && o.sceneId == sceneId) {
+				this.objects.splice(i, 1);
+				break;
 			}
 		}
 	},
@@ -362,8 +384,8 @@ L.Map.include({
 		let zoom = this.getZoom();
 
 		if(zoom < min || zoom > max) {
-			if(zoom < min) { this.setZoom(min); }
-			if(zoom > max) { this.setZoom(max); }
+			if(zoom < min) this.setZoom(min);
+			if(zoom > max) this.setZoom(max);
 		}
 
 		this.setMinZoom(min);
@@ -386,6 +408,7 @@ L.Map.include({
 				oo.options.borderColor = o.borderColor;
 				oo.options.borderThickness = o.borderThickness;
 				oo.options.overlayBlur = o.blur;
+				oo.options.overlayBrightness = o.brightness;
 				oo.options.overlayTransparency = o.transparency;
 				oo.options.overlayGrayscale = o.grayscale;
 				break;
@@ -439,7 +462,7 @@ L.Map.include({
 					id:					o.options.id,
 					sceneId:			o.options.sceneId,
 					type:				o.options.type,
-					pos:				o.getLatLng(),
+					pos:				{ lat: o.getLatLng().lat, lng: o.getLatLng().lng },
 					icon:				{
 						url: o.getIcon().options.iconUrl,
 						size: o.getIcon().options.iconSize
@@ -447,6 +470,7 @@ L.Map.include({
 					borderColor:		o.options.borderColor,
 					borderThickness:	o.options.borderThickness,
 					blur:				o.options.overlayBlur,
+					brightness:			o.options.overlayBrightness,
 					transparency:		o.options.overlayTransparency,
 					grayscale:			o.options.overlayGrayscale
 				};
@@ -457,7 +481,7 @@ L.Map.include({
 					id:				o.options.id,
 					sceneId:		o.options.sceneId,
 					type:			o.options.type,
-					pos:			o.getLatLngs(),
+					pos:			o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 					color:			o.options.color,
 					thickness:		o.options.weight,
 					transparency:	1 - o.options.opacity
@@ -470,7 +494,7 @@ L.Map.include({
 					id:					o.options.id,
 					sceneId:			o.options.sceneId,
 					type:				o.options.type,
-					pos:				o.getLatLngs(),
+					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 					lineColor:			o.options.color,
 					lineThickness:		o.options.weight,
 					lineTransparency:	1 - o.options.opacity,

@@ -22,12 +22,12 @@
 
 
 /* Hide arrows on type="number" input  */
-input[type=number] { -moz-appearance: textfield; }
+/*input[type=number] { -moz-appearance: textfield; }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
-}
+}*/
 
 input, textarea, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
@@ -67,36 +67,25 @@ input, textarea, button, ul, div.modal-content, .leaflet-bar { border-radius: 2p
 #sceneContainer li {
 	color: #999999;
 }
-#sceneContainer li:hover:not([class*="prepare"]):not([class*="active"]),
-#sceneContainer li:focus:not([class*="prepare"]):not([class*="active"]) {
-	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
-}
 #sceneContainer li:hover:not([class*="active"]),
 #sceneContainer li:focus:not([class*="active"]) {
+	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
 	cursor: pointer;
 }
 
-#sceneContainer .active {
+#sceneContainer li.active {
 	background-image: linear-gradient(to right, #7a6699, white, white, white, white, white, white, white, white);
 	color: white;
 }
-#sceneContainer .prepare {
-	background-image: linear-gradient(to right, #a6a6a6, white, white, white, white, white, white, white, white);
-	color: white;
-}
-#sceneContainer .active div#textInput,
-#sceneContainer .prepare div#textInput { color: initial; }
+#sceneContainer li.active div#textInput { color: initial; }
 
-#sceneContainer [class*="active"] #textInput { color: initial; }
-#sceneContainer [class*="active"] #reorder:hover {
+#sceneContainer li[class*="active"] #textInput { color: initial; }
+#sceneContainer li[class*="active"] #reorder:hover {
 	cursor: move;
 }
-#sceneContainer [class*="active"] #capture:hover,
-#sceneContainer [class*="active"] #delete:hover {
+#sceneContainer li[class*="active"] #capture:hover,
+#sceneContainer li[class*="active"] #delete:hover {
 	cursor: pointer;
-}
-#sceneContainer .prepare #capture {
-	color: darkred;
 }
 
 #map {

@@ -52,7 +52,7 @@ L.FadeLayer = L.FeatureGroup.extend({
 				break;
 		}
 
-		object.on("click", ev => { _MAP.insertObject(object); object.off("click"); });
+		object.on("click", ev => { _MAP.insertObject(object); });
 	},
 
 	getObject: function(id) {
@@ -63,6 +63,15 @@ L.FadeLayer = L.FeatureGroup.extend({
 		}
 
 		return null;
+	},
+
+	removeLayer: function(object, id) {
+		var object = object || (id ? this.getObject(id) : null);
+		if(!object) return;
+
+		object.off("click");
+
+		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
 
 	initialize: function(options) {
@@ -87,9 +96,7 @@ L.EditLayer = L.FeatureGroup.extend({
 	addLayer: function(object, type, id) {
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 
-		var id = id || uuid();
-
-		object.options.id = id;
+		object.options.id = id || uuid();
 		if(type && !object.options.type) object.options.type = type;
 
 		this.bind(object);
@@ -120,6 +127,9 @@ L.EditLayer = L.FeatureGroup.extend({
 		});
 
 		object.on("click", ev => { _EVENTS.object.setup(object); });
+
+		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
+		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
 	},
 
 	getObject: function(id) {
@@ -138,6 +148,8 @@ L.EditLayer = L.FeatureGroup.extend({
 
 		object.closePopup();
 		object.unbindPopup();
+
+		object.off("click"); object.off("mouseover"); object.off("mouseout");
 
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
@@ -167,19 +179,19 @@ L.MarkerLayer = L.FeatureGroup.extend({
 	addLayer: function(object, id) {
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 
-		var id = id || uuid();
-
-		object.options.id = id;
+		object.options.id = id || uuid();
 		if(!object.options.type)				object.options.type = "marker";
 		if(!object.options.borderColor)			object.options.borderColor = "#563d7c";
 		if(!object.options.borderThickness)		object.options.borderThickness = 0;
 		if(!object.options.overlayBlur)			object.options.overlayBlur = 0;
 		if(!object.options.overlayGrayscale)	object.options.overlayGrayscale = 0;
+		if(!object.options.overlayBrightness)	object.options.overlayBrightness = 0;
 		if(!object.options.overlayTransparency)	object.options.overlayTransparency = 0;
 
 		$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
 		$(object._icon).css("filter", `blur(${object.options.overlayBlur}px)`);
 		$(object._icon).css("filter", `grayscale(${object.options.overlayGrayscale*100}%)`);
+		$(object._icon).css("filter", `drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)`);
 		$(object._icon).css("filter", `opacity(${(1 - object.options.overlayTransparency)*100}%)`);
 
 		object.dragging.enable();
@@ -195,6 +207,11 @@ L.MarkerLayer = L.FeatureGroup.extend({
 		});
 
 		object.on("click", ev => { _EVENTS.object.setup(object); });
+
+		object.on("dragend", ev => { _MAP.updateObject(object.options.id); });
+
+		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
+		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
 	},
 
 	getObject: function(id) {
@@ -216,6 +233,8 @@ L.MarkerLayer = L.FeatureGroup.extend({
 
 		object.dragging.disable();
 
+		object.off("click"); object.off("dragend"); object.off("mouseover"); object.off("mouseout");
+
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
 
@@ -235,4 +254,3 @@ L.MarkerLayer = L.FeatureGroup.extend({
 L.markerLayer = function(options) {
 	return new L.MarkerLayer(options);
 };
-

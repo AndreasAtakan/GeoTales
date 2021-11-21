@@ -52,7 +52,7 @@ _EVENTS.scene = {
 
 		$(document).keydown(ev => {
 			let keycode = ev.keyCode,
-				id = $("#sceneContainer [class*=\"active\"]").data("sceneid");
+				id = $("#sceneContainer li.active").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
@@ -62,7 +62,7 @@ _EVENTS.scene = {
 			}
 
 			if(keycode == 40 && s.index < _SCENES.length - 1) {
-				this.set_scene( _SCENES[s.index + 1].id );
+				this.set_scene( _SCENES[s.index + 1].id, true );
 			}
 		});
 
@@ -81,15 +81,19 @@ _EVENTS.scene = {
 
 		add_scene(id);
 
-		let ne = _MAP.getBounds().getNorthEast(),
-			sw = _MAP.getBounds().getSouthWest();
-		let s = { id: id, bounds: [[sw.lat, sw.lng], [ne.lat, ne.lng]], prepare: true };
+		let s = { id: id };
 
 		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
-		textareas[id] = this.create_pell(id);
+		textareas[id] = pell.init({
+			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
+			onChange: html => { this.input(id, "text", html); },
+			defaultParagraphSeparator: "p",
+			styleWithCSS: false,
+			actions: [ "bold", "underline", { name: "italic", result: () => pell.exec("italic") }, { name: "link", result: () => { const url = window.prompt("Enter the link URL"); if(url) pell.exec("createLink", url); } } ]
+		});
 
 		let prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
 		if(prevId) {
@@ -108,6 +112,8 @@ _EVENTS.scene = {
 		}
 
 		_SCENES.push(s);
+
+		this.capture(id);
 		this.set_scene(id);
 	},
 
@@ -131,15 +137,7 @@ _EVENTS.scene = {
 		}
 		_SCENES[s.index].basemap = b;
 
-		_MAP.captureScene(id);
-
-		delete _SCENES[s.index].prepare;
-
 		this.flash_map();
-
-		$(`li[data-sceneid="${id}"] span#capture`).prop("title", "Recapture scene");
-		$(`li[data-sceneid="${id}"]`).removeClass("prepare");
-		this.set_scene_style(id);
 	},
 
 	delete: function(id) {
@@ -165,7 +163,7 @@ _EVENTS.scene = {
 
 
 
-	set_scene: function(id) {
+	set_scene: function(id, animate) {
 		let s = get_scene(id);
 
 		this.set_scene_input(id);
@@ -174,7 +172,7 @@ _EVENTS.scene = {
 
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
-		_MAP.setObjects(id);
+		_MAP.setObjects(id, animate);
 
 		if(s.basemap) {
 			if(s.basemap.name) _MAP.presetBasemap(s.basemap.name);
@@ -227,38 +225,29 @@ _EVENTS.scene = {
 			if(!id) id = $(ev.target.offsetParent).data("sceneid");
 			if(!id) return;
 
-			this.set_scene(id);
+			let prevId = $("#sceneContainer li.active").data("sceneid"), t = false;
+			if(prevId) {
+				t = get_scene(prevId).index == get_scene(id).index - 1;
+			}
+
+			this.set_scene( id, t );
+		});
+		$("#sceneContainer li.active").click(ev => {
+			let id = $(ev.target).data("sceneid");
+			if(!id) id = $(ev.target.offsetParent).data("sceneid");
+			if(!id) return;
+
+			let s = get_scene(id);
+			_MAP.flyToBounds(s.bounds, { maxZoom: _MAP.getMaxZoom() });
 		});
 	},
 	unset_click: function() {
 		$("#sceneContainer li").off("click");
 	},
 
-
-
 	flash_map: function() {
 		$("div#map").addClass("snapshot");
 		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 240);
-	},
-
-	create_pell: function(id) {
-		return pell.init({
-			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
-			onChange: html => { this.input(id, "text", html); },
-			defaultParagraphSeparator: "p",
-			styleWithCSS: false,
-			actions: [
-				"bold",
-				"underline",
-				{ name: "italic", result: () => pell.exec("italic") },
-				{ name: "link",
-					result: () => {
-						const url = window.prompt("Enter the link URL");
-						if(url) pell.exec("createLink", url);
-					}
-				}
-			]
-		});
 	}
 
 };
@@ -306,6 +295,7 @@ _EVENTS.object = {
 				);
 
 				$(object._icon).css("border", "1px solid #563d7c");
+				_MAP.updateObject(object.options.id);
 			};
 			fr.readAsDataURL(file);
 		});
@@ -315,6 +305,7 @@ _EVENTS.object = {
 
 			$(object._icon).css("border-color", val);
 			object.options.borderColor = val;
+			_MAP.updateObject(object.options.id);
 		});
 		$("#markerPopup input#color").val(object.options.borderColor || "#563d7c");
 
@@ -323,6 +314,7 @@ _EVENTS.object = {
 
 			$(object._icon).css("border-width", `${val}px`);
 			object.options.borderThickness = val;
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup input#blur").change(function(ev) {
@@ -330,6 +322,7 @@ _EVENTS.object = {
 
 			$(object._icon).css("filter", `blur(${val}px)`);
 			object.options.overlayBlur = val;
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup input#grayscale").change(function(ev) {
@@ -337,13 +330,23 @@ _EVENTS.object = {
 
 			$(object._icon).css("filter", `grayscale(${val*100}%)`);
 			object.options.overlayGrayscale = val;
+			_MAP.updateObject(object.options.id);
+		});
+
+		$("#markerPopup input#brightness").change(function(ev) {
+			let val = $(this).val();
+
+			$(object._icon).css("filter", `drop-shadow(0 0 ${val}px yellow)`);
+			object.options.overlayBrightness = val;
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup input#transparency").change(function(ev) {
-			let val = $(this).val() / 100;
+			let val = $(this).val();
 
 			$(object._icon).css("filter", `opacity(${(1 - val)*100}%)`);
 			object.options.overlayTransparency = val;
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup #delete").click(function(ev) {
@@ -354,15 +357,18 @@ _EVENTS.object = {
 	setup_polyline: function(object) {
 		$("#polylinePopup input#color").change(function(ev) {
 			object.setStyle({ color: $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 		$("#polylinePopup input#color").val(object.options.color || "#563d7c");
 
 		$("#polylinePopup input#thickness").change(function(ev) {
 			object.setStyle({ weight: $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polylinePopup input#transparency").change(function(ev) {
-			object.setStyle({ opacity: 1 - $(this).val() / 100 });
+			object.setStyle({ opacity: 1 - $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polylinePopup #delete").click(function(ev) {
@@ -373,24 +379,29 @@ _EVENTS.object = {
 	setup_polygon: function(object) {
 		$("#polygonPopup input#lineColor").change(function(ev) {
 			object.setStyle({ color: $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 		$("#polygonPopup input#lineColor").val(object.options.color || "#563d7c");
 
 		$("#polygonPopup input#lineThickness").change(function(ev) {
 			object.setStyle({ weight: $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polygonPopup input#lineTransparency").change(function(ev) {
-			object.setStyle({ opacity: 1 - $(this).val() / 100 });
+			object.setStyle({ opacity: 1 - $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polygonPopup input#fillColor").change(function(ev) {
 			object.setStyle({ fillColor: $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 		$("#polygonPopup input#fillColor").val(object.options.fillColor || "#563d7c");
 
 		$("#polygonPopup input#fillTransparency").change(function(ev) {
-			object.setStyle({ fillOpacity: 1 - $(this).val() / 100 });
+			object.setStyle({ fillOpacity: 1 - $(this).val() });
+			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polygonPopup #delete").click(function(ev) {
@@ -443,8 +454,9 @@ _EVENTS.basemapOptions = {
 
 	setup: function() {
 
-		$("#basemapModal input#basemapFile").change(function(ev) {
-			let file = $(this)[0].files[0];
+		$("#basemapModal input#basemapFile").change(ev => {
+			var self = this;
+			let file = $(ev.target)[0].files[0];
 
 			let fr = new FileReader();
 			fr.onload = function() {
@@ -455,8 +467,9 @@ _EVENTS.basemapOptions = {
 					let width = this.width,
 						height = this.height;
 
+					self.unsetSceneBasemap();
 					_MAP.setBasemap(res, width, height);
-					_BASEMAP = res;
+					self.setSceneBasemap();
 
 					return true;
 				};
@@ -467,14 +480,35 @@ _EVENTS.basemapOptions = {
 
 		init_basemaps();
 
-		$("#basemapModal #basemaps").click(function(ev) {
-			let basemap = $(this).data("basemap");
+		$("#basemapModal #basemaps").click(ev => {
+			let basemap = $(ev.target).data("basemap");
 			if(!basemap) return;
 
+			this.unsetSceneBasemap();
 			_MAP.presetBasemap(basemap);
-			_BASEMAP = basemap;
+			this.setSceneBasemap();
 		});
 
+	},
+
+	unsetSceneBasemap: function() {
+		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		if(!sceneId) console.error("No active scene found");
+
+		for(let i = get_scene(sceneId).index + 1; i < _SCENES.length; i++) {
+			if(!_SCENES[i].basemap) {
+				_SCENES[i].basemap = _MAP.getBasemap();
+				break;
+			}
+		}
+	},
+
+	setSceneBasemap: function() {
+		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		if(!sceneId) console.error("No active scene found");
+
+		let s = get_scene(sceneId);
+		_SCENES[s.index].basemap = _MAP.getBasemap();
 	}
 
 };
@@ -490,7 +524,6 @@ _EVENTS.project = { // TODO: reimplement
 
 		let project = {
 			font: _FONT || "default",
-			basemap: _BASEMAP || "default",
 			clustering: _CLUSTERING || "default",
 			scenes: _SCENES,
 			objects: _MAP.drawingLayer.export()

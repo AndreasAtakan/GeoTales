@@ -21,7 +21,6 @@
 "use strict";
 
 let _FONT,
-	_BASEMAP,
 	_CLUSTERING,
 	_SCENES = [];
 
