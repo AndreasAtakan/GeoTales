@@ -32,9 +32,11 @@ L.FadeLayer = L.FeatureGroup.extend({
 		switch(object.options.type) {
 			case "marker":
 				$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
-				$(object._icon).css("filter", `blur(${object.options.overlayBlur}px)`);
-				$(object._icon).css("filter", `grayscale(${object.options.overlayGrayscale*100}%)`);
-				$(object._icon).css("filter", `opacity(40%)`);
+				$(object._icon).css("filter", `
+					blur(${object.options.overlayBlur}px)
+					grayscale(${object.options.overlayGrayscale*100}%)
+					opacity(40%)
+				`);
 				break;
 
 			case "polyline":
@@ -189,10 +191,12 @@ L.MarkerLayer = L.FeatureGroup.extend({
 		if(!object.options.overlayTransparency)	object.options.overlayTransparency = 0;
 
 		$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
-		$(object._icon).css("filter", `blur(${object.options.overlayBlur}px)`);
-		$(object._icon).css("filter", `grayscale(${object.options.overlayGrayscale*100}%)`);
-		$(object._icon).css("filter", `drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)`);
-		$(object._icon).css("filter", `opacity(${(1 - object.options.overlayTransparency)*100}%)`);
+		$(object._icon).css("filter", `
+			blur(${object.options.overlayBlur}px)
+			grayscale(${object.options.overlayGrayscale*100}%)
+			drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
+			opacity(${(1 - object.options.overlayTransparency)*100}%)
+		`);
 
 		object.dragging.enable();
 
@@ -227,6 +231,8 @@ L.MarkerLayer = L.FeatureGroup.extend({
 	removeLayer: function(object, id) {
 		var object = object || (id ? this.getObject(id) : null);
 		if(!object) return;
+
+		object.slideCancel();
 
 		object.closePopup();
 		object.unbindPopup();

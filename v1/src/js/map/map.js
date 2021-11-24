@@ -79,7 +79,7 @@ L.Map.addInitHook(function() {
 		let object = ev.layer,
 			type = ev.layerType;
 
-		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 		object.options.sceneId = sceneId || console.error("No active scene found");
 
 		if(type == "marker") this.markerLayer.addLayer(object);
@@ -158,6 +158,14 @@ L.Map.addInitHook(function() {
 	this.editHandler = this.editControl.getModeHandlers()[0].handler;
 	this.editHandler._map = this; // NOTE: this is also a hack, but necessary to make editing work
 
+	this.on("movestart", ev => {
+		let activeScene = $("#sceneContainer li.active").data("sceneid");
+		if(!activeScene) return;
+
+		$(`li[data-sceneid="${activeScene}"]`).removeClass("active");
+		$(`li[data-sceneid="${activeScene}"]`).addClass("inactive");
+	});
+
 });
 
 
@@ -205,20 +213,37 @@ L.Map.include({
 		let o = this.fadeLayer.getObject(id);
 		if(!o) return;
 
-		if(o.options.type == "marker") $(o._icon).css("filter", `opacity(70%)`);
-		else o.setStyle({ opacity: 0.8 });
+		if(o.options.type == "marker") {
+			$(o._icon).css("filter", `
+				blur(${o.options.overlayBlur}px)
+				grayscale(${o.options.overlayGrayscale*100}%)
+				opacity(70%)
+			`);
+		} else o.setStyle({ opacity: 0.8 });
 	},
 	unhighlightObject: function(id) {
 		let o = this.fadeLayer.getObject(id);
 		if(!o) return;
 
-		if(o.options.type == "marker") $(o._icon).css("filter", `opacity(40%)`);
-		else o.setStyle({ opacity: 0.3 });
+		if(o.options.type == "marker") {
+			$(o._icon).css("filter", `
+				blur(${o.options.overlayBlur}px)
+				grayscale(${o.options.overlayGrayscale*100}%)
+				opacity(40%)
+			`);
+		} else o.setStyle({ opacity: 0.3 });
 	},
 
 	setObjects: function(sceneId, animate) {
 		let s = get_scene(sceneId),
 			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
+
+		this.fadeLayer.clearLayers();
+		if(prevSceneId) {
+			for(let o of this.objects) {
+				if(o.sceneId == prevSceneId) this.fadeLayer.addLayer(this.createObject(o), o.type, o.id);
+			}
+		}
 
 		let os = this.markerLayer.getLayers().map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
@@ -235,20 +260,18 @@ L.Map.include({
 						for(let oo of os) {
 							if(o.id == oo.id) {
 								m.setLatLng(oo.pos);
-								m.slideTo(o.pos, { duration: 200 });
+								m.slideTo(o.pos, { duration: 2000 });
+								/*let point = this.latLngToContainerPoint(oo.pos);
+								this.on("move", ev => {
+									m.setLatLng( this.containerPointToLatLng(point) );
+								});
+								this.on("moveend", ev => { m.slideTo(o.pos, { duration: 500 }); this.off("move"); });*/
 								break;
 							}
 						}
 					}
 				}
 				else this.editLayer.addLayer(this.createObject(o), o.type, o.id);
-			}
-		}
-
-		this.fadeLayer.clearLayers();
-		if(prevSceneId) {
-			for(let o of this.objects) {
-				if(o.sceneId == prevSceneId) this.fadeLayer.addLayer(this.createObject(o), o.type, o.id);
 			}
 		}
 	},
@@ -266,7 +289,7 @@ L.Map.include({
 			}
 		}
 
-		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 		object.options.sceneId = sceneId || console.error("No active scene found");
 
 		if(object.options.type == "marker") this.markerLayer.addLayer(object, object.options.id);
@@ -401,7 +424,7 @@ L.Map.include({
 					icon: L.icon({
 						iconUrl: o.icon.url,
 						iconSize: o.icon.size,
-						popupAnchor: [0, o.icon.size[1] * (-1)],
+						popupAnchor: [0, (o.icon.size[1] / 2) * (-1)],
 						className: "markerIcon"
 					})
 				});
@@ -481,7 +504,7 @@ L.Map.include({
 					id:				o.options.id,
 					sceneId:		o.options.sceneId,
 					type:			o.options.type,
-					pos:			o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+					pos:			o.getLatLngs().map(e => { return { lat: e.lat, lng: e.lng }; }),
 					color:			o.options.color,
 					thickness:		o.options.weight,
 					transparency:	1 - o.options.opacity

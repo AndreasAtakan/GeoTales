@@ -34,7 +34,7 @@ window.onload = function(ev) {
 		keyboard: false,
 		touchZoom: false,
 		tap: false,
-		worldCopyJump: true
+		//worldCopyJump: true
 	});
 
 	$("div.leaflet-control-attribution a").prop("target", "_blank");

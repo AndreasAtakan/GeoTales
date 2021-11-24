@@ -29,7 +29,7 @@ input::-webkit-inner-spin-button {
 	margin: 0;
 }*/
 
-input, textarea, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
+input, textarea, select, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
 #_midline {
 	position: absolute;
@@ -67,19 +67,21 @@ input, textarea, button, ul, div.modal-content, .leaflet-bar { border-radius: 2p
 #sceneContainer li {
 	color: #999999;
 }
-#sceneContainer li:hover:not([class*="active"]),
-#sceneContainer li:focus:not([class*="active"]) {
-	background-image: linear-gradient(to right, #cccccc, white, white, white, white, white, white, white, white);
+#sceneContainer li:hover:not(.active),
+#sceneContainer li:focus:not(.active) {
 	cursor: pointer;
 }
 
-#sceneContainer li.active {
-	background-image: linear-gradient(to right, #7a6699, white, white, white, white, white, white, white, white);
-	color: white;
+#sceneContainer li { background-color: initial; }
+#sceneContainer li.inactive {
+	background-color: white;
 }
-#sceneContainer li.active div#textInput { color: initial; }
+#sceneContainer li.active {
+	background-color: white;
+	color: #800000;
+}
+#sceneContainer li[class*="active"] div#textInput { color: initial; }
 
-#sceneContainer li[class*="active"] #textInput { color: initial; }
 #sceneContainer li[class*="active"] #reorder:hover {
 	cursor: move;
 }

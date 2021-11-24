@@ -3,27 +3,19 @@
 ##### Endringer – tilbakemeldinger runde 1:
 
 1. Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
-2. X Mulighet til å lenke avatar og scene (avataren følger scene-overgangen)
-3. Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
-4. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
+2. Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
+3. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
 ##### Endringer – tilbakemeldinger runde 2:
 
-1. Font-valg: font-alternativene må være i de spesifikke font-ene
-2. V Alle modal-er bør være flyttbar av bruker (som frittstående vinduer)
-3. Redigere avatar icon før icon blir satt på avataren (litt som twitter-profilbilde)
-4. X Automatisk legg inn tidspunkt fra forrige scene på ny scene (tidspunkt fortsettelse)
-5. X En scene skal følge flere kart-posisjoner (gjør dette ved å ha valg om å "keep prevoius scene", altså lag en ny scene på ny posisjon med samme innhold som forrige svene)
-6. Legge inn tekst-boks som alternativ i kart-tegning
-7. X Skifte grunnkart fra scene-til-scene, med glidende overgang
-8. X Gjør om på objekt redigering slik at det ikke lenger er bygd inn i leaflet.draw, men heller i objektets popup
+1. V Alle modal-er bør være flyttbar av bruker (som frittstående vinduer)
+2. Redigere avatar icon før icon blir satt på avataren (litt som twitter-profilbilde)
+3. Legge inn tekst-boks som alternativ i kart-tegning
 
 ##### Endringer – tilbakemeldinger runde 3:
 
-1. X Lage en markering av koblingen mellom objekters nåværende posisjon og forrige posisjon
-2. Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
-3. X Legge inn glidende transition for avatar mellom scenene
-4. X Når man oppretter en ny scene, så skal objektene fra tidligere scene IKKE kopieres inn med en gang. Objektene fra tidligere scene skal kun kopieres inn i nåværende scene når brukeren trykker på objektet fra this.fadeLayer (og drar objektet).
+1. Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
+2. X Legge inn glidende transition for avatar mellom scenene
 
 
 ###### Misc.
@@ -36,6 +28,14 @@
 	  Og "Available basemaps" bør ha et søkefelt på toppen
 
 - Kapittel-inndeling av scenene (gruppere scenene i "kapitler" og ha en innholdfortegnelse av alle kapitler øverst, på toppen av scene-seksjonen)
+
+- Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min)
+- Scene tekst-boks lenke går til relativ path, og ikke absolutt path
+- V Kart-objekt opsjonene sine verdier skal automatisk legges inn i popup-boksen når den åpnes?
+
+- Ny avatar-icon funksjonalitet: Legg inn ny ui i avatar-popup under "overlay" hvor brukeren kan legge predefinerte ikoner med gjennomsiktighet (png), f.eks. båt, bil, ol., som vil legges på toppen av avatarens eksisterende ikon. Dette gir avataren ekstra "forteller"-verdi
+
+- [Grunnkart kilde](https://maps.lib.utexas.edu/maps)
 
 
 

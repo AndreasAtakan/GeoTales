@@ -52,17 +52,24 @@ _EVENTS.scene = {
 
 		$(document).keydown(ev => {
 			let keycode = ev.keyCode,
-				id = $("#sceneContainer li.active").data("sceneid");
+				id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
 
 			if(keycode == 38 && s.index > 0) {
+				ev.preventDefault();
 				this.set_scene( _SCENES[s.index - 1].id );
 			}
 
 			if(keycode == 40 && s.index < _SCENES.length - 1) {
+				ev.preventDefault();
 				this.set_scene( _SCENES[s.index + 1].id, true );
+			}
+
+			if((keycode == 38 || keycode == 40)
+			&& (s.index <= 0 || s.index >= _SCENES.length - 1)) {
+				ev.preventDefault();
 			}
 		});
 
@@ -84,6 +91,7 @@ _EVENTS.scene = {
 		let s = { id: id };
 
 		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
@@ -98,13 +106,15 @@ _EVENTS.scene = {
 		let prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
 		if(prevId) {
 			let prevScene = get_scene(prevId);
-			if(prevScene.title)	s.title = prevScene.title;
-			if(prevScene.date)	s.date = prevScene.date;
-			if(prevScene.time)	s.time = prevScene.time;
-			if(prevScene.media)	s.media = prevScene.media;
-			if(prevScene.text)	s.text = prevScene.text;
+			if(prevScene.title)		s.title = prevScene.title;
+			if(prevScene.period)	s.period = prevScene.period;
+			if(prevScene.date)		s.date = prevScene.date;
+			if(prevScene.time)		s.time = prevScene.time;
+			if(prevScene.media)		s.media = prevScene.media;
+			if(prevScene.text)		s.text = prevScene.text;
 
 			$(`li[data-sceneid="${id}"] input#titleInput`).val( s.title || "" );
+			if(s.period) $(`li[data-sceneid="${id}"] select#periodInput`).val( s.period );
 			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
 			//$(`li[data-sceneid="${id}"] input#mediaInput`).val( s.media || "" );
@@ -126,9 +136,9 @@ _EVENTS.scene = {
 	capture: function(id) {
 		let s = get_scene(id);
 
-		let ne = _MAP.getBounds().getNorthEast(),
-			sw = _MAP.getBounds().getSouthWest();
-		_SCENES[s.index].bounds = [[sw.lat, sw.lng], [ne.lat, ne.lng]];
+		let center = _MAP.getCenter(), zoom = _MAP.getZoom();
+		_SCENES[s.index].center = { lat: center.lat, lng: center.lng };
+		_SCENES[s.index].zoom = zoom;
 
 		let b = _MAP.getBasemap(), lastB = get_last_scene_basemap(id);
 		if(lastB) {
@@ -158,7 +168,7 @@ _EVENTS.scene = {
 	reorder: function(order) {
 		_SCENES.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
 
-		this.set_scene( $("#sceneContainer li.active").data("sceneid") );
+		this.set_scene( $("#sceneContainer li[class*=\"active\"]").data("sceneid") );
 	},
 
 
@@ -172,8 +182,6 @@ _EVENTS.scene = {
 
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
-		_MAP.setObjects(id, animate);
-
 		if(s.basemap) {
 			if(s.basemap.name) _MAP.presetBasemap(s.basemap.name);
 			else if(s.basemap.url) _MAP.setBasemap(s.basemap.url, s.basemap.width, s.basemap.height);
@@ -185,20 +193,24 @@ _EVENTS.scene = {
 			}
 		}
 
-		_MAP.flyToBounds(s.bounds, { maxZoom: _MAP.getMaxZoom() });
+		_MAP.setObjects(id, animate);
+
+		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true /*duration: 4*/ });
 	},
 
 	set_scene_input: function(id) {
 		$("#sceneContainer span#capture").off("click");
 		$("#sceneContainer span#delete").off("click");
 		$("#sceneContainer input#titleInput").prop("disabled", true);
+		$("#sceneContainer select#periodInput").prop("disabled", true);
 		$("#sceneContainer input#dateInput").prop("disabled", true);
 		$("#sceneContainer input#timeInput").prop("disabled", true);
 		$("#sceneContainer input#mediaInput").prop("disabled", true);
 
-		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); } );
+		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
 		$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
+		$(`li[data-sceneid="${id}"] select#periodInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#mediaInput`).prop("disabled", false);
@@ -207,11 +219,13 @@ _EVENTS.scene = {
 	set_scene_style: function(id) {
 		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
 
+		$("#sceneContainer li").removeClass("inactive");
 		$("#sceneContainer li").removeClass("active");
 		$(`li[data-sceneid="${id}"]`).addClass("active");
 
 		if(_FONT) {
 			$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
+			$(`li[data-sceneid="${id}"] select#periodInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#dateInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
@@ -225,24 +239,30 @@ _EVENTS.scene = {
 			if(!id) id = $(ev.target.offsetParent).data("sceneid");
 			if(!id) return;
 
-			let prevId = $("#sceneContainer li.active").data("sceneid"), t = false;
+			let prevId = $("#sceneContainer li[class*=\"active\"]").data("sceneid"), t = false;
 			if(prevId) {
 				t = get_scene(prevId).index == get_scene(id).index - 1;
 			}
 
 			this.set_scene( id, t );
 		});
-		$("#sceneContainer li.active").click(ev => {
+		$("#sceneContainer li[class*=\"active\"]").click(ev => {
 			let id = $(ev.target).data("sceneid");
 			if(!id) id = $(ev.target.offsetParent).data("sceneid");
 			if(!id) return;
 
+			if( $(`li[data-sceneid="${id}"]`).hasClass("inactive") ) {
+				$(`li[data-sceneid="${id}"]`).removeClass("inactive");
+				$(`li[data-sceneid="${id}"]`).addClass("active");
+			}
+
 			let s = get_scene(id);
-			_MAP.flyToBounds(s.bounds, { maxZoom: _MAP.getMaxZoom() });
+			_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true /*duration: 4*/ });
 		});
+		$("#sceneContainer li input, #sceneContainer li div#textInput").click(ev => { ev.stopPropagation(); });
 	},
 	unset_click: function() {
-		$("#sceneContainer li").off("click");
+		$("#sceneContainer li, #sceneContainer li input, #sceneContainer li div#textInput").off("click");
 	},
 
 	flash_map: function() {
@@ -294,7 +314,7 @@ _EVENTS.object = {
 					})
 				);
 
-				$(object._icon).css("border", "1px solid #563d7c");
+				$(object._icon).css("border", "0px solid #563d7c");
 				_MAP.updateObject(object.options.id);
 			};
 			fr.readAsDataURL(file);
@@ -310,7 +330,7 @@ _EVENTS.object = {
 		$("#markerPopup input#color").val(object.options.borderColor || "#563d7c");
 
 		$("#markerPopup input#thickness").change(function(ev) {
-			let val = $(this).val();
+			let val = Math.min( Math.max( 0, $(this).val() ), 10 );
 
 			$(object._icon).css("border-width", `${val}px`);
 			object.options.borderThickness = val;
@@ -318,34 +338,58 @@ _EVENTS.object = {
 		});
 
 		$("#markerPopup input#blur").change(function(ev) {
-			let val = $(this).val();
+			let val = Math.min( Math.max( 0, $(this).val() ), 3 );
 
-			$(object._icon).css("filter", `blur(${val}px)`);
 			object.options.overlayBlur = val;
+			$(object._icon).css("filter", `
+				blur(${object.options.overlayBlur}px)
+				grayscale(${object.options.overlayGrayscale*100}%)
+				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
+				opacity(${(1 - object.options.overlayTransparency)*100}%)
+			`);
+
 			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup input#grayscale").change(function(ev) {
-			let val = $(this).val();
+			let val = Math.min( Math.max( 0, $(this).val() ), 1 );
 
-			$(object._icon).css("filter", `grayscale(${val*100}%)`);
 			object.options.overlayGrayscale = val;
+			$(object._icon).css("filter", `
+				blur(${object.options.overlayBlur}px)
+				grayscale(${object.options.overlayGrayscale*100}%)
+				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
+				opacity(${(1 - object.options.overlayTransparency)*100}%)
+			`);
+
 			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup input#brightness").change(function(ev) {
-			let val = $(this).val();
+			let val = Math.min( Math.max( 0, $(this).val() ), 6 );
 
-			$(object._icon).css("filter", `drop-shadow(0 0 ${val}px yellow)`);
 			object.options.overlayBrightness = val;
+			$(object._icon).css("filter", `
+				blur(${object.options.overlayBlur}px)
+				grayscale(${object.options.overlayGrayscale*100}%)
+				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
+				opacity(${(1 - object.options.overlayTransparency)*100}%)
+			`);
+
 			_MAP.updateObject(object.options.id);
 		});
 
 		$("#markerPopup input#transparency").change(function(ev) {
-			let val = $(this).val();
+			let val = Math.min( Math.max( 0, $(this).val() ), 0.9 );
 
-			$(object._icon).css("filter", `opacity(${(1 - val)*100}%)`);
 			object.options.overlayTransparency = val;
+			$(object._icon).css("filter", `
+				blur(${object.options.overlayBlur}px)
+				grayscale(${object.options.overlayGrayscale*100}%)
+				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
+				opacity(${(1 - object.options.overlayTransparency)*100}%)
+			`);
+
 			_MAP.updateObject(object.options.id);
 		});
 
@@ -362,12 +406,12 @@ _EVENTS.object = {
 		$("#polylinePopup input#color").val(object.options.color || "#563d7c");
 
 		$("#polylinePopup input#thickness").change(function(ev) {
-			object.setStyle({ weight: $(this).val() });
+			object.setStyle({ weight: Math.min( Math.max( 2, $(this).val() ), 10 ) });
 			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polylinePopup input#transparency").change(function(ev) {
-			object.setStyle({ opacity: 1 - $(this).val() });
+			object.setStyle({ opacity: 1 - Math.min( Math.max( 0, $(this).val() ), 0.9 ) });
 			_MAP.updateObject(object.options.id);
 		});
 
@@ -384,12 +428,12 @@ _EVENTS.object = {
 		$("#polygonPopup input#lineColor").val(object.options.color || "#563d7c");
 
 		$("#polygonPopup input#lineThickness").change(function(ev) {
-			object.setStyle({ weight: $(this).val() });
+			object.setStyle({ weight: Math.min( Math.max( 2, $(this).val() ), 10 ) });
 			_MAP.updateObject(object.options.id);
 		});
 
 		$("#polygonPopup input#lineTransparency").change(function(ev) {
-			object.setStyle({ opacity: 1 - $(this).val() });
+			object.setStyle({ opacity: 1 - Math.min( Math.max( 0, $(this).val() ), 0.9 ) });
 			_MAP.updateObject(object.options.id);
 		});
 
@@ -400,7 +444,7 @@ _EVENTS.object = {
 		$("#polygonPopup input#fillColor").val(object.options.fillColor || "#563d7c");
 
 		$("#polygonPopup input#fillTransparency").change(function(ev) {
-			object.setStyle({ fillOpacity: 1 - $(this).val() });
+			object.setStyle({ fillOpacity: 1 - Math.min( Math.max( 0, $(this).val() ), 1 ) });
 			_MAP.updateObject(object.options.id);
 		});
 
@@ -433,13 +477,16 @@ _EVENTS.mapOptions = {
 				case "georgia":			font = "Georgia, serif"; break;
 				case "courier new":		font = "\"Courier New\", monospace"; break;
 				case "brush script mt":	font = "\"Brush Script MT\", cursive"; break;
-				default: console.error("font type invalid"); break;
+				default:				font = "inherit"; break;
 			}
 
 			$("#sceneContainer input#titleInput").css("font-family", font);
+			$("#sceneContainer select#periodInput").css("font-family", font);
 			$("#sceneContainer input#dateInput").css("font-family", font);
 			$("#sceneContainer input#timeInput").css("font-family", font);
 			$("#sceneContainer div#textInput").css("font-family", font);
+
+			$(this).css("font-family", font);
 
 			_FONT = font;
 		});
@@ -492,7 +539,7 @@ _EVENTS.basemapOptions = {
 	},
 
 	unsetSceneBasemap: function() {
-		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 		if(!sceneId) console.error("No active scene found");
 
 		for(let i = get_scene(sceneId).index + 1; i < _SCENES.length; i++) {
@@ -504,7 +551,7 @@ _EVENTS.basemapOptions = {
 	},
 
 	setSceneBasemap: function() {
-		let sceneId = $("#sceneContainer li.active").data("sceneid");
+		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 		if(!sceneId) console.error("No active scene found");
 
 		let s = get_scene(sceneId);

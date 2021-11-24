@@ -118,8 +118,14 @@ function add_scene(id) {
 						</div>
 						<div class="row mb-3">
 							<div class="col">
-								<input type="date" class="form-control form-control-sm" id="dateInput" style="width: auto; display: inline;" required disabled />
-								<input type="time" class="form-control form-control-sm" id="timeInput" step="1" style="width: auto; display: inline;" required disabled />
+								<div class="input-group input-group-sm">
+									<select class="form-select" id="periodInput" aria-label="timeperiod" style="flex-grow: 0; width: auto;" required disabled>
+										<option value="ad" selected>AD</option>
+										<option value="bc">BC</option>
+									</select>
+									<input type="date" class="form-control" id="dateInput" required disabled />
+									<input type="time" class="form-control" id="timeInput" step="1" required disabled />
+								</div>
 							</div>
 						</div>
 						<div class="row mb-3">

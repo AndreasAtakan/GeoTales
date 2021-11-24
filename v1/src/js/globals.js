@@ -36,7 +36,7 @@ const _BASEMAPS = [
 	{ int: true,	name: "Stamen.Toner",					zoom: [0, 20],	preview: "https://stamen-tiles-b.a.ssl.fastly.net/toner/5/15/10.png" },
 	{ int: true,	name: "Stamen.TonerLite",				zoom: [0, 20],	preview: "https://stamen-tiles-b.a.ssl.fastly.net/toner-lite/5/15/10.png" },
 	{ int: true,	name: "Stamen.Watercolor",				zoom: [0, 16],	preview: "https://stamen-tiles-b.a.ssl.fastly.net/watercolor/5/15/10.png" },
-	{ int: true,	name: "Stamen.Terrain",					zoom: [0, 18],	preview: "https://stamen-tiles-b.a.ssl.fastly.net/terrain/5/15/10.png" },
+	{ int: true,	name: "Stamen.Terrain",					zoom: [0, 14],	preview: "https://stamen-tiles-b.a.ssl.fastly.net/terrain/5/15/10.png" },
 	{ int: true,	name: "Esri.WorldStreetMap",			zoom: [0, 18],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/5/10/15" },
 	{ int: true,	name: "Esri.WorldTopoMap",				zoom: [0, 18],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/5/10/15" },
 	{ int: true,	name: "Esri.WorldImagery",				zoom: [0, 18],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/10/15" },

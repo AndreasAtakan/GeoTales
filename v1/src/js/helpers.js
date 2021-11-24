@@ -35,7 +35,7 @@ function mergeObjects(o, u) {
 
 function get_scene(id) {
 	for(let i = 0; i < _SCENES.length; i++) {
-		let s = _SCENES[i];
+		let s = Object.assign({}, _SCENES[i]);
 
 		if(s.id == id) {
 			s.index = i;
