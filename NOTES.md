@@ -3,7 +3,7 @@
 ##### Endringer – tilbakemeldinger runde 1:
 
 1. Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
-2. Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
+2. V Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
 3. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
 ##### Endringer – tilbakemeldinger runde 2:
@@ -20,7 +20,6 @@
 
 ###### Misc.
 
-- Form in scenes needs validation, i.e. the "time" input is not set unless the user gives values for both hour, minute and seconds. If seconds is missing, the time field is not set at all. Add some sort of validation on the set_scene mehtod in events to give a message to the user to set the value in its entirety.
 - Source for object-editing enable and disable: https://github.com/Leaflet/Leaflet.draw/issues/129#issuecomment-466672085
 
 - Gi brukeren muligheten til å plassere/posisjonere bilde-grunnkart i forhold til de innebygde grunnkartene
@@ -29,7 +28,7 @@
 
 - Kapittel-inndeling av scenene (gruppere scenene i "kapitler" og ha en innholdfortegnelse av alle kapitler øverst, på toppen av scene-seksjonen)
 
-- Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min)
+- Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min). Gjelder Chrome
 - Scene tekst-boks lenke går til relativ path, og ikke absolutt path
 - V Kart-objekt opsjonene sine verdier skal automatisk legges inn i popup-boksen når den åpnes?
 

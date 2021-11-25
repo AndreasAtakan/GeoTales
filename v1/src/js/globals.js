@@ -20,12 +20,22 @@
 
 "use strict";
 
-let _FONT,
-	_CLUSTERING,
+let _CLUSTERING = "default",
+	_AVATARSPEED = 2000,
+	_PANNINGSPEED,
+	_FONT = "inherit",
+	_THEME = "default",
 	_SCENES = [];
 
 let _MAP,
 	_EVENTS = {};
+
+const _THEMES = [
+	{ name: "default",	style: "light",	primary: "#f2f2f2",	secondary: "#bfbfbf" },
+	{ name: "hot",		style: "light",	primary: "#cc0000",	secondary: "#ffcc66" },
+	{ name: "cold",		style: "light",	primary: "#ecf2f9",	secondary: "#336699" },
+	{ name: "dark",		style: "dark",	primary: "#a6a6a6",	secondary: "#1a1a1a" }
+];
 
 const _BASEMAPS = [
 	{ int: true,	name: "OpenStreetMap.Mapnik",			zoom: [0, 19],	preview: "https://b.tile.openstreetmap.org/5/15/10.png" },

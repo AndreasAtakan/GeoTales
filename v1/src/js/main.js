@@ -39,24 +39,12 @@ window.onload = function(ev) {
 
 	$("div.leaflet-control-attribution a").prop("target", "_blank");
 
-	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); });
+	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); _EVENTS.scene.add(); });
 
 	$("#exportMap").click(ev => { _EVENTS.project.export(); });
 
-	_EVENTS.mapOptions.setup();
+	_EVENTS.project.setup();
+	_EVENTS.options.setup();
 	_EVENTS.basemapOptions.setup();
 
 };
-
-/*let height;
-window.onresize = function(ev) {
-
-	if(height >= 630 && window.innerHeight < 630) {
-		map.drawingControl.setPosition("bottomleft");
-	}else if(height < 630 && window.innerHeight >= 630) {
-		map.drawingControl.setPosition("bottomright");
-	}
-
-	height = window.innerHeight;
-
-};*/

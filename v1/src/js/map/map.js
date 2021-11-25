@@ -45,6 +45,7 @@ L.Map.addInitHook(function() {
 		]
 	});
 	this.addControl( this.basemapButton );
+	this.basemapButton.disable();
 
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
@@ -175,6 +176,7 @@ L.Map.include({
 
 	setup: function() {
 		this.enableDrawing();
+		this.basemapButton.enable();
 	},
 	reset: function() {
 		this.markerLayer.clearLayers();
@@ -182,6 +184,7 @@ L.Map.include({
 		this.fadeLayer.clearLayers();
 
 		this.disableDrawing();
+		this.basemapButton.disable();
 	},
 
 	enableDrawing: function() {
@@ -260,7 +263,7 @@ L.Map.include({
 						for(let oo of os) {
 							if(o.id == oo.id) {
 								m.setLatLng(oo.pos);
-								m.slideTo(o.pos, { duration: 2000 });
+								m.slideTo(o.pos, { duration: _AVATARSPEED });
 								/*let point = this.latLngToContainerPoint(oo.pos);
 								this.on("move", ev => {
 									m.setLatLng( this.containerPointToLatLng(point) );
@@ -535,7 +538,9 @@ L.Map.include({
 	},
 
 	importData: function(data) {
-		console.log(data);
+		for(let i = 0; i < data.length; i++) {
+			this.objects.push( data[i] );
+		}
 	},
 
 	exportData: function() {

@@ -85,7 +85,7 @@ function add_scene(id) {
 
 	$("ul#sceneContainer").append(`
 		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
-			<form class="container-fluid needs-validation px-0">
+			<form class="container-fluid gx-0">
 				<div class="row g-0">
 					<div class="col-1">
 						<div class="row gx-0 mb-3">
@@ -110,21 +110,21 @@ function add_scene(id) {
 							</div>
 						</div>
 					</div>
-					<div class="col-11">
+					<div class="col-10" style="width: 90%;">
 						<div class="row mb-1">
 							<div class="col">
-								<input type="text" class="form-control" id="titleInput" placeholder="Title" required disabled />
+								<input type="text" class="form-control" id="titleInput" placeholder="Title" disabled />
 							</div>
 						</div>
 						<div class="row mb-3">
 							<div class="col">
 								<div class="input-group input-group-sm">
-									<select class="form-select" id="periodInput" aria-label="timeperiod" style="flex-grow: 0; width: auto;" required disabled>
+									<select class="form-select" id="periodInput" aria-label="timeperiod" style="flex-grow: 0; width: auto;" disabled>
 										<option value="ad" selected>AD</option>
 										<option value="bc">BC</option>
 									</select>
-									<input type="date" class="form-control" id="dateInput" required disabled />
-									<input type="time" class="form-control" id="timeInput" step="1" required disabled />
+									<input type="date" class="form-control" id="dateInput" disabled />
+									<input type="time" class="form-control" id="timeInput" step="1" disabled />
 								</div>
 							</div>
 						</div>
@@ -134,6 +134,7 @@ function add_scene(id) {
 								<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" accept="image/*" multiple disabled />
 							</div>
 						</div>
+						<div class="row mb-3" id="mediaPlaceholder"></div>
 						<div class="row">
 							<div class="col">
 								<div class="pell" id="textInput"></div>
@@ -152,7 +153,7 @@ function add_scene(id) {
 function marker_popup() {
 
 	return `
-		<div class="container-fluid" id="markerPopup">
+		<form class="container-fluid" id="markerPopup">
 			<div class="row">
 				<div class="col">
 					<h6>Icon</h6>
@@ -191,7 +192,7 @@ function marker_popup() {
 					</button>
 				</div>
 			</div>
-		</div>
+		</form>
 	`;
 
 }
@@ -199,7 +200,7 @@ function marker_popup() {
 function polyline_popup() {
 
 	return `
-		<div class="container-fluid" id="polylinePopup">
+		<form class="container-fluid" id="polylinePopup">
 			<div class="row">
 				<div class="col">
 					<h6>Color</h6>
@@ -218,7 +219,7 @@ function polyline_popup() {
 					</button>
 				</div>
 			</div>
-		</div>
+		</form>
 	`;
 
 }
@@ -226,7 +227,7 @@ function polyline_popup() {
 function polygon_popup() {
 
 	return `
-		<div class="container-fluid" id="polygonPopup">
+		<form class="container-fluid" id="polygonPopup">
 			<div class="row">
 				<div class="col">
 					<h6>Line</h6>
@@ -255,8 +256,33 @@ function polygon_popup() {
 					</button>
 				</div>
 			</div>
-		</div>
+		</form>
 	`;
+
+}
+
+
+
+function init_themes() {
+
+	let html = ``;
+
+	for(let t of _THEMES) {
+		html += `
+			<div class="col">
+				<div class="card ${t.style == "dark" ? "text-white" : ""} mt-2" style="background-color: ${t.primary};">
+					<div class="card-header" style="background-color: ${t.secondary};">
+						${t.name}
+					</div>
+					<div class="card-body">
+						<input class="form-check-input" type="radio" name="themeRadio" id="${t.name}" ${t.name == "default" ? "checked" : ""} />
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	$("#optionsModal #themeChoose").html(html);
 
 }
 

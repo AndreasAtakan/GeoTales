@@ -28,7 +28,6 @@ _EVENTS.scene = {
 	setup: function() {
 		init_scene();
 
-		this.add();
 		$("#sceneCol button#addScene").click( ev => { this.add(); } );
 
 		$("ul#sceneContainer").sortable({
@@ -78,7 +77,7 @@ _EVENTS.scene = {
 
 	reset: function() {
 		reset_scene();
-		$("#sceneCol button#addScene").click( ev => { this.setup(); } );
+		$("#sceneCol button#addScene").click( ev => { this.setup(); this.add(); } );
 
 		_MAP.reset();
 	},
@@ -86,24 +85,13 @@ _EVENTS.scene = {
 	add: function() {
 		let id = uuid();
 
-		add_scene(id);
+		this.set_add(id);
 
 		let s = { id: id };
 
-		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => { this.input(id, "media", ""); } );
-		textareas[id] = pell.init({
-			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
-			onChange: html => { this.input(id, "text", html); },
-			defaultParagraphSeparator: "p",
-			styleWithCSS: false,
-			actions: [ "bold", "underline", { name: "italic", result: () => pell.exec("italic") }, { name: "link", result: () => { const url = window.prompt("Enter the link URL"); if(url) pell.exec("createLink", url); } } ]
-		});
-
 		let prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
+		_SCENES.push(s);
+
 		if(prevId) {
 			let prevScene = get_scene(prevId);
 			if(prevScene.title)		s.title = prevScene.title;
@@ -114,14 +102,12 @@ _EVENTS.scene = {
 			if(prevScene.text)		s.text = prevScene.text;
 
 			$(`li[data-sceneid="${id}"] input#titleInput`).val( s.title || "" );
-			if(s.period) $(`li[data-sceneid="${id}"] select#periodInput`).val( s.period );
+			$(`li[data-sceneid="${id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
-			//$(`li[data-sceneid="${id}"] input#mediaInput`).val( s.media || "" );
+			if(s.media && s.media.length > 0) this.set_media(id);
 			textareas[id].content.innerHTML = s.text || "";
 		}
-
-		_SCENES.push(s);
 
 		this.capture(id);
 		this.set_scene(id);
@@ -195,7 +181,7 @@ _EVENTS.scene = {
 
 		_MAP.setObjects(id, animate);
 
-		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true /*duration: 4*/ });
+		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
 	set_scene_input: function(id) {
@@ -257,12 +243,63 @@ _EVENTS.scene = {
 			}
 
 			let s = get_scene(id);
-			_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true /*duration: 4*/ });
+			_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
 		});
 		$("#sceneContainer li input, #sceneContainer li div#textInput").click(ev => { ev.stopPropagation(); });
 	},
 	unset_click: function() {
 		$("#sceneContainer li, #sceneContainer li input, #sceneContainer li div#textInput").off("click");
+	},
+
+	set_add: function(id) {
+		add_scene(id);
+
+		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
+		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => {
+			let files = ev.target.files,
+				media = [],
+				self = this;
+			let length = Math.min(files.length, 4);
+
+			for(let i = 0; i < length; i++) {
+				(function(file) {
+					let fr = new FileReader();
+					fr.onload = function(ev) {
+						media.push( ev.target.result );
+
+						if(media.length >= length) {
+							self.input(id, "media", media);
+							self.set_media(id);
+						}
+					};
+					fr.readAsDataURL( file );
+				})(files[i]);
+			}
+		} );
+		textareas[id] = pell.init({
+			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
+			onChange: html => { this.input(id, "text", html); },
+			defaultParagraphSeparator: "p",
+			styleWithCSS: false,
+			actions: [ "bold", "underline", { name: "italic", result: () => pell.exec("italic") }, { name: "link", result: () => { const url = window.prompt("Enter the link URL"); if(url) pell.exec("createLink", url); } } ]
+		});
+	},
+
+	set_media: function(id) {
+		let s = get_scene(id);
+
+		let res = "", w = 12 / Math.min(s.media.length, 4);
+		for(let m of s.media) {
+			res += `
+				<div class="col-${w}">
+					<img src="${m}" class="img-fluid rounded" alt="" />
+				</div>
+			`;
+		}
+		$(`li[data-sceneid="${id}"] #mediaPlaceholder`).html(res);
 	},
 
 	flash_map: function() {
@@ -457,16 +494,30 @@ _EVENTS.object = {
 
 
 
-_EVENTS.mapOptions = {
+_EVENTS.options = {
 
 	setup: function() {
 
-		$("#mapModal select#clusterInput").change(function(ev) {
+		$("#optionsModal select#clusteringInput").change(function(ev) {
 			let val = $(this).val();
 			_CLUSTERING = val;
 		});
 
-		$("#mapModal select#fontInput").change(function(ev) {
+		$("#optionsModal input#avatarSpeedInput").change(function(ev) {
+			let val = $(this).val();
+			_AVATARSPEED = parseInt(val);
+
+			$("#optionsModal span#avatarSpeedInputValue").html(`${val} milliseconds`);
+		});
+
+		$("#optionsModal input#panningSpeedInput").change(function(ev) {
+			let val = $(this).val();
+			_PANNINGSPEED = (val / 1000) || null;
+
+			$("#optionsModal span#panningSpeedInputValue").html(val <= 0 ? `auto` : `${val} milliseconds`);
+		});
+
+		$("#optionsModal select#fontInput").change(function(ev) {
 			let val = $(this).val(), font;
 
 			switch(val) {
@@ -489,6 +540,15 @@ _EVENTS.mapOptions = {
 			$(this).css("font-family", font);
 
 			_FONT = font;
+		});
+
+		init_themes();
+
+		$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
+			let theme = $(ev.target).prop("id");
+			if(!theme) return;
+
+			_THEME = theme;
 		});
 
 	}
@@ -562,7 +622,61 @@ _EVENTS.basemapOptions = {
 
 
 
-_EVENTS.project = { // TODO: reimplement
+_EVENTS.project = {
+
+	setup: function() {
+		let self = this;
+
+		$("#importModal button#import").click(ev => {
+			$("#importModal").modal("hide");
+
+			let file = $("#importModal input#fileInput")[0].files[0];
+			if(!file) return;
+
+			let fr = new FileReader();
+			fr.onload = function() {
+				let res = fr.result;
+				res = JSON.parse(res);
+
+				self.import(res);
+			};
+			fr.readAsText(file);
+		});
+
+	},
+
+	import: function(data) {
+		_CLUSTERING = data.options.clustering;
+		_AVATARSPEED = data.options.avatarspeed;
+		_PANNINGSPEED = data.options.panningspeed;
+
+		_FONT = data.options.clustering;
+		_THEME = data.options.clustering;
+
+		if(data.scenes.length <= 0) return;
+
+		let index = _SCENES.length;
+		if(index <= 0) _EVENTS.scene.setup();
+
+		for(let i = 0; i < data.scenes.length; i++) {
+			let s = data.scenes[i];
+
+			_EVENTS.scene.set_add(s.id);
+
+			_SCENES.push(s);
+
+			$(`li[data-sceneid="${s.id}"] input#titleInput`).val( s.title || "" );
+			$(`li[data-sceneid="${s.id}"] select#periodInput`).val( s.period || "ad" );
+			$(`li[data-sceneid="${s.id}"] input#dateInput`).val( s.date || "" );
+			$(`li[data-sceneid="${s.id}"] input#timeInput`).val( s.time || "" );
+			if(s.media && s.media.length > 0) _EVENTS.scene.set_media(s.id);
+			textareas[s.id].content.innerHTML = s.text || "";
+		}
+
+		_MAP.importData(data.objects);
+
+		_EVENTS.scene.set_scene( _SCENES[index].id );
+	},
 
 	export: function() {
 		let el = document.createElement("a");
@@ -570,10 +684,15 @@ _EVENTS.project = { // TODO: reimplement
 		let filename = "project.tellus";
 
 		let project = {
-			font: _FONT || "default",
-			clustering: _CLUSTERING || "default",
+			options: {
+				clustering: _CLUSTERING,
+				avatarspeed: _AVATARSPEED,
+				panningspeed: _PANNINGSPEED,
+				font: _FONT,
+				theme: _THEME
+			},
 			scenes: _SCENES,
-			objects: _MAP.drawingLayer.export()
+			objects: _MAP.exportData()
 		};
 		project = JSON.stringify(project);
 
