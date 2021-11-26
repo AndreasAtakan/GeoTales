@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+		<title>TellUs</title>
+		<meta name="title" content="---" />
+		<meta name="description" content="---" />
+
+		<link rel="icon" href="assets/logo.jpg" />
+
+		<!-- Load lib/ CSS -->
+		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
+		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
+		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
+		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
+		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
+		<link rel="stylesheet" href="lib/pell/pell.min.css" />
+
+		<!-- Load src/ CSS -->
+		<link rel="stylesheet" href="src/css/main.css" />
+
+		<style type="text/css">
+			.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
+				background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
+				background-size: 14px 14px;
+				background-position: 8px 8px !important;
+			}
+		</style>
+	</head>
+	<body>
+
+
+
+		<!-- Import modal -->
+		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="importModalLabel">Import data</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="fileInput" class="form-label">Choose a data-file</label>
+							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-secondary" id="import">Import</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Options modal -->
+		<div class="modal fade" id="optionsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="optionsModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="optionsModalLabel">Options</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col">
+									<h5>Avatar</h5>
+								</div>
+							</div>
+
+							<div class="row mt-3">
+								<div class="col-md-6 col-sm-12" id="clusteringInputCol">
+									<p>Clustering</p>
+									<select class="form-select" id="clusteringInput" aria-label="Clustering" disabled>
+										<option value="default" selected>Default</option>
+										<option value="tree">Tree</option>
+										<option value="spiral">Spiral</option>
+									</select>
+								</div>
+								<div class="col-md-6 col-sm-12">
+									<p>Animation speed: <small><span id="avatarSpeedInputValue">2000 milliseconds</span></small></p>
+									<input type="range" class="form-range" id="avatarSpeedInput" min="200" max="3000" step="100" value="2000" />
+								</div>
+							</div>
+
+							<br />
+							<hr />
+							<br />
+
+							<div class="row">
+								<div class="col">
+									<h5>Map</h5>
+								</div>
+							</div>
+
+							<div class="row mt-2">
+								<div class="col col-md-10">
+									<p>Panning speed: <small><span id="panningSpeedInputValue">auto</span></small></p>
+									<input type="range" class="form-range" id="panningSpeedInput" min="0" max="4000" step="100" />
+								</div>
+							</div>
+
+							<br />
+							<hr />
+							<br />
+
+							<div class="row">
+								<div class="col">
+									<h5>Presentation mode</h5>
+								</div>
+							</div>
+
+							<div class="row mt-2 mb-4">
+								<div class="col col-md-10">
+									<p>Font</p>
+									<select class="form-select" id="fontInput" aria-label="Font type">
+										<option value="default" selected>Default (Roboto)</option>
+										<option value="arial">Arial (sans-serif)</option>
+										<option value="verdana">Verdana (sans-serif)</option>
+										<option value="helvetica">Helvetica (sans-serif)</option>
+										<option value="times new roman">Times New Roman (serif)</option>
+										<option value="georgia">Georgia (serif)</option>
+										<option value="courier new">Courier New (monospace)</option>
+										<option value="brush script mt">Brush Script MT (cursive)</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="row mt-2">
+								<div class="col">
+									<p>Color theme</p>
+									<div class="accordion" id="themeAccordion">
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="themeAccordionHeading">
+												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#themeAccordionCollapse" aria-expanded="false" aria-controls="themeAccordionCollapse">
+													Choose a theme
+												</button>
+											</h2>
+											<div id="themeAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="themeAccordionHeading" data-bs-parent="#themeAccordion">
+												<div class="accordion-body">
+													<div class="row row-cols-2 row-cols-md-3" id="themeChoose"></div>
+												</div>
+											</div>
+										  </div>
+									</div>
+									<p class="text-muted"> <small>Only applies to presentation mode</small> </p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Basemap modal -->
+		<div class="modal fade" id="basemapModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="basemapModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="basemapModalLabel">Choose basemap</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row mt-2">
+								<div class="col">
+									<div class="accordion" id="basemapAccordion">
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="basemapAccordionHeading">
+												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#basemapAccordionCollapse" aria-expanded="false" aria-controls="basemapAccordionCollapse">
+													Available basemaps
+												</button>
+											</h2>
+											<div id="basemapAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="basemapAccordionHeading" data-bs-parent="#basemapAccordion">
+												<div class="accordion-body">
+													<div class="row row-cols-2 row-cols-md-3" id="basemapChoose"></div>
+												</div>
+											</div>
+										  </div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row mt-2">
+								<div class="col col-md-10">
+									<label for="basemapFile"><small>Or choose custom basemap</small></label>
+									<input type="file" class="form-control" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/*" />
+									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+
+
+
+
+		<div class="container-fluid p-0">
+			<div class="row g-0">
+				<div class="col">
+					<nav class="navbar navbar-dark sticky-top shadow px-2 px-sm-3 justify-content-start" style="background-color: #563d7c;">
+						<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" style="font-size: 1rem;">
+							<span class="navbar-toggler-icon"></span>
+						</button>
+
+						<button class="btn btn-sm btn-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
+							Import
+						</button>
+
+						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#optionsModal" style="border-color: rgba(255,255,255,.5);">
+							Options
+						</button>
+
+						<div class="dropdown ms-auto">
+							<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(255,255,255,.5);">
+								<i class="fas fa-user"></i>
+							</button>
+							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+								<li><a class="dropdown-item" href="#">My profile</a></li>
+								<li><a class="dropdown-item" href="#">Settings</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item" href="#">Log out</a></li>
+							</ul>
+						</div>
+
+						<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+							<div class="offcanvas-header">
+								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">[project title]</h5>
+								<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+							</div>
+							<div class="offcanvas-body">
+								<ul class="navbar-nav justify-content-start flex-grow-1 ms-3">
+									<li class="offcanvasBtn"><hr /></li>
+
+									<li class="nav-item offcanvasBtn">
+										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#importModal" style="color: inherit;">Import</a>
+									</li>
+									<li class="nav-item offcanvasBtn">
+										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal" style="color: inherit;">Map options</a>
+									</li>
+
+									<li><hr /></li>
+
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-home"></i> &nbsp; Home
+										</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-folder-open"></i> &nbsp; Projects
+										</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" href="#" style="color: inherit;">
+											<i class="fas fa-user"></i> &nbsp; My profile
+										</a>
+									</li>
+
+									<li><br /></li>
+
+									<li class="nav-item">
+										<a class="nav-link" href="#" id="exportMap" style="color: inherit;">
+											Export
+										</a>
+									</li>
+								</ul>
+
+								<button type="button" class="btn btn-outline-secondary" style="position: absolute; bottom: 15px; right: 15px;">
+									<i class="fas fa-cog"></i>
+								</button>
+							</div>
+						</div>
+					</nav>
+				</div>
+			</div>
+
+
+			<div class="row g-0" style="height: calc(100vh - 50px);">
+				<div class="col-12 col-sm-6 col-md-7 col-lg-8 col-xl-9 order-sm-1" id="mapCol">
+					<div id="map"></div>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-5 col-lg-4 col-xl-3 order-sm-0 shadow" id="sceneCol">
+
+					<div class="row align-items-center h-100 g-0">
+						<div class="col">
+							<center>
+								<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
+									<strong>+</strong>
+								</button>
+
+								<p class="text-muted mt-3">
+									Click to prepare a scene
+								</p>
+							</center>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Load lib/ JS -->
+		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
+		<!--script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script-->
+		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
+		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
+		<script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
+		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
+		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
+		<!--script type="text/javascript" src="lib/geotiff/geotiff.js"></script-->
+		<!--script type="text/javascript" src="lib/plotty/plotty.min.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff-plotty.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff-vector-arrows.js"></script-->
+		<script type="text/javascript" src="lib/pell/pell.min.js"></script>
+
+		<!-- Load src/ JS -->
+		<script type="text/javascript" src="src/js/globals.js"></script>
+
+		<script type="text/javascript" src="src/js/helpers.js"></script>
+
+		<script type="text/javascript" src="src/js/generate.js"></script>
+
+		<script type="text/javascript" src="src/js/events.js"></script>
+
+		<script type="text/javascript" src="src/js/map/layers.js"></script>
+		<script type="text/javascript" src="src/js/map/map.js"></script>
+
+		<script type="text/javascript" src="src/js/main.js"></script>
+
+	</body>
+</html>

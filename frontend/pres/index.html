@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+		<title>TellUs</title>
+		<meta name="title" content="---" />
+		<meta name="description" content="---" />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://tellusmap.com/" />
+		<meta property="og:title" content="---" />
+		<meta property="og:description" content="---" />
+		<meta property="og:site_name" content="---" />
+		<meta property="og:image" content="assets/logo.jpg" />
+		<meta property="og:image:type" content="image/png" />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@TellusMap" />
+		<meta name="twitter:creator" content="@TellusMap" />
+		<meta property="twitter:url" content="https://tellusmap.com/" />
+		<meta property="twitter:title" content="---" />
+		<meta property="twitter:description" content="---" />
+		<meta property="twitter:image" content="assets/logo.jpg" />
+
+		<link rel="icon" href="assets/logo.jpg" />
+
+		<!-- Load lib/ CSS -->
+		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
+		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
+		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
+		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
+		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
+		<link rel="stylesheet" href="lib/pell/pell.min.css" />
+
+		<!-- Load src/ CSS -->
+		<link rel="stylesheet" href="src/css/main.css" />
+
+		<style type="text/css">
+			.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
+				background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
+				background-size: 14px 14px;
+				background-position: 8px 8px !important;
+			}
+		</style>
+	</head>
+	<body>
+
+
+
+		<!-- Import modal -->
+		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="importModalLabel">Import data</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="fileInput" class="form-label">Choose a data-file</label>
+							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-secondary" id="import">Import</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+
+
+
+
+		<div class="container-fluid p-0">
+			<div class="row g-0" style="height: calc(100vh);">
+				<div class="col-12 col-sm-6 col-md-7 col-lg-8 col-xl-9 order-sm-1" id="mapCol">
+					<div id="map"></div>
+
+					<div class="card" id="dateticker">
+						<div class="card-body">
+							<h5 class="card-title text-muted mb-0" id="datetime">
+								<span id="hour"></span>:<span id="minute"></span>:<span id="second"></span> – <span id="day"></span>/<span id="month"></span>/<span id="year"></span> <span id="period"></span>
+							</h5>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-5 col-lg-4 col-xl-3 order-sm-0 shadow" id="sceneCol">
+
+					<div class="row align-items-center h-100 g-0">
+						<div class="col">
+							<center>
+								<button type="button" class="btn btn-outline-secondary px-5" id="import">
+									<strong>+</strong>
+								</button>
+
+								<p class="text-muted mt-3">
+									Click to import project
+								</p>
+							</center>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Load lib/ JS -->
+		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
+		<!--script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script-->
+		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
+		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
+		<script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
+		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
+		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
+		<!--script type="text/javascript" src="lib/geotiff/geotiff.js"></script-->
+		<!--script type="text/javascript" src="lib/plotty/plotty.min.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff-plotty.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff-vector-arrows.js"></script-->
+		<script type="text/javascript" src="lib/pell/pell.min.js"></script>
+
+		<!-- Load src/ JS -->
+		<script type="text/javascript" src="src/js/globals.js"></script>
+
+		<script type="text/javascript" src="src/js/helpers.js"></script>
+
+		<script type="text/javascript" src="src/js/generate.js"></script>
+
+		<script type="text/javascript" src="src/js/events.js"></script>
+
+		<script type="text/javascript" src="src/js/map/layers.js"></script>
+		<script type="text/javascript" src="src/js/map/map.js"></script>
+
+		<script type="text/javascript" src="src/js/main.js"></script>
+
+	</body>
+</html>

@@ -2,7 +2,7 @@
 
 ##### Endringer – tilbakemeldinger runde 1:
 
-1. Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
+1. X Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
 2. V Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
 3. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
