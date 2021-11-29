@@ -120,6 +120,8 @@ _EVENTS.scene = {
 		let s = get_scene(id);
 
 		_SCENES[s.index][type] = value;
+
+		if(type == "date" && !s.period) { _SCENES[s.index].period = "ad"; }
 	},
 
 	capture: function(id) {
@@ -131,8 +133,8 @@ _EVENTS.scene = {
 
 		let b = _MAP.getBasemap(), lastB = get_last_scene_basemap(id);
 		if(lastB) {
-			if(b.name && b.name == lastB.name) { b = null; }
-			else if(b.url && b.url == lastB.url) { b = null; }
+			if(b.url && b.url == lastB.url) { b = null; }
+			else if(b.img && b.img == lastB.img) { b = null; }
 		}
 		_SCENES[s.index].basemap = b;
 
@@ -205,13 +207,13 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
 		if(s.basemap) {
-			if(s.basemap.name) _MAP.presetBasemap(s.basemap.name);
-			else if(s.basemap.url) _MAP.setBasemap(s.basemap.url, s.basemap.width, s.basemap.height);
+			if(s.basemap.url) this.set_basemap(s.basemap.url);
+			else if(s.basemap.img) _MAP.imgBasemap(s.basemap.img, s.basemap.width, s.basemap.height);
 		}else{
 			let b = get_last_scene_basemap(id);
 			if(b) {
-				if(b.name) _MAP.presetBasemap(b.name);
-				else if(b.url) _MAP.setBasemap(b.url, b.width, b.height);
+				if(b.url) this.set_basemap(b.url);
+				else if(b.img) _MAP.imgBasemap(b.img, b.width, b.height);
 			}
 		}
 
@@ -336,6 +338,13 @@ _EVENTS.scene = {
 			`;
 		}
 		$(`li[data-sceneid="${id}"] #mediaPlaceholder`).html(res);
+	},
+
+	set_basemap: function(url) {
+		let basemap = get_basemap(url);
+
+		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
+		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
 	},
 
 	flash_map: function() {
@@ -597,6 +606,18 @@ _EVENTS.basemapOptions = {
 
 	setup: function() {
 
+		init_basemaps();
+
+		$("#basemapModal #basemaps").click(ev => {
+			let name = $(ev.target).data("basemap");
+			if(!name) return;
+			let basemap = get_basemap(name);
+
+			this.unsetSceneBasemap();
+			_MAP.setBasemap(basemap.int, basemap.int ? name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
+			this.setSceneBasemap();
+		});
+
 		$("#basemapModal input#basemapFile").change(ev => {
 			var self = this;
 			let file = $(ev.target)[0].files[0];
@@ -611,7 +632,7 @@ _EVENTS.basemapOptions = {
 						height = this.height;
 
 					self.unsetSceneBasemap();
-					_MAP.setBasemap(res, width, height);
+					_MAP.imgBasemap(res, width, height);
 					self.setSceneBasemap();
 
 					return true;
@@ -621,15 +642,31 @@ _EVENTS.basemapOptions = {
 			fr.readAsDataURL(file);
 		});
 
-		init_basemaps();
+		$("#basemapModal input#basemapLink").change(ev => {
+			$("#basemapModal input#basemapKey").off("change");
 
-		$("#basemapModal #basemaps").click(ev => {
-			let basemap = $(ev.target).data("basemap");
-			if(!basemap) return;
+			let url = $(ev.target).val();
+			let protocol = url.split(/\:/ig)[0];
 
-			this.unsetSceneBasemap();
-			_MAP.presetBasemap(basemap);
-			this.setSceneBasemap();
+			if(protocol == "mapbox") {
+				let key = $("#basemapModal input#basemapKey").val(),
+					username = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[0],
+					styleID = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[1];
+				if(!key) {
+					$("#basemapModal input#basemapKey").change(ev => {
+						$(ev.target).off("change");
+						key = $(ev.target).val();
+
+						url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
+						_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+					});
+				}else{
+					url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
+					_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+				}
+			}else{
+				_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+			}
 		});
 
 	},

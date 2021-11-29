@@ -52,8 +52,6 @@ _EVENTS.scene = {
 		});
 
 		_MAP.setup();
-
-		$("#dateticker").css("visibility", "visible");
 	},
 
 	reset: function() {
@@ -74,13 +72,13 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
 		if(s.basemap) {
-			if(s.basemap.name) _MAP.presetBasemap(s.basemap.name);
-			else if(s.basemap.url) _MAP.setBasemap(s.basemap.url, s.basemap.width, s.basemap.height);
+			if(s.basemap.url) this.set_basemap(s.basemap.url);
+			else if(s.basemap.img) _MAP.imgBasemap(s.basemap.img, s.basemap.width, s.basemap.height);
 		}else{
 			let b = get_last_scene_basemap(id);
 			if(b) {
-				if(b.name) _MAP.presetBasemap(b.name);
-				else if(b.url) _MAP.setBasemap(b.url, b.width, b.height);
+				if(b.url) this.set_basemap(b.url);
+				else if(b.img) _MAP.imgBasemap(b.img, b.width, b.height);
 			}
 		}
 
@@ -137,12 +135,11 @@ _EVENTS.scene = {
 
 		$(`li[data-sceneid="${id}"] #title`).html(s.title || "");
 
-		let p = "", y = "", m = "", d = "", H = "", M = "", S = "";
-		if(s.period) { p = s.period.toUpperCase() || "AD"; }
+		let y = "", m = "", d = "", H = "", M = "", S = "";
 		if(s.date) { y = s.date.split("-")[0]; m = s.date.split("-")[1]; d = s.date.split("-")[2]; }
 		if(s.time) { H = s.time.split(":")[0]; M = s.time.split(":")[1]; S = s.time.split(":")[2]; }
 		$(`li[data-sceneid="${id}"] #datetime`).html(
-			`${s.time ? `${H}:${M}:${S}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${p}`
+			`${s.time ? `${H}:${M}:${S}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${s.period ? s.period.toUpperCase() : ""}`
 		);
 
 		if(s.media && s.media.length > 0) this.set_media(s.id);
@@ -165,13 +162,28 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"] #media`).html(res);
 	},
 
+	set_basemap: function(url) {
+		let basemap = get_basemap(url);
+
+		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
+		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+	},
+
 	set_datetime: function(id) {
 		let s = get_scene(id);
 		let els = [], current = {}, last = {};
 
-		$("#dateticker #period").html( s.period.toUpperCase() || "AD" );
+		if(s.time || s.date || s.period) { $("#dateticker").css("display", "block"); }
+		else{ $("#dateticker").css("display", "none"); return; }
+
+		if(s.period) {
+			$("#dateticker #period").css("display", "inline");
+			$("#dateticker #period").html( s.period.toUpperCase() );
+		}else{ $("#dateticker #period").css("display", "none"); }
 
 		if(s.date) {
+			$("#dateticker #date").css("display", "inline");
+
 			els.push("year", "month", "day");
 
 			current.year = s.date.split("-")[0];
@@ -181,9 +193,11 @@ _EVENTS.scene = {
 			last.year = $("#dateticker #year").html() || 1;
 			last.month = $("#dateticker #month").html() || 1;
 			last.day = $("#dateticker #day").html() || 1;
-		}
+		}else{ $("#dateticker #date").css("display", "none"); }
 
 		if(s.time) {
+			$("#dateticker #time").css("display", "inlineinline");
+
 			els.push("hour", "minute", "second");
 
 			current.hour = s.time.split(":")[0];
@@ -193,7 +207,10 @@ _EVENTS.scene = {
 			last.hour = $("#dateticker #hour").html() || 1;
 			last.minute = $("#dateticker #minute").html() || 1;
 			last.second = $("#dateticker #second").html() || 1;
-		}
+		}else{ $("#dateticker #time").css("display", "none"); }
+
+		if(s.date && s.time) { $("#dateticker #dateNtime").css("display", "inline"); }
+		else { $("#dateticker #dateNtime").css("display", "none"); }
 
 		for(let e of els) {
 			let c = parseInt( current[e] ),

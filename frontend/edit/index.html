@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
 
 		<title>TellUs</title>
 		<meta name="title" content="---" />
@@ -16,9 +16,9 @@
 		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
-		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
-		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
-		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
+		<!--link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" /-->
+		<!--link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" /-->
+		<!--link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
 		<link rel="stylesheet" href="lib/pell/pell.min.css" />
@@ -50,7 +50,7 @@
 						<div class="mb-3">
 							<label for="fileInput" class="form-label">Choose a data-file</label>
 							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel</div>
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, TellUs project-file</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -170,7 +170,7 @@
 
 		<!-- Basemap modal -->
 		<div class="modal fade" id="basemapModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="basemapModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" id="basemapModalLabel">Choose basemap</h5>
@@ -178,7 +178,7 @@
 					</div>
 					<div class="modal-body">
 						<div class="container-fluid">
-							<div class="row mt-2">
+							<div class="row my-2">
 								<div class="col">
 									<div class="accordion" id="basemapAccordion">
 										<div class="accordion-item">
@@ -197,11 +197,22 @@
 								</div>
 							</div>
 
-							<div class="row mt-2">
+							<div class="row my-4">
 								<div class="col col-md-10">
 									<label for="basemapFile"><small>Or choose custom basemap</small></label>
-									<input type="file" class="form-control" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/*" />
+									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/*" />
 									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
+								</div>
+							</div>
+
+							<div class="row my-2">
+								<div class="col">
+									<label for="basemapLink"><small>Or link to an online basemap</small></label>
+									<div class="input-group input-group-sm">
+										<input type="text" class="form-control" id="basemapLink" aria-label="Url" aria-describedby="inputGroup-sizing-sm" placeholder="URL" style="width: 70%;" />
+										<input type="text" class="form-control" id="basemapKey" aria-label="Access key" aria-describedby="inputGroup-sizing-sm" placeholder="Access key" style="width: 30%;" />
+									</div>
+									<div id="basemapKey" class="form-text">XYZ-tiles or a Mapbox style. Access key is required with Mapbox style</div>
 								</div>
 							</div>
 						</div>
@@ -334,9 +345,9 @@
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
-		<script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script>
-		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
-		<script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script>
+		<!--script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script-->
+		<!--script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>

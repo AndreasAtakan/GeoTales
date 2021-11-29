@@ -58,7 +58,7 @@ L.Map.addInitHook(function() {
 	// Basemap
 
 	this.basemap = L.tileLayer.provider("OpenStreetMap.HOT");
-	this.basemap.options.source = { name: "OpenStreetMap.HOT" };
+	this.basemap.options.source = { url: "OpenStreetMap.HOT" };
 	this.addLayer( this.basemap );
 
 
@@ -345,9 +345,9 @@ L.Map.include({
 		return this.basemap.options.source;
 	},
 
-	setBasemap: function(img, width, height) {
-		if(this.basemap.options.source.url
-		&& this.basemap.options.source.url == img) return;
+	imgBasemap: function(img, width, height) {
+		if(this.basemap.options.source.img
+		&& this.basemap.options.source.img == img) return;
 
 		this.removeLayer( this.basemap );
 
@@ -370,7 +370,7 @@ L.Map.include({
 			zIndex: 0,
 			attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
 		});
-		this.basemap.options.source = { url: img, width: width, height: height };
+		this.basemap.options.source = { img: img, width: width, height: height };
 
 		this.presetZoom(0, 18);
 
@@ -378,33 +378,36 @@ L.Map.include({
 		//this.fitBounds(bounds);
 	},
 
-	presetBasemap: function(name) {
-		if(this.basemap.options.source.name
-		&& this.basemap.options.source.name == name) return;
-
-		let basemap = get_basemap(name);
+	setBasemap: function(int, url, minZoom, maxZoom, cc) {
+		if(this.basemap.options.source.url
+		&& this.basemap.options.source.url == url) return;
 
 		this.removeLayer( this.basemap );
 
-		if(basemap.int) {
-			this.basemap = L.tileLayer.provider(name);
+		if(int) {
+			this.basemap = L.tileLayer.provider(url);
 		}else{
-			this.basemap = L.tileLayer(basemap.url, {
-				attribution: basemap.cc,
-				minZoom: basemap.zoom[0],
-				maxZoom: basemap.zoom[1]
+			this.basemap = L.tileLayer(url, {
+				attribution: cc,
+				minZoom: minZoom,
+				maxZoom: maxZoom
 			});
 		}
-		this.basemap.options.source = { name: name };
+		this.basemap.options.source = { url: url };
 
-		this.presetZoom(basemap.zoom[0], basemap.zoom[1]);
+		this.presetZoom(minZoom, maxZoom);
 
 		this.addLayer( this.basemap );
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 
-	resetBasemap: function() { this.presetBasemap("OpenStreetMap.HOT"); },
+	resetBasemap: function() {
+		let name = "OpenStreetMap.HOT";
+		let basemap = get_basemap(name);
+
+		this.setBasemap(name, basemap.zoom[0], basemap.zoom[1]);
+	},
 
 	presetZoom: function(min, max) {
 		let zoom = this.getZoom();

@@ -32,8 +32,8 @@ window.onload = function(ev) {
 		zoomAnimationThreshold: 100,
 		wheelPxPerZoomLevel: 1500,
 		keyboard: false,
-		touchZoom: false,
 		tap: false,
+		//touchZoom: false,
 		//worldCopyJump: true
 	});
 

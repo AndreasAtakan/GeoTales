@@ -21,67 +21,6 @@
 "use strict";
 
 
-L.FadeLayer = L.FeatureGroup.extend({
-
-	addLayer: function(object, type, id) {
-		L.FeatureGroup.prototype.addLayer.call(this, object);
-
-		if(id && !object.options.id) object.options.id = id;
-		if(type && !object.options.type) object.options.type = type;
-
-		switch(object.options.type) {
-			case "marker":
-				$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
-				$(object._icon).css("filter", `
-					blur(${object.options.overlayBlur}px)
-					grayscale(${object.options.overlayGrayscale*100}%)
-					opacity(40%)
-				`);
-				break;
-
-			case "polyline":
-				object.setStyle({ opacity: 0.3 });
-				break;
-
-			case "polygon":
-			case "rectangle":
-				object.setStyle({ opacity: 0.3 });
-				object.setStyle({ fillOpacity: 0.2 });
-				break;
-
-			default:
-				console.error("object type invalid");
-				break;
-		}
-	},
-
-	getObject: function(id) {
-		for(let o of this.getLayers()) {
-			if(o.options.id == id) {
-				return o;
-			}
-		}
-
-		return null;
-	},
-
-	initialize: function(options) {
-		L.FeatureGroup.prototype.initialize.call(this);
-
-		this.options.id = uuid();
-		this.options = mergeObjects(this.options, options);
-	}
-
-});
-
-
-L.fadeLayer = function(options) {
-	return new L.FadeLayer(options);
-};
-
-
-
-
 L.ObjectLayer = L.FeatureGroup.extend({
 
 	addLayer: function(object, type, id) {

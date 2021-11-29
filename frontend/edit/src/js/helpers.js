@@ -79,8 +79,8 @@ function reset_scene_basemaps() {
 		if(s.basemap) {
 			let lastB = get_last_scene_basemap(s.id);
 
-			if((lastB.name && lastB.name == s.basemap.name)
-			|| (lastB.url && lastB.url == s.basemap.url)) {
+			if((lastB.url && lastB.url == s.basemap.url)
+			|| (lastB.img && lastB.img == s.basemap.img)) {
 				_SCENES[i].basemap = null;
 			}
 		}

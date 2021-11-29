@@ -51,7 +51,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	top: 15px;
 	right: 15px;
 
-	visibility: hidden;
+	display: none;
 }
 
 #sceneCol {

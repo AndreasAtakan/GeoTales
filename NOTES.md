@@ -33,6 +33,7 @@
 - V Kart-objekt opsjonene sine verdier skal automatisk legges inn i popup-boksen når den åpnes?
 
 - Ny avatar-icon funksjonalitet: Legg inn ny ui i avatar-popup under "overlay" hvor brukeren kan legge predefinerte ikoner med gjennomsiktighet (png), f.eks. båt, bil, ol., som vil legges på toppen av avatarens eksisterende ikon. Dette gir avataren ekstra "forteller"-verdi
+- Legg inn fade-overgang mellom avatar-ikoner fra scene til scene
 
 - [Grunnkart kilde](https://maps.lib.utexas.edu/maps)
 
