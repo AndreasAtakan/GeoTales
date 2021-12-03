@@ -43,9 +43,11 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 .draw-control-disabled { filter: contrast(22%) brightness(157%); pointer-events: none; }
 
-.pell-content { height: 120px; }
+.ui-sortable-helper { left: auto !important; }
 
-.offcanvasBtn { display: none; }
+/*.pell-content { height: 120px; }*/
+
+/*.offcanvasBtn { display: none; }*/
 
 #mapCol {
 	height: 100%;
@@ -58,29 +60,33 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 #sceneContainer #textInput {
-	min-height: 160px;
+	/*min-height: 250px;
 	max-height: 180px;
 	overflow-y: auto;
-	background-color: white;
+	background-color: white;*/
 }
 
-#sceneContainer li {
+/*#sceneContainer li {
 	color: #999999;
-}
+}*/
 #sceneContainer li:hover:not(.active),
 #sceneContainer li:focus:not(.active) {
 	cursor: pointer;
 }
 
-#sceneContainer li { background-color: initial; }
-#sceneContainer li.inactive {
-	background-color: white;
-}
+#sceneContainer li { background-color: #f2f2f2; }
+#sceneContainer li.inactive,
 #sceneContainer li.active {
 	background-color: white;
-	color: #800000;
 }
-#sceneContainer li[class*="active"] div#textInput { color: initial; }
+
+#sceneContainer li #reorder,
+#sceneContainer li #capture,
+#sceneContainer li #delete { color: #999999; }
+#sceneContainer li.active #reorder,
+#sceneContainer li.active #capture,
+#sceneContainer li.active #delete { color: #800000; }
+#sceneContainer li #textInput { color: #212529; }
 
 #sceneContainer li[class*="active"] #reorder:hover {
 	cursor: move;
@@ -134,8 +140,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 575.98px) {
-	.headerBtn { display: none; }
-	.offcanvasBtn { display: block; }
+	/*.headerBtn { display: none; }
+	.offcanvasBtn { display: block; }*/
 
 	#mapCol { height: 55%; }
 

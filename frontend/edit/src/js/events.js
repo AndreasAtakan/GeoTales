@@ -21,7 +21,7 @@
 "use strict";
 
 
-let textareas = {};
+//let textareas = {};
 
 _EVENTS.scene = {
 
@@ -30,10 +30,13 @@ _EVENTS.scene = {
 
 		$("#sceneCol button#addScene").click( ev => { this.add(); } );
 
-		$("ul#sceneContainer").sortable({
+		$("ul#sceneContainer").sortable({ // https://api.jqueryui.com/sortable/
 			cursor: "move",
 			handle: "#reorder",
 			items: "> li",
+			axis: "y",
+			containment: "parent",
+			tolerance: "pointer",
 			//scroll: false,
 			start: (ev, ui) => {
 				ev.stopPropagation();
@@ -43,8 +46,8 @@ _EVENTS.scene = {
 				ev.stopPropagation();
 
 				let order = $("ul#sceneContainer").sortable("toArray"),
-					scene = get_element_scene(ev.originalEvent.target);
-				this.reorder( order, scene.id );
+					sceneId = $(ui.item[0]).data("sceneid");
+				this.reorder( order, sceneId );
 			},
 			stop: (ev, ui) => {
 				ev.stopPropagation();
@@ -97,19 +100,19 @@ _EVENTS.scene = {
 
 		if(prevId) {
 			let prevScene = get_scene(prevId);
-			if(prevScene.title)		s.title = prevScene.title;
+			//if(prevScene.title)		s.title = prevScene.title;
 			if(prevScene.period)	s.period = prevScene.period;
 			if(prevScene.date)		s.date = prevScene.date;
 			if(prevScene.time)		s.time = prevScene.time;
-			if(prevScene.media)		s.media = prevScene.media;
+			//if(prevScene.media)		s.media = prevScene.media;
 			if(prevScene.text)		s.text = prevScene.text;
 
-			$(`li[data-sceneid="${id}"] input#titleInput`).val( s.title || "" );
+			//$(`li[data-sceneid="${id}"] input#titleInput`).val( s.title || "" );
 			$(`li[data-sceneid="${id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
-			if(s.media && s.media.length > 0) this.set_media(id);
-			textareas[id].content.innerHTML = s.text || "";
+			//if(s.media && s.media.length > 0) this.set_media(id);
+			//textareas[id].content.innerHTML = s.text || "";
 		}
 
 		this.capture(id);
@@ -153,7 +156,7 @@ _EVENTS.scene = {
 		}
 
 		_SCENES.splice(s.index, 1);
-		delete textareas[id];
+		$(`li[data-sceneid="${id}"] #textInput`).summernote("destroy");
 
 		$(`li[data-sceneid="${id}"]`).remove();
 
@@ -219,25 +222,25 @@ _EVENTS.scene = {
 
 		_MAP.setObjects(id, animate);
 
-		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
+		_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
 	},
 
 	set_scene_input: function(id) {
 		$("#sceneContainer span#capture").off("click");
 		$("#sceneContainer span#delete").off("click");
-		$("#sceneContainer input#titleInput").prop("disabled", true);
+		//$("#sceneContainer input#titleInput").prop("disabled", true);
 		$("#sceneContainer select#periodInput").prop("disabled", true);
 		$("#sceneContainer input#dateInput").prop("disabled", true);
 		$("#sceneContainer input#timeInput").prop("disabled", true);
-		$("#sceneContainer input#mediaInput").prop("disabled", true);
+		//$("#sceneContainer input#mediaInput").prop("disabled", true);
 
-		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); } );
+		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); _MAP.setOverlay(); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
-		$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
+		//$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] select#periodInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
-		$(`li[data-sceneid="${id}"] input#mediaInput`).prop("disabled", false);
+		//$(`li[data-sceneid="${id}"] input#mediaInput`).prop("disabled", false);
 	},
 
 	set_scene_style: function(id) {
@@ -248,11 +251,11 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"]`).addClass("active");
 
 		if(_FONT) {
-			$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
+			//$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] select#periodInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#dateInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
-			$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
+			//$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
 		}
 	},
 
@@ -281,7 +284,7 @@ _EVENTS.scene = {
 			}
 
 			let s = get_scene(id);
-			_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
+			_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
 		});
 		$("#sceneContainer li input, #sceneContainer li div#textInput").click(ev => { ev.stopPropagation(); });
 	},
@@ -292,11 +295,11 @@ _EVENTS.scene = {
 	set_add: function(id) {
 		add_scene(id);
 
-		$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
+		//$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => {
+		/*$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => {
 			let files = ev.target.files,
 				media = [],
 				self = this;
@@ -316,17 +319,26 @@ _EVENTS.scene = {
 					fr.readAsDataURL( file );
 				})(files[i]);
 			}
-		} );
-		textareas[id] = pell.init({
+		} );*/
+		/*textareas[id] = pell.init({
 			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
 			onChange: html => { this.input(id, "text", html); },
 			defaultParagraphSeparator: "p",
 			styleWithCSS: false,
 			actions: [ "bold", "underline", { name: "italic", result: () => pell.exec("italic") }, { name: "link", result: () => { const url = window.prompt("Enter the link URL"); if(url) pell.exec("createLink", url); } } ]
+		});*/
+		$(`li[data-sceneid="${id}"] #textInput`).summernote({
+			spellCheck: false,
+			focus: false,
+			//dialogsInBody: true,
+			placeholder: "Enter scene content",
+			height: 250,
+			minHeight: 150,
+			maxHeight: 450
 		});
 	},
 
-	set_media: function(id) {
+	/*set_media: function(id) {
 		let s = get_scene(id);
 
 		let res = "", w = 12 / Math.min(s.media.length, 4);
@@ -338,12 +350,12 @@ _EVENTS.scene = {
 			`;
 		}
 		$(`li[data-sceneid="${id}"] #mediaPlaceholder`).html(res);
-	},
+	},*/
 
 	set_basemap: function(url) {
 		let basemap = get_basemap(url);
 
-		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
+		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
 		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
 	},
 
@@ -614,7 +626,7 @@ _EVENTS.basemapOptions = {
 			let basemap = get_basemap(name);
 
 			this.unsetSceneBasemap();
-			_MAP.setBasemap(basemap.int, basemap.int ? name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
+			_MAP.setBasemap(basemap.int, basemap.int ? name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
 			this.setSceneBasemap();
 		});
 
@@ -646,6 +658,8 @@ _EVENTS.basemapOptions = {
 			$("#basemapModal input#basemapKey").off("change");
 
 			let url = $(ev.target).val();
+			if(!url) return;
+
 			let protocol = url.split(/\:/ig)[0];
 
 			if(protocol == "mapbox") {
@@ -658,11 +672,11 @@ _EVENTS.basemapOptions = {
 						key = $(ev.target).val();
 
 						url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-						_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+						_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
 					});
 				}else{
 					url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-					_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+					_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
 				}
 			}else{
 				_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
@@ -739,12 +753,12 @@ _EVENTS.project = {
 
 			_SCENES.push(s);
 
-			$(`li[data-sceneid="${s.id}"] input#titleInput`).val( s.title || "" );
+			//$(`li[data-sceneid="${s.id}"] input#titleInput`).val( s.title || "" );
 			$(`li[data-sceneid="${s.id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-sceneid="${s.id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${s.id}"] input#timeInput`).val( s.time || "" );
-			if(s.media && s.media.length > 0) _EVENTS.scene.set_media(s.id);
-			textareas[s.id].content.innerHTML = s.text || "";
+			//if(s.media && s.media.length > 0) _EVENTS.scene.set_media(s.id);
+			//textareas[s.id].content.innerHTML = s.text || "";
 		}
 
 		_MAP.importData(data.objects);
@@ -757,7 +771,15 @@ _EVENTS.project = {
 
 		let el = document.createElement("a");
 
-		let filename = "project.tellus";
+		let f = v => v < 10 && v >= 0 ? `0${v}` : `${v}`;
+		let date = new Date();
+		let y = date.getFullYear(),
+			m = f(date.getMonth() + 1),
+			d = f(date.getDate()),
+			H = f(date.getHours()),
+			M = f(date.getMinutes()),
+			S = f(date.getSeconds());
+		let filename = `project-${y}.${m}.${d}-${H}.${M}.${S}.tellus`;
 
 		let project = {
 			options: {

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
 		<title>TellUs</title>
 		<meta name="title" content="---" />
@@ -21,7 +21,9 @@
 		<!--link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
-		<link rel="stylesheet" href="lib/pell/pell.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" />
+		<!--link rel="stylesheet" href="lib/pell/pell.min.css" /-->
+		<link rel="stylesheet" href="lib/summernote/summernote-bs5.min.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/css/main.css" />
@@ -40,7 +42,7 @@
 
 		<!-- Import modal -->
 		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" id="importModalLabel">Import data</h5>
@@ -65,7 +67,7 @@
 
 		<!-- Options modal -->
 		<div class="modal fade" id="optionsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="optionsModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" id="optionsModalLabel">Options</h5>
@@ -233,85 +235,49 @@
 		<div class="container-fluid p-0">
 			<div class="row g-0">
 				<div class="col">
-					<nav class="navbar navbar-dark sticky-top shadow px-2 px-sm-3 justify-content-start" style="background-color: #563d7c;">
-						<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" style="font-size: 1rem;">
+					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #563d7c;">
+						<a class="navbar-brand" href="#">
+							<img src="assets/logo.jpg" alt="TellUs" width="30" height="30" style="border-radius: 2px;" />
+						</a>
+
+						<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 							<span class="navbar-toggler-icon"></span>
 						</button>
 
-						<button class="btn btn-sm btn-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
-							Import
-						</button>
+						<div class="collapse navbar-collapse" id="navbarContent">
+							<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
+								<li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle" href="#" id="navbarFileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+										File
+									</a>
+									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown">
+										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import project</a></li>
+										<li><a class="dropdown-item" href="#" id="exportMap">Export</a></li>
+									</ul>
+								</li>
+								<li class="nav-item me-auto">
+									<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal">Options</a>
+								</li>
 
-						<button class="btn btn-sm btn-outline-light ms-3 headerBtn" type="button" data-bs-toggle="modal" data-bs-target="#optionsModal" style="border-color: rgba(255,255,255,.5);">
-							Options
-						</button>
-
-						<div class="dropdown ms-auto">
-							<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-color: rgba(255,255,255,.5);">
-								<i class="fas fa-user"></i>
-							</button>
-							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-								<li><a class="dropdown-item" href="#">My profile</a></li>
-								<li><a class="dropdown-item" href="#">Settings</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item" href="#">Log out</a></li>
+								<li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fas fa-user"></i>
+									</a>
+									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
+										<li><a class="dropdown-item" href="#">Projects</a></li>
+										<li><a class="dropdown-item" href="#">My profile</a></li>
+										<li><hr class="dropdown-divider"></li>
+										<li><a class="dropdown-item" href="#">Settings</a></li>
+									</ul>
+								</li>
 							</ul>
-						</div>
-
-						<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-							<div class="offcanvas-header">
-								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">[project title]</h5>
-								<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-							</div>
-							<div class="offcanvas-body">
-								<ul class="navbar-nav justify-content-start flex-grow-1 ms-3">
-									<li class="offcanvasBtn"><hr /></li>
-
-									<li class="nav-item offcanvasBtn">
-										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#importModal" style="color: inherit;">Import</a>
-									</li>
-									<li class="nav-item offcanvasBtn">
-										<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal" style="color: inherit;">Map options</a>
-									</li>
-
-									<li><hr /></li>
-
-									<li class="nav-item">
-										<a class="nav-link" href="#" style="color: inherit;">
-											<i class="fas fa-home"></i> &nbsp; Home
-										</a>
-									</li>
-									<li class="nav-item">
-										<a class="nav-link" href="#" style="color: inherit;">
-											<i class="fas fa-folder-open"></i> &nbsp; Projects
-										</a>
-									</li>
-									<li class="nav-item">
-										<a class="nav-link" href="#" style="color: inherit;">
-											<i class="fas fa-user"></i> &nbsp; My profile
-										</a>
-									</li>
-
-									<li><br /></li>
-
-									<li class="nav-item">
-										<a class="nav-link" href="#" id="exportMap" style="color: inherit;">
-											Export
-										</a>
-									</li>
-								</ul>
-
-								<button type="button" class="btn btn-outline-secondary" style="position: absolute; bottom: 15px; right: 15px;">
-									<i class="fas fa-cog"></i>
-								</button>
-							</div>
 						</div>
 					</nav>
 				</div>
 			</div>
 
 
-			<div class="row g-0" style="height: calc(100vh - 50px);">
+			<div class="row g-0" style="height: calc(100vh - 50.65px); margin-top: 50.65px;">
 				<div class="col-12 col-sm-6 col-md-7 col-lg-8 col-xl-9 order-sm-1" id="mapCol">
 					<div id="map"></div>
 				</div>
@@ -351,12 +317,14 @@
 		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
+		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<!--script type="text/javascript" src="lib/geotiff/geotiff.js"></script-->
 		<!--script type="text/javascript" src="lib/plotty/plotty.min.js"></script-->
 		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff.js"></script-->
 		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff-plotty.js"></script-->
 		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff-vector-arrows.js"></script-->
-		<script type="text/javascript" src="lib/pell/pell.min.js"></script>
+		<!--script type="text/javascript" src="lib/pell/pell.min.js"></script-->
+		<script type="text/javascript" src="lib/summernote/summernote-bs5.min.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/js/globals.js"></script>

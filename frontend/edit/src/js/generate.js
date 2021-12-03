@@ -111,11 +111,6 @@ function add_scene(id) {
 						</div>
 					</div>
 					<div class="col-10" style="width: 90%;">
-						<div class="row mb-1">
-							<div class="col">
-								<input type="text" class="form-control" id="titleInput" placeholder="Title" disabled />
-							</div>
-						</div>
 						<div class="row mb-3">
 							<div class="col">
 								<div class="input-group input-group-sm">
@@ -128,16 +123,9 @@ function add_scene(id) {
 								</div>
 							</div>
 						</div>
-						<div class="row mb-3">
-							<div class="col">
-								<div class="form-text" id="mediaHelp">Choose one or more media files</div>
-								<input type="file" class="form-control form-control-sm" id="mediaInput" aria-describedby="mediaHelp" accept="image/*" multiple disabled />
-							</div>
-						</div>
-						<div class="row mb-3" id="mediaPlaceholder"></div>
 						<div class="row">
 							<div class="col">
-								<div class="pell" id="textInput"></div>
+								<div id="textInput"></div>
 							</div>
 						</div>
 					</div>

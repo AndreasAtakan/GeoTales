@@ -73,8 +73,8 @@ L.Map.addInitHook(function() {
 
 	// Basemap
 
-	this.basemap = L.tileLayer.provider("OpenStreetMap.HOT");
-	this.basemap.options.source = { url: "OpenStreetMap.HOT" };
+	this.basemap = L.tileLayer.provider("Esri.WorldStreetMap");
+	this.basemap.options.source = { url: "Esri.WorldStreetMap" };
 	this.addLayer( this.basemap );
 
 
@@ -167,8 +167,8 @@ L.Map.include({
 		for(let i = 0; i < 18; i++) {
 			bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
 			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
-			if(bl.lat >= -90 && bl.lng >= -180
-			&& tr.lat <=  90 && tr.lng <=  180) {
+			if(bl.lat >= -85.06 && bl.lng >= -180
+			&& tr.lat <=  85.06 && tr.lng <=  180) {
 				zoom = i;
 				break;
 			}
@@ -191,7 +191,7 @@ L.Map.include({
 
 	setBasemap: function(int, url, minZoom, maxZoom, cc) {
 		if(this.basemap.options.source.url
-		&& this.basemap.options.source.url == name) return;
+		&& this.basemap.options.source.url == url) return;
 
 		this.removeLayer( this.basemap );
 
@@ -214,7 +214,7 @@ L.Map.include({
 	},
 
 	resetBasemap: function() {
-		let name = "OpenStreetMap.HOT";
+		let name = "Esri.WorldStreetMap";
 		let basemap = get_basemap(name);
 
 		this.setBasemap(name, basemap.zoom[0], basemap.zoom[1]);

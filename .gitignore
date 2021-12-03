@@ -22,3 +22,4 @@ dist
 */.env.production.local
 
 */temp.*
+temp/

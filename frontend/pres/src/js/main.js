@@ -23,6 +23,11 @@
 
 window.onload = function(ev) {
 
+	// Disable mobile pinch-zoom
+	document.addEventListener("touchmove", function(ev) {
+		if(ev.scale !== 1) { ev.preventDefault(); }
+	}, false);
+
 	_MAP = L.map("map", {
 		center: [ 51.781435604431195, 14.194335937500002 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,

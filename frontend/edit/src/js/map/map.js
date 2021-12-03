@@ -51,14 +51,22 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
+	this.basemapLegend = L.control.htmllegend({
+		position: "bottomright",
+		collapsedOnInit: true,
+		disableVisibilityControls: true,
+		updateOpacity: null
+	});
+	this.addControl( this.basemapLegend );
+
 
 
 
 
 	// Basemap
 
-	this.basemap = L.tileLayer.provider("OpenStreetMap.HOT");
-	this.basemap.options.source = { url: "OpenStreetMap.HOT" };
+	this.basemap = L.tileLayer.provider("Esri.WorldStreetMap", { noWrap: false });
+	this.basemap.options.source = { url: "Esri.WorldStreetMap" };
 	this.addLayer( this.basemap );
 
 
@@ -71,6 +79,7 @@ L.Map.addInitHook(function() {
 	this.fadeLayer = L.fadeLayer();
 	this.editLayer = L.editLayer();
 	this.markerLayer = L.markerLayer();
+	this.overlayRect = L.rectangle(this.getBounds(), { interactive: false, color: "#ffffff", weight: 2, opacity: 0.8, fill: false });
 
 	this.addLayer( this.fadeLayer );
 	this.addLayer( this.editLayer );
@@ -182,6 +191,7 @@ L.Map.include({
 		this.markerLayer.clearLayers();
 		this.editLayer.clearLayers();
 		this.fadeLayer.clearLayers();
+		this.removeLayer(this.overlayRect);
 
 		this.disableDrawing();
 		this.basemapButton.disable();
@@ -200,6 +210,36 @@ L.Map.include({
 			b.addClass("draw-control-disabled");
 			b.click(this._drawingClick);
 		}
+	},
+
+	setOverlay: function() { // TODO
+		return;
+
+		this.on("moveend", ev => {
+			this.off("moveend");
+
+			if(!this.hasLayer(this.overlayRect)) this.addLayer(this.overlayRect);
+			this.overlayRect.setBounds( this.getBounds() );
+			this.overlayRect.redraw();
+			this.overlayRect.bringToBack(); this.basemap.bringToBack();
+
+			// NOTE: overlayRect lingers on last scene's bounds, I have no idea why. this.getBounds returns correct values
+		});
+
+		/*let c = this.project(center, zoom),
+			half = this.getSize().divideBy(2);
+		let tl = this.unproject(c.subtract(half)),
+			br = this.unproject(c.add(half));
+
+		console.log(tl, br); // NOTE: tl and br are WAY too big, something goes wrong with the project/unproject. Fix this!
+		this.overlayRect.setLatLngs([
+			[[85.06,-180], [85.06,180], [-85.06,180], [-85.06,-180]],
+			[[tl.lat, tl.lng], [tl.lat, br.lng], [br.lat, br.lng], [br.lat, tl.lng]]
+		]);*/
+	},
+	setFlyTo: function(center, zoom) {
+		this.setOverlay();
+		this.flyTo(center, zoom, { noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
 	deleteScene: function(sceneId) {
@@ -350,14 +390,15 @@ L.Map.include({
 		&& this.basemap.options.source.img == img) return;
 
 		this.removeLayer( this.basemap );
+		this.basemapLegend.removeLegend(1);
 
 		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
 		let zoom, bl, tr;
 		for(let i = 0; i < 18; i++) {
 			bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
 			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
-			if(bl.lat >= -90 && bl.lng >= -180
-			&& tr.lat <=  90 && tr.lng <=  180) {
+			if(bl.lat >= -85.06 && bl.lng >= -180
+			&& tr.lat <=  85.06 && tr.lng <=  180) {
 				zoom = i;
 				break;
 			}
@@ -378,20 +419,30 @@ L.Map.include({
 		//this.fitBounds(bounds);
 	},
 
-	setBasemap: function(int, url, minZoom, maxZoom, cc) {
+	setBasemap: function(int, url, minZoom, maxZoom, cc, legend) {
 		if(this.basemap.options.source.url
 		&& this.basemap.options.source.url == url) return;
 
 		this.removeLayer( this.basemap );
+		this.basemapLegend.removeLegend(1);
 
 		if(int) {
-			this.basemap = L.tileLayer.provider(url);
+			this.basemap = L.tileLayer.provider(url, { noWrap: false });
 		}else{
 			this.basemap = L.tileLayer(url, {
 				attribution: cc,
 				minZoom: minZoom,
-				maxZoom: maxZoom
+				maxZoom: maxZoom,
+				noWrap: false
 			});
+
+			if(legend) {
+				this.basemapLegend.addLegend({
+					name: "Basemap legend",
+					layer: this.basemap,
+					elements: [ { html: legend } ]
+				});
+			}
 		}
 		this.basemap.options.source = { url: url };
 
@@ -403,7 +454,7 @@ L.Map.include({
 	},
 
 	resetBasemap: function() {
-		let name = "OpenStreetMap.HOT";
+		let name = "Esri.WorldStreetMap";
 		let basemap = get_basemap(name);
 
 		this.setBasemap(name, basemap.zoom[0], basemap.zoom[1]);
