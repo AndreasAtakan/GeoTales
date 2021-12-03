@@ -80,14 +80,12 @@ function add_scene(id) {
 					<div class="col">
 						<div class="row mb-1">
 							<div class="col">
-								<h4 id="title"></h4>
 								<p class="text-muted" id="datetime"></p>
 							</div>
 						</div>
-						<div class="row mb-3" id="media"></div>
-						<div class="row">
+						<div class="row my-1">
 							<div class="col">
-								<div id="text"></div>
+								<div id="content"></div>
 							</div>
 						</div>
 					</div>

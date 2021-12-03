@@ -21,8 +21,6 @@
 "use strict";
 
 
-//let textareas = {};
-
 _EVENTS.scene = {
 
 	setup: function() {
@@ -100,19 +98,15 @@ _EVENTS.scene = {
 
 		if(prevId) {
 			let prevScene = get_scene(prevId);
-			//if(prevScene.title)		s.title = prevScene.title;
 			if(prevScene.period)	s.period = prevScene.period;
 			if(prevScene.date)		s.date = prevScene.date;
 			if(prevScene.time)		s.time = prevScene.time;
-			//if(prevScene.media)		s.media = prevScene.media;
-			if(prevScene.text)		s.text = prevScene.text;
+			if(prevScene.content)	s.content = prevScene.content;
 
-			//$(`li[data-sceneid="${id}"] input#titleInput`).val( s.title || "" );
 			$(`li[data-sceneid="${id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
-			//if(s.media && s.media.length > 0) this.set_media(id);
-			//textareas[id].content.innerHTML = s.text || "";
+			$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("html", s.content || "");
 		}
 
 		this.capture(id);
@@ -156,7 +150,7 @@ _EVENTS.scene = {
 		}
 
 		_SCENES.splice(s.index, 1);
-		$(`li[data-sceneid="${id}"] #textInput`).summernote("destroy");
+		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("destroy");
 
 		$(`li[data-sceneid="${id}"]`).remove();
 
@@ -228,19 +222,17 @@ _EVENTS.scene = {
 	set_scene_input: function(id) {
 		$("#sceneContainer span#capture").off("click");
 		$("#sceneContainer span#delete").off("click");
-		//$("#sceneContainer input#titleInput").prop("disabled", true);
 		$("#sceneContainer select#periodInput").prop("disabled", true);
 		$("#sceneContainer input#dateInput").prop("disabled", true);
 		$("#sceneContainer input#timeInput").prop("disabled", true);
-		//$("#sceneContainer input#mediaInput").prop("disabled", true);
+		$("#sceneContainer #textInput").each(function(index) { $(this).trumbowyg("disable") });
 
 		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); _MAP.setOverlay(); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
-		//$(`li[data-sceneid="${id}"] input#titleInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] select#periodInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
-		//$(`li[data-sceneid="${id}"] input#mediaInput`).prop("disabled", false);
+		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg('enable');
 	},
 
 	set_scene_style: function(id) {
@@ -250,13 +242,12 @@ _EVENTS.scene = {
 		$("#sceneContainer li").removeClass("active");
 		$(`li[data-sceneid="${id}"]`).addClass("active");
 
-		if(_FONT) {
-			//$(`li[data-sceneid="${id}"] input#titleInput`).css("font-family", _FONT);
+		/*if(_FONT) {
 			$(`li[data-sceneid="${id}"] select#periodInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#dateInput`).css("font-family", _FONT);
 			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
 			//$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
-		}
+		}*/
 	},
 
 	set_click: function() {
@@ -284,57 +275,50 @@ _EVENTS.scene = {
 			}
 
 			let s = get_scene(id);
-			_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
+			_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
 		});
-		$("#sceneContainer li input, #sceneContainer li div#textInput").click(ev => { ev.stopPropagation(); });
+		$("#sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").click(ev => { ev.stopPropagation(); });
 	},
 	unset_click: function() {
-		$("#sceneContainer li, #sceneContainer li input, #sceneContainer li div#textInput").off("click");
+		$("#sceneContainer li, #sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").off("click");
 	},
 
 	set_add: function(id) {
+		let self = this;
 		add_scene(id);
 
-		//$(`li[data-sceneid="${id}"] input#titleInput`).change( ev => { this.input(id, "title", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
-		/*$(`li[data-sceneid="${id}"] input#mediaInput`).change( ev => {
-			let files = ev.target.files,
-				media = [],
-				self = this;
-			let length = Math.min(files.length, 4);
-
-			for(let i = 0; i < length; i++) {
-				(function(file) {
-					let fr = new FileReader();
-					fr.onload = function(ev) {
-						media.push( ev.target.result );
-
-						if(media.length >= length) {
-							self.input(id, "media", media);
-							self.set_media(id);
-						}
-					};
-					fr.readAsDataURL( file );
-				})(files[i]);
-			}
-		} );*/
-		/*textareas[id] = pell.init({
-			element: document.querySelector(`li[data-sceneid="${id}"] div#textInput`),
-			onChange: html => { this.input(id, "text", html); },
-			defaultParagraphSeparator: "p",
-			styleWithCSS: false,
-			actions: [ "bold", "underline", { name: "italic", result: () => pell.exec("italic") }, { name: "link", result: () => { const url = window.prompt("Enter the link URL"); if(url) pell.exec("createLink", url); } } ]
-		});*/
-		$(`li[data-sceneid="${id}"] #textInput`).summernote({
-			spellCheck: false,
-			focus: false,
-			//dialogsInBody: true,
-			placeholder: "Enter scene content",
-			height: 250,
-			minHeight: 150,
-			maxHeight: 450
+		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg({
+			autogrow: true,
+			resetCss: true,
+			removeformatPasted: true,
+			urlProtocol: true,
+			defaultLinkTarget: "_blank",
+			tagsToRemove: ["script", "link"],
+			btns: [
+				//["viewHTML"],
+				["undo", "redo"], // NOTE: Only supported in Blink browsers
+				["formatting"],
+				["strong", "em" /*,"del"*/],
+				//["superscript", "subscript"],
+				["fontfamily"],
+				["foreColor", "backColor"],
+				//["historyUndo", "historyRedo"],
+				["link"],
+				//["insertImage"],
+				["base64"],
+				["justifyLeft", "justifyCenter", "justifyRight", "justifyFull"],
+				["unorderedList", "orderedList"],
+				//["horizontalRule"],
+				["removeformat"]
+				//["fullscreen"]
+			],
+			plugins: {}
+		}).on("tbwchange", function() {
+			let cont = $(this).trumbowyg("html");
+			self.input(id, "content", cont);
 		});
 	},
 
@@ -588,11 +572,10 @@ _EVENTS.options = {
 				default:				font = "inherit"; break;
 			}
 
-			$("#sceneContainer input#titleInput").css("font-family", font);
-			$("#sceneContainer select#periodInput").css("font-family", font);
-			$("#sceneContainer input#dateInput").css("font-family", font);
-			$("#sceneContainer input#timeInput").css("font-family", font);
-			$("#sceneContainer div#textInput").css("font-family", font);
+			//$("#sceneContainer select#periodInput").css("font-family", font);
+			//$("#sceneContainer input#dateInput").css("font-family", font);
+			//$("#sceneContainer input#timeInput").css("font-family", font);
+			//$("#sceneContainer #textInput").css("font-family", font);
 
 			$(this).css("font-family", font);
 
@@ -753,12 +736,10 @@ _EVENTS.project = {
 
 			_SCENES.push(s);
 
-			//$(`li[data-sceneid="${s.id}"] input#titleInput`).val( s.title || "" );
 			$(`li[data-sceneid="${s.id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-sceneid="${s.id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${s.id}"] input#timeInput`).val( s.time || "" );
-			//if(s.media && s.media.length > 0) _EVENTS.scene.set_media(s.id);
-			//textareas[s.id].content.innerHTML = s.text || "";
+			$(`li[data-sceneid="${s.id}"] #textInput`).trumbowyg("html", s.content || s.text || "");
 		}
 
 		_MAP.importData(data.objects);

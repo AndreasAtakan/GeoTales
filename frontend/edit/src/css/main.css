@@ -45,9 +45,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 .ui-sortable-helper { left: auto !important; }
 
-/*.pell-content { height: 120px; }*/
-
-/*.offcanvasBtn { display: none; }*/
+.trumbowyg-modal { top: 25px !important; }
 
 #mapCol {
 	height: 100%;
@@ -66,9 +64,6 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	background-color: white;*/
 }
 
-/*#sceneContainer li {
-	color: #999999;
-}*/
 #sceneContainer li:hover:not(.active),
 #sceneContainer li:focus:not(.active) {
 	cursor: pointer;
@@ -140,9 +135,6 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 575.98px) {
-	/*.headerBtn { display: none; }
-	.offcanvasBtn { display: block; }*/
-
 	#mapCol { height: 55%; }
 
 	#sceneCol { height: 45%; }

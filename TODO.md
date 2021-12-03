@@ -9,16 +9,16 @@
 - X Can't pinch-zoom map on mobile
 - X Roman-era basemap without churches; new basemap system with support for XYZ-tiles and Mapbox styles
 - (-) Roman-era map, remove roads
-- V (Legg også til i pres.modus) Mulighet for grunnkart-legende
+- X Mulighet for grunnkart-legende
 
 - Edit-mode
 	- X Move offcanvas content to header and add collapse on medium-screen break-point
 	- (?) Add a rectangle on the current scene's bounds
 	- X Endre hva som er default grunnkart (utgangspunkt grunnkart)
-	- V (Dette vil løses med Summernote) Legg til slette-x-knapp på bildene i scenene
-	- \[WORKING ON THIS\] Erstatte Pell tekstboks med Summernote textboks:
-		- (Løses med Summernote) Pell tekst-boks på scenene, legg in flere valg (tekst-størrelse, tekst-farge, etc.)
-		- (Løses med Summernote) Gjør Pell tekst-boks større
+	- V (Dette vil løses med ny tekstboks) Legg til slette-x-knapp på bildene i scenene
+	- X (TEST THIS) Erstatte Pell tekstboks:
+		- Pell tekst-boks på scenene, legg in flere valg (tekst-størrelse, tekst-farge, etc.)
+		- Gjør Pell tekst-boks større
 	- Avatar-ikon:
 		- Automatisk gjør ikon-bilde dimensjoner lik utgangspunkt-bilde
 		- Mulighet til å endre størrelse

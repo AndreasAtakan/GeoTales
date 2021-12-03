@@ -67,6 +67,14 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
+	this.basemapLegend = L.control.htmllegend({
+		position: "bottomright",
+		collapsedOnInit: true,
+		disableVisibilityControls: true,
+		updateOpacity: null
+	});
+	this.addControl( this.basemapLegend );
+
 
 
 
@@ -116,6 +124,10 @@ L.Map.include({
 		this.objectLayer.clearLayers();
 	},
 
+	setFlyTo: function(center, zoom) {
+		this.flyTo(center, zoom, { noMoveStart: true, duration: _PANNINGSPEED || null });
+	},
+
 	setObjects: function(sceneId, animate) {
 		let s = get_scene(sceneId),
 			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
@@ -161,6 +173,7 @@ L.Map.include({
 		&& this.basemap.options.source.img == img) return;
 
 		this.removeLayer( this.basemap );
+		this.basemapLegend.removeLegend(1);
 
 		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
 		let zoom, bl, tr;
@@ -189,11 +202,12 @@ L.Map.include({
 		//this.fitBounds(bounds);
 	},
 
-	setBasemap: function(int, url, minZoom, maxZoom, cc) {
+	setBasemap: function(int, url, minZoom, maxZoom, cc, legend) {
 		if(this.basemap.options.source.url
 		&& this.basemap.options.source.url == url) return;
 
 		this.removeLayer( this.basemap );
+		this.basemapLegend.removeLegend(1);
 
 		if(int) {
 			this.basemap = L.tileLayer.provider(url);
@@ -203,6 +217,14 @@ L.Map.include({
 				minZoom: minZoom,
 				maxZoom: maxZoom
 			});
+
+			if(legend) {
+				this.basemapLegend.addLegend({
+					name: "Basemap legend",
+					layer: this.basemap,
+					elements: [ { html: legend } ]
+				});
+			}
 		}
 		this.basemap.options.source = { url: url };
 

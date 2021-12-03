@@ -21,8 +21,6 @@
 "use strict";
 
 
-let textareas = {};
-
 _EVENTS.scene = {
 
 	setup: function() {
@@ -83,7 +81,8 @@ _EVENTS.scene = {
 		}
 
 		_MAP.setObjects(id, animate);
-		_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
+
+		_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
 
 		this.set_datetime(id);
 	},
@@ -121,7 +120,7 @@ _EVENTS.scene = {
 			}
 
 			let s = get_scene(id);
-			_MAP.flyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()), { noMoveStart: true, duration: _PANNINGSPEED || null });
+			_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
 		});
 	},
 	unset_click: function() {
@@ -133,8 +132,6 @@ _EVENTS.scene = {
 
 		add_scene(id);
 
-		$(`li[data-sceneid="${id}"] #title`).html(s.title || "");
-
 		let y = "", m = "", d = "", H = "", M = "", S = "";
 		if(s.date) { y = s.date.split("-")[0]; m = s.date.split("-")[1]; d = s.date.split("-")[2]; }
 		if(s.time) { H = s.time.split(":")[0]; M = s.time.split(":")[1]; S = s.time.split(":")[2]; }
@@ -142,31 +139,16 @@ _EVENTS.scene = {
 			`${s.time ? `${H}:${M}:${S}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${s.period ? s.period.toUpperCase() : ""}`
 		);
 
-		if(s.media && s.media.length > 0) this.set_media(s.id);
-		$(`li[data-sceneid="${id}"] #text`).html(s.text || "");
+		$(`li[data-sceneid="${id}"] #content`).html(s.content || s.text || "");
 
 		if(_FONT) $(`li[data-sceneid="${id}"]`).css("font-family", _FONT);
-	},
-
-	set_media: function(id) {
-		let s = get_scene(id);
-
-		let res = "", w = 12 / Math.min(s.media.length, 4);
-		for(let m of s.media) {
-			res += `
-				<div class="col-${w}">
-					<img src="${m}" class="img-fluid rounded" alt="" />
-				</div>
-			`;
-		}
-		$(`li[data-sceneid="${id}"] #media`).html(res);
 	},
 
 	set_basemap: function(url) {
 		let basemap = get_basemap(url);
 
 		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
-		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
 	},
 
 	set_datetime: function(id) {

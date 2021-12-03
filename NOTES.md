@@ -29,10 +29,9 @@
 - Kapittel-inndeling av scenene (gruppere scenene i "kapitler" og ha en innholdfortegnelse av alle kapitler øverst, på toppen av scene-seksjonen)
 
 - Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min). Gjelder Chrome
-- V (Løses med Summernote?) Scene tekst-boks lenke går til relativ path, og ikke absolutt path
 - V Kart-objekt opsjonene sine verdier skal automatisk legges inn i popup-boksen når den åpnes?
 
-- V (Løses med Summernote) Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)
+- V Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)
 
 - Ny avatar-icon funksjonalitet: Legg inn ny ui i avatar-popup under "overlay" hvor brukeren kan legge predefinerte ikoner med gjennomsiktighet (png), f.eks. båt, bil, ol., som vil legges på toppen av avatarens eksisterende ikon. Dette gir avataren ekstra "forteller"-verdi
 - Legg inn fade-overgang mellom avatar-ikoner fra scene til scene

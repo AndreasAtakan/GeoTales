@@ -123,8 +123,8 @@ function add_scene(id) {
 								</div>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col">
+						<div class="row mb-2">
+							<div class="col" style="max-height: 400px; overflow-y: auto;">
 								<div id="textInput"></div>
 							</div>
 						</div>
