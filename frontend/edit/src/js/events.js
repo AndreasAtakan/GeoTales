@@ -124,9 +124,9 @@ _EVENTS.scene = {
 	capture: function(id) {
 		let s = get_scene(id);
 
-		let center = _MAP.getCenter(), zoom = _MAP.getZoom();
-		_SCENES[s.index].center = { lat: center.lat, lng: center.lng };
-		_SCENES[s.index].zoom = zoom;
+		let nw = _MAP.getBounds().getNorthWest(),
+			se = _MAP.getBounds().getSouthEast();
+		_SCENES[s.index].bounds = [[nw.lat, nw.lng], [se.lat, se.lng]];
 
 		let b = _MAP.getBasemap(), lastB = get_last_scene_basemap(id);
 		if(lastB) {
@@ -216,7 +216,7 @@ _EVENTS.scene = {
 
 		_MAP.setObjects(id, animate);
 
-		_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
+		_MAP.setFlyTo(s.bounds);
 	},
 
 	set_scene_input: function(id) {
@@ -275,7 +275,7 @@ _EVENTS.scene = {
 			}
 
 			let s = get_scene(id);
-			_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
+			_MAP.setFlyTo(s.bounds);
 		});
 		$("#sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").click(ev => { ev.stopPropagation(); });
 	},
@@ -322,7 +322,7 @@ _EVENTS.scene = {
 		let basemap = get_basemap(url);
 
 		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
-		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
 	},
 
 	flash_map: function() {

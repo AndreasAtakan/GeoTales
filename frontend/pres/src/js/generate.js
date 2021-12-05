@@ -28,7 +28,18 @@ function init_scene() {
 
 		<div class="row align-items-center g-0 h-100">
 			<div class="col">
-				<div class="row gx-0 mx-2" id="topPadScene">
+				<div class="btn-group btn-group-sm" role="group" aria-label="Scene buttons" id="navBtns">
+					<button type="button" class="btn btn-light" id="sceneUp">
+						<i class="fas fa-chevron-up"></i>
+					</button>
+					<button type="button" class="btn btn-light" id="sceneDown">
+						<i class="fas fa-chevron-down"></i>
+					</button>
+				</div>
+
+				<div id="topFade"></div>
+
+				<div class="row gx-0 mx-2">
 					<div class="col">
 						<hr />
 					</div>
@@ -40,11 +51,13 @@ function init_scene() {
 					</div>
 				</div>
 
-				<div class="row gx-0 mx-2" id="bottomPadScene">
+				<div class="row gx-0 mx-2">
 					<div class="col">
 						<hr />
 					</div>
 				</div>
+
+				<div id="bottomFade"></div>
 			</div>
 		</div>
 	`);
@@ -74,13 +87,13 @@ function reset_scene() {
 function add_scene(id) {
 
 	$("ul#sceneContainer").append(`
-		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
+		<li class="list-group-item" id="${id}" data-sceneid="${id}">
 			<div class="container-fluid">
 				<div class="row">
 					<div class="col">
-						<div class="row mb-1">
+						<div class="row my-1">
 							<div class="col">
-								<p class="text-muted" id="datetime"></p>
+								<p class="text-muted text-end mb-1" id="datetime"></p>
 							</div>
 						</div>
 						<div class="row my-1">

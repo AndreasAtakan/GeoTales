@@ -1,10 +1,10 @@
 ## TODO
 
-- (?) Use map bounds instead of center/zoom. Small devices needs to show the entire map-extent
+- X Use map bounds instead of center/zoom. Small devices needs to show the entire map-extent
 
 
 
-- T (TEST THIS) Block zoom on mobile devices; meta tag
+- W (not finished) Block zoom on mobile devices; meta tag
 - (-) Roman-era map, remove roads
 - X (Extend) Mulighet for grunnkart-legende
 
@@ -21,5 +21,4 @@
 		- Mulighet til å rotere; slider i popup menyen, CSS transform
 
 - Presentation-mode
-	- Gjøre om på scenene slik at de ikke er i en `<ul>`, men heller separate 'cards' med avstand mellom hverande slik at kun den mitterste er i "fokus".
-	  Også legge inn slik at scenene over og under den aktive scenen "forsvinner" bak en slags 'fade' (kanskje også med pil-opp og pil-ned knapper?)
+	- X Legg til design elementer i scene seksjon

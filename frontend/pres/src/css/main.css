@@ -65,10 +65,19 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	cursor: pointer;
 }
 
-#sceneContainer li { background-color: #f2f2f2; }
+#sceneContainer li {
+	background-color: initial;
+	border-color: rgba(0,0,0,.4);
+	max-height: 80vh;
+	overflow-y: auto;
+}
 #sceneContainer li.inactive,
 #sceneContainer li.active {
 	background-color: white;
+}
+#sceneContainer li #content { color: initial; }
+#sceneContainer li #content img {
+	max-width: 100%;
 }
 
 #map {
@@ -77,11 +86,26 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	opacity: 1;
 }
 
-#topPadScene { margin-top: 100px; }
-#bottomPadScene { margin-bottom: 120px; }
+#navBtns {
+	position: absolute;
+	top: 10px;
+	left: 15px;
+	z-index: 4;
+}
 
-#markerPopup, #polylinePopup, #polygonPopup, #editPopup {
-	width: 300px;
+#topFade, #bottomFade {
+	position: sticky;
+	width: 100%;
+	height: 50px;
+	z-index: 3;
+}
+#topFade {
+	top: 0;
+	background-image: linear-gradient(grey, rgba(242, 242, 242, 0));
+}
+#bottomFade {
+	bottom: 0;
+	background-image: linear-gradient(to top, grey, rgba(242, 242, 242, 0));
 }
 
 
@@ -103,6 +127,9 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 	#sceneCol { height: 45%; }
 
-	#topPadScene { margin-top: 0; }
-	#bottomPadScene { margin-bottom: 1.5rem; }
+	#sceneContainer li { max-height: 40vh; }
+
+	#navBtns { top: calc(55% + 10px); }
+
+	#topFade, #bottomFade { height: 20px; }
 }

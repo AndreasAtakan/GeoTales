@@ -249,9 +249,9 @@ L.Map.include({
 			[[tl.lat, tl.lng], [tl.lat, br.lng], [br.lat, br.lng], [br.lat, tl.lng]]
 		]);*/
 	},
-	setFlyTo: function(center, zoom) {
+	setFlyTo: function(bounds) {
 		this.setOverlay();
-		this.flyTo(center, zoom, { noMoveStart: true, duration: _PANNINGSPEED || null });
+		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
 	deleteScene: function(sceneId) {

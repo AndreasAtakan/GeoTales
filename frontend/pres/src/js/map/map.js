@@ -33,7 +33,7 @@ L.Map.addInitHook(function() {
 
 	this.fullscreenButton = L.easyButton({
 		id: "fullscreen",
-		position: "topleft",
+		position: "bottomleft",
 		leafletClasses: true,
 		states: [
 			{
@@ -124,8 +124,8 @@ L.Map.include({
 		this.objectLayer.clearLayers();
 	},
 
-	setFlyTo: function(center, zoom) {
-		this.flyTo(center, zoom, { noMoveStart: true, duration: _PANNINGSPEED || null });
+	setFlyTo: function(bounds) {
+		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
 	setObjects: function(sceneId, animate) {

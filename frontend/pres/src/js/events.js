@@ -49,6 +49,21 @@ _EVENTS.scene = {
 			}
 		});
 
+		$("#sceneCol button#sceneUp").click(ev => {
+			let id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+			if(!id) return;
+
+			let s = get_scene(id);
+			if(s.index > 0) this.set_scene( _SCENES[s.index - 1].id );
+		});
+		$("#sceneCol button#sceneDown").click(ev => {
+			let id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+			if(!id) return;
+
+			let s = get_scene(id);
+			if(s.index < _SCENES.length - 1) this.set_scene( _SCENES[s.index + 1].id, true );
+		});
+
 		_MAP.setup();
 	},
 
@@ -82,7 +97,7 @@ _EVENTS.scene = {
 
 		_MAP.setObjects(id, animate);
 
-		_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
+		_MAP.setFlyTo(s.bounds);
 
 		this.set_datetime(id);
 	},
@@ -120,7 +135,7 @@ _EVENTS.scene = {
 			}
 
 			let s = get_scene(id);
-			_MAP.setFlyTo(s.center, Math.min(s.zoom, _MAP.getMaxZoom()));
+			_MAP.setFlyTo(s.bounds);
 		});
 	},
 	unset_click: function() {
