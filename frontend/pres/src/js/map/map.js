@@ -263,18 +263,22 @@ L.Map.include({
 					keyboard: false,
 					interactive: false,
 					icon: L.icon({
-						iconUrl: o.icon.url,
-						iconSize: o.icon.size,
-						popupAnchor: [0, (o.icon.size[1] / 2) * (-1)],
-						className: "markerIcon"
+						iconUrl: o.icon,
+						iconSize: o.size,
+						popupAnchor: [0, (-1) * (o.size[1] / 2)],
+						tooltipAnchor: [ 0, o.size[1] / 2 ]
 					})
 				});
+				oo.options.label = o.label;
+				oo.options.ratio = o.ratio;
+				oo.options.rounded = o.rounded;
+				oo.options.angle = o.angle;
 				oo.options.borderColor = o.borderColor;
 				oo.options.borderThickness = o.borderThickness;
 				oo.options.overlayBlur = o.blur;
 				oo.options.overlayBrightness = o.brightness;
-				oo.options.overlayTransparency = o.transparency;
 				oo.options.overlayGrayscale = o.grayscale;
+				oo.options.overlayTransparency = o.transparency;
 				break;
 
 			case "polyline":
@@ -330,16 +334,18 @@ L.Map.include({
 					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				{ lat: o.getLatLng().lat, lng: o.getLatLng().lng },
-					icon:				{
-						url: o.getIcon().options.iconUrl,
-						size: o.getIcon().options.iconSize
-					},
+					label:				o.options.label,
+					icon:				o.getIcon().options.iconUrl,
+					size:				o.getIcon().options.iconSize,
+					ratio:				o.options.ratio,
+					rounded:			o.options.rounded,
+					angle:				0,
 					borderColor:		o.options.borderColor,
 					borderThickness:	o.options.borderThickness,
 					blur:				o.options.overlayBlur,
+					grayscale:			o.options.overlayGrayscale,
 					brightness:			o.options.overlayBrightness,
-					transparency:		o.options.overlayTransparency,
-					grayscale:			o.options.overlayGrayscale
+					transparency:		o.options.overlayTransparency
 				};
 				break;
 
@@ -348,7 +354,10 @@ L.Map.include({
 					id:				o.options.id,
 					sceneId:		o.options.sceneId,
 					type:			o.options.type,
-					pos:			o.getLatLngs().map(e => { return { lat: e.lat, lng: e.lng }; }),
+					pos:			o.getLatLngs().map(e => {
+						if(!e.length) return { lat: e.lat, lng: e.lng };
+						else return e.map(f => { return { lat: f.lat, lng: f.lng }; });
+					}),
 					color:			o.options.color,
 					thickness:		o.options.weight,
 					transparency:	1 - o.options.opacity

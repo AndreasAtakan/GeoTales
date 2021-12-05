@@ -49,7 +49,7 @@ function init_scene() {
 				<div class="row gx-0" id="bottomPadScene">
 					<div class="col">
 						<center>
-							<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
+							<button type="button" class="btn btn-outline-secondary px-5" id="addScene" title="Add new scene">
 								<strong>+</strong>
 							</button>
 						</center>
@@ -67,7 +67,7 @@ function reset_scene() {
 		<div class="row align-items-center h-100 g-0">
 			<div class="col">
 				<center>
-					<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
+					<button type="button" class="btn btn-outline-secondary px-5" id="addScene" title="Add new scene">
 						<strong>+</strong>
 					</button>
 
@@ -144,12 +144,25 @@ function marker_popup() {
 		<form class="container-fluid" id="markerPopup">
 			<div class="row">
 				<div class="col">
-					<h6>Icon</h6>
-					<input type="file" class="form-control form-control-sm" id="icon" accept="image/*" />
+					<input type="text" class="form-control form-control-sm" id="label" aria-label="label" placeholder="Label" />
 				</div>
 			</div>
 
-			<div class="row mt-4">
+			<div class="row mt-3">
+				<div class="col">
+					<h6>Icon</h6>
+					<div class="input-group input-group-sm">
+						<input type="file" class="form-control form-control-sm" id="icon" accept="image/*" />
+						<input type="number" min="10" max="65" class="form-control" id="size" placeholder="Size" />
+					</div>
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="checkbox" value="" id="rounded">
+						<label class="form-check-label" for="rounded">Rounded</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="row mt-2">
 				<div class="col">
 					<h6>Border</h6>
 					<div class="input-group input-group-sm">
@@ -174,8 +187,18 @@ function marker_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
+				<div class="col-7">
+					<!--button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
+						<i class="fas fa-share"></i>
+					</button-->
+				</div>
+				<div class="col-3">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Make option global">
+						<i class="fas fa-globe"></i>
+					</button>
+				</div>
+				<div class="col-2">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;" title="Delete">
 						<i class="fas fa-trash"></i>
 					</button>
 				</div>
@@ -202,7 +225,7 @@ function polyline_popup() {
 
 			<div class="row">
 				<div class="col">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;" title="Delete">
 						<i class="fas fa-trash"></i>
 					</button>
 				</div>
@@ -239,7 +262,7 @@ function polygon_popup() {
 
 			<div class="row">
 				<div class="col">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;" title="Delete">
 						<i class="fas fa-trash"></i>
 					</button>
 				</div>

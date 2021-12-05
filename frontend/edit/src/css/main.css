@@ -111,9 +111,6 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #markerPopup, #polylinePopup, #polygonPopup, #editPopup {
 	width: 300px;
 }
-.markerIcon {
-	border-radius: 50%;
-}
 
 #basemapModal #basemaps:hover,
 #basemapModal #basemaps:focus {

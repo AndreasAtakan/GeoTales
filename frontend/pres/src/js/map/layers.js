@@ -30,6 +30,7 @@ L.ObjectLayer = L.FeatureGroup.extend({
 		if(type && !object.options.type) object.options.type = type;
 
 		if(object.options.type == "marker") {
+			//if(!object.options.angle)				object.options.angle = 0;
 			if(!object.options.borderColor)			object.options.borderColor = "#563d7c";
 			if(!object.options.borderThickness)		object.options.borderThickness = 0;
 			if(!object.options.overlayBlur)			object.options.overlayBlur = 0;
@@ -37,21 +38,17 @@ L.ObjectLayer = L.FeatureGroup.extend({
 			if(!object.options.overlayBrightness)	object.options.overlayBrightness = 0;
 			if(!object.options.overlayTransparency)	object.options.overlayTransparency = 0;
 
-			$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
-			$(object._icon).css("filter", `
-				blur(${object.options.overlayBlur}px)
-				grayscale(${object.options.overlayGrayscale*100}%)
-				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
-				opacity(${(1 - object.options.overlayTransparency)*100}%)
-			`);
+			this.setIcon(object.options.id);
 		}
 
-		this.bind(object);
+		this.bind(object.options.id);
 	},
 
-	bind: function(object) {
-		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
-		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
+	bind: function(id) {
+		let o = this.getObject(id);
+		let label = o.options.label;
+
+		if(label) o.bindTooltip(label, { direction: "bottom", permanent: true });
 	},
 
 	getObject: function(id) {
@@ -64,12 +61,29 @@ L.ObjectLayer = L.FeatureGroup.extend({
 		return null;
 	},
 
+	setIcon: function(id) {
+		let o = this.getObject(id);
+
+		$(o._icon).css("border-radius", o.options.rounded ? "50%" : "0");
+		//$(o._icon).css("transform", `rotate(${o.options.angle}deg)`);
+		$(o._icon).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
+		$(o._icon).css("filter", `
+			blur(${o.options.overlayBlur}px)
+			grayscale(${o.options.overlayGrayscale*100}%)
+			drop-shadow(0 0 ${o.options.overlayBrightness}px yellow)
+			opacity(${(1 - o.options.overlayTransparency)*100}%)
+		`);
+	},
+
 	removeLayer: function(object, id) {
 		var object = object || (id ? this.getObject(id) : null);
 		if(!object) return;
 
-		if(object.options.type == "marker") object.slideCancel();
-		object.off("mouseover"); object.off("mouseout");
+		if(object.options.type == "marker") {
+			object.slideCancel();
+			object.closeTooltip();
+			object.unbindTooltip();
+		}
 
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},

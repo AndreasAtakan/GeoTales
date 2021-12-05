@@ -40,6 +40,15 @@ window.onload = function(ev) {
 		tap: false,
 		//touchZoom: false,
 		//worldCopyJump: true
+
+		contextmenu: true,
+		contextmenuItems: [
+			{ text: "Copy coordinates", callback: ev => { navigator.clipboard.writeText( `${ev.latlng.lat}, ${ev.latlng.lng}` ); } },
+			{ text: "Center map here", callback: ev => { _MAP.panTo(ev.latlng); } },
+			"-",
+			{ text: "Zoom in", icon: "assets/zoom-in.png", callback: ev => { _MAP.zoomIn(); } },
+			{ text: "Zoom out", icon: "assets/zoom-out.png", callback: ev => { _MAP.zoomOut(); } }
+		]
 	});
 
 	$("div.leaflet-control-attribution a").prop("target", "_blank");

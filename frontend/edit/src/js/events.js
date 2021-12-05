@@ -232,7 +232,7 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"] select#periodInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
-		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg('enable');
+		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("enable");
 	},
 
 	set_scene_style: function(id) {
@@ -292,28 +292,24 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg({
 			autogrow: true,
+			//semantic: false,
 			resetCss: true,
 			removeformatPasted: true,
 			urlProtocol: true,
 			defaultLinkTarget: "_blank",
 			tagsToRemove: ["script", "link"],
 			btns: [
-				//["viewHTML"],
 				["undo", "redo"], // NOTE: Only supported in Blink browsers
 				["formatting"],
-				["strong", "em" /*,"del"*/],
-				//["superscript", "subscript"],
+				["strong", "em"],
 				["fontfamily"],
 				["foreColor", "backColor"],
 				//["historyUndo", "historyRedo"],
-				["link"],
-				//["insertImage"],
 				["base64"],
+				["link"],
 				["justifyLeft", "justifyCenter", "justifyRight", "justifyFull"],
 				["unorderedList", "orderedList"],
-				//["horizontalRule"],
 				["removeformat"]
-				//["fullscreen"]
 			],
 			plugins: {}
 		}).on("tbwchange", function() {
@@ -321,20 +317,6 @@ _EVENTS.scene = {
 			self.input(id, "content", cont);
 		});
 	},
-
-	/*set_media: function(id) {
-		let s = get_scene(id);
-
-		let res = "", w = 12 / Math.min(s.media.length, 4);
-		for(let m of s.media) {
-			res += `
-				<div class="col-${w}">
-					<img src="${m}" class="img-fluid rounded" alt="" />
-				</div>
-			`;
-		}
-		$(`li[data-sceneid="${id}"] #mediaPlaceholder`).html(res);
-	},*/
 
 	set_basemap: function(url) {
 		let basemap = get_basemap(url);
@@ -376,6 +358,22 @@ _EVENTS.object = {
 	},
 
 	setup_marker: function(object) {
+		$("#markerPopup input#label").change(function(ev) {
+			let val = $(this).val();
+
+			if(val) {
+				let tooltip = object.getTooltip();
+
+				if(!tooltip) object.bindTooltip(val, { direction: "bottom", permanent: true });
+				else object.setTooltipContent(val);
+			}
+			else{ object.unbindTooltip(); }
+
+			object.options.label = val;
+			_MAP.updateObject(object.options.id);
+		});
+		$("#markerPopup input#label").val(object.options.label || "");
+
 		$("#markerPopup input#icon").change(function(ev) {
 			let file = $(this)[0].files[0];
 
@@ -383,92 +381,107 @@ _EVENTS.object = {
 			fr.onload = function() {
 				let res = fr.result;
 
-				object.setIcon(
-					L.icon({
-						iconUrl: res,
-						iconSize: [50, 50],
-						popupAnchor: [0, -25],
-						className: "markerIcon"
-					})
-				);
+				let img = new Image();
+				img.onload = function() {
+					let width = 50;
+					let ratio = this.width / this.height;
+					let height = width / ratio;
 
-				$(object._icon).css("border", "0px solid #563d7c");
-				_MAP.updateObject(object.options.id);
+					object.setIcon(
+						L.icon({
+							iconUrl: res,
+							iconSize: [ width, height ],
+							popupAnchor: [ 0, (-1) * (height / 2) ],
+							tooltipAnchor: [ 0, height / 2 ]
+						})
+					);
+
+					$("#markerPopup select#size").val("medium");
+					$("#markerPopup input#rounded").prop("checked", false);
+					// TODO: Also set rotation-angle input to 0
+
+					object.options.ratio = ratio;
+					object.options.rounded = false;
+					object.options.angle = 0;
+
+					_MAP.updateObject(object.options.id);
+					_MAP.setIcon(object.options.id, [width, height]);
+
+					return true;
+				};
+				img.src = res;
 			};
 			fr.readAsDataURL(file);
 		});
 
+		$("#markerPopup input#size").change(function(ev) {
+			let val = Math.min( Math.max( 10, $(this).val() ), 65 );
+
+			_MAP.setIcon(object.options.id, [ val, val / object.options.ratio ]);
+			_MAP.updateObject(object.options.id);
+		});
+
+		$("#markerPopup input#rounded").change(function(ev) {
+			object.options.rounded = this.checked;
+
+			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
+		});
+		$("#markerPopup input#rounded").prop("checked", object.options.rounded);
+
 		$("#markerPopup input#color").change(function(ev) {
 			let val = $(this).val();
 
-			$(object._icon).css("border-color", val);
 			object.options.borderColor = val;
 			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
 		});
 		$("#markerPopup input#color").val(object.options.borderColor || "#563d7c");
 
 		$("#markerPopup input#thickness").change(function(ev) {
 			let val = Math.min( Math.max( 0, $(this).val() ), 10 );
 
-			$(object._icon).css("border-width", `${val}px`);
 			object.options.borderThickness = val;
 			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
 		});
 
 		$("#markerPopup input#blur").change(function(ev) {
 			let val = Math.min( Math.max( 0, $(this).val() ), 3 );
 
 			object.options.overlayBlur = val;
-			$(object._icon).css("filter", `
-				blur(${object.options.overlayBlur}px)
-				grayscale(${object.options.overlayGrayscale*100}%)
-				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
-				opacity(${(1 - object.options.overlayTransparency)*100}%)
-			`);
-
 			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
 		});
 
 		$("#markerPopup input#grayscale").change(function(ev) {
 			let val = Math.min( Math.max( 0, $(this).val() ), 1 );
 
 			object.options.overlayGrayscale = val;
-			$(object._icon).css("filter", `
-				blur(${object.options.overlayBlur}px)
-				grayscale(${object.options.overlayGrayscale*100}%)
-				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
-				opacity(${(1 - object.options.overlayTransparency)*100}%)
-			`);
-
 			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
 		});
 
 		$("#markerPopup input#brightness").change(function(ev) {
 			let val = Math.min( Math.max( 0, $(this).val() ), 6 );
 
 			object.options.overlayBrightness = val;
-			$(object._icon).css("filter", `
-				blur(${object.options.overlayBlur}px)
-				grayscale(${object.options.overlayGrayscale*100}%)
-				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
-				opacity(${(1 - object.options.overlayTransparency)*100}%)
-			`);
-
 			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
 		});
 
 		$("#markerPopup input#transparency").change(function(ev) {
 			let val = Math.min( Math.max( 0, $(this).val() ), 0.9 );
 
 			object.options.overlayTransparency = val;
-			$(object._icon).css("filter", `
-				blur(${object.options.overlayBlur}px)
-				grayscale(${object.options.overlayGrayscale*100}%)
-				drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
-				opacity(${(1 - object.options.overlayTransparency)*100}%)
-			`);
-
 			_MAP.updateObject(object.options.id);
+			_MAP.setIcon(object.options.id);
+		});
+
+		//$("#markerPopup #bringToFront").click(function(ev) { /**/ });
+
+		$("#markerPopup #makeGlobal").click(function(ev) {
+			_MAP.globalObjectOptions(object.options.id);
 		});
 
 		$("#markerPopup #delete").click(function(ev) {
@@ -770,7 +783,11 @@ _EVENTS.project = {
 				font: _FONT,
 				theme: _THEME
 			},
-			scenes: _SCENES,
+			scenes: _SCENES.map(scene => {
+				let s = Object.assign({}, scene);
+				if(s.content && s.text) { delete s.text }
+				return s;
+			}),
 			objects: _MAP.exportData()
 		};
 		project = JSON.stringify(project);

@@ -92,7 +92,19 @@ L.Map.addInitHook(function() {
 		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 		object.options.sceneId = sceneId || console.error("No active scene found");
 
-		if(type == "marker") this.markerLayer.addLayer(object);
+		if(type == "marker") {
+			object.options.ratio = 496 / 512; // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
+			object.options.rounded = false;
+			object.options.angle = 0;
+			object.options.borderColor = "#563d7c";
+			object.options.borderThickness = 0;
+			object.options.overlayBlur = 0;
+			object.options.overlayGrayscale = 0;
+			object.options.overlayBrightness = 0;
+			object.options.overlayTransparency = 0;
+
+			this.markerLayer.addLayer(object);
+		}
 		else this.editLayer.addLayer(object, type);
 
 		this.objects.push( this.extractObject(object) );
@@ -125,7 +137,7 @@ L.Map.addInitHook(function() {
 					iconUrl: "assets/user-circle-solid.svg",
 					iconSize: [30, 30],
 					popupAnchor: [0, -15],
-					className: "markerIcon"
+					tooltipAnchor: [ 0, 15 ]
 				})
 			},
 			polyline: {
@@ -320,9 +332,8 @@ L.Map.include({
 	},
 
 	insertObject: function(o) {
-		for(let oo of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
-			if(oo.options.id == o.options.id) return;
-		}
+		if(this.editLayer.getObject(o.options.id)
+		|| this.markerLayer.getObject(o.options.id)) return;
 
 		let object;
 		for(let oo of this.objects) {
@@ -342,14 +353,7 @@ L.Map.include({
 	},
 
 	updateObject: function(id) {
-		let object;
-
-		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
-			if(o.options.id == id) {
-				object = o;
-				break;
-			}
-		}
+		let object = this.editLayer.getObject(id) || this.markerLayer.getObject(id);
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let o = this.objects[i];
@@ -361,16 +365,11 @@ L.Map.include({
 	},
 
 	deleteObject: function(id, type) {
-		let sceneId;
+		let object = this.editLayer.getObject(id) || this.markerLayer.getObject(id);
+		let sceneId = object.options.sceneId;
 
-		for(let o of this.editLayer.getLayers().concat(this.markerLayer.getLayers())) {
-			if(o.options.id == id) {
-				sceneId = o.options.sceneId;
-
-				if(type == "marker") this.markerLayer.removeLayer(o);
-				else this.editLayer.removeLayer(o);
-			}
-		}
+		if(type == "marker") this.markerLayer.removeLayer(object);
+		else this.editLayer.removeLayer(object);
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let o = this.objects[i];
@@ -379,6 +378,31 @@ L.Map.include({
 				break;
 			}
 		}
+	},
+
+	globalObjectOptions: function(id) {
+		let object = this.editLayer.getObject(id) || this.markerLayer.getObject(id);
+		let o = this.extractObject(object);
+		delete o.id; delete o.sceneId; delete o.type; delete o.pos;
+
+		for(let i = 0; i < this.objects.length; i++) {
+			let oo = this.objects[i];
+			if(oo.id == id && oo.sceneId != object.options.sceneId) {
+				this.objects[i] = mergeObjects(oo, o);
+			}
+		}
+
+		object = this.fadeLayer.getObject(id);
+		if(object) {
+			this.fadeLayer.removeLayer(object);
+
+			let oo = mergeObjects(this.extractObject(object), o);
+			this.fadeLayer.addLayer(this.createObject(oo), oo.type, oo.id);
+		}
+	},
+
+	setIcon: function(id, size, icon) {
+		this.markerLayer.setIcon(id, size, icon);
 	},
 
 	getBasemap: function() {
@@ -479,18 +503,22 @@ L.Map.include({
 			case "marker":
 				oo = L.marker(o.pos, {
 					icon: L.icon({
-						iconUrl: o.icon.url,
-						iconSize: o.icon.size,
-						popupAnchor: [0, (o.icon.size[1] / 2) * (-1)],
-						className: "markerIcon"
+						iconUrl: o.icon,
+						iconSize: o.size,
+						popupAnchor: [0, (-1) * (o.size[1] / 2)],
+						tooltipAnchor: [ 0, o.size[1] / 2 ]
 					})
 				});
+				oo.options.label = o.label;
+				oo.options.ratio = o.ratio;
+				oo.options.rounded = o.rounded;
+				oo.options.angle = o.angle;
 				oo.options.borderColor = o.borderColor;
 				oo.options.borderThickness = o.borderThickness;
 				oo.options.overlayBlur = o.blur;
 				oo.options.overlayBrightness = o.brightness;
-				oo.options.overlayTransparency = o.transparency;
 				oo.options.overlayGrayscale = o.grayscale;
+				oo.options.overlayTransparency = o.transparency;
 				break;
 
 			case "polyline":
@@ -543,16 +571,18 @@ L.Map.include({
 					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				{ lat: o.getLatLng().lat, lng: o.getLatLng().lng },
-					icon:				{
-						url: o.getIcon().options.iconUrl,
-						size: o.getIcon().options.iconSize
-					},
+					label:				o.options.label,
+					icon:				o.getIcon().options.iconUrl,
+					size:				o.getIcon().options.iconSize,
+					ratio:				o.options.ratio,
+					rounded:			o.options.rounded,
+					angle:				0,
 					borderColor:		o.options.borderColor,
 					borderThickness:	o.options.borderThickness,
 					blur:				o.options.overlayBlur,
+					grayscale:			o.options.overlayGrayscale,
 					brightness:			o.options.overlayBrightness,
-					transparency:		o.options.overlayTransparency,
-					grayscale:			o.options.overlayGrayscale
+					transparency:		o.options.overlayTransparency
 				};
 				break;
 
@@ -561,7 +591,10 @@ L.Map.include({
 					id:				o.options.id,
 					sceneId:		o.options.sceneId,
 					type:			o.options.type,
-					pos:			o.getLatLngs().map(e => { return { lat: e.lat, lng: e.lng }; }),
+					pos:			o.getLatLngs().map(e => {
+						if(!e.length) return { lat: e.lat, lng: e.lng };
+						else return e.map(f => { return { lat: f.lat, lng: f.lng }; });
+					}),
 					color:			o.options.color,
 					thickness:		o.options.weight,
 					transparency:	1 - o.options.opacity

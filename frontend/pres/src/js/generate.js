@@ -57,7 +57,7 @@ function reset_scene() {
 		<div class="row align-items-center h-100 g-0">
 			<div class="col">
 				<center>
-					<button type="button" class="btn btn-outline-secondary px-5" id="import">
+					<button type="button" class="btn btn-outline-secondary px-5" id="import" title="Import project">
 						<strong>+</strong>
 					</button>
 

@@ -60,15 +60,12 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	background-color: #f2f2f2;
 }
 
-#sceneContainer li {
-	color: #999999;
-}
 #sceneContainer li:hover:not(.active),
 #sceneContainer li:focus:not(.active) {
 	cursor: pointer;
 }
 
-#sceneContainer li { background-color: initial; }
+#sceneContainer li { background-color: #f2f2f2; }
 #sceneContainer li.inactive,
 #sceneContainer li.active {
 	background-color: white;
@@ -85,9 +82,6 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 #markerPopup, #polylinePopup, #polygonPopup, #editPopup {
 	width: 300px;
-}
-.markerIcon {
-	border-radius: 50%;
 }
 
 

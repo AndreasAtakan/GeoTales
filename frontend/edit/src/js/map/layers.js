@@ -31,6 +31,8 @@ L.FadeLayer = L.FeatureGroup.extend({
 
 		switch(object.options.type) {
 			case "marker":
+				$(object._icon).css("border-radius", object.options.rounded ? "50%" : "0");
+				//$(object._icon).css("transform", `rotate(${object.options.angle}deg)`);
 				$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
 				$(object._icon).css("filter", `
 					blur(${object.options.overlayBlur}px)
@@ -122,11 +124,7 @@ L.EditLayer = L.FeatureGroup.extend({
 				break;
 		}
 
-		object.bindPopup(popup, {
-			keepInView: true,
-			maxWidth: 350,
-			maxHeight: 450
-		});
+		object.bindPopup(popup, { keepInView: true, maxWidth: 350, maxHeight: 450 });
 
 		object.on("click", ev => { _EVENTS.object.setup(object); });
 
@@ -182,33 +180,18 @@ L.MarkerLayer = L.FeatureGroup.extend({
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 
 		object.options.id = id || uuid();
-		if(!object.options.type)				object.options.type = "marker";
-		if(!object.options.borderColor)			object.options.borderColor = "#563d7c";
-		if(!object.options.borderThickness)		object.options.borderThickness = 0;
-		if(!object.options.overlayBlur)			object.options.overlayBlur = 0;
-		if(!object.options.overlayGrayscale)	object.options.overlayGrayscale = 0;
-		if(!object.options.overlayBrightness)	object.options.overlayBrightness = 0;
-		if(!object.options.overlayTransparency)	object.options.overlayTransparency = 0;
-
-		$(object._icon).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
-		$(object._icon).css("filter", `
-			blur(${object.options.overlayBlur}px)
-			grayscale(${object.options.overlayGrayscale*100}%)
-			drop-shadow(0 0 ${object.options.overlayBrightness}px yellow)
-			opacity(${(1 - object.options.overlayTransparency)*100}%)
-		`);
+		if(!object.options.type) object.options.type = "marker";
 
 		object.dragging.enable();
 
 		this.bind(object);
+		this.setIcon(object.options.id);
 	},
 
 	bind: function(object) {
-		object.bindPopup( marker_popup() , {
-			keepInView: true,
-			maxWidth: 350,
-			maxHeight: 450
-		});
+		if(object.options.label) object.bindTooltip(object.options.label, { direction: "bottom", permanent: true });
+
+		object.bindPopup( marker_popup() , { keepInView: true, maxWidth: 350, maxHeight: 450 } );
 
 		object.on("click", ev => { _EVENTS.object.setup(object); });
 
@@ -228,11 +211,42 @@ L.MarkerLayer = L.FeatureGroup.extend({
 		return null;
 	},
 
+	setIcon: function(id, size, icon) {
+		let o = this.getObject(id);
+		var size = size || o.getIcon().options.iconSize,
+			icon = icon || o.getIcon().options.iconUrl;
+
+		o.setIcon(
+			L.icon({
+				iconUrl: icon,
+				iconSize: size,
+				popupAnchor: [ 0, (-1) * (size[1] / 2) ],
+				tooltipAnchor: [ 0, size[1] / 2 ]
+			})
+		);
+
+		$(o._icon).css("border-radius", o.options.rounded ? "50%" : "0");
+		//$(o._icon).css("transform", `rotate(${o.options.angle}deg)`);
+		$(o._icon).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
+		$(o._icon).css("filter", `
+			blur(${o.options.overlayBlur}px)
+			grayscale(${o.options.overlayGrayscale*100}%)
+			drop-shadow(0 0 ${o.options.overlayBrightness}px yellow)
+			opacity(${(1 - o.options.overlayTransparency)*100}%)
+		`);
+
+		o.closeTooltip();
+		o.openTooltip();
+	},
+
 	removeLayer: function(object, id) {
 		var object = object || (id ? this.getObject(id) : null);
 		if(!object) return;
 
 		object.slideCancel();
+
+		object.closeTooltip();
+		object.unbindTooltip();
 
 		object.closePopup();
 		object.unbindPopup();
