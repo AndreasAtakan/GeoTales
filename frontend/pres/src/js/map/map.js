@@ -265,7 +265,7 @@ L.Map.include({
 					icon: L.icon({
 						iconUrl: o.icon,
 						iconSize: o.size,
-						popupAnchor: [0, (-1) * (o.size[1] / 2)],
+						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
 						tooltipAnchor: [ 0, o.size[1] / 2 ]
 					})
 				});

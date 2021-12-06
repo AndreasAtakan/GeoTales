@@ -40,6 +40,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 .leaflet-bottom.leaflet-left { z-index: 1001; }
+.leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
+.leaflet-tooltip::before { display: none; }
 
 .draw-control-disabled { filter: contrast(22%) brightness(157%); pointer-events: none; }
 

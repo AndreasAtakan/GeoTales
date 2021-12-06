@@ -137,7 +137,7 @@ L.Map.addInitHook(function() {
 					iconUrl: "assets/user-circle-solid.svg",
 					iconSize: [30, 30],
 					popupAnchor: [0, -15],
-					tooltipAnchor: [ 0, 15 ]
+					tooltipAnchor: [0, 15]
 				})
 			},
 			polyline: {
@@ -505,7 +505,7 @@ L.Map.include({
 					icon: L.icon({
 						iconUrl: o.icon,
 						iconSize: o.size,
-						popupAnchor: [0, (-1) * (o.size[1] / 2)],
+						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
 						tooltipAnchor: [ 0, o.size[1] / 2 ]
 					})
 				});
