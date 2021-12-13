@@ -30,12 +30,12 @@ let _CLUSTERING = "default",
 let _MAP,
 	_EVENTS = {};
 
-const _THEMES = [
+/*const _THEMES = [
 	{ name: "default",	style: "light",	primary: "#f2f2f2",	secondary: "#bfbfbf" },
 	{ name: "hot",		style: "light",	primary: "#cc0000",	secondary: "#ffcc66" },
 	{ name: "cold",		style: "light",	primary: "#ecf2f9",	secondary: "#336699" },
 	{ name: "dark",		style: "dark",	primary: "#a6a6a6",	secondary: "#1a1a1a" }
-];
+];*/
 
 const _BASEMAPS = [
 	{ int: true,	name: "OpenStreetMap.Mapnik",			zoom: [0, 19],	preview: "https://b.tile.openstreetmap.org/5/15/10.png" },
@@ -52,7 +52,7 @@ const _BASEMAPS = [
 	{ int: true,	name: "Esri.WorldImagery",				zoom: [0, 18],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/10/15" },
 	{ int: true,	name: "Esri.WorldTerrain",				zoom: [0, 13],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/5/10/15" },
 	{ int: true,	name: "Esri.OceanBasemap",				zoom: [0, 13],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/5/10/15" },
-	{ int: true,	name: "Esri.NatGeoWorldMap",			zoom: [0, 16],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/5/10/15" },
+	{ int: true,	name: "Esri.NatGeoWorldMap",			zoom: [0, 12],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/5/10/15" },
 	{ int: true,	name: "Esri.WorldGrayCanvas",			zoom: [0, 16],	preview: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/5/10/15" },
 	{ int: true,	name: "CartoDB.Positron",				zoom: [0, 20],	preview: "https://b.basemaps.cartocdn.com/light_all/5/15/10.png" },
 	{ int: true,	name: "CartoDB.DarkMatter",				zoom: [0, 20],	preview: "https://b.basemaps.cartocdn.com/dark_all/5/15/10.png" },

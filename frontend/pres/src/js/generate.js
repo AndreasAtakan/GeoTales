@@ -28,6 +28,8 @@ function init_scene() {
 
 		<div class="row align-items-center g-0 h-100">
 			<div class="col">
+				<div id="topFade"></div>
+
 				<div class="btn-group btn-group-sm" role="group" aria-label="Scene buttons" id="navBtns">
 					<button type="button" class="btn btn-light" id="sceneUp">
 						<i class="fas fa-chevron-up"></i>
@@ -36,8 +38,6 @@ function init_scene() {
 						<i class="fas fa-chevron-down"></i>
 					</button>
 				</div>
-
-				<div id="topFade"></div>
 
 				<div class="row gx-0 mx-2">
 					<div class="col">

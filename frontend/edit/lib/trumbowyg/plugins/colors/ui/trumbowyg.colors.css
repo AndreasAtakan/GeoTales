@@ -12,8 +12,7 @@
 .trumbowyg-dropdown-foreColor:not(.trumbowyg-dropdown--color-list),
 .trumbowyg-dropdown-backColor:not(.trumbowyg-dropdown--color-list) {
   max-width: 276px;
-  padding: 7px 5px;
-  overflow: initial; }
+  padding: 7px 5px; }
   .trumbowyg-dropdown-foreColor:not(.trumbowyg-dropdown--color-list) button,
   .trumbowyg-dropdown-backColor:not(.trumbowyg-dropdown--color-list) button {
     display: block;

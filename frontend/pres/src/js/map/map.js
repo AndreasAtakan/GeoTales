@@ -27,13 +27,21 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( new L.Control.Fullscreen({ position: "topleft" }) );*/
 
+	this.basemapLegend = L.control.htmllegend({
+		position: "topright",
+		collapsedOnInit: true,
+		disableVisibilityControls: true,
+		updateOpacity: null
+	});
+	this.addControl( this.basemapLegend );
+
 	this.addControl(
-		L.control.zoom({ position: "bottomleft" })
+		L.control.zoom({ position: "topright" })
 	);
 
 	this.fullscreenButton = L.easyButton({
 		id: "fullscreen",
-		position: "bottomleft",
+		position: "topright",
 		leafletClasses: true,
 		states: [
 			{
@@ -66,14 +74,6 @@ L.Map.addInitHook(function() {
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
-
-	this.basemapLegend = L.control.htmllegend({
-		position: "bottomright",
-		collapsedOnInit: true,
-		disableVisibilityControls: true,
-		updateOpacity: null
-	});
-	this.addControl( this.basemapLegend );
 
 
 

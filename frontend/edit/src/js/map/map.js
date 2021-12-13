@@ -27,13 +27,21 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( new L.Control.Fullscreen({ position: "topright" }) );*/
 
+	this.basemapLegend = L.control.htmllegend({
+		position: "topright",
+		collapsedOnInit: true,
+		disableVisibilityControls: true,
+		updateOpacity: null
+	});
+	this.addControl( this.basemapLegend );
+
 	this.addControl(
-		L.control.zoom({ position: "bottomleft" })
+		L.control.zoom({ position: "topright" })
 	);
 
 	this.basemapButton = L.easyButton({
 		id: "chooseBasemap",
-		position: "bottomleft",
+		position: "topright",
 		leafletClasses: true,
 		states: [
 			{
@@ -50,14 +58,6 @@ L.Map.addInitHook(function() {
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
-
-	this.basemapLegend = L.control.htmllegend({
-		position: "bottomright",
-		collapsedOnInit: true,
-		disableVisibilityControls: true,
-		updateOpacity: null
-	});
-	this.addControl( this.basemapLegend );
 
 
 
@@ -129,7 +129,7 @@ L.Map.addInitHook(function() {
 
 	L.EditToolbar.Delete.include({ removeAllLayers: false });
 	this.drawingControl = new L.Control.Draw({
-		position: "topleft",
+		position: "topright",
 		edit: false,
 		draw: {
 			marker: {

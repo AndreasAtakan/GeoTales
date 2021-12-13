@@ -48,22 +48,15 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 .ui-sortable-helper { left: auto !important; }
 
 .trumbowyg-modal { top: 25px !important; }
-
-#mapCol {
-	height: 100%;
-}
+.trumbowyg-modal-box .trumbowyg-modal-button.trumbowyg-modal-submit,
+.trumbowyg-modal-box .trumbowyg-modal-button.trumbowyg-modal-submit:hover { background: #333; }
 
 #sceneCol {
-	height: 100%;
+	position: absolute;
+	z-index: 1002;
+	height: calc(100% - 50.65px);
 	overflow-y: auto;
-	background-color: #f2f2f2;
-}
-
-#sceneContainer #textInput {
-	/*min-height: 250px;
-	max-height: 180px;
-	overflow-y: auto;
-	background-color: white;*/
+	background-color: rgba(242, 242, 242, 0.7);
 }
 
 #sceneContainer li:hover:not(.active),
@@ -71,11 +64,13 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	cursor: pointer;
 }
 
-#sceneContainer li { background-color: #f2f2f2; }
-#sceneContainer li.inactive,
-#sceneContainer li.active {
-	background-color: white;
+#sceneContainer li {
+	max-height: 80vh;
+	background-color: rgba(242, 242, 242, 0.2);
+	border-color: rgba(0, 0, 0, 0.4);
 }
+#sceneContainer li.inactive,
+#sceneContainer li.active { background-color: #f9f9f9; }
 
 #sceneContainer li #reorder,
 #sceneContainer li #capture,
@@ -83,7 +78,11 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #sceneContainer li.active #reorder,
 #sceneContainer li.active #capture,
 #sceneContainer li.active #delete { color: #800000; }
-#sceneContainer li #textInput { color: #212529; }
+#sceneContainer li .textInput { max-height: calc(80vh - 100px); }
+#sceneContainer li #textInput {
+	color: #212529;
+	background-color: inherit !important;
+}
 
 #sceneContainer li[class*="active"] #reorder:hover {
 	cursor: move;
@@ -98,26 +97,21 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	height: 100%;
 	opacity: 1;
 }
-.snapshot#map {
+/*.snapshot#map {
 	-webkit-transition: 0.12s;
 	-moz-transition: 0.12s;
 	-ms-transition: 0.12s;
 	-o-transition: 0.12s;
 	transition: 0.12s;
 	opacity: 0.6;
-}
+}*/
 
 #topPadScene { margin-top: 100px; }
 #bottomPadScene { margin-bottom: 120px; }
 
-#markerPopup, #polylinePopup, #polygonPopup, #editPopup {
-	width: 300px;
-}
+#markerPopup, #polylinePopup, #polygonPopup, #editPopup { width: 300px; }
 
-#basemapModal #basemaps:hover,
-#basemapModal #basemaps:focus {
-	cursor: pointer;
-}
+#basemapModal #basemaps:hover, #basemapModal #basemaps:focus { cursor: pointer; }
 
 
 
@@ -134,9 +128,13 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 575.98px) {
-	#mapCol { height: 55%; }
+	#sceneCol {
+		height: 45%;
+		bottom: 0;
+	}
 
-	#sceneCol { height: 45%; }
+	#sceneContainer li { max-height: 40vh; }
+	#sceneContainer li .textInput { max-height: calc(40vh - 100px); }
 
 	#topPadScene { margin-top: 0; }
 	#bottomPadScene { margin-bottom: 1.5rem; }

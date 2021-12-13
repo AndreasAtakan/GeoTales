@@ -72,7 +72,7 @@ function reset_scene() {
 					</button>
 
 					<p class="text-muted mt-3">
-						Click to prepare a scene
+						Click to capture scene
 					</p>
 				</center>
 			</div>
@@ -84,7 +84,7 @@ function reset_scene() {
 function add_scene(id) {
 
 	$("ul#sceneContainer").append(`
-		<li class="list-group-item" style="border-color: rgba(0,0,0,.4);" id="${id}" data-sceneid="${id}">
+		<li class="list-group-item" id="${id}" data-sceneid="${id}">
 			<form class="container-fluid gx-0">
 				<div class="row g-0">
 					<div class="col-1">
@@ -124,7 +124,7 @@ function add_scene(id) {
 							</div>
 						</div>
 						<div class="row mb-2">
-							<div class="col" style="max-height: 400px; overflow-y: auto;">
+							<div class="col textInput" style="overflow-y: auto;">
 								<div id="textInput"></div>
 							</div>
 						</div>
@@ -193,7 +193,7 @@ function marker_popup() {
 					</button-->
 				</div>
 				<div class="col-3">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Make option global">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Make options global">
 						<i class="fas fa-globe"></i>
 					</button>
 				</div>
@@ -274,7 +274,7 @@ function polygon_popup() {
 
 
 
-function init_themes() {
+/*function init_themes() {
 
 	let html = ``;
 
@@ -295,7 +295,7 @@ function init_themes() {
 
 	$("#optionsModal #themeChoose").html(html);
 
-}
+}*/
 
 
 

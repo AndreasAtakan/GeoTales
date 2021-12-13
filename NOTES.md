@@ -2,9 +2,8 @@
 
 ##### Endringer – tilbakemeldinger runde 1:
 
-1. X Bygge ferdig skjermbilde for presentasjonsmodus (fremheve aktuell scene, tids-tikker i presentasjonsmodus)
-2. V Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
-3. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
+1. V Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
+2. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
 ##### Endringer – tilbakemeldinger runde 2:
 
@@ -15,7 +14,6 @@
 ##### Endringer – tilbakemeldinger runde 3:
 
 1. Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
-2. X Legge inn glidende transition for avatar mellom scenene
 
 
 ###### Misc.

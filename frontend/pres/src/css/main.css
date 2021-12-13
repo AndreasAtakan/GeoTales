@@ -43,23 +43,21 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
 
-#mapCol {
-	height: 100%;
-}
-
 #dateticker {
 	position: absolute;
 	z-index: 1001;
-	top: 15px;
+	bottom: 25px;
 	right: 15px;
 
 	display: none;
 }
 
 #sceneCol {
+	position: absolute;
+	z-index: 1002;
 	height: 100%;
 	overflow-y: auto;
-	background-color: #f2f2f2;
+	background-color: rgba(242, 242, 242, 0.4);
 }
 
 #sceneContainer li:hover:not(.active),
@@ -68,19 +66,23 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 #sceneContainer li {
-	background-color: initial;
-	border-color: rgba(0,0,0,.4);
+	border-color: rgba(0, 0, 0, 0.4);
+	background-color: rgba(242, 242, 242, 0.1);
+	color: rgba(0, 0, 0, 0.2);
 	max-height: 80vh;
 	overflow-y: auto;
 }
 #sceneContainer li.inactive,
 #sceneContainer li.active {
-	background-color: white;
+	background-color: #f9f9f9;
+	color: initial;
 }
-#sceneContainer li #content { color: initial; }
 #sceneContainer li #content img {
 	max-width: 100%;
+	opacity: 0.2;
 }
+#sceneContainer li.inactive #content img,
+#sceneContainer li.active #content img { opacity: 1; }
 
 #map {
 	width: 100%;
@@ -89,7 +91,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 #navBtns {
-	position: absolute;
+	position: sticky;
 	top: 10px;
 	left: 15px;
 	z-index: 4;
@@ -125,13 +127,19 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 575.98px) {
-	#mapCol { height: 55%; }
+	#dateticker {
+		bottom: calc(45% + 15px);
+	}
 
-	#sceneCol { height: 45%; }
+	#sceneCol {
+		height: 45%;
+		bottom: 0;
+	}
 
 	#sceneContainer li { max-height: 40vh; }
 
-	#navBtns { top: calc(55% + 10px); }
+	#navBtns { top: 8px; }
 
-	#topFade, #bottomFade { height: 20px; }
+	#topFade { display: none; }
+	#bottomFade { height: 20px; }
 }

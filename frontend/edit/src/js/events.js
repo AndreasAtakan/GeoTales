@@ -135,7 +135,7 @@ _EVENTS.scene = {
 		}
 		_SCENES[s.index].basemap = b;
 
-		this.flash_map();
+		//this.flash_map();
 	},
 
 	delete: function(id) {
@@ -241,13 +241,6 @@ _EVENTS.scene = {
 		$("#sceneContainer li").removeClass("inactive");
 		$("#sceneContainer li").removeClass("active");
 		$(`li[data-sceneid="${id}"]`).addClass("active");
-
-		/*if(_FONT) {
-			$(`li[data-sceneid="${id}"] select#periodInput`).css("font-family", _FONT);
-			$(`li[data-sceneid="${id}"] input#dateInput`).css("font-family", _FONT);
-			$(`li[data-sceneid="${id}"] input#timeInput`).css("font-family", _FONT);
-			//$(`li[data-sceneid="${id}"] div#textInput`).css("font-family", _FONT);
-		}*/
 	},
 
 	set_click: function() {
@@ -292,24 +285,34 @@ _EVENTS.scene = {
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg({
 			autogrow: true,
-			//semantic: false,
+			semantic: false,
 			resetCss: true,
 			removeformatPasted: true,
 			urlProtocol: true,
 			defaultLinkTarget: "_blank",
 			tagsToRemove: ["script", "link"],
+			btnsDef: {
+				format: {
+					dropdown: ["bold", "italic", "underline", "del"],
+					title: "Format",
+					ico: "bold"
+				},
+				align: {
+					dropdown: ["justifyLeft", "justifyCenter", "justifyRight", "justifyFull", "unorderedList", "orderedList"],
+					title: "List/Align",
+					ico: "justifyLeft"
+				}
+			},
 			btns: [
-				["undo", "redo"], // NOTE: Only supported in Blink browsers
+				//["undo", "redo"], // NOTE: Only supported in Blink browsers
 				["formatting"],
-				["strong", "em"],
+				["format"],
+				["align"],
 				["fontfamily"],
 				["foreColor", "backColor"],
-				//["historyUndo", "historyRedo"],
-				["base64"],
-				["link"],
-				["justifyLeft", "justifyCenter", "justifyRight", "justifyFull"],
-				["unorderedList", "orderedList"],
-				["removeformat"]
+				//["link"],
+				["base64"]
+				//["removeformat"]
 			],
 			plugins: {}
 		}).on("tbwchange", function() {
@@ -325,10 +328,10 @@ _EVENTS.scene = {
 		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
 	},
 
-	flash_map: function() {
+	/*flash_map: function() {
 		$("div#map").addClass("snapshot");
 		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 240);
-	}
+	}*/
 
 };
 
@@ -585,17 +588,12 @@ _EVENTS.options = {
 				default:				font = "inherit"; break;
 			}
 
-			//$("#sceneContainer select#periodInput").css("font-family", font);
-			//$("#sceneContainer input#dateInput").css("font-family", font);
-			//$("#sceneContainer input#timeInput").css("font-family", font);
-			//$("#sceneContainer #textInput").css("font-family", font);
-
 			$(this).css("font-family", font);
 
 			_FONT = font;
 		});
 
-		init_themes();
+		//init_themes();
 
 		$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
 			let theme = $(ev.target).prop("id");
