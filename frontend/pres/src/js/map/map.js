@@ -103,11 +103,7 @@ L.Map.addInitHook(function() {
 	// Map events
 
 	this.on("movestart", ev => {
-		let activeScene = $("#sceneContainer li.active").data("sceneid");
-		if(!activeScene) return;
-
-		$(`li[data-sceneid="${activeScene}"]`).removeClass("active");
-		$(`li[data-sceneid="${activeScene}"]`).addClass("inactive");
+		$("#scene").addClass("inactive");
 	});
 
 });

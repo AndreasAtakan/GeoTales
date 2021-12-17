@@ -23,7 +23,7 @@
 
 function init_scene() {
 
-	$("div#sceneCol").html(`
+	$("#sceneCol").html(`
 		<div id="_midline"></div>
 
 		<div class="row align-items-center g-0 h-100">
@@ -63,7 +63,7 @@ function init_scene() {
 
 function reset_scene() {
 
-	$("div#sceneCol").html(`
+	$("#sceneCol").html(`
 		<div class="row align-items-center h-100 g-0">
 			<div class="col">
 				<center>
@@ -153,7 +153,7 @@ function marker_popup() {
 					<h6>Icon</h6>
 					<div class="input-group input-group-sm">
 						<input type="file" class="form-control form-control-sm" id="icon" accept="image/*" />
-						<input type="number" min="10" max="65" class="form-control" id="size" placeholder="Size" />
+						<input type="number" min="10" max="100" class="form-control" id="size" placeholder="Size" />
 					</div>
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="checkbox" value="" id="rounded">

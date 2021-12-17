@@ -29,7 +29,7 @@ window.onload = function(ev) {
 	}, false);
 
 	_MAP = L.map("map", {
-		center: [ 51.781435604431195, 14.194335937500002 ],
+		center: [ 50, 6 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
 		maxZoom: 18,
@@ -53,7 +53,7 @@ window.onload = function(ev) {
 
 	$("div.leaflet-control-attribution a").prop("target", "_blank");
 
-	$("#sceneCol button#import").click(ev => { $("#importModal").modal("show"); });
+	$("button#importProject").click(ev => { $("#importModal").modal("show"); });
 
 	_EVENTS.project.setup();
 

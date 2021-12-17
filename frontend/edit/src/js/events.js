@@ -53,27 +53,26 @@ _EVENTS.scene = {
 			}
 		});
 
-		$(document).keydown(ev => {
-			let keycode = ev.keyCode,
+		$("#sceneCol").keydown(ev => { if(ev.code == "ArrowUp" || ev.code == "ArrowDown") { ev.preventDefault(); } });
+		$("#sceneCol").keyup(ev => {
+			let keycode = ev.code,
 				id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
+			console.log(keycode);
 
-			if(keycode == 38 && s.index > 0) {
+			if(keycode == "ArrowUp" && s.index > 0) {
 				ev.preventDefault();
 				this.set_scene( _SCENES[s.index - 1].id );
 			}
 
-			if(keycode == 40 && s.index < _SCENES.length - 1) {
+			if(keycode == "ArrowDown" && s.index < _SCENES.length - 1) {
 				ev.preventDefault();
 				this.set_scene( _SCENES[s.index + 1].id, true );
 			}
 
-			if((keycode == 38 || keycode == 40)
-			&& (s.index <= 0 || s.index >= _SCENES.length - 1)) {
-				ev.preventDefault();
-			}
+			if(keycode == "ArrowUp" || keycode == "ArrowDown") { ev.preventDefault(); }
 		});
 
 		_MAP.setup();
@@ -280,6 +279,8 @@ _EVENTS.scene = {
 		let self = this;
 		add_scene(id);
 
+		$(`li[data-sceneid="${id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
+
 		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
 		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
@@ -418,7 +419,7 @@ _EVENTS.object = {
 		});
 
 		$("#markerPopup input#size").change(function(ev) {
-			let val = Math.min( Math.max( 10, $(this).val() ), 65 );
+			let val = Math.min( Math.max( 10, $(this).val() ), 100 );
 
 			_MAP.setIcon(object.options.id, [ val, val / object.options.ratio ]);
 			_MAP.updateObject(object.options.id);

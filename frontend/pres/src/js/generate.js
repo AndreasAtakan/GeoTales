@@ -23,41 +23,20 @@
 
 function init_scene() {
 
-	$("div#sceneCol").html(`
-		<div id="_midline"></div>
-
-		<div class="row align-items-center g-0 h-100">
-			<div class="col">
-				<div id="topFade"></div>
-
+	$("div#col").append(`
+		<div class="card" id="scene" data-sceneid="">
+			<div class="card-body">
 				<div class="btn-group btn-group-sm" role="group" aria-label="Scene buttons" id="navBtns">
-					<button type="button" class="btn btn-light" id="sceneUp">
-						<i class="fas fa-chevron-up"></i>
+					<button type="button" class="btn btn-light" id="sceneBackward">
+						<i class="fas fa-chevron-left"></i>
 					</button>
-					<button type="button" class="btn btn-light" id="sceneDown">
-						<i class="fas fa-chevron-down"></i>
+					<button type="button" class="btn btn-light" id="sceneForward">
+						<i class="fas fa-chevron-right"></i>
 					</button>
 				</div>
 
-				<div class="row gx-0 mx-2">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-
-				<div class="row mx-2">
-					<div class="col">
-						<ul class="list-group" id="sceneContainer"></ul>
-					</div>
-				</div>
-
-				<div class="row gx-0 mx-2">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-
-				<div id="bottomFade"></div>
+				<h6 class="card-subtitle my-2 text-muted" id="datetime"></h6>
+				<div id="content"></div>
 			</div>
 		</div>
 	`);
@@ -66,45 +45,6 @@ function init_scene() {
 
 function reset_scene() {
 
-	$("div#sceneCol").html(`
-		<div class="row align-items-center h-100 g-0">
-			<div class="col">
-				<center>
-					<button type="button" class="btn btn-outline-secondary px-5" id="import" title="Import project">
-						<strong>+</strong>
-					</button>
-
-					<p class="text-muted mt-3">
-						Click to import project
-					</p>
-				</center>
-			</div>
-		</div>
-	`);
-
-}
-
-function add_scene(id) {
-
-	$("ul#sceneContainer").append(`
-		<li class="list-group-item" id="${id}" data-sceneid="${id}">
-			<div class="container-fluid">
-				<div class="row">
-					<div class="col">
-						<div class="row my-1">
-							<div class="col">
-								<p class="text-muted text-end mb-1" id="datetime"></p>
-							</div>
-						</div>
-						<div class="row my-1">
-							<div class="col">
-								<div id="content"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</li>
-	`);
+	$("div#scene").remove();
 
 }

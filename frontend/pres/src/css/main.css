@@ -31,14 +31,7 @@ input::-webkit-inner-spin-button {
 
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
-#_midline {
-	position: absolute;
-	top: 50%;
-	left: 0;
-	height: 0;
-	visibility: hidden;
-}
-
+.leaflet-control { opacity: 0.8; }
 .leaflet-bottom.leaflet-left { z-index: 1001; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
@@ -52,37 +45,34 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	display: none;
 }
 
-#sceneCol {
+#importProject {
 	position: absolute;
-	z-index: 1002;
-	height: 100%;
-	overflow-y: auto;
-	background-color: rgba(242, 242, 242, 0.4);
+	z-index: 1001;
+	top: 15px;
+	left: 15px;
 }
 
-#sceneContainer li:hover:not(.active),
-#sceneContainer li:focus:not(.active) {
-	cursor: pointer;
-}
+#scene {
+	position: absolute;
+	z-index: 1001;
+	top: 15px;
+	left: 15px;
 
-#sceneContainer li {
-	border-color: rgba(0, 0, 0, 0.4);
-	background-color: rgba(242, 242, 242, 0.1);
-	color: rgba(0, 0, 0, 0.2);
-	max-height: 80vh;
+	max-height: calc(100vh - 30px);
+	width: 40vw;
+	max-width: 550px;
+
+	opacity: 0.9;
 	overflow-y: auto;
+
+	display: none;
 }
-#sceneContainer li.inactive,
-#sceneContainer li.active {
-	background-color: #f9f9f9;
-	color: initial;
-}
-#sceneContainer li #content img {
+.inactive#scene:hover,
+.inactive#scene:focus { cursor: pointer; }
+
+#scene #content img {
 	max-width: 100%;
-	opacity: 0.2;
 }
-#sceneContainer li.inactive #content img,
-#sceneContainer li.active #content img { opacity: 1; }
 
 #map {
 	width: 100%;
@@ -91,10 +81,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 #navBtns {
-	position: sticky;
-	top: 10px;
-	left: 15px;
-	z-index: 4;
+	float: right;
 }
 
 #topFade, #bottomFade {
@@ -128,17 +115,17 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 @media (max-width: 575.98px) {
 	#dateticker {
-		bottom: calc(45% + 15px);
+		bottom: calc(40vh + 15px);
 	}
 
-	#sceneCol {
-		height: 45%;
-		bottom: 0;
+	#scene {
+		top: auto;
+		bottom: 15px;
+
+		max-height: 40vh;
+		width: 80vw;
+		max-width: none;
 	}
-
-	#sceneContainer li { max-height: 40vh; }
-
-	#navBtns { top: 8px; }
 
 	#topFade { display: none; }
 	#bottomFade { height: 20px; }

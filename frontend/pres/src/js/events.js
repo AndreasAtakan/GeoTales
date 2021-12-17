@@ -25,39 +25,40 @@ _EVENTS.scene = {
 
 	setup: function() {
 		init_scene();
+		$("button#importProject").css("display", "none");
+		$("#scene").css("display", "block");
+
+		this.set_click();
 
 		$(document).keydown(ev => {
-			let keycode = ev.keyCode,
-				id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+			let keycode = ev.code,
+				id = $("#scene").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
 
-			if(keycode == 38 && s.index > 0) {
+			if(["ArrowUp", "ArrowLeft"].indexOf(keycode) > -1 && s.index > 0) {
 				ev.preventDefault();
 				this.set_scene( _SCENES[s.index - 1].id );
 			}
 
-			if(keycode == 40 && s.index < _SCENES.length - 1) {
+			if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1 && s.index < _SCENES.length - 1) {
 				ev.preventDefault();
 				this.set_scene( _SCENES[s.index + 1].id, true );
 			}
 
-			if((keycode == 38 || keycode == 40)
-			&& (s.index <= 0 || s.index >= _SCENES.length - 1)) {
-				ev.preventDefault();
-			}
+			if(keycode == "ArrowUp" || keycode == "ArrowDown") { ev.preventDefault(); }
 		});
 
-		$("#sceneCol button#sceneUp").click(ev => {
-			let id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+		$("button#sceneBackward").click(ev => {
+			let id = $("#scene").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
 			if(s.index > 0) this.set_scene( _SCENES[s.index - 1].id );
 		});
-		$("#sceneCol button#sceneDown").click(ev => {
-			let id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+		$("button#sceneForward").click(ev => {
+			let id = $("#scene").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
@@ -69,7 +70,7 @@ _EVENTS.scene = {
 
 	reset: function() {
 		reset_scene();
-		$("#sceneCol button#import").click(ev => { $("#importModal").modal("show"); });
+		$("button#importProject").click(ev => { $("#importModal").modal("show"); });
 
 		_MAP.reset();
 	},
@@ -79,10 +80,20 @@ _EVENTS.scene = {
 	set_scene: function(id, animate) {
 		let s = get_scene(id);
 
-		this.set_scene_style(id);
-		this.set_click();
+		this.set_scene_style();
 
-		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
+		$("#scene").data("sceneid", id);
+
+		let y = "", m = "", d = "", H = "", M = "", S = "";
+		if(s.date) { y = s.date.split("-")[0]; m = s.date.split("-")[1]; d = s.date.split("-")[2]; }
+		if(s.time) { H = s.time.split(":")[0]; M = s.time.split(":")[1]; S = s.time.split(":")[2]; }
+		$("#scene #datetime").html(
+			`${s.time ? `${H}:${M}:${S}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${s.period ? s.period.toUpperCase() : ""}`
+		);
+
+		$("#scene #content").html(s.content || "");
+
+		if(_FONT) $("#scene #datetime").css("font-family", _FONT);
 
 		if(s.basemap) {
 			if(s.basemap.url) this.set_basemap(s.basemap.url);
@@ -102,61 +113,24 @@ _EVENTS.scene = {
 		this.set_datetime(id);
 	},
 
-	set_scene_style: function(id) {
-		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
+	set_scene_style: function() {
+		// TODO: add fade in and out effect to scene card
 
-		$("#sceneContainer li").removeClass("inactive");
-		$("#sceneContainer li").removeClass("active");
-		$(`li[data-sceneid="${id}"]`).addClass("active");
+		/*if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
+
+		$("#scene").removeClass("active");
+		$("#scene").addClass("active");*/
 	},
 
 	set_click: function() {
-		$("#sceneContainer li").off("click");
-		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
-			let scene = get_element_scene(ev.target);
-			if(!scene) return;
-			let id = scene.id;
+		$("#scene").click(ev => {
+			let id = $("#scene").data("sceneid");
+			let scene = get_scene( id );
 
-			let prevId = $("#sceneContainer li[class*=\"active\"]").data("sceneid"), t = false;
-			if(prevId) {
-				t = get_scene(prevId).index == get_scene(id).index - 1;
-			}
+			_MAP.setFlyTo(scene.bounds);
 
-			this.set_scene( id, t );
+			$("#scene").removeClass("inactive");
 		});
-		$("#sceneContainer li[class*=\"active\"]").click(ev => {
-			let scene = get_element_scene(ev.target);
-			if(!scene) return;
-			let id = scene.id;
-
-			if( $(`li[data-sceneid="${id}"]`).hasClass("inactive") ) {
-				$(`li[data-sceneid="${id}"]`).removeClass("inactive");
-				$(`li[data-sceneid="${id}"]`).addClass("active");
-			}
-
-			let s = get_scene(id);
-			_MAP.setFlyTo(s.bounds);
-		});
-	},
-	unset_click: function() {
-		$("#sceneContainer li").off("click");
-	},
-
-	set_add: function(id) {
-		let s = get_scene(id);
-
-		add_scene(id);
-
-		let y = "", m = "", d = "", H = "", M = "", S = "";
-		if(s.date) { y = s.date.split("-")[0]; m = s.date.split("-")[1]; d = s.date.split("-")[2]; }
-		if(s.time) { H = s.time.split(":")[0]; M = s.time.split(":")[1]; S = s.time.split(":")[2]; }
-		$(`li[data-sceneid="${id}"] #datetime`).html(
-			`${s.time ? `${H}:${M}:${S}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${s.period ? s.period.toUpperCase() : ""}`
-		);
-
-		$(`li[data-sceneid="${id}"] #content`).html(s.content || s.text || "");
-
-		if(_FONT) $(`li[data-sceneid="${id}"]`).css("font-family", _FONT);
 	},
 
 	set_basemap: function(url) {
@@ -238,7 +212,7 @@ _EVENTS.scene = {
 _EVENTS.project = {
 
 	setup: function() {
-		let self = this;
+		//let self = this;
 
 		$("#importModal button#import").click(ev => {
 			$("#importModal").modal("hide");
@@ -247,11 +221,10 @@ _EVENTS.project = {
 			if(!file) return;
 
 			let fr = new FileReader();
-			fr.onload = function() {
-				let res = fr.result;
-				res = JSON.parse(res);
-
-				self.import(res);
+			fr.onload = () => {
+				this.import(
+					JSON.parse( fr.result )
+				);
 			};
 			fr.readAsText(file);
 		});
@@ -275,13 +248,11 @@ _EVENTS.project = {
 			let s = data.scenes[i];
 
 			_SCENES.push(s);
-
-			_EVENTS.scene.set_add(s.id);
 		}
 
 		_MAP.importData(data.objects);
 
-		_EVENTS.scene.set_scene( _SCENES[index].id );
+		if(index >= 0) _EVENTS.scene.set_scene( _SCENES[index].id );
 
 		$("#dateticker").css("font-family", _FONT);
 	}
