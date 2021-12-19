@@ -102,9 +102,8 @@ L.Map.addInitHook(function() {
 
 	// Map events
 
-	this.on("movestart", ev => {
-		$("#scene").addClass("inactive");
-	});
+	this.on("movestart", ev => { $("#scene").addClass("inactive"); });
+	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
 
 });
 
@@ -124,17 +123,13 @@ L.Map.include({
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
-	setObjects: function(sceneId, animate) {
+	setObjects: function(sceneId) {
 		let s = get_scene(sceneId),
 			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
 
-		let os = [];
-		for(let o of this.objectLayer.getLayers()) {
-			if(o.options.type == "marker") {
-				let r = this.extractObject(o);
-				os.push( { id: r.id, pos: r.pos } );
-			}
-		}
+		let os = this.objectLayer.getLayers().filter(o => o.options.type == "marker").map(o => {
+			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
+		});
 
 		this.objectLayer.clearLayers();
 		for(let o of this.objects) {
@@ -142,16 +137,11 @@ L.Map.include({
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
-				if(animate && o.type == "marker") {
+				if(o.type == "marker") {
 					for(let oo of os) {
 						if(o.id == oo.id) {
 							object.setLatLng(oo.pos);
 							object.slideTo(o.pos, { duration: _AVATARSPEED });
-							/*let point = this.latLngToContainerPoint(oo.pos);
-							this.on("move", ev => {
-								m.setLatLng( this.containerPointToLatLng(point) );
-							});
-							this.on("moveend", ev => { m.slideTo(o.pos, { duration: 500 }); this.off("move"); });*/
 							break;
 						}
 					}

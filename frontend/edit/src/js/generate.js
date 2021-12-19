@@ -40,13 +40,13 @@ function init_scene() {
 					</div>
 				</div>
 
-				<div class="row gx-0 mx-2">
+				<div class="row gx-0 mx-2" id="bottomPadScene">
 					<div class="col">
 						<hr />
 					</div>
 				</div>
 
-				<div class="row gx-0" id="bottomPadScene">
+				<!--div class="row gx-0" id="bottomPadScene">
 					<div class="col">
 						<center>
 							<button type="button" class="btn btn-outline-secondary px-5" id="addScene" title="Add new scene">
@@ -54,7 +54,7 @@ function init_scene() {
 							</button>
 						</center>
 					</div>
-				</div>
+				</div-->
 			</div>
 		</div>
 	`);
@@ -81,9 +81,9 @@ function reset_scene() {
 
 }
 
-function add_scene(id) {
+function add_scene(id, prevId) {
 
-	$("ul#sceneContainer").append(`
+	let cont = `
 		<li class="list-group-item" id="${id}" data-sceneid="${id}">
 			<form class="container-fluid gx-0">
 				<div class="row g-0">
@@ -102,10 +102,17 @@ function add_scene(id) {
 								</span>
 							</div>
 						</div>
-						<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
+						<div class="row gx-0 mb-3" style="position: absolute; bottom: 60px;">
 							<div class="col">
 								<span id="delete" title="Delete scene">
 									<i class="fas fa-trash"></i>
+								</span>
+							</div>
+						</div>
+						<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
+							<div class="col">
+								<span id="add" title="Add scene below">
+									<i class="fas fa-reply" style="transform: rotate(180deg);"></i>
 								</span>
 							</div>
 						</div>
@@ -132,7 +139,10 @@ function add_scene(id) {
 				</div>
 			</form>
 		</li>
-	`);
+	`;
+
+	if(prevId) { $(`li[data-sceneid="${prevId}"]`).after(cont); }
+	else{ $("ul#sceneContainer").append(cont); }
 
 }
 
@@ -193,8 +203,8 @@ function marker_popup() {
 					</button-->
 				</div>
 				<div class="col-3">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Make options global">
-						<i class="fas fa-globe"></i>
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
+						<i class="fas fa-save"></i> <strong>*</strong>
 					</button>
 				</div>
 				<div class="col-2">

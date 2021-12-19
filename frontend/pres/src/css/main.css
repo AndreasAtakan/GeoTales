@@ -67,12 +67,12 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 	display: none;
 }
+#scene:focus { outline: none; }
 .inactive#scene:hover,
 .inactive#scene:focus { cursor: pointer; }
 
-#scene #content img {
-	max-width: 100%;
-}
+#scene #content img { max-width: 100%; }
+#scene #content img:hover { cursor: pointer; }
 
 #map {
 	width: 100%;

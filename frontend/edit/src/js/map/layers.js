@@ -56,7 +56,7 @@ L.FadeLayer = L.FeatureGroup.extend({
 				break;
 		}
 
-		object.on("click", ev => { _MAP.insertObject(object); });
+		object.on("click", ev => { _MAP.insertObject(object.options.id, object.options.sceneId); });
 	},
 
 	getObject: function(id) {

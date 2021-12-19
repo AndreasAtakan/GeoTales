@@ -187,6 +187,7 @@ L.Map.addInitHook(function() {
 		$(`li[data-sceneid="${activeScene}"]`).removeClass("active");
 		$(`li[data-sceneid="${activeScene}"]`).addClass("inactive");
 	});
+	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
 
 });
 
@@ -225,8 +226,6 @@ L.Map.include({
 	},
 
 	setOverlay: function() { // TODO
-		return;
-
 		this.on("moveend", ev => {
 			this.off("moveend");
 
@@ -250,7 +249,8 @@ L.Map.include({
 		]);*/
 	},
 	setFlyTo: function(bounds) {
-		this.setOverlay();
+		//this.setOverlay();
+
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
@@ -316,38 +316,54 @@ L.Map.include({
 							if(o.id == oo.id) {
 								m.setLatLng(oo.pos);
 								m.slideTo(o.pos, { duration: _AVATARSPEED });
-								/*let point = this.latLngToContainerPoint(oo.pos);
-								this.on("move", ev => {
-									m.setLatLng( this.containerPointToLatLng(point) );
-								});
-								this.on("moveend", ev => { m.slideTo(o.pos, { duration: 500 }); this.off("move"); });*/
 								break;
 							}
 						}
 					}
 				}
-				else this.editLayer.addLayer(this.createObject(o), o.type, o.id);
+				else{ this.editLayer.addLayer(this.createObject(o), o.type, o.id); }
 			}
 		}
 	},
 
-	insertObject: function(o) {
-		if(this.editLayer.getObject(o.options.id)
-		|| this.markerLayer.getObject(o.options.id)) return;
+	insertObject: function(id, sceneId) {
+		if(this.editLayer.getObject(id)
+		|| this.markerLayer.getObject(id)) return;
 
 		let object;
 		for(let oo of this.objects) {
-			if(oo.id == o.options.id && oo.sceneId == o.options.sceneId) {
+			if(oo.id == id && oo.sceneId == sceneId) {
 				object = this.createObject(oo);
 				break;
 			}
 		}
 
-		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
-		object.options.sceneId = sceneId || console.error("No active scene found");
+		let sId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+		object.options.sceneId = sId || console.error("No active scene found");
 
 		if(object.options.type == "marker") this.markerLayer.addLayer(object, object.options.id);
 		else this.editLayer.addLayer(object, object.options.type, object.options.id);
+
+		this.objects.push( this.extractObject(object) );
+	},
+	cloneAvatar: function(id, sceneId) {
+		let object, zoom = this.getZoom();
+		for(let o of this.objects) {
+			if(o.id == id && o.sceneId == sceneId) {
+				object = Object.assign({}, o);
+
+				object.id = uuid();
+
+				let pos = this.project(object.pos, zoom);
+				pos.x += 50; pos.y += 50; pos = this.unproject(pos, zoom);
+				object.pos = { lat: pos.lat, lng: pos.lng };
+
+				object = this.createObject(object);
+				break;
+			}
+		}
+
+		this.markerLayer.addLayer(object, object.options.id);
 
 		this.objects.push( this.extractObject(object) );
 	},
@@ -507,7 +523,15 @@ L.Map.include({
 						iconSize: o.size,
 						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
 						tooltipAnchor: [ 0, o.size[1] / 2 ]
-					})
+					}),
+					contextmenu: true,
+					contextmenuItems: [
+						{
+							text: "Clone avatar",
+							callback: ev => { this.cloneAvatar(o.id, o.sceneId); },
+							index: 0
+						}
+					]
 				});
 				oo.options.label = o.label;
 				oo.options.ratio = o.ratio;

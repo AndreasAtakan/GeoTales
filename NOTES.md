@@ -31,7 +31,6 @@
 - V Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)
 
 - Ny avatar-icon funksjonalitet: Legg inn ny ui i avatar-popup under "overlay" hvor brukeren kan legge predefinerte ikoner med gjennomsiktighet (png), f.eks. båt, bil, ol., som vil legges på toppen av avatarens eksisterende ikon. Dette gir avataren ekstra "forteller"-verdi
-- Legg inn fade-overgang mellom avatar-ikoner fra scene til scene
 
 - Redigerings-modus: Brukeren kan dynamisk justere på bredden av scene-seksjonen
 

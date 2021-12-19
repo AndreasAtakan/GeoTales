@@ -44,7 +44,7 @@ _EVENTS.scene = {
 
 			if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1 && s.index < _SCENES.length - 1) {
 				ev.preventDefault();
-				this.set_scene( _SCENES[s.index + 1].id, true );
+				this.set_scene( _SCENES[s.index + 1].id );
 			}
 
 			if(keycode == "ArrowUp" || keycode == "ArrowDown") { ev.preventDefault(); }
@@ -55,14 +55,14 @@ _EVENTS.scene = {
 			if(!id) return;
 
 			let s = get_scene(id);
-			if(s.index > 0) this.set_scene( _SCENES[s.index - 1].id );
+			if(s.index > 0) { this.set_scene( _SCENES[s.index - 1].id ); }
 		});
 		$("button#sceneForward").click(ev => {
 			let id = $("#scene").data("sceneid");
 			if(!id) return;
 
 			let s = get_scene(id);
-			if(s.index < _SCENES.length - 1) this.set_scene( _SCENES[s.index + 1].id, true );
+			if(s.index < _SCENES.length - 1) { this.set_scene( _SCENES[s.index + 1].id ); }
 		});
 
 		_MAP.setup();
@@ -77,7 +77,7 @@ _EVENTS.scene = {
 
 
 
-	set_scene: function(id, animate) {
+	set_scene: function(id) {
 		let s = get_scene(id);
 
 		this.set_scene_style();
@@ -92,21 +92,16 @@ _EVENTS.scene = {
 		);
 
 		$("#scene #content").html(s.content || "");
+		$("#scene #content img").click(ev => { ev.stopPropagation();
+			$("#imageModal img#imgPreview").attr("src", ev.target.src);
+			$("#imageModal").modal("show");
+		});
 
 		if(_FONT) $("#scene #datetime").css("font-family", _FONT);
 
-		if(s.basemap) {
-			if(s.basemap.url) this.set_basemap(s.basemap.url);
-			else if(s.basemap.img) _MAP.imgBasemap(s.basemap.img, s.basemap.width, s.basemap.height);
-		}else{
-			let b = get_last_scene_basemap(id);
-			if(b) {
-				if(b.url) this.set_basemap(b.url);
-				else if(b.img) _MAP.imgBasemap(b.img, b.width, b.height);
-			}
-		}
+		this.set_basemap( s.basemap || get_last_scene_basemap(id) );
 
-		_MAP.setObjects(id, animate);
+		_MAP.setObjects(id);
 
 		_MAP.setFlyTo(s.bounds);
 
@@ -124,20 +119,28 @@ _EVENTS.scene = {
 
 	set_click: function() {
 		$("#scene").click(ev => {
+			if(_IS_MAP_MOVING) return;
+
 			let id = $("#scene").data("sceneid");
 			let scene = get_scene( id );
 
-			_MAP.setFlyTo(scene.bounds);
-
 			$("#scene").removeClass("inactive");
+
+			_MAP.setFlyTo(scene.bounds);
+			_IS_MAP_MOVING = true;
 		});
 	},
 
-	set_basemap: function(url) {
-		let basemap = get_basemap(url);
+	set_basemap: function(b) {
+		if(b.url) {
+			let basemap = get_basemap(b.url);
 
-		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc);
-		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
+			if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
+			else _MAP.setBasemap(false, b.url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(b.url));
+		}
+		else if(b.img) {
+			_MAP.imgBasemap(b.img, b.width, b.height);
+		}
 	},
 
 	set_datetime: function(id) {
@@ -212,8 +215,6 @@ _EVENTS.scene = {
 _EVENTS.project = {
 
 	setup: function() {
-		//let self = this;
-
 		$("#importModal button#import").click(ev => {
 			$("#importModal").modal("hide");
 

@@ -26,7 +26,7 @@ _EVENTS.scene = {
 	setup: function() {
 		init_scene();
 
-		$("#sceneCol button#addScene").click( ev => { this.add(); } );
+		//$("#sceneCol button#addScene").click( ev => { this.add(); } );
 
 		$("ul#sceneContainer").sortable({ // https://api.jqueryui.com/sortable/
 			cursor: "move",
@@ -53,7 +53,7 @@ _EVENTS.scene = {
 			}
 		});
 
-		$("#sceneCol").keydown(ev => { if(ev.code == "ArrowUp" || ev.code == "ArrowDown") { ev.preventDefault(); } });
+		$("#sceneCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
 		$("#sceneCol").keyup(ev => {
 			let keycode = ev.code,
 				id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
@@ -64,7 +64,7 @@ _EVENTS.scene = {
 
 			if(keycode == "ArrowUp" && s.index > 0) {
 				ev.preventDefault();
-				this.set_scene( _SCENES[s.index - 1].id );
+				this.set_scene( _SCENES[s.index - 1].id, true );
 			}
 
 			if(keycode == "ArrowDown" && s.index < _SCENES.length - 1) {
@@ -72,7 +72,7 @@ _EVENTS.scene = {
 				this.set_scene( _SCENES[s.index + 1].id, true );
 			}
 
-			if(keycode == "ArrowUp" || keycode == "ArrowDown") { ev.preventDefault(); }
+			if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
 		});
 
 		_MAP.setup();
@@ -85,15 +85,12 @@ _EVENTS.scene = {
 		_MAP.reset();
 	},
 
-	add: function() {
+	add: function(prevId) {
 		let id = uuid();
 
-		this.set_add(id);
+		this.set_add(id, prevId);
 
 		let s = { id: id };
-
-		let prevId = _SCENES.length > 0 ? _SCENES[_SCENES.length - 1].id : null;
-		_SCENES.push(s);
 
 		if(prevId) {
 			let prevScene = get_scene(prevId);
@@ -106,7 +103,10 @@ _EVENTS.scene = {
 			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
 			$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("html", s.content || "");
+
+			_SCENES.splice(prevScene.index + 1, 0, s);
 		}
+		else{ _SCENES.push(s); }
 
 		this.capture(id);
 		this.set_scene(id);
@@ -134,7 +134,7 @@ _EVENTS.scene = {
 		}
 		_SCENES[s.index].basemap = b;
 
-		//this.flash_map();
+		this.flash_map();
 	},
 
 	delete: function(id) {
@@ -202,16 +202,7 @@ _EVENTS.scene = {
 
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
-		if(s.basemap) {
-			if(s.basemap.url) this.set_basemap(s.basemap.url);
-			else if(s.basemap.img) _MAP.imgBasemap(s.basemap.img, s.basemap.width, s.basemap.height);
-		}else{
-			let b = get_last_scene_basemap(id);
-			if(b) {
-				if(b.url) this.set_basemap(b.url);
-				else if(b.img) _MAP.imgBasemap(b.img, b.width, b.height);
-			}
-		}
+		this.set_basemap( s.basemap || get_last_scene_basemap(id) );
 
 		_MAP.setObjects(id, animate);
 
@@ -221,13 +212,15 @@ _EVENTS.scene = {
 	set_scene_input: function(id) {
 		$("#sceneContainer span#capture").off("click");
 		$("#sceneContainer span#delete").off("click");
+		$("#sceneContainer span#add").off("click");
 		$("#sceneContainer select#periodInput").prop("disabled", true);
 		$("#sceneContainer input#dateInput").prop("disabled", true);
 		$("#sceneContainer input#timeInput").prop("disabled", true);
-		$("#sceneContainer #textInput").each(function(index) { $(this).trumbowyg("disable") });
+		$("#sceneContainer #textInput").each(function(index) { $(this).trumbowyg("disable"); });
 
-		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); _MAP.setOverlay(); } );
+		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); /*_MAP.setOverlay();*/ } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
+		$(`li[data-sceneid="${id}"] span#add`).click( ev => { this.add(id); ev.stopPropagation(); } );
 		$(`li[data-sceneid="${id}"] select#periodInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
@@ -250,13 +243,13 @@ _EVENTS.scene = {
 			let id = scene.id;
 
 			let prevId = $("#sceneContainer li[class*=\"active\"]").data("sceneid"), t = false;
-			if(prevId) {
-				t = get_scene(prevId).index == get_scene(id).index - 1;
-			}
+			if(prevId) { t = Math.abs( get_scene(id).index - get_scene(prevId).index ) == 1; }
 
 			this.set_scene( id, t );
 		});
 		$("#sceneContainer li[class*=\"active\"]").click(ev => {
+			if(_IS_MAP_MOVING) return;
+
 			let scene = get_element_scene(ev.target);
 			if(!scene) return;
 			let id = scene.id;
@@ -266,8 +259,8 @@ _EVENTS.scene = {
 				$(`li[data-sceneid="${id}"]`).addClass("active");
 			}
 
-			let s = get_scene(id);
-			_MAP.setFlyTo(s.bounds);
+			_MAP.setFlyTo(scene.bounds);
+			_IS_MAP_MOVING = true;
 		});
 		$("#sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").click(ev => { ev.stopPropagation(); });
 	},
@@ -275,9 +268,9 @@ _EVENTS.scene = {
 		$("#sceneContainer li, #sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").off("click");
 	},
 
-	set_add: function(id) {
+	set_add: function(id, prevId) {
 		let self = this;
-		add_scene(id);
+		add_scene(id, prevId);
 
 		$(`li[data-sceneid="${id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
 
@@ -322,17 +315,22 @@ _EVENTS.scene = {
 		});
 	},
 
-	set_basemap: function(url) {
-		let basemap = get_basemap(url);
+	set_basemap: function(b) {
+		if(b.url) {
+			let basemap = get_basemap(b.url);
 
-		if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
-		else _MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
+			if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
+			else _MAP.setBasemap(false, b.url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(b.url));
+		}
+		else if(b.img) {
+			_MAP.imgBasemap(b.img, b.width, b.height);
+		}
 	},
 
-	/*flash_map: function() {
+	flash_map: function() {
 		$("div#map").addClass("snapshot");
 		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 240);
-	}*/
+	}
 
 };
 
