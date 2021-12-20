@@ -102,7 +102,7 @@ function add_scene(id, prevId) {
 								</span>
 							</div>
 						</div>
-						<div class="row gx-0 mb-3" style="position: absolute; bottom: 60px;">
+						<div class="row gx-0 mb-3" style="position: absolute; bottom: 55px;">
 							<div class="col">
 								<span id="delete" title="Delete scene">
 									<i class="fas fa-trash"></i>
@@ -112,7 +112,7 @@ function add_scene(id, prevId) {
 						<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
 							<div class="col">
 								<span id="add" title="Add scene below">
-									<i class="fas fa-reply" style="transform: rotate(180deg);"></i>
+									<i class="fas fa-plus"></i>
 								</span>
 							</div>
 						</div>
@@ -313,14 +313,15 @@ function init_basemaps() {
 
 	let html = ``;
 
-	for(let b of _BASEMAPS) {
+	for(let i = 0; i < _BASEMAPS.length; i++) {
+		let b = _BASEMAPS[i];
 		html += `
 			<div class="col">
 				<div class="card mt-2">
 					<div class="card-body">
 						<h6 class="card-title mb-0">${b.name}</h6>
 					</div>
-					<img class="card-img-bottom" id="basemaps" src="${b.preview}" alt="${b.name}" data-basemap="${b.name}" />
+					<img class="card-img-bottom" id="basemaps" src="${b.preview}" alt="${b.name}" data-basemap="${i}" />
 				</div>
 			</div>
 		`;

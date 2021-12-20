@@ -319,8 +319,8 @@ _EVENTS.scene = {
 		if(b.url) {
 			let basemap = get_basemap(b.url);
 
-			if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
-			else _MAP.setBasemap(false, b.url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(b.url));
+			if(basemap) _MAP.setBasemap( basemap.tiles );
+			else _MAP.setBasemap(L.tileLayer(b.url, { minZoom: 0, maxZoom: 22, attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>" }), is_internal_roman_basemap(b.url));
 		}
 		else if(b.img) {
 			_MAP.imgBasemap(b.img, b.width, b.height);
@@ -614,12 +614,12 @@ _EVENTS.basemapOptions = {
 		init_basemaps();
 
 		$("#basemapModal #basemaps").click(ev => {
-			let name = $(ev.target).data("basemap");
-			if(!name) return;
-			let basemap = get_basemap(name);
+			let index = $(ev.target).data("basemap");
+			if(!index && index != 0) return;
+			let basemap = _BASEMAPS[index];
 
 			this.unsetSceneBasemap();
-			_MAP.setBasemap(basemap.int, basemap.int ? name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
+			_MAP.setBasemap( basemap.tiles );
 			this.setSceneBasemap();
 		});
 
@@ -653,6 +653,7 @@ _EVENTS.basemapOptions = {
 			let url = $(ev.target).val();
 			if(!url) return;
 
+			let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>" });
 			let protocol = url.split(/\:/ig)[0];
 
 			if(protocol == "mapbox") {
@@ -665,14 +666,16 @@ _EVENTS.basemapOptions = {
 						key = $(ev.target).val();
 
 						url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-						_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
+						tiles.setUrl(url, true);
+						_MAP.setBasemap(tiles, is_internal_roman_basemap(url));
 					});
 				}else{
 					url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-					_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(url));
+					tiles.setUrl(url, true);
+					_MAP.setBasemap(tiles, is_internal_roman_basemap(url));
 				}
 			}else{
-				_MAP.setBasemap(false, url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>");
+				_MAP.setBasemap(tiles);
 			}
 		});
 

@@ -59,11 +59,9 @@ function get_last_scene_basemap(id) {
 	return null;
 }
 
-function get_basemap(name) {
+function get_basemap(url) {
 	for(let b of _BASEMAPS) {
-		if(b.name == name) {
-			return b;
-		}
+		if(b.tiles._url == url) { return b; }
 	}
 
 	return null;

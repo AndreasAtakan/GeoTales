@@ -1,13 +1,15 @@
 ## TODO
 
+- Fix edit-mode "new scene" user-workflow
+
 - WIP (not woking) Block zoom on mobile devices; meta tag
 - X (extend this) Mulighet for grunnkart-legende
 
 - Edit-mode
 	- Avatar-ikon; Mulighet til å rotere, slider i popup menyen, CSS transform
 	- (?) Add a rectangle on the current scene's bounds
-	- X Context-menu for avatarer; legg inn valg om å "clone avatar"
-	- X Muligheten til å legge inn scene rett under en annen scene
+	- W (Fix bugs) Context-menu for avatarer; legg inn valg om å "clone avatar"
+	- Add Mars basemap: [Link](https://www.google.com/mars/)
 
 - Presentation-mode
 	- X Når brukere trykker på bildene i scenene skal bildene vises i fullskjerm
