@@ -60,7 +60,6 @@ _EVENTS.scene = {
 			if(!id) return;
 
 			let s = get_scene(id);
-			console.log(keycode);
 
 			if(keycode == "ArrowUp" && s.index > 0) {
 				ev.preventDefault();
@@ -83,6 +82,27 @@ _EVENTS.scene = {
 		$("#sceneCol button#addScene").click( ev => { this.setup(); this.add(); } );
 
 		_MAP.reset();
+	},
+
+	prepare: function(prevId) {
+		prepare_scene(prevId);
+
+		this.unset_click();
+
+		let handler = ev => { ev.stopPropagation(); };
+		$("#sceneContainer li #reorder").mousedown(handler);
+
+		$("#sceneContainer li").removeClass("inactive active");
+		$("li#prepare").addClass("active");
+
+		$("li#prepare")[0].scrollIntoView({ behavior: "smooth", block: "center" });
+
+		$("li#prepare button#capture").click(ev => {
+			$("#sceneContainer li #reorder").unbind("mousedown", handler);
+			$("li#prepare").remove();
+
+			this.add(prevId);
+		});
 	},
 
 	add: function(prevId) {
@@ -143,14 +163,12 @@ _EVENTS.scene = {
 
 		if(s.basemap) {
 			let nextS = _SCENES[ s.index + 1 ];
-			if(nextS && !nextS.basemap) {
-				_SCENES[ s.index + 1 ].basemap = s.basemap;
-			}
+			if(nextS && !nextS.basemap) { _SCENES[ s.index + 1 ].basemap = s.basemap; }
 		}
 
 		_SCENES.splice(s.index, 1);
-		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("destroy");
 
+		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("destroy");
 		$(`li[data-sceneid="${id}"]`).remove();
 
 		if(_SCENES.length <= 0) { this.reset(); }
@@ -210,33 +228,27 @@ _EVENTS.scene = {
 	},
 
 	set_scene_input: function(id) {
-		$("#sceneContainer span#capture").off("click");
-		$("#sceneContainer span#delete").off("click");
-		$("#sceneContainer span#add").off("click");
-		$("#sceneContainer select#periodInput").prop("disabled", true);
-		$("#sceneContainer input#dateInput").prop("disabled", true);
-		$("#sceneContainer input#timeInput").prop("disabled", true);
+		$("#sceneContainer span#capture, #sceneContainer span#delete, #sceneContainer span#add").off("click");
+		$("#sceneContainer select#periodInput, #sceneContainer input#dateInput, #sceneContainer input#timeInput").prop("disabled", true);
 		$("#sceneContainer #textInput").each(function(index) { $(this).trumbowyg("disable"); });
 
-		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); /*_MAP.setOverlay();*/ } );
+		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); } );
 		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
-		$(`li[data-sceneid="${id}"] span#add`).click( ev => { this.add(id); ev.stopPropagation(); } );
-		$(`li[data-sceneid="${id}"] select#periodInput`).prop("disabled", false);
-		$(`li[data-sceneid="${id}"] input#dateInput`).prop("disabled", false);
-		$(`li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
+		$(`li[data-sceneid="${id}"] span#add`).click( ev => { this.prepare(id); ev.stopPropagation(); } );
+		$(`li[data-sceneid="${id}"] select#periodInput, li[data-sceneid="${id}"] input#dateInput, li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
 		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("enable");
 	},
 
 	set_scene_style: function(id) {
 		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
 
-		$("#sceneContainer li").removeClass("inactive");
-		$("#sceneContainer li").removeClass("active");
+		$("#sceneContainer li").removeClass("inactive active");
 		$(`li[data-sceneid="${id}"]`).addClass("active");
 	},
 
 	set_click: function() {
-		$("#sceneContainer li").off("click");
+		this.unset_click();
+
 		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
 			let scene = get_element_scene(ev.target);
 			if(!scene) return;
@@ -247,6 +259,7 @@ _EVENTS.scene = {
 
 			this.set_scene( id, t );
 		});
+
 		$("#sceneContainer li[class*=\"active\"]").click(ev => {
 			if(_IS_MAP_MOVING) return;
 
@@ -262,6 +275,7 @@ _EVENTS.scene = {
 			_MAP.setFlyTo(scene.bounds);
 			_IS_MAP_MOVING = true;
 		});
+
 		$("#sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").click(ev => { ev.stopPropagation(); });
 	},
 	unset_click: function() {
@@ -594,12 +608,12 @@ _EVENTS.options = {
 
 		//init_themes();
 
-		$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
+		/*$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
 			let theme = $(ev.target).prop("id");
 			if(!theme) return;
 
 			_THEME = theme;
-		});
+		});*/
 
 	}
 
@@ -654,15 +668,14 @@ _EVENTS.basemapOptions = {
 			if(!url) return;
 
 			let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>" });
-			let protocol = url.split(/\:/ig)[0];
 
+			let protocol = url.split(/\:/ig)[0];
 			if(protocol == "mapbox") {
-				let key = $("#basemapModal input#basemapKey").val(),
-					username = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[0],
-					styleID = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[1];
+				let username = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[0],
+					styleID = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[1],
+					key = $("#basemapModal input#basemapKey").val();
 				if(!key) {
-					$("#basemapModal input#basemapKey").change(ev => {
-						$(ev.target).off("change");
+					$("#basemapModal input#basemapKey").change(ev => { //$(ev.target).off("change");
 						key = $(ev.target).val();
 
 						url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;

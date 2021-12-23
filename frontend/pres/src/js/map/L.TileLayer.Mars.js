@@ -21,42 +21,47 @@
 "use strict";
 
 
-window.onload = function(ev) {
+L.TileLayer.Mars = L.TileLayer.extend({
 
-	// Disable mobile pinch-zoom
-	document.addEventListener("touchmove", function(ev) {
-		if(ev.scale !== 1) { ev.preventDefault(); }
-	}, false);
+	getTileUrl: function(coords) {
+		let bound = Math.pow(2, coords.z),
+			x = coords.x,
+			y = coords.y;
 
-	_MAP = L.map("map", {
-		center: [ 50, 6 ],
-		zoom: window.innerWidth < 575.98 ? 3 : 5,
-		zoomControl: false,
-		maxZoom: 18,
-		doubleClickZoom: false,
-		zoomAnimationThreshold: 100,
-		wheelPxPerZoomLevel: 1500,
-		keyboard: false,
-		tap: false,
-		//touchZoom: false,
-		//worldCopyJump: true
+		// Don't repeat across y-axis (vertically).
+		if(y < 0 || y >= bound) { return null; }
 
-		contextmenu: true,
-		contextmenuItems: [
-			{ text: "Copy coordinates", callback: ev => { navigator.clipboard.writeText( `${ev.latlng.lat}, ${ev.latlng.lng}` ); } },
-			{ text: "Center map here", callback: ev => { _MAP.panTo(ev.latlng); } },
-			"-",
-			{ text: "Zoom in", icon: "assets/zoom-in.png", callback: ev => { _MAP.zoomIn(); } },
-			{ text: "Zoom out", icon: "assets/zoom-out.png", callback: ev => { _MAP.zoomOut(); } }
-		]
-	});
+		// Repeat across x-axis.
+		if(x < 0 || x >= bound) { x = (x % bound + bound) % bound; }
 
-	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); _EVENTS.scene.add(); });
+		let qstr = "t";
+		for(let z = 0; z < coords.z; z++) {
+			bound = bound / 2;
+			if(y < bound) {
+				if (x < bound) { qstr += "q"; }
+				else {
+					qstr += "r";
+					x -= bound;
+				}
+			}else{
+				if(x < bound) {
+					qstr += "t";
+					y -= bound;
+				}else{
+					qstr += "s";
+					x -= bound;
+					y -= bound;
+				}
+			}
+		}
+		return `https://mw1.google.com/mw-planetary/mars/${this.options.layer}/${qstr}.jpg`;
+	},
 
-	$("#exportMap").click(ev => { _EVENTS.project.export(); });
+	initialize: function(options) {
+		L.TileLayer.prototype.initialize.call(this, "", options);
+	}
 
-	_EVENTS.project.setup();
-	_EVENTS.options.setup();
-	_EVENTS.basemapOptions.setup();
+});
 
-};
+
+L.tileLayer.mars = function(options) { return new L.TileLayer.Mars(options); }

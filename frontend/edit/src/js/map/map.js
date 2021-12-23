@@ -28,7 +28,7 @@ L.Map.addInitHook(function() {
 	/*this.addControl( new L.Control.Fullscreen({ position: "topright" }) );*/
 
 	this.basemapLegend = L.control.htmllegend({
-		position: "topright",
+		position: "bottomright",
 		collapsedOnInit: true,
 		disableVisibilityControls: true,
 		updateOpacity: null
@@ -36,12 +36,12 @@ L.Map.addInitHook(function() {
 	this.addControl( this.basemapLegend );
 
 	this.addControl(
-		L.control.zoom({ position: "topright" })
+		L.control.zoom({ position: "bottomright" })
 	);
 
 	this.basemapButton = L.easyButton({
 		id: "chooseBasemap",
-		position: "topright",
+		position: "bottomright",
 		leafletClasses: true,
 		states: [
 			{
@@ -79,7 +79,6 @@ L.Map.addInitHook(function() {
 	this.fadeLayer = L.fadeLayer();
 	this.editLayer = L.editLayer();
 	this.markerLayer = L.markerLayer();
-	this.overlayRect = L.rectangle(this.getBounds(), { interactive: false, color: "#ffffff", weight: 2, opacity: 0.8, fill: false });
 
 	this.addLayer( this.fadeLayer );
 	this.addLayer( this.editLayer );
@@ -188,6 +187,16 @@ L.Map.addInitHook(function() {
 		$(`li[data-sceneid="${activeScene}"]`).addClass("inactive");
 	});
 	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
+	this.on("autopanstart", ev => {
+		let handler = ev => {
+			this.off("moveend", handler);
+
+			let c = this.getCenter(), z = this.getZoom();
+			c = this.project(c, z); c.y -= 50;
+			this.setView(this.unproject(c, z), z);
+		};
+		this.on("moveend", handler);
+	});
 
 });
 
@@ -199,12 +208,13 @@ L.Map.include({
 	setup: function() {
 		this.enableDrawing();
 		this.basemapButton.enable();
+
+		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 	reset: function() {
 		this.markerLayer.clearLayers();
 		this.editLayer.clearLayers();
 		this.fadeLayer.clearLayers();
-		this.removeLayer(this.overlayRect);
 
 		this.disableDrawing();
 		this.basemapButton.disable();
@@ -225,32 +235,7 @@ L.Map.include({
 		}
 	},
 
-	setOverlay: function() { // TODO
-		this.on("moveend", ev => {
-			this.off("moveend");
-
-			if(!this.hasLayer(this.overlayRect)) this.addLayer(this.overlayRect);
-			this.overlayRect.setBounds( this.getBounds() );
-			this.overlayRect.redraw();
-			this.overlayRect.bringToBack(); this.basemap.bringToBack();
-
-			// NOTE: overlayRect lingers on last scene's bounds, I have no idea why. this.getBounds returns correct values
-		});
-
-		/*let c = this.project(center, zoom),
-			half = this.getSize().divideBy(2);
-		let tl = this.unproject(c.subtract(half)),
-			br = this.unproject(c.add(half));
-
-		console.log(tl, br); // NOTE: tl and br are WAY too big, something goes wrong with the project/unproject. Fix this!
-		this.overlayRect.setLatLngs([
-			[[85.06,-180], [85.06,180], [-85.06,180], [-85.06,-180]],
-			[[tl.lat, tl.lng], [tl.lat, br.lng], [br.lat, br.lng], [br.lat, tl.lng]]
-		]);*/
-	},
 	setFlyTo: function(bounds) {
-		//this.setOverlay();
-
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
@@ -355,7 +340,8 @@ L.Map.include({
 				object.id = uuid();
 
 				let pos = this.project(object.pos, zoom);
-				pos.x += 50; pos.y += 50; pos = this.unproject(pos, zoom);
+					pos.x += 50; pos.y += 50;
+					pos = this.unproject(pos, zoom);
 				object.pos = { lat: pos.lat, lng: pos.lng };
 
 				object = this.createObject(object);
@@ -417,13 +403,9 @@ L.Map.include({
 		}
 	},
 
-	setIcon: function(id, size, icon) {
-		this.markerLayer.setIcon(id, size, icon);
-	},
+	setIcon: function(id, size, icon) { this.markerLayer.setIcon(id, size, icon); },
 
-	getBasemap: function() {
-		return this.basemap.options.source;
-	},
+	getBasemap: function() { return this.basemap.options.source; },
 
 	imgBasemap: function(img, width, height) {
 		if(this.basemap.options.source.img
@@ -484,9 +466,7 @@ L.Map.include({
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 
-	resetBasemap: function() {
-		this.setBasemap( _BASEMAPS[9].tiles );
-	},
+	resetBasemap: function() { this.setBasemap( _BASEMAPS[9].tiles ); },
 
 	presetZoom: function(min, max) {
 		let zoom = this.getZoom();
@@ -511,15 +491,7 @@ L.Map.include({
 						iconSize: o.size,
 						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
 						tooltipAnchor: [ 0, o.size[1] / 2 ]
-					}),
-					contextmenu: true,
-					contextmenuItems: [
-						{
-							text: "Clone avatar",
-							callback: ev => { this.cloneAvatar(o.id, o.sceneId); },
-							index: 0
-						}
-					]
+					})
 				});
 				oo.options.label = o.label;
 				oo.options.ratio = o.ratio;
@@ -642,8 +614,6 @@ L.Map.include({
 		}
 	},
 
-	exportData: function() {
-		return this.objects;
-	}
+	exportData: function() { return this.objects; }
 
 });

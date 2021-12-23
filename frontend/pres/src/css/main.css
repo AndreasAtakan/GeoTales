@@ -32,9 +32,13 @@ input::-webkit-inner-spin-button {
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
 .leaflet-control { opacity: 0.8; }
-.leaflet-bottom.leaflet-left { z-index: 1001; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
+
+/*.marker-transition { opacity: 1; -webkit-transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); -moz-transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); -o-transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); }
+.marker-transition-enter { opacity: 0.01; }
+.marker-transition-leave, .marker-transition-leave-active { -webkit-transition: opacity .7s cubic-bezier(0,0,.25,1); -moz-transition: opacity .7s cubic-bezier(0,0,.25,1); -o-transition: opacity .7s cubic-bezier(0,0,.25,1); transition: opacity .7s cubic-bezier(0,0,.25,1); }
+.marker-transition-leave-active { opacity: 0.01; }*/
 
 #dateticker {
 	position: absolute;
@@ -81,6 +85,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 #navBtns {
+	position: sticky;
+	top: 5px;
 	float: right;
 }
 
@@ -98,6 +104,23 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	bottom: 0;
 	background-image: linear-gradient(to top, grey, rgba(242, 242, 242, 0));
 }
+
+/*.fadeOut {
+	-webkit-transition: 0.12s;
+	-moz-transition: 0.12s;
+	-ms-transition: 0.12s;
+	-o-transition: 0.12s;
+	transition: 0.12s;
+	opacity: 0;
+}
+.fadeIn {
+	-webkit-transition: 0.12s;
+	-moz-transition: 0.12s;
+	-ms-transition: 0.12s;
+	-o-transition: 0.12s;
+	transition: 0.12s;
+	opacity: 1;
+}*/
 
 
 

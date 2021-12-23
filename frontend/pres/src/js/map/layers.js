@@ -48,7 +48,7 @@ L.ObjectLayer = L.FeatureGroup.extend({
 		let o = this.getObject(id);
 		let label = o.options.label;
 
-		if(label) o.bindTooltip(label, { direction: "bottom", permanent: true });
+		if(label) { o.bindTooltip(label, { direction: "bottom", permanent: true }); }
 	},
 
 	getObject: function(id) {
@@ -101,6 +101,4 @@ L.ObjectLayer = L.FeatureGroup.extend({
 });
 
 
-L.objectLayer = function(options) {
-	return new L.ObjectLayer(options);
-};
+L.objectLayer = function(options) { return new L.ObjectLayer(options); };

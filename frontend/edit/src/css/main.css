@@ -31,15 +31,7 @@ input::-webkit-inner-spin-button {
 
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
-#_midline {
-	position: absolute;
-	top: 50%;
-	left: 0;
-	height: 0;
-	visibility: hidden;
-}
-
-.leaflet-bottom.leaflet-left { z-index: 1001; }
+.leaflet-top.leaflet-right { top: 50px; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
 
@@ -54,7 +46,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #sceneCol {
 	position: absolute;
 	z-index: 1002;
-	height: calc(100% - 50.65px);
+	height: calc(100vh - 50px);
+	margin-top: 50px;
 	overflow-y: auto;
 	background-color: rgba(242, 242, 242, 0.7);
 }
@@ -96,6 +89,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	cursor: pointer;
 }
 
+#mapCol { height: 100%; }
+
 #map {
 	width: 100%;
 	height: 100%;
@@ -132,6 +127,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 575.98px) {
+	.leaflet-bottom.leaflet-right { bottom: 45%; }
+
 	#sceneCol {
 		height: 45%;
 		bottom: 0;

@@ -88,9 +88,7 @@ L.FadeLayer = L.FeatureGroup.extend({
 });
 
 
-L.fadeLayer = function(options) {
-	return new L.FadeLayer(options);
-};
+L.fadeLayer = function(options) { return new L.FadeLayer(options); };
 
 
 
@@ -126,7 +124,7 @@ L.EditLayer = L.FeatureGroup.extend({
 
 		object.bindPopup(popup, { keepInView: true, maxWidth: 350, maxHeight: 450 });
 
-		object.on("click", ev => { _EVENTS.object.setup(object); });
+		object.on("popupopen", ev => { _EVENTS.object.setup(object); });
 
 		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
 		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
@@ -146,10 +144,9 @@ L.EditLayer = L.FeatureGroup.extend({
 		var object = object || (id ? this.getObject(id) : null);
 		if(!object) return;
 
-		object.closePopup();
-		object.unbindPopup();
+		object.closePopup(); object.unbindPopup();
 
-		object.off("click"); object.off("mouseover"); object.off("mouseout");
+		object.off("popupopen"); object.off("mouseover"); object.off("mouseout");
 
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
@@ -167,9 +164,7 @@ L.EditLayer = L.FeatureGroup.extend({
 });
 
 
-L.editLayer = function(options) {
-	return new L.EditLayer(options);
-};
+L.editLayer = function(options) { return new L.EditLayer(options); };
 
 
 
@@ -193,12 +188,23 @@ L.MarkerLayer = L.FeatureGroup.extend({
 
 		object.bindPopup( marker_popup() , { keepInView: true, maxWidth: 350, maxHeight: 450 } );
 
-		object.on("click", ev => { _EVENTS.object.setup(object); });
+		object.on("popupopen", ev => { _EVENTS.object.setup(object); });
 
 		object.on("dragend", ev => { _MAP.updateObject(object.options.id); });
 
 		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
 		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
+
+		object.bindContextMenu({
+			contextmenu: true,
+			contextmenuItems: [
+				{
+					text: "Clone avatar",
+					callback: ev => { _MAP.cloneAvatar(object.options.id, object.options.sceneId); },
+					index: 0
+				}
+			]
+		});
 	},
 
 	getObject: function(id) {
@@ -216,14 +222,16 @@ L.MarkerLayer = L.FeatureGroup.extend({
 		var size = size || o.getIcon().options.iconSize,
 			icon = icon || o.getIcon().options.iconUrl;
 
-		o.setIcon(
-			L.icon({
-				iconUrl: icon,
-				iconSize: size,
-				popupAnchor: [ 0, (-1) * (size[1] / 2) ],
-				tooltipAnchor: [ 0, size[1] / 2 ]
-			})
-		);
+		if(size[1] < 180) { // NOTE: this is to avoid the "Too much recursion" error
+			o.setIcon(
+				L.icon({
+					iconUrl: icon,
+					iconSize: size,
+					popupAnchor: [ 0, (-1) * (size[1] / 2) ],
+					tooltipAnchor: [ 0, size[1] / 2 ]
+				})
+			);
+		}
 
 		$(o._icon).css("border-radius", o.options.rounded ? "50%" : "0");
 		//$(o._icon).css("transform", `rotate(${o.options.angle}deg)`);
@@ -245,15 +253,13 @@ L.MarkerLayer = L.FeatureGroup.extend({
 
 		object.slideCancel();
 
-		object.closeTooltip();
-		object.unbindTooltip();
+		object.closeTooltip(); object.unbindTooltip();
 
-		object.closePopup();
-		object.unbindPopup();
+		object.closePopup(); object.unbindPopup();
 
 		object.dragging.disable();
 
-		object.off("click"); object.off("dragend"); object.off("mouseover"); object.off("mouseout");
+		object.off("popupopen"); object.off("dragend"); object.off("mouseover"); object.off("mouseout");
 
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
@@ -271,6 +277,4 @@ L.MarkerLayer = L.FeatureGroup.extend({
 });
 
 
-L.markerLayer = function(options) {
-	return new L.MarkerLayer(options);
-};
+L.markerLayer = function(options) { return new L.MarkerLayer(options); };

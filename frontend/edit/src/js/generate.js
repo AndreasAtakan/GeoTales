@@ -24,8 +24,6 @@
 function init_scene() {
 
 	$("#sceneCol").html(`
-		<div id="_midline"></div>
-
 		<div class="row align-items-center g-0 h-100">
 			<div class="col">
 				<div class="row gx-0 mx-2" id="topPadScene">
@@ -45,16 +43,6 @@ function init_scene() {
 						<hr />
 					</div>
 				</div>
-
-				<!--div class="row gx-0" id="bottomPadScene">
-					<div class="col">
-						<center>
-							<button type="button" class="btn btn-outline-secondary px-5" id="addScene" title="Add new scene">
-								<strong>+</strong>
-							</button>
-						</center>
-					</div>
-				</div-->
 			</div>
 		</div>
 	`);
@@ -77,6 +65,28 @@ function reset_scene() {
 				</center>
 			</div>
 		</div>
+	`);
+
+}
+
+function prepare_scene(prevId) {
+
+	$(`li[data-sceneid="${prevId}"]`).after(`
+		<li class="list-group-item" id="prepare">
+			<div class="row">
+				<div class="col">
+					<center>
+						<button type="button" class="btn btn-light px-5 mt-3" id="capture" title="Capture scene">
+							<i class="fas fa-camera"></i>
+						</button>
+
+						<p class="text-muted mt-3">
+							Click to capture
+						</p>
+					</center>
+				</div>
+			</div>
+		</li>
 	`);
 
 }

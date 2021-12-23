@@ -7,9 +7,8 @@
 
 ##### Endringer – tilbakemeldinger runde 2:
 
-1. V Alle modal-er bør være flyttbar av bruker (som frittstående vinduer)
-2. Redigere avatar icon før icon blir satt på avataren (litt som twitter-profilbilde)
-3. Legge inn tekst-boks som alternativ i kart-tegning
+1. Redigere avatar icon før icon blir satt på avataren (litt som twitter-profilbilde)
+2. Legge inn tekst-boks som alternativ i kart-tegning
 
 ##### Endringer – tilbakemeldinger runde 3:
 

@@ -110,11 +110,6 @@ _EVENTS.scene = {
 
 	set_scene_style: function() {
 		// TODO: add fade in and out effect to scene card
-
-		/*if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
-
-		$("#scene").removeClass("active");
-		$("#scene").addClass("active");*/
 	},
 
 	set_click: function() {
@@ -135,8 +130,8 @@ _EVENTS.scene = {
 		if(b.url) {
 			let basemap = get_basemap(b.url);
 
-			if(basemap) _MAP.setBasemap(basemap.int, basemap.int ? basemap.name : basemap.url, basemap.zoom[0], basemap.zoom[1], basemap.cc, basemap.legend);
-			else _MAP.setBasemap(false, b.url, 0, 22, "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>", is_internal_roman_basemap(b.url));
+			if(basemap) _MAP.setBasemap( basemap.tiles );
+			else _MAP.setBasemap(L.tileLayer(b.url, { minZoom: 0, maxZoom: 22, attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>" }), is_internal_roman_basemap(b.url));
 		}
 		else if(b.img) {
 			_MAP.imgBasemap(b.img, b.width, b.height);

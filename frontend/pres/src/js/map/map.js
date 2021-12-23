@@ -81,8 +81,8 @@ L.Map.addInitHook(function() {
 
 	// Basemap
 
-	this.basemap = L.tileLayer.provider("Esri.WorldStreetMap");
-	this.basemap.options.source = { url: "Esri.WorldStreetMap" };
+	this.basemap = _BASEMAPS[9].tiles;
+	this.basemap.options.source = { url: this.basemap._url };
 	this.addLayer( this.basemap );
 
 
@@ -113,7 +113,7 @@ L.Map.addInitHook(function() {
 L.Map.include({
 
 	setup: function() {
-		//
+		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 	reset: function() {
 		this.objectLayer.clearLayers();
@@ -188,52 +188,39 @@ L.Map.include({
 		//this.fitBounds(bounds);
 	},
 
-	setBasemap: function(int, url, minZoom, maxZoom, cc, legend) {
+	setBasemap: function(tiles, legend) {
 		if(this.basemap.options.source.url
-		&& this.basemap.options.source.url == url) return;
+		&& this.basemap.options.source.url == tiles._url) return;
 
 		this.removeLayer( this.basemap );
 		this.basemapLegend.removeLegend(1);
 
-		if(int) {
-			this.basemap = L.tileLayer.provider(url);
-		}else{
-			this.basemap = L.tileLayer(url, {
-				attribution: cc,
-				minZoom: minZoom,
-				maxZoom: maxZoom
+		this.basemap = tiles;
+		this.basemap.options.source = { url: this.basemap._url };
+
+		if(legend) {
+			this.basemapLegend.addLegend({
+				name: "Basemap legend",
+				layer: this.basemap,
+				elements: [ { html: legend } ]
 			});
-
-			if(legend) {
-				this.basemapLegend.addLegend({
-					name: "Basemap legend",
-					layer: this.basemap,
-					elements: [ { html: legend } ]
-				});
-			}
 		}
-		this.basemap.options.source = { url: url };
 
-		this.presetZoom(minZoom, maxZoom);
+		this.presetZoom(this.basemap.options.minZoom, this.basemap.options.maxZoom);
 
 		this.addLayer( this.basemap );
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 
-	resetBasemap: function() {
-		let name = "Esri.WorldStreetMap";
-		let basemap = get_basemap(name);
-
-		this.setBasemap(name, basemap.zoom[0], basemap.zoom[1]);
-	},
+	resetBasemap: function() { this.setBasemap( _BASEMAPS[9].tiles ); },
 
 	presetZoom: function(min, max) {
 		let zoom = this.getZoom();
 
 		if(zoom < min || zoom > max) {
-			if(zoom < min) this.setZoom(min);
-			if(zoom > max) this.setZoom(max);
+			if(zoom < min) { this.setZoom(min); }
+			if(zoom > max) { this.setZoom(max); }
 		}
 
 		this.setMinZoom(min);
@@ -242,6 +229,7 @@ L.Map.include({
 
 	createObject: function(o) {
 		let oo = null;
+		//let TransitionedIcon = L.TransitionedIcon.extend({ options: { cssTransitionName: "marker-transition" } });
 
 		switch(o.type) {
 			case "marker":
@@ -253,6 +241,8 @@ L.Map.include({
 						iconSize: o.size,
 						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
 						tooltipAnchor: [ 0, o.size[1] / 2 ]
+						//shadowUrl: "lib/leaflet/images/marker-shadow.png",
+						//shadowSize: [41, 41]
 					})
 				});
 				oo.options.label = o.label;
