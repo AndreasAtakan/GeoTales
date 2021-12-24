@@ -399,9 +399,18 @@ _EVENTS.object = {
 
 				let img = new Image();
 				img.onload = function() {
-					let width = 50;
-					let ratio = this.width / this.height;
-					let height = width / ratio;
+					let ratio = this.width / this.height,
+						width, height;
+
+					for(let w = 50; w > 0; w--) {
+						let h = w / ratio;
+						if(h < 180) {
+							width = w;
+							height = h;
+							break;
+						}
+					}
+					if(!width || !height) { return; }
 
 					object.setIcon(
 						L.icon({
