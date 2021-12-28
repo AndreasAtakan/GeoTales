@@ -36,6 +36,10 @@
 - [Grunnkart kilde](https://maps.lib.utexas.edu/maps)
 
 
+- Ting å huske når man installerer Discourse:
+	- [SMTP issues](https://meta.discourse.org/t/discourse-with-other-websites-smtp-issue-end-of-file-reached/162893/3)
+
+
 
 
 
@@ -47,3 +51,4 @@
 	- Erstattet alle `L.Point(20,20)` med `L.Point(12,12)` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å gjøre resize/move boksene på polyline/polygon objekter mindre
 	- ~Fjernet alle kall til `_toggleMarkerHighlight` og fjernet selve metoden og medfølgende hjelpe-metoder på `L.Edit.Marker` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å fjerne objekt-styling på markers i editLayer~
 	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~
+
