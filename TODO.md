@@ -3,8 +3,17 @@
 
 - W Install Discourse with docker (default theme: Graceful)
 - Test Discourse SSO with PHP
-
-
+	`Array (
+		[admin] => false
+		[moderator] => true
+		[email] => theandreascan@gmail.com
+		[external_id] => 2
+		[groups] => moderators,staff,trust_level_0,trust_level_1
+		[name] => Andreas Atakan
+		[nonce] => f48b3ef776c49690d29b0f2d710fed77c49e620ecfff35954afefb7974ac1030190384e40e6b761edd1adfff49ed1ec574c17e6b8f94290c788528860b263590
+		[return_sso_url] => https://tellusmap.com/login.php
+		[username] => andreas
+	)`
 
 
 
