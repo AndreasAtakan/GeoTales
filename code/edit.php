@@ -1,3 +1,21 @@
+<?php
+
+ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
+
+//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
+session_start();
+
+//include "init_sso.php";
+
+if(!isset($_SESSION['uid'])) { // Not logged in
+	header("location: index.php");
+	exit;
+}
+
+$username = $_SESSION['username'];
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -241,7 +259,7 @@
 			<div class="row g-0">
 				<div class="col">
 					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #563d7c;">
-						<a class="navbar-brand" href="#">
+						<a class="navbar-brand" href="index.php">
 							<img src="assets/logo.jpg" alt="TellUs" width="30" height="30" style="border-radius: 2px;" />
 						</a>
 
@@ -269,10 +287,11 @@
 										<i class="fas fa-user"></i>
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-										<li><a class="dropdown-item" href="#">Projects</a></li>
-										<li><a class="dropdown-item" href="#">My profile</a></li>
+										<li><a class="dropdown-item" href="projects.php">Projects</a></li>
+										<li><a class="dropdown-item" href="<?php print("https://forum.tellusmap.com/u/$username/preferences/account"); ?>" target="_blank">My profile</a></li>
+										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider"></li>
-										<li><a class="dropdown-item" href="#">Settings</a></li>
+										<li><a class="dropdown-item" href="logout.php">Log out</a></li>
 									</ul>
 								</li>
 							</ul>

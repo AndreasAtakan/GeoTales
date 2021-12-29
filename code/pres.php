@@ -1,3 +1,9 @@
+<?php
+
+ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
+
+?>
+
 <!DOCTYPE html>
 <html>
 	<head>
