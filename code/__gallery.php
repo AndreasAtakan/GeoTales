@@ -35,32 +35,7 @@ include "init_sso.php";
 				/**/
 			}
 
-			img#jumbotron {
-				width: 100%;
-				max-height: 650px;
-				object-fit: cover;
-				filter: blur(3px);
-			}
-			#jumbotron-text {
-				position: absolute;
-				top: 200px;
-				left: 20%;
-
-				color: white;
-				text-shadow: #333 1px 1px 3px;
-				-webkit-font-smoothing: antialiased;
-				font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
-			}
-
-			#map-preview {
-				color: white;
-				text-shadow: #000 1px 1px 3px;
-				-webkit-font-smoothing: antialiased;
-			}
-			#map-preview img {
-				filter: blur(1px);
-			}
-			#map-preview .card:hover { cursor: pointer; }
+			#projects #like:hover { cursor: pointer; }
 		</style>
 	</head>
 	<body>
@@ -116,7 +91,7 @@ include "init_sso.php";
 
 									echo("
 										<li class=\"nav-item\">
-											<a role=\"button\" class=\"btn btn-sm btn-light mt-1\" href=\"login.php\" target=\"_blank\">Login</a>
+											<a role=\"button\" class=\"btn btn-sm btn-light mt-1\" href=\"login.php\">Login</a>
 										</li>
 									");
 								}
@@ -137,7 +112,105 @@ include "init_sso.php";
 
 				<div class="row mx-auto" style="max-width: 950px;">
 					<div class="col">
-						<h4>Map gallery</h4>
+						<form>
+							<div class="row mb-3">
+								<div class="col">
+									<div class="input-group input-group-lg">
+										<input type="text" class="form-control" id="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
+										<button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col">
+									<div class="accordion" id="searchAccordion">
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="headingOne">
+												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+													Filters
+												</button>
+											</h2>
+											<div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#searchAccordion">
+												<div class="accordion-body">
+													<div class="row g-2">
+														<div class="col-12 col-sm">
+															<input type="text" class="form-control form-control-sm" id="owner" />
+															<label for="owner" class="form-label">Owner</label>
+														</div>
+														<div class="col-12 col-md">
+															<input class="form-control form-control-sm" list="listTags" id="tags" />
+															<datalist id="listTags">
+																<option value="San Francisco" />
+															</datalist>
+															<label for="tags" class="form-label">Tags</label>
+														</div>
+														<div class="col-12 col-md">
+															<input type="date" class="form-control form-control-sm" id="created" />
+															<label for="created" class="form-label">Created after</label>
+														</div>
+														<div class="col-12 col-md">
+															<input type="date" class="form-control form-control-sm" id="published" />
+															<label for="published" class="form-label">Published after</label>
+														</div>
+														<div class="col-12 col-md">
+															<input type="number" class="form-control form-control-sm" id="rating" min="0" />
+															<label for="rating" class="form-label">Rating larger than</label>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<div class="row my-5">
+					<div class="col"></div>
+				</div>
+
+				<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" id="projects">
+					<div class="col">
+						<div class="card">
+							<div class="card-body">
+								<h5 class="card-title">
+									<a class="text-decoration-none text-body" href="#" target="_blank">Demo map 1</a>
+								</h5>
+								<h6 class="card-subtitle mb-2 text-muted">Andreas – 3.jan 2021</h6>
+								<p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras metus diam, tempor quis metus nec, convallis dictum elit.</p>
+								<div class="row">
+									<div class="col-9">
+										<span class="badge bg-success">History</span>
+										<span class="badge bg-success">Education</span>
+									</div>
+									<div class="col-3" id="like">
+										<span class="float-end">6 <i class="fas fa-heart"></i></span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card">
+							<div class="card-body">
+								<h5 class="card-title">
+									<a class="text-decoration-none text-body" href="#" target="_blank">Demo map 2</a>
+								</h5>
+								<h6 class="card-subtitle mb-2 text-muted">Nils – 3.jan 2021</h6>
+								<p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras metus diam, tempor quis metus nec, convallis dictum elit.</p>
+								<div class="row">
+									<div class="col-9">
+										<span class="badge bg-success">History</span>
+										<span class="badge bg-success">Academic</span>
+									</div>
+									<div class="col-3" id="like">
+										<span class="float-end">2 <i class="fas fa-heart"></i></span>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
@@ -153,17 +226,17 @@ include "init_sso.php";
 		<footer class="py-5 mt-5 shadow" style="background-color: #e6e6e6;">
 			<div class="container">
 				<div class="row">
-					<div class="col">
-						<p class="text-muted">© <a class="text-decoration-none" href="https://tellusmap.com">tellusmap.com</a> – all rights reserved</p>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center">© <a class="text-decoration-none" href="https://tellusmap.com">tellusmap.com</a> – all rights reserved</p>
 					</div>
-					<div class="col">
+					<div class="col-sm-4 mt-2">
 						<center>
-							<img id="logo" src="assets/logo.jpg" alt="TellUs" width="60" height="60" />
+							<img class="d-none d-sm-block" id="logo" src="assets/logo.jpg" alt="TellUs" width="60" height="60" />
 						</center>
 					</div>
-					<div class="col">
-						<p class="text-muted text-end"><a class="text-decoration-none" href="mailto:contact@tellusmap.com">contact@tellusmap.com</a></p>
-						<p class="text-muted text-end"><a class="text-decoration-none" href="tel:+4748006325">+47 48 00 63 25</a></p>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center"><a class="text-decoration-none" href="mailto:contact@tellusmap.com">contact@tellusmap.com</a></p>
+						<p class="text-muted text-center"><a class="text-decoration-none" href="tel:+4748006325">+47 48 00 63 25</a></p>
 					</div>
 				</div>
 			</div>

@@ -12,15 +12,15 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
 		<title>TellUs</title>
-		<meta name="title" content="---" />
-		<meta name="description" content="---" />
+		<meta name="title" content="TellUs" />
+		<meta name="description" content="Map stories" />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="https://tellusmap.com/" />
-		<meta property="og:title" content="---" />
-		<meta property="og:description" content="---" />
-		<meta property="og:site_name" content="---" />
+		<meta property="og:title" content="TellUs" />
+		<meta property="og:description" content="Map stories" />
+		<meta property="og:site_name" content="TellUs" />
 		<meta property="og:image" content="assets/logo.jpg" />
 		<meta property="og:image:type" content="image/png" />
 
@@ -29,8 +29,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 		<meta name="twitter:site" content="@TellusMap" />
 		<meta name="twitter:creator" content="@TellusMap" />
 		<meta property="twitter:url" content="https://tellusmap.com/" />
-		<meta property="twitter:title" content="---" />
-		<meta property="twitter:description" content="---" />
+		<meta property="twitter:title" content="TellUs" />
+		<meta property="twitter:description" content="Map stories" />
 		<meta property="twitter:image" content="assets/logo.jpg" />
 
 		<link rel="icon" href="assets/logo.jpg" />

@@ -2,7 +2,7 @@
 
 
 - W Install Discourse with docker (default theme: Graceful)
-- Test Discourse SSO with PHP
+- W Test Discourse SSO with PHP
 	`Array (
 		[admin] => false
 		[moderator] => true
@@ -14,6 +14,13 @@
 		[return_sso_url] => https://tellusmap.com/login.php
 		[username] => andreas
 	)`
+- Map gallery will be the same as the Discourse-forum
+	- When a user publishes a map, it will generate a post on Discourse (in the name of the user).
+	  The user will then be redirected to this post, and all further interactions will happen on the forum.
+	  Other users will like the post, comment on the post, and so on. All on the forum.
+	  There will be a dedicated post-category for published maps.
+	  The user can also tag the post will different tags related to the map.
+	  The title of the post will be the same as the projects title, and so the user can easily find back to the post.
 
 
 

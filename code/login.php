@@ -7,7 +7,6 @@ session_start();
 include "init_sso.php";
 include "init_db.php";
 
-//$loc = '/projects.php';
 $loc = 'projects.php';
 
 if($FLAG && isset($_GET['sso']) && isset($_GET['sig'])) {
@@ -42,7 +41,8 @@ if($FLAG && isset($_GET['sso']) && isset($_GET['sig'])) {
 	$uid = $query['external_id'];
 	$username = $query['username'];
 
-	$row = $pdo->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?")->execute([$uid])->fetch();
+	$stmt = $pdo->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?"); $stmt->execute([$uid]);
+	$row = $stmt->fetch();
 	if($row['c'] < 1) {
 		if($row['c'] < 0) { http_response_code(500); exit; }
 
@@ -61,3 +61,5 @@ else{ $_SESSION['uid'] = 1; $_SESSION['username'] = 'andreas'; }
 
 // user is logged in
 header("location: $loc");
+
+exit;

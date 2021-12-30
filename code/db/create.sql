@@ -48,41 +48,10 @@ END;
 --
 
 BEGIN;
-CREATE TABLE IF NOT EXISTS "Tag"(
-	id serial,
-	name varchar(65) NOT NULL,
-	PRIMARY KEY (id)
-);
-END;
-
---
-
-BEGIN;
-CREATE TABLE IF NOT EXISTS "Project_Tag"(
+CREATE TABLE IF NOT EXISTS "Public"(
 	id serial,
 	pid serial NOT NULL,
-	tid serial NOT NULL,
-
-	PRIMARY KEY (id),
-	FOREIGN KEY (pid)
-		REFERENCES "Project" (pid)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	FOREIGN KEY (tid)
-		REFERENCES "Tag" (id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
-);
-END;
-
---
-
-BEGIN;
-CREATE TABLE IF NOT EXISTS "Gallery"(
-	id serial,
-	pid serial NOT NULL,
-	published timestamp DEFAULT NOW(),
-	likes int,
+	url text NOT NULL,
 
 	PRIMARY KEY (id),
 	FOREIGN KEY (pid)

@@ -22,12 +22,6 @@ END;
 --
 
 BEGIN;
-INSERT INTO "Tag" (name) VALUES ('gaming');
-END;
-
---
-
-BEGIN;
-INSERT INTO "Project_Tag" (pid, tid)
-VALUES ( (SELECT pid FROM "Project" LIMIT 1), (SELECT id FROM "Tag" LIMIT 1) );
+INSERT INTO "Public" (pid, url)
+VALUES ( (SELECT pid FROM "Project" LIMIT 1), 'https://forum.tellusmap.com/t/about-the-public-maps-category/16' );
 END;

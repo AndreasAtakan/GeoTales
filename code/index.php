@@ -43,7 +43,7 @@ include "init_sso.php";
 			}
 			#jumbotron-text {
 				position: absolute;
-				top: 200px;
+				top: 15vw;
 				left: 20%;
 
 				color: white;
@@ -53,14 +53,10 @@ include "init_sso.php";
 			}
 
 			#map-preview {
-				color: white;
 				text-shadow: #000 1px 1px 3px;
 				-webkit-font-smoothing: antialiased;
 			}
-			#map-preview img {
-				filter: blur(1px);
-			}
-			#map-preview .card:hover { cursor: pointer; }
+			#map-preview img { filter: blur(1px); }
 		</style>
 	</head>
 	<body>
@@ -82,7 +78,7 @@ include "init_sso.php";
 								<a class="nav-link active" aria-current="page" href="index.php">Home</a>
 							</li>
 							<li class="nav-item me-auto">
-								<a class="nav-link" href="gallery.php">Gallery</a>
+								<a class="nav-link" href="https://forum.tellusmap.com/c/public-maps/5" target="_blank">Gallery</a>
 							</li>
 
 							<li class="nav-item me-3">
@@ -92,20 +88,20 @@ include "init_sso.php";
 							<?php
 								if(isset($_SESSION['uid'])) { // logged in
 									$username = $_SESSION['username'];
-									echo("
-										<li class=\"nav-item dropdown\">
-											<a class=\"nav-link dropdown-toggle\" href=\"#\" id=\"navbarUserDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">
-												<i class=\"fas fa-user\"></i>
-											</a>
-											<ul class=\"dropdown-menu dropdown-menu-sm-end\" aria-labelledby=\"navbarUserDropdown\">
-												<li><a class=\"dropdown-item\" href=\"projects.php\">Projects</a></li>
-												<li><a class=\"dropdown-item\" href=\"https://forum.tellusmap.com/u/$username/preferences/account\" target=\"_blank\">My profile</a></li>
-												<li><a class=\"dropdown-item\" href=\"settings.php\">Settings</a></li>
-												<li><hr class=\"dropdown-divider\"></li>
-												<li><a class=\"dropdown-item\" href=\"logout.php\">Log out</a></li>
-											</ul>
-										</li>
-									");
+							?>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+											<i class="fas fa-user"></i>
+										</a>
+										<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
+											<li><a class="dropdown-item" href="projects.php">Projects</a></li>
+											<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php print($username); ?>/preferences/account" target="_blank">My profile</a></li>
+											<li><a class="dropdown-item" href="settings.php">Settings</a></li>
+											<li><hr class="dropdown-divider"></li>
+											<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+										</ul>
+									</li>
+							<?php
 								}else{
 									$nonce = hash('sha512', mt_rand());
 									$_SESSION['nonce'] = $nonce;
@@ -114,11 +110,11 @@ include "init_sso.php";
 									$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $sso_secret)));
 									$url = "https://forum.tellusmap.com/session/sso_provider?$query";
 
-									echo("
-										<li class=\"nav-item\">
-											<a role=\"button\" class=\"btn btn-sm btn-light mt-1\" href=\"login.php\" target=\"_blank\">Login</a>
-										</li>
-									");
+							?>
+									<li class="nav-item">
+										<a role="button" class="btn btn-sm btn-light mt-1" href="<?php /*print($url);*/ print("login.php"); ?>">Login</a>
+									</li>
+							<?php
 								}
 							?>
 						</ul>
@@ -165,19 +161,23 @@ include "init_sso.php";
 					<div class="col">
 						<div class="card">
 							<img src="assets/map-preview-1.png" class="card-img" alt="map-preview-1" />
-							<div class="card-img-overlay">
-								<h3 class="card-title">Map of Saint Paul's journey to Rome</h3>
-								<p class="card-text">Click the image to open demo map</p>
-							</div>
+							<a class="text-decoration-none text-light" href="#" target="_blank">
+								<div class="card-img-overlay">
+									<h3 class="card-title">Map of Saint Paul's journey to Rome</h3>
+									<p class="card-text">Click the image to open demo map</p>
+								</div>
+							</a>
 						</div>
 					</div>
 					<div class="col">
 						<div class="card">
 							<img src="assets/map-preview-2.png" class="card-img" alt="map-preview-2" />
-							<div class="card-img-overlay">
-								<h3 class="card-title">Visual presentation of the Wars of the Roses</h3>
-								<p class="card-text">Click the image to open demo map</p>
-							</div>
+							<a class="text-decoration-none text-light" href="#" target="_blank">
+								<div class="card-img-overlay">
+									<h3 class="card-title">Visual presentation of the Wars of the Roses</h3>
+									<p class="card-text">Click the image to open demo map</p>
+								</div>
+							</a>
 						</div>
 					</div>
 				</div>
@@ -327,17 +327,17 @@ include "init_sso.php";
 		<footer class="py-5 mt-5 shadow" style="background-color: #e6e6e6;">
 			<div class="container">
 				<div class="row">
-					<div class="col">
-						<p class="text-muted">© <a class="text-decoration-none" href="https://tellusmap.com">tellusmap.com</a> – all rights reserved</p>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center">© <a class="text-decoration-none" href="https://tellusmap.com">tellusmap.com</a> – all rights reserved</p>
 					</div>
-					<div class="col">
+					<div class="col-sm-4 mt-2">
 						<center>
-							<img id="logo" src="assets/logo.jpg" alt="TellUs" width="60" height="60" />
+							<img class="d-none d-sm-block" id="logo" src="assets/logo.jpg" alt="TellUs" width="60" height="60" />
 						</center>
 					</div>
-					<div class="col">
-						<p class="text-muted text-end"><a class="text-decoration-none" href="mailto:contact@tellusmap.com">contact@tellusmap.com</a></p>
-						<p class="text-muted text-end"><a class="text-decoration-none" href="tel:+4748006325">+47 48 00 63 25</a></p>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center"><a class="text-decoration-none" href="mailto:contact@tellusmap.com">contact@tellusmap.com</a></p>
+						<p class="text-muted text-center"><a class="text-decoration-none" href="tel:+4748006325">+47 48 00 63 25</a></p>
 					</div>
 				</div>
 			</div>

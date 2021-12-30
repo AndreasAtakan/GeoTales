@@ -5,8 +5,6 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-//include "init_sso.php";
-
 if(!isset($_SESSION['uid'])) { // Not logged in
 	header("location: index.php");
 	exit;
@@ -24,8 +22,8 @@ $username = $_SESSION['username'];
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
 		<title>TellUs</title>
-		<meta name="title" content="---" />
-		<meta name="description" content="---" />
+		<meta name="title" content="TellUs" />
+		<meta name="description" content="Map stories" />
 
 		<link rel="icon" href="assets/logo.jpg" />
 
