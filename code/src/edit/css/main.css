@@ -39,10 +39,6 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 .ui-sortable-helper { left: auto !important; }
 
-.trumbowyg-modal { top: 25px !important; }
-.trumbowyg-modal-box .trumbowyg-modal-button.trumbowyg-modal-submit,
-.trumbowyg-modal-box .trumbowyg-modal-button.trumbowyg-modal-submit:hover { background: #333; }
-
 #sceneCol {
 	position: absolute;
 	z-index: 1002;

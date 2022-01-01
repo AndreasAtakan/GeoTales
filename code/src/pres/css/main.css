@@ -49,13 +49,6 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	display: none;
 }
 
-#importProject {
-	position: absolute;
-	z-index: 1001;
-	top: 15px;
-	left: 15px;
-}
-
 #scene {
 	position: absolute;
 	z-index: 1001;

@@ -48,17 +48,6 @@ function get_scene(id) {
 
 
 
-function get_last_scene_basemap(id) {
-	let scene = get_scene(id);
-
-	for(let i = scene.index-1; i >= 0; i--) {
-		let s = _SCENES[i];
-		if(s.basemap) return s.basemap;
-	}
-
-	return null;
-}
-
 function get_basemap(url) {
 	for(let b of _BASEMAPS) {
 		if(b.tiles._url == url) { return b; }

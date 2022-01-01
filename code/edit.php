@@ -10,7 +10,20 @@ if(!isset($_SESSION['uid'])) { // Not logged in
 	exit;
 }
 
+include "init.php";
+
 $username = $_SESSION['username'];
+
+if(!isset($_GET['pid'])) {
+	http_response_code(422);
+	exit;
+}
+$pid = $_GET['pid'];
+
+
+$stmt = $pdo->prepare("SELECT title, description FROM \"Project\" WHERE pid = ?");
+$stmt->execute([$pid]);
+$row = $stmt->fetch();
 
 ?>
 
@@ -21,9 +34,9 @@ $username = $_SESSION['username'];
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>TellUs</title>
-		<meta name="title" content="TellUs" />
-		<meta name="description" content="Map stories" />
+		<title>TellUs – <?php echo $row['title']; ?></title>
+		<meta name="title" content="TellUs – <?php echo $row['title']; ?>" />
+		<meta name="description" content="<?php echo $row['description']; ?>" />
 
 		<link rel="icon" href="assets/logo.jpg" />
 
@@ -96,13 +109,13 @@ $username = $_SESSION['username'];
 					</div>
 					<div class="modal-body">
 						<div class="container-fluid">
-							<div class="row">
+							<div class="row mb-3">
 								<div class="col">
 									<h5>Avatar</h5>
 								</div>
 							</div>
 
-							<div class="row mt-3">
+							<div class="row">
 								<div class="col-md-6 col-sm-12" id="clusteringInputCol">
 									<p>Clustering</p>
 									<select class="form-select" id="clusteringInput" aria-label="Clustering" disabled>
@@ -121,13 +134,13 @@ $username = $_SESSION['username'];
 							<hr />
 							<br />
 
-							<div class="row">
+							<div class="row mb-2">
 								<div class="col">
 									<h5>Map</h5>
 								</div>
 							</div>
 
-							<div class="row mt-2">
+							<div class="row">
 								<div class="col col-md-10">
 									<p>Panning speed: <small><span id="panningSpeedInputValue">auto</span></small></p>
 									<input type="range" class="form-range" id="panningSpeedInput" min="0" max="4000" step="100" />
@@ -138,13 +151,13 @@ $username = $_SESSION['username'];
 							<hr />
 							<br />
 
-							<div class="row">
+							<div class="row mb-2">
 								<div class="col">
 									<h5>Presentation mode</h5>
 								</div>
 							</div>
 
-							<div class="row mt-2 mb-4">
+							<div class="row mb-4">
 								<div class="col col-md-10">
 									<p>Font</p>
 									<select class="form-select" id="fontInput" aria-label="Font type">
@@ -160,7 +173,7 @@ $username = $_SESSION['username'];
 								</div>
 							</div>
 
-							<!--div class="row mt-2">
+							<!--div class="row">
 								<div class="col">
 									<p>Color theme</p>
 									<div class="accordion" id="themeAccordion">
@@ -223,7 +236,7 @@ $username = $_SESSION['username'];
 							<div class="row my-4">
 								<div class="col col-md-10">
 									<label for="basemapFile"><small>Or choose custom basemap</small></label>
-									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/*" />
+									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/gif, image/jpeg, image/png" />
 									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
 								</div>
 							</div>
@@ -242,6 +255,40 @@ $username = $_SESSION['username'];
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Loading modal -->
+		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadingModalLabel">Loading</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Error modal -->
+		<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="errorModalLabel">Error</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Something went wrong. Please try again.</p>
 					</div>
 				</div>
 			</div>
@@ -273,11 +320,18 @@ $username = $_SESSION['username'];
 									</a>
 									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown">
 										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import project</a></li>
-										<li><a class="dropdown-item" href="#" id="exportMap">Export</a></li>
+										<li><a class="dropdown-item" href="#" id="export">Export</a></li>
 									</ul>
 								</li>
 								<li class="nav-item me-auto">
 									<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal">Options</a>
+								</li>
+
+								<li class="nav-item mt-1 me-4">
+									<div class="btn-group btn-group-sm" role="group" aria-label="Save/Preview">
+										<button type="button" class="btn btn-light" id="save">Save</button>
+										<a role="button" class="btn btn-outline-light" href="pres.php?pid=<?php echo $pid; ?>" target="_blank">Preview</a>
+									</div>
 								</li>
 
 								<li class="nav-item dropdown">
@@ -286,7 +340,7 @@ $username = $_SESSION['username'];
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 										<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-										<li><a class="dropdown-item" href="<?php print("https://forum.tellusmap.com/u/$username/preferences/account"); ?>" target="_blank">My profile</a></li>
+										<li><a class="dropdown-item" href="<?php echo "https://forum.tellusmap.com/u/$username/preferences/account"; ?>" target="_blank">My profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider"></li>
 										<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -325,6 +379,9 @@ $username = $_SESSION['username'];
 			</div>
 		</div>
 
+		<!-- NOTE: Used as placeholder input for trumbowyg image upload -->
+		<input type="file" id="_img" accept="image/gif, image/jpeg, image/png" style="display: none;" />
+
 		<!-- Load lib/ JS -->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
 		<!--script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script-->
@@ -361,6 +418,11 @@ $username = $_SESSION['username'];
 		<script type="text/javascript" src="lib/trumbowyg/plugins/resizimg/trumbowyg.resizimg.min.js"></script>
 		<script type="text/javascript" src="lib/trumbowyg/plugins/specialchars/trumbowyg.specialchars.min.js"></script>
 		<script type="text/javascript" src="lib/trumbowyg/plugins/table/trumbowyg.table.min.js"></script>
+
+		<!-- Set PID -->
+		<script type="text/javascript">
+			const _PID = <?php echo $pid; ?>;
+		</script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/edit/js/map/L.TileLayer.Mars.js"></script>

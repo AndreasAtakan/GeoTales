@@ -5,7 +5,7 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "init_sso.php";
+include "init.php";
 
 ?>
 
@@ -28,7 +28,7 @@ include "init_sso.php";
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/css/main.css" />
+		<link rel="stylesheet" href="src/main.css" />
 
 		<style type="text/css">
 			html, body {
@@ -95,7 +95,7 @@ include "init_sso.php";
 										</a>
 										<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 											<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-											<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php print($username); ?>/preferences/account" target="_blank">My profile</a></li>
+											<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account" target="_blank">My profile</a></li>
 											<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 											<li><hr class="dropdown-divider"></li>
 											<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -112,7 +112,7 @@ include "init_sso.php";
 
 							?>
 									<li class="nav-item">
-										<a role="button" class="btn btn-sm btn-light mt-1" href="<?php /*print($url);*/ print("login.php"); ?>">Login</a>
+										<a role="button" class="btn btn-sm btn-light mt-1" href="<?php /*echo $url;*/ echo "login.php"; ?>">Login</a>
 									</li>
 							<?php
 								}
@@ -352,7 +352,7 @@ include "init_sso.php";
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/js/main.js"></script>
+		<!--script type="text/javascript" src="src/main.js"></script-->
 
 	</body>
 </html>

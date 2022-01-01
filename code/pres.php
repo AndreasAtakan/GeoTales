@@ -2,6 +2,21 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
+//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
+
+include "init.php";
+
+if(!isset($_GET['pid'])) {
+	http_response_code(422);
+	exit;
+}
+$pid = $_GET['pid'];
+
+
+$stmt = $pdo->prepare("SELECT title, description FROM \"Project\" WHERE pid = ?");
+$stmt->execute([$pid]);
+$row = $stmt->fetch();
+
 ?>
 
 <!DOCTYPE html>
@@ -11,15 +26,15 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>TellUs</title>
-		<meta name="title" content="TellUs" />
-		<meta name="description" content="Map stories" />
+		<title>TellUs – <?php echo $row['title']; ?></title>
+		<meta name="title" content="TellUs – <?php echo $row['title']; ?>" />
+		<meta name="description" content="<?php echo $row['description']; ?>" />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="https://tellusmap.com/" />
-		<meta property="og:title" content="TellUs" />
-		<meta property="og:description" content="Map stories" />
+		<meta property="og:title" content="TellUs – <?php echo $row['title']; ?>" />
+		<meta property="og:description" content="<?php echo $row['description']; ?>" />
 		<meta property="og:site_name" content="TellUs" />
 		<meta property="og:image" content="assets/logo.jpg" />
 		<meta property="og:image:type" content="image/png" />
@@ -29,8 +44,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 		<meta name="twitter:site" content="@TellusMap" />
 		<meta name="twitter:creator" content="@TellusMap" />
 		<meta property="twitter:url" content="https://tellusmap.com/" />
-		<meta property="twitter:title" content="TellUs" />
-		<meta property="twitter:description" content="Map stories" />
+		<meta property="twitter:title" content="TellUs – <?php echo $row['title']; ?>" />
+		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
 		<meta property="twitter:image" content="assets/logo.jpg" />
 
 		<link rel="icon" href="assets/logo.jpg" />
@@ -59,31 +74,6 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 
 
-		<!-- Import modal -->
-		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="importModalLabel">Import data</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<div class="mb-3">
-							<label for="fileInput" class="form-label">Choose a data-file</label>
-							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, TellUs project-file</div>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-						<button type="button" class="btn btn-secondary" id="import">Import</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-
 		<!-- Image modal -->
 		<div class="modal fade" id="imageModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl modal-fullscreen-lg-down">
@@ -93,6 +83,40 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 					</div>
 					<div class="modal-body">
 						<img alt="Could not load image" class="img-fluid mx-auto d-block" id="imgPreview" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Loading modal -->
+		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadingModalLabel">Loading</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Error modal -->
+		<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="errorModalLabel">Error</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Something went wrong. Please try again.</p>
 					</div>
 				</div>
 			</div>
@@ -123,10 +147,6 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 							</h5>
 						</div>
 					</div>
-
-					<button type="button" class="btn btn-light px-4" id="importProject">
-						Click to import project
-					</button>
 				</div>
 
 			</div>
@@ -134,9 +154,9 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 		<!-- Load lib/ JS -->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
-		<script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script>
-		<!--script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
-		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script-->
+		<!--script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script-->
+		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
+		<!--script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script-->
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
@@ -145,6 +165,11 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
+
+		<!-- Set PID -->
+		<script type="text/javascript">
+			const _PID = <?php echo $pid; ?>;
+		</script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/pres/js/map/L.TileLayer.Mars.js"></script>

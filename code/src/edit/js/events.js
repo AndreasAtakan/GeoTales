@@ -147,12 +147,7 @@ _EVENTS.scene = {
 			se = _MAP.getBounds().getSouthEast();
 		_SCENES[s.index].bounds = [[nw.lat, nw.lng], [se.lat, se.lng]];
 
-		let b = _MAP.getBasemap(), lastB = get_last_scene_basemap(id);
-		if(lastB) {
-			if(b.url && b.url == lastB.url) { b = null; }
-			else if(b.img && b.img == lastB.img) { b = null; }
-		}
-		_SCENES[s.index].basemap = b;
+		_SCENES[s.index].basemap = _MAP.getBasemap();
 
 		this.flash_map();
 	},
@@ -160,11 +155,6 @@ _EVENTS.scene = {
 	delete: function(id) {
 		let s = get_scene(id);
 		let i = s.index == _SCENES.length - 1 ? s.index - 1 : s.index;
-
-		if(s.basemap) {
-			let nextS = _SCENES[ s.index + 1 ];
-			if(nextS && !nextS.basemap) { _SCENES[ s.index + 1 ].basemap = s.basemap; }
-		}
 
 		_SCENES.splice(s.index, 1);
 
@@ -181,30 +171,7 @@ _EVENTS.scene = {
 		let scene = get_scene(id);
 		if(!scene) { console.error("No scene found"); return; }
 
-		let lastB;
-		if(!scene.basemap) { lastB = get_last_scene_basemap(id); }
-		else {
-			let nextScene = _SCENES[ scene.index + 1 ];
-			if(nextScene && !nextScene.basemap) {
-				_SCENES[ scene.index + 1 ].basemap = scene.basemap;
-			}
-		}
-
 		_SCENES.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
-
-		scene = get_scene(id);
-		if(lastB) { _SCENES[ scene.index ].basemap = lastB; }
-
-		let nextScene = _SCENES[ scene.index + 1 ];
-		if(nextScene && !nextScene.basemap) {
-			let lastScene = _SCENES[ scene.index - 1 ];
-			if(lastScene) {
-				lastB = lastScene.basemap || get_last_scene_basemap(lastScene.id);
-				_SCENES[ scene.index + 1 ].basemap = lastB;
-			}
-		}
-
-		reset_scene_basemaps();
 
 		this.set_scene( $("#sceneContainer li[class*=\"active\"]").data("sceneid") );
 	},
@@ -220,7 +187,7 @@ _EVENTS.scene = {
 
 		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
-		this.set_basemap( s.basemap || get_last_scene_basemap(id) );
+		this.set_basemap( s.basemap );
 
 		_MAP.setObjects(id, animate);
 
@@ -309,6 +276,47 @@ _EVENTS.scene = {
 					dropdown: ["justifyLeft", "justifyCenter", "justifyRight", "justifyFull", "unorderedList", "orderedList"],
 					title: "List/Align",
 					ico: "justifyLeft"
+				},
+				uploadImg: {
+					fn: function(e) {
+						$("input#_img").off("change");
+						$("input#_img").change(function(ev) {
+							let file = $(this)[0].files[0];
+
+							$("#loadingModal").modal("show");
+
+							let data = new FormData();
+							data.append("image", file);
+
+							$.ajax({
+								type: "POST",
+								url: "api/img.php",
+								data: data,
+								contentType: false,
+								processData: false,
+								success: function(result, status, xhr) {
+									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+
+									$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("execCmd", {
+										cmd: "insertImage",
+										param: result,
+										forceCss: false,
+										skipTrumbowyg: true
+									});
+								},
+								error: function(xhr, status, error) {
+									console.log(xhr.status);
+									console.log(error);
+
+									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+									$("#errorModal").modal("show");
+								}
+							});
+						});
+						$("input#_img").click();
+					},
+					title: "Add image",
+					ico: "insertImage"
 				}
 			},
 			btns: [
@@ -319,7 +327,7 @@ _EVENTS.scene = {
 				["fontfamily"],
 				["foreColor", "backColor"],
 				//["link"],
-				["base64"]
+				["uploadImg"]
 				//["removeformat"]
 			],
 			plugins: {}
@@ -393,6 +401,8 @@ _EVENTS.object = {
 		$("#markerPopup input#icon").change(function(ev) {
 			let file = $(this)[0].files[0];
 
+			$("#loadingModal").modal("show");
+
 			let fr = new FileReader();
 			fr.onload = function() {
 				let res = fr.result;
@@ -412,15 +422,6 @@ _EVENTS.object = {
 					}
 					if(!width || !height) { return; }
 
-					object.setIcon(
-						L.icon({
-							iconUrl: res,
-							iconSize: [ width, height ],
-							popupAnchor: [ 0, (-1) * (height / 2) ],
-							tooltipAnchor: [ 0, height / 2 ]
-						})
-					);
-
 					$("#markerPopup select#size").val("medium");
 					$("#markerPopup input#rounded").prop("checked", false);
 					// TODO: Also set rotation-angle input to 0
@@ -429,8 +430,38 @@ _EVENTS.object = {
 					object.options.rounded = false;
 					object.options.angle = 0;
 
-					_MAP.updateObject(object.options.id);
-					_MAP.setIcon(object.options.id, [width, height]);
+					let data = new FormData();
+					data.append("image", file);
+
+					$.ajax({
+						type: "POST",
+						url: "api/img.php",
+						data: data,
+						contentType: false,
+						processData: false,
+						success: function(result, status, xhr) {
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+
+							object.setIcon(
+								L.icon({
+									iconUrl: result,
+									iconSize: [ width, height ],
+									popupAnchor: [ 0, (-1) * (height / 2) ],
+									tooltipAnchor: [ 0, height / 2 ]
+								})
+							);
+
+							_MAP.updateObject(object.options.id);
+							_MAP.setIcon(object.options.id, [width, height]);
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status);
+							console.log(error);
+
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+							$("#errorModal").modal("show");
+						}
+					});
 
 					return true;
 				};
@@ -641,7 +672,6 @@ _EVENTS.basemapOptions = {
 			if(!index && index != 0) return;
 			let basemap = _BASEMAPS[index];
 
-			this.unsetSceneBasemap();
 			_MAP.setBasemap( basemap.tiles );
 			this.setSceneBasemap();
 		});
@@ -649,6 +679,8 @@ _EVENTS.basemapOptions = {
 		$("#basemapModal input#basemapFile").change(ev => {
 			var self = this;
 			let file = $(ev.target)[0].files[0];
+
+			$("#loadingModal").modal("show");
 
 			let fr = new FileReader();
 			fr.onload = function() {
@@ -659,9 +691,28 @@ _EVENTS.basemapOptions = {
 					let width = this.width,
 						height = this.height;
 
-					self.unsetSceneBasemap();
-					_MAP.imgBasemap(res, width, height);
-					self.setSceneBasemap();
+					let data = new FormData();
+					data.append("image", file);
+
+					$.ajax({
+						type: "POST",
+						url: "api/img.php",
+						data: data,
+						contentType: false,
+						processData: false,
+						success: function(result, status, xhr) {
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+							_MAP.imgBasemap(result, width, height);
+							self.setSceneBasemap();
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status);
+							console.log(error);
+
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+							$("#errorModal").modal("show");
+						}
+					});
 
 					return true;
 				};
@@ -699,19 +750,10 @@ _EVENTS.basemapOptions = {
 			}else{
 				_MAP.setBasemap(tiles);
 			}
+
+			this.setSceneBasemap();
 		});
 
-	},
-
-	unsetSceneBasemap: function() {
-		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
-		if(!sceneId) { console.error("No active scene found"); return; }
-
-		let i = get_scene(sceneId).index + 1;
-		let nextScene = _SCENES[ i ];
-		if(nextScene && !nextScene.basemap) {
-			_SCENES[ i ].basemap = _MAP.getBasemap();
-		}
 	},
 
 	setSceneBasemap: function() {
@@ -720,8 +762,6 @@ _EVENTS.basemapOptions = {
 
 		let s = get_scene(sceneId);
 		_SCENES[s.index].basemap = _MAP.getBasemap();
-
-		reset_scene_basemaps();
 	}
 
 };
@@ -749,6 +789,87 @@ _EVENTS.project = {
 			fr.readAsText(file);
 		});
 
+		let exportEv = ev => {
+			$("#export").off("click");
+
+			let el = document.createElement("a");
+
+			let f = v => v < 10 && v >= 0 ? `0${v}` : `${v}`;
+			let date = new Date();
+			let y = date.getFullYear(),
+				m = f(date.getMonth() + 1),
+				d = f(date.getDate()),
+				H = f(date.getHours()),
+				M = f(date.getMinutes()),
+				S = f(date.getSeconds());
+			let filename = `project-${y}.${m}.${d}-${H}.${M}.${S}.tellus`;
+
+			let data = this.export();
+
+			el.setAttribute("href", "data:application/json;charset=utf-8," + encodeURIComponent(data));
+			el.setAttribute("download", filename);
+			el.style.display = "none";
+
+			document.body.appendChild(el);
+			$(el).ready(() => {
+				el.click();
+				document.body.removeChild(el);
+
+				$("#export").click(exportEv);
+			});
+		};
+		$("#export").click(exportEv);
+
+		$("#save").click(ev => {
+			let data = this.export();
+
+			$("#loadingModal").modal("show");
+
+			$.ajax({
+				type: "POST",
+				url: "api/project.php",
+				data: {
+					"op": "write",
+					"pid": _PID,
+					"data": data
+				},
+				dataType: "json",
+				success: function(result, status, xhr) {
+					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+				},
+				error: function(xhr, status, error) {
+					console.log(xhr.status);
+					console.log(error);
+
+					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+					$("#errorModal").modal("show");
+				}
+			});
+		});
+
+		$("#loadingModal").modal("show");
+		$.ajax({
+			type: "GET",
+			url: "api/project.php",
+			data: {
+				"op": "read",
+				"pid": _PID
+			},
+			dataType: "json",
+			success: function(result, status, xhr) {
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+
+				if(result.data) { self.import( JSON.parse(result.data) ); }
+			},
+			error: function(xhr, status, error) {
+				console.log(xhr.status);
+				console.log(error);
+
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+				$("#errorModal").modal("show");
+			}
+		});
+
 	},
 
 	import: function(data) {
@@ -774,7 +895,7 @@ _EVENTS.project = {
 			$(`li[data-sceneid="${s.id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-sceneid="${s.id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-sceneid="${s.id}"] input#timeInput`).val( s.time || "" );
-			$(`li[data-sceneid="${s.id}"] #textInput`).trumbowyg("html", s.content || s.text || "");
+			$(`li[data-sceneid="${s.id}"] #textInput`).trumbowyg("html", s.content || "");
 		}
 
 		_MAP.importData(data.objects);
@@ -783,21 +904,7 @@ _EVENTS.project = {
 	},
 
 	export: function() {
-		$("#exportMap").off("click");
-
-		let el = document.createElement("a");
-
-		let f = v => v < 10 && v >= 0 ? `0${v}` : `${v}`;
-		let date = new Date();
-		let y = date.getFullYear(),
-			m = f(date.getMonth() + 1),
-			d = f(date.getDate()),
-			H = f(date.getHours()),
-			M = f(date.getMinutes()),
-			S = f(date.getSeconds());
-		let filename = `project-${y}.${m}.${d}-${H}.${M}.${S}.tellus`;
-
-		let project = {
+		return JSON.stringify({
 			options: {
 				clustering: _CLUSTERING,
 				avatarspeed: _AVATARSPEED,
@@ -805,32 +912,9 @@ _EVENTS.project = {
 				font: _FONT,
 				theme: _THEME
 			},
-			scenes: _SCENES.map(scene => {
-				let s = Object.assign({}, scene);
-				if(s.content && s.text) { delete s.text }
-				return s;
-			}),
+			scenes: _SCENES,
 			objects: _MAP.exportData()
-		};
-		project = JSON.stringify(project);
-
-		el.setAttribute("href", "data:application/json;charset=utf-8," + encodeURIComponent(project));
-		el.setAttribute("download", filename);
-		el.style.display = "none";
-
-		document.body.appendChild(el);
-		$(el).ready(() => {
-			el.click();
-			document.body.removeChild(el);
-
-			$("#exportMap").click(ev => { this.export(); });
 		});
-		/*setTimeout(function() {
-			el.click();
-			document.body.removeChild(el);
-
-			$("#exportMap").click(ev => { this.export(); });
-		}, 200);*/
 	}
 
 };

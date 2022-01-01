@@ -10,29 +10,33 @@ if(!isset($_SESSION['uid'])) { // Not logged in
 	exit;
 }
 
-include "init_db.php";
+include "init.php";
 
 $uid = $_SESSION['uid'];
 $username = $_SESSION['username'];
 
-$stmt = $pdo->prepare("
+$title = "%";
+if(isset($_GET['title'])) { $title .= "{$_GET['title']}%"; }
+
+$sql = "
 	SELECT
 		P.pid AS pid,
 		P.title AS title,
 		P.description AS description,
 		P.created AS created,
-		PU.url AS url
+		P.post AS post
 	FROM
 		\"User_Project\" AS UP INNER JOIN
 		\"Project\" AS P
-			ON UP.pid = P.pid LEFT OUTER JOIN
-		\"Public\" AS PU
-			ON P.pid = PU.pid
+			ON UP.pid = P.pid
 	WHERE
 		UP.status IN ('owner', 'editor') AND
-		UP.uid = ?
-");
-$stmt->execute([$uid]);
+		UP.uid = ? AND
+		P.title LIKE ?
+	ORDER BY
+		P.created DESC
+";
+$stmt = $pdo->prepare($sql); $stmt->execute([$uid, $title]);
 $rows = $stmt->fetchAll();
 
 ?>
@@ -56,7 +60,7 @@ $rows = $stmt->fetchAll();
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/css/main.css" />
+		<link rel="stylesheet" href="src/main.css" />
 
 		<style type="text/css">
 			html, body {
@@ -65,6 +69,110 @@ $rows = $stmt->fetchAll();
 		</style>
 	</head>
 	<body>
+
+		<!-- New project modal -->
+		<div class="modal fade" id="newModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="newModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="newModalLabel">New project</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row mb-3">
+								<div class="col">
+									<label for="titleInput" class="form-label">Title</label>
+									<input type="text" class="form-control" id="titleInput" aria-describedby="titleHelp" maxlength="65" />
+									<div id="titleHelp" class="form-text">Max 65 characters</div>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col">
+									<label for="descriptionInput" class="form-label">Description</label>
+									<textarea class="form-control" id="descriptionInput" rows="5" aria-describedby="descriptionHelp"></textarea>
+									<div id="descriptionHelp" class="form-text">Arbitrary length</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" id="create">Create project</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Edit project modal -->
+		<div class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="editModalLabel">Edit project</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row mb-3">
+								<div class="col">
+									<label for="titleInput" class="form-label">Title</label>
+									<input type="text" class="form-control" id="titleInput" aria-describedby="titleHelp" placeholder="Loading..." disabled />
+									<div id="titleHelp" class="form-text">Max 65 characters</div>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col">
+									<label for="descriptionInput" class="form-label">Description</label>
+									<textarea class="form-control" id="descriptionInput" rows="5" aria-describedby="descriptionHelp" placeholder="Loading..." disabled></textarea>
+									<div id="descriptionHelp" class="form-text">Arbitrary length</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" id="save" data-pid="" disabled>Save changes</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Loading modal -->
+		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadingModalLabel">Loading</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Error modal -->
+		<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="errorModalLabel">Error</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Something went wrong. Please try again.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
 
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #563d7c;">
@@ -96,7 +204,7 @@ $rows = $stmt->fetchAll();
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 									<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-									<li><a class="dropdown-item" href="<?php print("https://forum.tellusmap.com/u/$username/preferences/account"); ?>" target="_blank">My profile</a></li>
+									<li><a class="dropdown-item" href="<?php echo "https://forum.tellusmap.com/u/$username/preferences/account"; ?>" target="_blank">My profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -118,28 +226,15 @@ $rows = $stmt->fetchAll();
 
 				<div class="row mx-auto" style="max-width: 950px;">
 					<div class="col">
-						<form>
-							<div class="row mb-3">
+						<form method="get">
+							<div class="row mb">
 								<div class="col-sm-5 order-sm-2 mb-4 mb-sm-0">
-									<button type="button" class="btn btn-lg btn-primary float-sm-end mt-2 mt-sm-0">New project</button>
+									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New project</button>
 								</div>
 								<div class="col-sm-7 order-sm-1">
 									<div class="input-group">
-										<input type="text" class="form-control" id="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
-										<button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
-									</div>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col">
-									<span class="text-muted me-2">Sort by</span>
-
-									<div class="btn-group btn-group-sm" role="group" aria-label="Sort by">
-										<input type="radio" class="btn-check" name="sortby" id="sortbyTitle" autocomplete="off" checked>
-										<label class="btn btn-outline-secondary" for="sortbyTitle">Title</label>
-
-										<input type="radio" class="btn-check" name="sortby" id="sortbyCreated" autocomplete="off">
-										<label class="btn btn-outline-secondary" for="sortbyCreated">Created date</label>
+										<input type="text" class="form-control" name="title" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
+										<button class="btn btn-outline-secondary" type="submit" id="search-button">Search</button>
 									</div>
 								</div>
 							</div>
@@ -159,32 +254,34 @@ $rows = $stmt->fetchAll();
 							<div class="col">
 								<div class="card">
 									<div class="card-body">
-										<h5 class="card-title"><?php print($row['title']); ?></h5>
-										<h6 class="card-subtitle mb-2 text-muted"><?php print($created); ?></h6>
-										<p class="card-text"><?php print($row['description']); ?></p>
+										<h5 class="card-title"><?php echo $row['title']; ?></h5>
+										<h6 class="card-subtitle mb-2 text-muted"><?php echo $created; ?></h6>
+										<p class="card-text"><?php echo $row['description']; ?></p>
 										<div class="row">
 											<div class="col">
-												<a role="button" class="btn btn-sm btn-outline-secondary" href="edit.php?pid=<?php print($row['pid']); ?>" target="_blank">Open project</a>
+												<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
+													<a role="button" class="btn btn-outline-secondary" href="pres.php?pid=<?php echo $row['pid']; ?>" target="_blank">View</a>
+													<a role="button" class="btn btn-outline-secondary" href="edit.php?pid=<?php echo $row['pid']; ?>" target="_blank">Edit</a>
+												</div>
 											</div>
 											<div class="col">
 												<div class="dropdown float-end">
 													<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="optionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-														<i class="fas fa-pen"></i>
+														<i class="fas fa-ellipsis-v"></i>
 													</button>
 													<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown">
-														<li><button type="button" class="dropdown-item">Edit title</button></li>
-														<li><button type="button" class="dropdown-item">Edit description</button></li>
+														<li><button type="button" class="dropdown-item" id="edit" data-pid="<?php echo $row['pid']; ?>">Change attributes</button></li>
 														<li>
 														<?php
-															if(is_null($row['url'])) {
-																?><button type="button" class="dropdown-item">Publish map</button><?php
+															if(is_null($row['post'])) {
+																?><button type="button" class="dropdown-item" id="publish" data-pid="<?php echo $row['pid']; ?>">Publish map</button><?php
 															}else{
-																?><a class="dropdown-item" href="<?php print($row['url']); ?>" target="_blank">View public post</a><?php
+																?><a class="dropdown-item" href="<?php echo $row['post']; ?>" target="_blank">View public post</a><?php
 															}
 														?>
 														</li>
 														<li><hr class="dropdown-divider"></li>
-														<li><button type="button" class="dropdown-item">Delete</button></li>
+														<li><button type="button" class="dropdown-item" id="delete" data-pid="<?php echo $row['pid']; ?>">Delete</button></li>
 													</ul>
 												</div>
 											</div>
@@ -234,7 +331,7 @@ $rows = $stmt->fetchAll();
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/js/main.js"></script>
+		<script type="text/javascript" src="src/projects.js"></script>
 
 	</body>
 </html>

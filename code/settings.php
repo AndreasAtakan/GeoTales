@@ -33,7 +33,7 @@ $username = $_SESSION['username'];
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/css/main.css" />
+		<link rel="stylesheet" href="src/main.css" />
 
 		<style type="text/css">
 			html, body {
@@ -73,7 +73,7 @@ $username = $_SESSION['username'];
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 									<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-									<li><a class="dropdown-item" href="<?php print("https://forum.tellusmap.com/u/$username/preferences/account"); ?>" target="_blank">My profile</a></li>
+									<li><a class="dropdown-item" href="<?php echo "https://forum.tellusmap.com/u/$username/preferences/account"; ?>" target="_blank">My profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -164,7 +164,7 @@ $username = $_SESSION['username'];
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/js/main.js"></script>
+		<!--script type="text/javascript" src="src/main.js"></script-->
 
 	</body>
 </html>

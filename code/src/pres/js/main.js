@@ -51,8 +51,6 @@ window.onload = function(ev) {
 		]
 	});
 
-	$("button#importProject").click(ev => { $("#importModal").modal("show"); });
-
 	_EVENTS.project.setup();
 
 };

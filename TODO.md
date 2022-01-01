@@ -3,17 +3,6 @@
 
 - W Install Discourse with docker (default theme: Graceful)
 - W Test Discourse SSO with PHP
-	`Array (
-		[admin] => false
-		[moderator] => true
-		[email] => theandreascan@gmail.com
-		[external_id] => 2
-		[groups] => moderators,staff,trust_level_0,trust_level_1
-		[name] => Andreas Atakan
-		[nonce] => f48b3ef776c49690d29b0f2d710fed77c49e620ecfff35954afefb7974ac1030190384e40e6b761edd1adfff49ed1ec574c17e6b8f94290c788528860b263590
-		[return_sso_url] => https://tellusmap.com/login.php
-		[username] => andreas
-	)`
 - Map gallery will be the same as the Discourse-forum
 	- When a user publishes a map, it will generate a post on Discourse (in the name of the user).
 	  The user will then be redirected to this post, and all further interactions will happen on the forum.
@@ -22,7 +11,8 @@
 	  The user can also tag the post will different tags related to the map.
 	  The title of the post will be the same as the projects title, and so the user can easily find back to the post.
 
-
+- Add warning in edit.php, "Unsaved changes, are you sure you want to exit?"
+- Add warning in projects.php before deleting project "Are you sure?"
 
 
 

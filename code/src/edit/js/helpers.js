@@ -48,41 +48,12 @@ function get_scene(id) {
 
 
 
-function get_last_scene_basemap(id) {
-	let scene = get_scene(id);
-
-	for(let i = scene.index-1; i >= 0; i--) {
-		let s = _SCENES[i];
-		if(s.basemap) return s.basemap;
-	}
-
-	return null;
-}
-
 function get_basemap(url) {
 	for(let b of _BASEMAPS) {
 		if(b.tiles._url == url) { return b; }
 	}
 
 	return null;
-}
-
-function reset_scene_basemaps() {
-	let fs = _SCENES[0];
-	if(!fs.basemap) { _SCENES[0].basemap = _MAP.getBasemap(); }
-
-	for(let i = 1; i < _SCENES.length; i++) {
-		let s = _SCENES[i];
-
-		if(s.basemap) {
-			let lastB = get_last_scene_basemap(s.id);
-
-			if((lastB.url && lastB.url == s.basemap.url)
-			|| (lastB.img && lastB.img == s.basemap.img)) {
-				_SCENES[i].basemap = null;
-			}
-		}
-	}
 }
 
 

@@ -25,7 +25,6 @@ _EVENTS.scene = {
 
 	setup: function() {
 		init_scene();
-		$("button#importProject").css("display", "none");
 		$("#scene").css("display", "block");
 
 		this.set_click();
@@ -70,7 +69,6 @@ _EVENTS.scene = {
 
 	reset: function() {
 		reset_scene();
-		$("button#importProject").click(ev => { $("#importModal").modal("show"); });
 
 		_MAP.reset();
 	},
@@ -99,7 +97,7 @@ _EVENTS.scene = {
 
 		if(_FONT) $("#scene #datetime").css("font-family", _FONT);
 
-		this.set_basemap( s.basemap || get_last_scene_basemap(id) );
+		this.set_basemap( s.basemap );
 
 		_MAP.setObjects(id);
 
@@ -210,19 +208,31 @@ _EVENTS.scene = {
 _EVENTS.project = {
 
 	setup: function() {
-		$("#importModal button#import").click(ev => {
-			$("#importModal").modal("hide");
 
-			let file = $("#importModal input#fileInput")[0].files[0];
-			if(!file) return;
+		// Load data
+		let self = this;
+		$("#loadingModal").modal("show");
 
-			let fr = new FileReader();
-			fr.onload = () => {
-				this.import(
-					JSON.parse( fr.result )
-				);
-			};
-			fr.readAsText(file);
+		$.ajax({
+			type: "GET",
+			url: "api/project.php",
+			data: {
+				"op": "read",
+				"pid": _PID
+			},
+			dataType: "json",
+			success: function(result, status, xhr) {
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+
+				if(result.data) { self.import( JSON.parse(result.data) ); }
+			},
+			error: function(xhr, status, error) {
+				console.log(xhr.status);
+				console.log(error);
+
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+				$("#errorModal").modal("show");
+			}
 		});
 
 	},
@@ -241,9 +251,7 @@ _EVENTS.project = {
 		if(index <= 0) _EVENTS.scene.setup();
 
 		for(let i = 0; i < data.scenes.length; i++) {
-			let s = data.scenes[i];
-
-			_SCENES.push(s);
+			_SCENES.push( data.scenes[i] );
 		}
 
 		_MAP.importData(data.objects);

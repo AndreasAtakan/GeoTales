@@ -53,8 +53,6 @@ window.onload = function(ev) {
 
 	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); _EVENTS.scene.add(); });
 
-	$("#exportMap").click(ev => { _EVENTS.project.export(); });
-
 	_EVENTS.project.setup();
 	_EVENTS.options.setup();
 	_EVENTS.basemapOptions.setup();

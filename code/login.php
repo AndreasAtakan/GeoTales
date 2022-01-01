@@ -4,8 +4,7 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 session_start();
 
-include "init_sso.php";
-include "init_db.php";
+include "init.php";
 
 $loc = 'projects.php';
 
@@ -44,10 +43,8 @@ if($FLAG && isset($_GET['sso']) && isset($_GET['sig'])) {
 	$stmt = $pdo->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?"); $stmt->execute([$uid]);
 	$row = $stmt->fetch();
 	if($row['c'] < 1) {
-		if($row['c'] < 0) { http_response_code(500); exit; }
-
-		$res = $pdo->prepare("INSERT INTO \"User\" (uid, username) VALUES (?, ?)")->execute([$uid, $username]);
-		if(!$res) { http_response_code(500); exit; }
+		$stmt = $pdo->prepare("INSERT INTO \"User\" (uid) VALUES (?)");
+		$stmt->execute([$uid]);
 	}
 	elseif($row['c'] > 1) { http_response_code(500); exit; }
 

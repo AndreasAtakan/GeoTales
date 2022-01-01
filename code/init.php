@@ -1,5 +1,7 @@
 <?php
 
+// DB init
+
 $host = "localhost";
 $user = "www-data";
 $pass = "vleowemnxoyvq"; # secret
@@ -17,3 +19,16 @@ try {
 } catch (\PDOException $e) {
 	throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
+
+
+
+// SSO init
+
+$FLAG = false;
+$sso_secret = 'xnUhKjs4HfYqmPhLTgKFutvN7';
+
+
+
+// API init
+
+$apikey = "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017";

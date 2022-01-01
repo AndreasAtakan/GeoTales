@@ -172,7 +172,7 @@ function marker_popup() {
 				<div class="col">
 					<h6>Icon</h6>
 					<div class="input-group input-group-sm">
-						<input type="file" class="form-control form-control-sm" id="icon" accept="image/*" />
+						<input type="file" class="form-control form-control-sm" id="icon" accept="image/gif, image/jpeg, image/png" />
 						<input type="number" min="10" max="100" class="form-control" id="size" placeholder="Size" />
 					</div>
 					<div class="form-check mt-1">
