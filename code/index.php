@@ -1,4 +1,11 @@
 <?php
+/*******************************************************************************
+* Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
+*                                                                              *
+* Unauthorized copying of this file, via any medium is strictly prohibited     *
+* Proprietary and confidential                                                 *
+* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+*******************************************************************************/
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
@@ -324,7 +331,7 @@ include "init.php";
 			</div>
 		</main>
 
-		<footer class="py-5 mt-5 shadow" style="background-color: #e6e6e6;">
+		<footer class="py-3 shadow" style="background-color: #e6e6e6;">
 			<div class="container">
 				<div class="row">
 					<div class="col-sm-4 mt-2">

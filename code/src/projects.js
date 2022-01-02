@@ -1,22 +1,10 @@
-/*©agpl*************************************************************************
+/*******************************************************************************
+* Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
 *                                                                              *
-* TellUs                                                                       *
-* Copyright (C) 2021  TellUs AS                                                *
-*                                                                              *
-* This program is free software: you can redistribute it and/or modify         *
-* it under the terms of the GNU Affero General Public License as published by  *
-* the Free Software Foundation, either version 3 of the License, or            *
-* (at your option) any later version.                                          *
-*                                                                              *
-* This program is distributed in the hope that it will be useful,              *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of               *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 *
-* GNU Affero General Public License for more details.                          *
-*                                                                              *
-* You should have received a copy of the GNU Affero General Public License     *
-* along with this program. If not, see <http://www.gnu.org/licenses/>.         *
-*                                                                              *
-*****************************************************************************©*/
+* Unauthorized copying of this file, via any medium is strictly prohibited     *
+* Proprietary and confidential                                                 *
+* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+*******************************************************************************/
 
 "use strict";
 
@@ -40,8 +28,6 @@ window.onload = function(ev) {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
-
 				window.location.assign(`edit.php?pid=${result.pid}`);
 			},
 			error: function(xhr, status, error) {
@@ -82,7 +68,6 @@ window.onload = function(ev) {
 			}
 		});
 	});
-
 	$("button#save").click(ev => {
 		let pid = $(ev.target).data("pid"),
 			title = $("#editModal input#titleInput").val(),
@@ -102,11 +87,6 @@ window.onload = function(ev) {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				//$("#editModal input#titleInput, #editModal textarea#descriptionInput, #editModal button#save").prop("disabled", true);
-				//$("#editModal input#titleInput, #editModal textarea#descriptionInput").val("");
-				//$("#editModal button#save").data("pid", "");
-
-				//setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				window.location.reload();
 			},
 			error: function(xhr, status, error) {
@@ -121,6 +101,12 @@ window.onload = function(ev) {
 
 	$("button#delete").click(ev => {
 		let pid = $(ev.target).data("pid");
+		$("#deleteModal").modal("show");
+		$("#deleteModal button#deleteConfirm").data("pid", pid);
+	});
+	$("button#deleteConfirm").click(ev => {
+		let pid = $(ev.target).data("pid");
+		$("#deleteModal").modal("hide");
 		$("#loadingModal").modal("show");
 
 		$.ajax({
@@ -132,7 +118,6 @@ window.onload = function(ev) {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				//setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				window.location.reload();
 			},
 			error: function(xhr, status, error) {

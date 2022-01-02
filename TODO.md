@@ -11,9 +11,6 @@
 	  The user can also tag the post will different tags related to the map.
 	  The title of the post will be the same as the projects title, and so the user can easily find back to the post.
 
-- Add warning in edit.php, "Unsaved changes, are you sure you want to exit?"
-- Add warning in projects.php before deleting project "Are you sure?"
-
 
 
 
@@ -24,6 +21,8 @@
 - X (extend this) Mulighet for grunnkart-legende
 
 - Edit-mode
+	- Add warning in edit.php, "Unsaved changes, are you sure you want to exit?"
+	- Kapittelinndeling
 	- (?) Avatar-ikon; Mulighet til å rotere, slider i popup menyen, CSS transform
 
 - Presentation-mode

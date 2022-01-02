@@ -1,4 +1,11 @@
 <?php
+/*******************************************************************************
+* Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
+*                                                                              *
+* Unauthorized copying of this file, via any medium is strictly prohibited     *
+* Proprietary and confidential                                                 *
+* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+*******************************************************************************/
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
@@ -65,6 +72,17 @@ $rows = $stmt->fetchAll();
 		<style type="text/css">
 			html, body {
 				/**/
+			}
+
+			main {
+				margin-top: calc(3rem + 50px);
+				margin-bottom: calc(3rem + 120px);
+			}
+
+			footer {
+				position: fixed;
+				bottom: 0;
+				width: 100%;
 			}
 		</style>
 	</head>
@@ -135,6 +153,25 @@ $rows = $stmt->fetchAll();
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
 						<button type="button" class="btn btn-primary" id="save" data-pid="" disabled>Save changes</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Delete modal -->
+		<div class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="deleteModalLabel">Delete project</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Are you sure you want to delete? This can not be undone.</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-danger" id="deleteConfirm" data-pid="">Delete</button>
 					</div>
 				</div>
 			</div>
@@ -216,7 +253,7 @@ $rows = $stmt->fetchAll();
 			</nav>
 		</header>
 
-		<main role="main" style="margin-top: calc(3rem + 50px);">
+		<main role="main">
 			<div class="container" id="main">
 				<div class="row my-5">
 					<div class="col">
@@ -303,7 +340,7 @@ $rows = $stmt->fetchAll();
 			</div>
 		</main>
 
-		<footer class="py-5 mt-5 shadow" style="background-color: #e6e6e6;">
+		<footer class="py-3 shadow" style="background-color: #e6e6e6;">
 			<div class="container">
 				<div class="row">
 					<div class="col-sm-4 mt-2">
