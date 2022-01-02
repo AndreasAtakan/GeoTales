@@ -14,17 +14,38 @@ session_start();
 
 include "../init.php";
 
-if(!isset($_SESSION['uid'])) { // Not logged in
-	http_response_code(401);
-	exit;
-}
-$uid = $_SESSION['uid'];
-
 if(!isset($_REQUEST['op'])) {
 	http_response_code(422);
 	exit;
 }
 $op = $_REQUEST['op'];
+
+
+if($op == "read") {
+
+	if(!isset($_GET['pid'])) {
+		http_response_code(422);
+		exit;
+	}
+	$pid = $_GET['pid'];
+
+	$stmt = $pdo->prepare("SELECT data FROM \"Project\" WHERE pid = ?");
+	$stmt->execute([$pid]);
+	$row = $stmt->fetch();
+
+	echo json_encode(array(
+		"data" => $row['data']
+	));
+	exit;
+
+}
+
+
+if(!isset($_SESSION['uid'])) { // Not logged in
+	http_response_code(401);
+	exit;
+}
+$uid = $_SESSION['uid'];
 
 
 
@@ -67,25 +88,6 @@ if($op == "get") {
 	echo json_encode(array(
 		"title" => $row['title'],
 		"description" => $row['description']
-	));
-	exit;
-
-}
-else
-if($op == "read") {
-
-	if(!isset($_GET['pid'])) {
-		http_response_code(422);
-		exit;
-	}
-	$pid = $_GET['pid'];
-
-	$stmt = $pdo->prepare("SELECT data FROM \"Project\" WHERE pid = ?");
-	$stmt->execute([$pid]);
-	$row = $stmt->fetch();
-
-	echo json_encode(array(
-		"data" => $row['data']
 	));
 	exit;
 
