@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -17,6 +17,20 @@ function uuid(a) {
 
 function mergeObjects(o, u) {
 	return Object.assign({}, o, u);
+}
+
+
+
+function unsaved_changes() {
+	$(window).off("beforeunload");
+	$(window).on("beforeunload", ev => {
+		ev.preventDefault();
+		ev.returnValue = "";
+	});
+}
+
+function saved_changes() {
+	$(window).off("beforeunload");
 }
 
 

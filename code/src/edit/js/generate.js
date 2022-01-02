@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -62,15 +62,22 @@ function prepare_scene(prevId) {
 	$(`li[data-sceneid="${prevId}"]`).after(`
 		<li class="list-group-item" id="prepare">
 			<div class="row">
-				<div class="col">
+				<div class="col-6">
 					<center>
-						<button type="button" class="btn btn-light px-5 mt-3" id="capture" title="Capture scene">
+						<button type="button" class="btn btn-light px-5 mt-3" id="chapter" title="Add chapter">
+							<i class="fas fa-paragraph"></i>
+						</button>
+
+						<p class="text-muted mt-3">Chapter division</p>
+					</center>
+				</div>
+				<div class="col-6">
+					<center>
+						<button type="button" class="btn btn-light px-5 mt-3" id="capture" title="Capture new scene">
 							<i class="fas fa-camera"></i>
 						</button>
 
-						<p class="text-muted mt-3">
-							Click to capture
-						</p>
+						<p class="text-muted mt-3">New scene</p>
 					</center>
 				</div>
 			</div>

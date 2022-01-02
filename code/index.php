@@ -4,7 +4,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
 *******************************************************************************/
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
@@ -86,10 +86,6 @@ include "init.php";
 							</li>
 							<li class="nav-item me-auto">
 								<a class="nav-link" href="https://forum.tellusmap.com/c/public-maps/5" target="_blank">Gallery</a>
-							</li>
-
-							<li class="nav-item me-3">
-								<a role="button" class="btn btn-sm btn-outline-light mt-1" href="https://forum.tellusmap.com" target="_blank">Forum</a>
 							</li>
 
 							<?php

@@ -21,8 +21,7 @@
 - X (extend this) Mulighet for grunnkart-legende
 
 - Edit-mode
-	- Add warning in edit.php, "Unsaved changes, are you sure you want to exit?"
-	- Kapittelinndeling
+	- (WIP) Kapittelinndeling
 	- (?) Avatar-ikon; Mulighet til å rotere, slider i popup menyen, CSS transform
 
 - Presentation-mode

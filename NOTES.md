@@ -23,8 +23,6 @@
 	- Fremtidig utvidelse: en full grunnkart-editor hvor brukeren kan lage sine egne grunnkart med bilder og/eller innebygde grunnkart, og lagre dem til "Avaiable basemaps"
 	  Og "Available basemaps" bør ha et søkefelt på toppen
 
-- Kapittel-inndeling av scenene (gruppere scenene i "kapitler" og ha en innholdfortegnelse av alle kapitler øverst, på toppen av scene-seksjonen)
-
 - Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min). Gjelder Chrome
 
 - V Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)

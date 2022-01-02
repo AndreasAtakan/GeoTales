@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Can Atakan <aca@tellusmap.com>, January 2022              *
+* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -13,8 +13,6 @@ _EVENTS.scene = {
 
 	setup: function() {
 		init_scene();
-
-		//$("#sceneCol button#addScene").click( ev => { this.add(); } );
 
 		$("ul#sceneContainer").sortable({ // https://api.jqueryui.com/sortable/
 			cursor: "move",
@@ -824,6 +822,7 @@ _EVENTS.project = {
 				dataType: "json",
 				success: function(result, status, xhr) {
 					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+					saved_changes();
 				},
 				error: function(xhr, status, error) {
 					console.log(xhr.status);
@@ -847,7 +846,10 @@ _EVENTS.project = {
 			success: function(result, status, xhr) {
 				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 
-				if(result.data) { self.import( JSON.parse(result.data) ); }
+				if(result.data) {
+					self.import( JSON.parse(result.data) );
+					$(document).click(ev => { unsaved_changes(); });
+				}
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
