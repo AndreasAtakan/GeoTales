@@ -12,8 +12,6 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "init.php";
-
 ?>
 
 <!DOCTYPE html>
@@ -106,16 +104,9 @@ include "init.php";
 									</li>
 							<?php
 								}else{
-									$nonce = hash('sha512', mt_rand());
-									$_SESSION['nonce'] = $nonce;
-
-									$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => 'https://'.$_SERVER['HTTP_HOST'].'/login.php')));
-									$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $sso_secret)));
-									$url = "https://forum.tellusmap.com/session/sso_provider?$query";
-
 							?>
 									<li class="nav-item">
-										<a role="button" class="btn btn-sm btn-light mt-1" href="<?php /*echo $url;*/ echo "login.php"; ?>">Login</a>
+										<a role="button" class="btn btn-sm btn-light mt-1" href="login.php">Login</a>
 									</li>
 							<?php
 								}

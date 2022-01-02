@@ -347,7 +347,7 @@ $row = $stmt->fetch();
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 										<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-										<li><a class="dropdown-item" href="<?php echo "https://forum.tellusmap.com/u/$username/preferences/account"; ?>" target="_blank">My profile</a></li>
+										<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account" target="_blank">My profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider"></li>
 										<li><a class="dropdown-item" href="logout.php">Log out</a></li>

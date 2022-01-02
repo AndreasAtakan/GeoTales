@@ -13,15 +13,15 @@ session_start();
 
 include "init.php";
 
-$loc = 'projects.php';
+$loc = "projects.php";
 
-if($FLAG && isset($_GET['sso']) && isset($_GET['sig'])) {
+// user is already logged in
+if(isset($_SESSION['uid'])) {
+	header("location: $loc");
+	exit;
+}
 
-	// user is already logged in
-	if(isset($_SESSION['uid'])) {
-		header("location: $loc");
-		exit;
-	}
+if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 
 	$sso = $_GET['sso'];
 	$sig = $_GET['sig'];
@@ -60,10 +60,20 @@ if($FLAG && isset($_GET['sso']) && isset($_GET['sig'])) {
 	$_SESSION['username'] = $username;
 
 	header("Access-Control-Allow-Origin: *");
+	header("location: $loc");
+	exit;
+
 }
-else{ $_SESSION['uid'] = 1; $_SESSION['username'] = 'andreas'; }
+else{ // redirect to SSO
 
-// user is logged in
-header("location: $loc");
+	$nonce = hash('sha512', mt_rand());
+	$_SESSION['nonce'] = $nonce;
 
-exit;
+	$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => 'https://'.$_SERVER['HTTP_HOST'].'/login.php')));
+	$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $sso_secret)));
+	$url = "https://forum.tellusmap.com/session/sso_provider?$query";
+
+	header("location: $url");
+	exit;
+
+}
