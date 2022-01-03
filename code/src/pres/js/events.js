@@ -18,38 +18,19 @@ _EVENTS.scene = {
 		this.set_click();
 
 		$(document).keydown(ev => {
-			let keycode = ev.code,
-				id = $("#scene").data("sceneid");
-			if(!id) return;
+			let keycode = ev.code;
 
-			let s = get_scene(id);
-
-			if(["ArrowUp", "ArrowLeft"].indexOf(keycode) > -1 && s.index > 0) {
+			if(["ArrowUp", "ArrowLeft"].indexOf(keycode) > -1) {
 				ev.preventDefault();
-				this.set_scene( _SCENES[s.index - 1].id );
+				this.backward_scene();
 			}
 
-			if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1 && s.index < _SCENES.length - 1) {
+			if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1) {
 				ev.preventDefault();
-				this.set_scene( _SCENES[s.index + 1].id );
+				this.forward_scene();
 			}
 
 			if(keycode == "ArrowUp" || keycode == "ArrowDown") { ev.preventDefault(); }
-		});
-
-		$("button#sceneBackward").click(ev => {
-			let id = $("#scene").data("sceneid");
-			if(!id) return;
-
-			let s = get_scene(id);
-			if(s.index > 0) { this.set_scene( _SCENES[s.index - 1].id ); }
-		});
-		$("button#sceneForward").click(ev => {
-			let id = $("#scene").data("sceneid");
-			if(!id) return;
-
-			let s = get_scene(id);
-			if(s.index < _SCENES.length - 1) { this.set_scene( _SCENES[s.index + 1].id ); }
 		});
 
 		_MAP.setup();
@@ -63,6 +44,22 @@ _EVENTS.scene = {
 
 
 
+	backward_scene: function() {
+		let id = $("#scene").data("sceneid");
+		if(!id) { return; }
+
+		let s = get_scene(id);
+		if(s.index > 0) { this.set_scene( _SCENES[s.index - 1].id ); }
+	},
+
+	forward_scene: function() {
+		let id = $("#scene").data("sceneid");
+		if(!id) { return; }
+
+		let s = get_scene(id);
+		if(s.index < _SCENES.length - 1) { this.set_scene( _SCENES[s.index + 1].id ); }
+	},
+
 	set_scene: function(id) {
 		let s = get_scene(id);
 
@@ -74,7 +71,7 @@ _EVENTS.scene = {
 		if(s.date) { y = s.date.split("-")[0]; m = s.date.split("-")[1]; d = s.date.split("-")[2]; }
 		if(s.time) { H = s.time.split(":")[0]; M = s.time.split(":")[1]; S = s.time.split(":")[2]; }
 		$("#scene #datetime").html(
-			`${s.time ? `${H}:${M}:${S}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${s.period ? s.period.toUpperCase() : ""}`
+			`${s.time ? `${H}:${M}:${S || ""}` : ""} ${s.time && s.date ? "–" : ""} ${s.date ? `${d}/${m}/${y}` : ""} ${s.period ? s.period.toUpperCase() : ""}`
 		);
 
 		$("#scene #content").html(s.content || "");
@@ -91,7 +88,9 @@ _EVENTS.scene = {
 
 		_MAP.setFlyTo(s.bounds);
 
-		this.set_datetime(id);
+		// TODO: change this to animate the time in #scene only.
+		//		 #dateticker is to be removed
+		//this.set_datetime(id);
 	},
 
 	set_scene_style: function() {
@@ -210,16 +209,16 @@ _EVENTS.project = {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
-
 				if(result.data) { self.import( JSON.parse(result.data) ); }
+
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 

@@ -140,7 +140,7 @@ $row = $stmt->fetch();
 				<div class="col-12" id="col">
 					<div id="map"></div>
 
-					<div class="card" id="dateticker">
+					<!--div class="card" id="dateticker">
 						<div class="card-body">
 							<h5 class="card-title text-muted mb-0" id="datetime">
 								<span id="time">
@@ -153,7 +153,7 @@ $row = $stmt->fetch();
 								<span id="period"></span>
 							</h5>
 						</div>
-					</div>
+					</div-->
 				</div>
 
 			</div>

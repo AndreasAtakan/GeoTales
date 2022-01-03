@@ -9,7 +9,17 @@
 @charset "UTF-8";
 
 
+html, body {
+	height: 100%;
+}
+
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, a[role="button"] { border-radius: 2px !important; }
+
+main {
+	min-height: 100%;
+	margin: 0 0 -120px 0;
+	padding: 0 0 120px 0;
+}
 
 #logo {
 	border-radius: 2px;

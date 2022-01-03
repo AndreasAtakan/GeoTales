@@ -62,6 +62,10 @@ session_start();
 				-webkit-font-smoothing: antialiased;
 			}
 			#map-preview img { filter: blur(1px); }
+
+			@media (max-width: 575.98px) {
+				#jumbotron-text { top: 25vw; }
+			}
 		</style>
 	</head>
 	<body>

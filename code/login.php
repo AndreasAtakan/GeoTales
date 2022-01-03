@@ -66,14 +66,23 @@ if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 }
 else{ // redirect to SSO
 
-	$nonce = hash('sha512', mt_rand());
-	$_SESSION['nonce'] = $nonce;
+	if($FLAG) {
+		$nonce = hash('sha512', mt_rand());
+		$_SESSION['nonce'] = $nonce;
 
-	$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => 'https://'.$_SERVER['HTTP_HOST'].'/login.php')));
-	$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $sso_secret)));
-	$url = "https://forum.tellusmap.com/session/sso_provider?$query";
+		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => 'https://'.$_SERVER['HTTP_HOST'].'/login.php')));
+		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $sso_secret)));
+		$url = "https://forum.tellusmap.com/session/sso_provider?$query";
 
-	header("location: $url");
-	exit;
+		header("location: $url");
+		exit;
+	}
+	else{
+		$_SESSION['uid'] = 1;
+		$_SESSION['username'] = "andreas";
+
+		header("location: $loc");
+		exit;
+	}
 
 }

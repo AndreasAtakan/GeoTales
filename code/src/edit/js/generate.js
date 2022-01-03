@@ -62,7 +62,7 @@ function prepare_scene(prevId) {
 	$(`li[data-sceneid="${prevId}"]`).after(`
 		<li class="list-group-item" id="prepare">
 			<div class="row">
-				<div class="col-6">
+				<!--div class="col-6">
 					<center>
 						<button type="button" class="btn btn-light px-5 mt-3" id="chapter" title="Add chapter">
 							<i class="fas fa-paragraph"></i>
@@ -70,8 +70,8 @@ function prepare_scene(prevId) {
 
 						<p class="text-muted mt-3">Chapter division</p>
 					</center>
-				</div>
-				<div class="col-6">
+				</div-->
+				<div class="col">
 					<center>
 						<button type="button" class="btn btn-light px-5 mt-3" id="capture" title="Capture new scene">
 							<i class="fas fa-camera"></i>

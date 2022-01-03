@@ -53,7 +53,8 @@ if($fileType != "jpg"
 if($uploadOk) { // Only if all checks are passed
 
 	if(move_uploaded_file($_FILES["image"]["tmp_name"], $path)) {
-		echo "https://tellusmap.com/assets/img/$file"; // "http://localhost/tellus/assets/img/$file"
+		if($FLAG) { echo "https://tellusmap.com/assets/img/$file"; }
+		else{ echo "http://localhost/tellus/assets/img/$file"; }
 		exit;
 	}
 	else{

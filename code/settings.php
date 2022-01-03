@@ -49,13 +49,6 @@ $username = $_SESSION['username'];
 
 			main {
 				margin-top: calc(3rem + 50px);
-				margin-bottom: calc(3rem + 120px);
-			}
-
-			footer {
-				position: fixed;
-				bottom: 0;
-				width: 100%;
 			}
 		</style>
 	</head>

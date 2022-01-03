@@ -268,6 +268,7 @@ _EVENTS.scene = {
 						$("input#_img").off("change");
 						$("input#_img").change(function(ev) {
 							let file = $(this)[0].files[0];
+							if(!file) { return; }
 
 							$("#loadingModal").modal("show");
 
@@ -281,21 +282,21 @@ _EVENTS.scene = {
 								contentType: false,
 								processData: false,
 								success: function(result, status, xhr) {
-									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
-
 									$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("execCmd", {
 										cmd: "insertImage",
 										param: result,
 										forceCss: false,
 										skipTrumbowyg: true
 									});
+
+									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 								},
 								error: function(xhr, status, error) {
 									console.log(xhr.status);
 									console.log(error);
 
-									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 									$("#errorModal").modal("show");
+									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 								}
 							});
 						});
@@ -386,6 +387,7 @@ _EVENTS.object = {
 
 		$("#markerPopup input#icon").change(function(ev) {
 			let file = $(this)[0].files[0];
+			if(!file) { return; }
 
 			$("#loadingModal").modal("show");
 
@@ -426,8 +428,6 @@ _EVENTS.object = {
 						contentType: false,
 						processData: false,
 						success: function(result, status, xhr) {
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
-
 							object.setIcon(
 								L.icon({
 									iconUrl: result,
@@ -439,13 +439,15 @@ _EVENTS.object = {
 
 							_MAP.updateObject(object.options.id);
 							_MAP.setIcon(object.options.id, [width, height]);
+
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status);
 							console.log(error);
 
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 							$("#errorModal").modal("show");
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 						}
 					});
 
@@ -663,8 +665,9 @@ _EVENTS.basemapOptions = {
 		});
 
 		$("#basemapModal input#basemapFile").change(ev => {
-			var self = this;
 			let file = $(ev.target)[0].files[0];
+			if(!file) { return; }
+			var self = this;
 
 			$("#loadingModal").modal("show");
 
@@ -687,16 +690,16 @@ _EVENTS.basemapOptions = {
 						contentType: false,
 						processData: false,
 						success: function(result, status, xhr) {
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 							_MAP.imgBasemap(result, width, height);
 							self.setSceneBasemap();
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status);
 							console.log(error);
 
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 							$("#errorModal").modal("show");
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 						}
 					});
 
@@ -763,7 +766,7 @@ _EVENTS.project = {
 			$("#importModal").modal("hide");
 
 			let file = $("#importModal input#fileInput")[0].files[0];
-			if(!file) return;
+			if(!file) { return; }
 
 			let fr = new FileReader();
 			fr.onload = function() {
@@ -821,15 +824,15 @@ _EVENTS.project = {
 				},
 				dataType: "json",
 				success: function(result, status, xhr) {
-					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 					saved_changes();
+					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				},
 				error: function(xhr, status, error) {
 					console.log(xhr.status);
 					console.log(error);
 
-					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 					$("#errorModal").modal("show");
+					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				}
 			});
 		});
@@ -844,19 +847,19 @@ _EVENTS.project = {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
-
 				if(result.data) {
 					self.import( JSON.parse(result.data) );
 					$(document).click(ev => { unsaved_changes(); });
 				}
+
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 

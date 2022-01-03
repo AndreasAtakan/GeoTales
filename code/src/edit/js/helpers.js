@@ -25,7 +25,10 @@ function unsaved_changes() {
 	$(window).off("beforeunload");
 	$(window).on("beforeunload", ev => {
 		ev.preventDefault();
-		ev.returnValue = "";
+
+		let m = "Unsaved changes could be lost. Are you sure you want to close?";
+		ev.returnValue = m;
+		return m;
 	});
 }
 

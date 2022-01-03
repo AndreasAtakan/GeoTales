@@ -24,40 +24,70 @@ L.Map.addInitHook(function() {
 	this.addControl( this.basemapLegend );
 
 	this.addControl(
+		L.easyBar([
+			L.easyButton({
+				id: "sceneBackward",
+				leafletClasses: true,
+				states: [
+					{
+						stateName: "main",
+						onClick: function(button, map) { _EVENTS.scene.backward_scene(); },
+						title: "Previous scene",
+						icon: "fa-chevron-left"
+					}
+				]
+			}),
+			L.easyButton({
+				id: "sceneForward",
+				leafletClasses: true,
+				states: [
+					{
+						stateName: "main",
+						onClick: function(button, map) { _EVENTS.scene.forward_scene(); },
+						title: "Next scene",
+						icon: "fa-chevron-right"
+					}
+				]
+			})
+		], { position: "topright", id: "navBtns" })
+	);
+
+	this.addControl(
 		L.control.zoom({ position: "topright" })
 	);
 
-	this.fullscreenButton = L.easyButton({
-		id: "fullscreen",
-		position: "topright",
-		leafletClasses: true,
-		states: [
-			{
-				stateName: "enterFullscreen",
-				onClick: function(button, map) {
-					let el = document.body;
-					if (el.requestFullscreen) { el.requestFullscreen(); }
-					else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
-					else if (el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
-					button.state("exitFullscreen");
+	this.addControl(
+		L.easyButton({
+			id: "fullscreen",
+			position: "topright",
+			leafletClasses: true,
+			states: [
+				{
+					stateName: "enterFullscreen",
+					onClick: function(button, map) {
+						let el = document.body;
+						if (el.requestFullscreen) { el.requestFullscreen(); }
+						else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
+						else if (el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
+						button.state("exitFullscreen");
+					},
+					title: "Enter fullscreen",
+					icon: "fa-expand"
 				},
-				title: "Enter fullscreen",
-				icon: "fa-expand"
-			},
-			{
-				stateName: "exitFullscreen",
-				onClick: function(button, map) {
-					if (document.exitFullscreen) { document.exitFullscreen(); }
-					else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
-					else if (document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
-					button.state("enterFullscreen");
-				},
-				title: "Exit fullscreen",
-				icon: "fa-compress"
-			}
-		]
-	});
-	this.addControl( this.fullscreenButton );
+				{
+					stateName: "exitFullscreen",
+					onClick: function(button, map) {
+						if (document.exitFullscreen) { document.exitFullscreen(); }
+						else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
+						else if (document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
+						button.state("enterFullscreen");
+					},
+					title: "Exit fullscreen",
+					icon: "fa-compress"
+				}
+			]
+		})
+	);
 
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
@@ -112,9 +142,6 @@ L.Map.include({
 	},
 
 	setObjects: function(sceneId) {
-		let s = get_scene(sceneId),
-			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
-
 		let os = this.objectLayer.getLayers().filter(o => o.options.type == "marker").map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
 		});

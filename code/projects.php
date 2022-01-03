@@ -39,12 +39,13 @@ $sql = "
 	WHERE
 		UP.status IN ('owner', 'editor') AND
 		UP.uid = ? AND
-		P.title LIKE ?
+		lower(P.title) LIKE lower(?)
 	ORDER BY
 		P.created DESC
 ";
 $stmt = $pdo->prepare($sql); $stmt->execute([$uid, $title]);
 $rows = $stmt->fetchAll();
+$count = $stmt->rowCount();
 
 ?>
 
@@ -76,13 +77,6 @@ $rows = $stmt->fetchAll();
 
 			main {
 				margin-top: calc(3rem + 50px);
-				margin-bottom: calc(3rem + 120px);
-			}
-
-			footer {
-				position: fixed;
-				bottom: 0;
-				width: 100%;
 			}
 		</style>
 	</head>
@@ -260,16 +254,22 @@ $rows = $stmt->fetchAll();
 				<div class="row mx-auto" style="max-width: 950px;">
 					<div class="col">
 						<form method="get">
-							<div class="row mb">
+							<div class="row mb-2">
 								<div class="col-sm-5 order-sm-2 mb-4 mb-sm-0">
 									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New project</button>
 								</div>
 								<div class="col-sm-7 order-sm-1">
 									<div class="input-group">
 										<input type="text" class="form-control" name="title" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
-										<button class="btn btn-outline-secondary" type="submit" id="search-button">Search</button>
+										<button type="submit" class="btn btn-outline-secondary" id="search-button">Search</button>
 									</div>
 								</div>
+							</div>
+							<div class="row">
+								<div class="col-12 col-sm-7">
+									<a role="button" class="btn btn-sm btn-outline-secondary float-end" href="projects.php">Clear search</a>
+								</div>
+								<div class="col-12 col-sm-5"></div>
 							</div>
 						</form>
 					</div>
@@ -281,46 +281,55 @@ $rows = $stmt->fetchAll();
 
 				<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" id="projects">
 					<?php
-						foreach($rows as $row) {
-							$created = date_format(date_create($row['created']), "d.M Y, H:i");
+						if($count > 0) {
+							foreach($rows as $row) {
+								$created = date_format(date_create($row['created']), "d.M Y, H:i");
 					?>
-							<div class="col">
-								<div class="card">
-									<div class="card-body">
-										<h5 class="card-title"><?php echo $row['title']; ?></h5>
-										<h6 class="card-subtitle mb-2 text-muted"><?php echo $created; ?></h6>
-										<p class="card-text"><?php echo $row['description']; ?></p>
-										<div class="row">
-											<div class="col">
-												<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
-													<a role="button" class="btn btn-outline-secondary" href="pres.php?pid=<?php echo $row['pid']; ?>" target="_blank">View</a>
-													<a role="button" class="btn btn-outline-secondary" href="edit.php?pid=<?php echo $row['pid']; ?>" target="_blank">Edit</a>
+								<div class="col">
+									<div class="card">
+										<div class="card-body">
+											<h5 class="card-title"><?php echo $row['title']; ?></h5>
+											<h6 class="card-subtitle mb-2 text-muted"><?php echo $created; ?></h6>
+											<p class="card-text"><?php echo $row['description']; ?></p>
+											<div class="row">
+												<div class="col">
+													<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
+														<a role="button" class="btn btn-outline-secondary" href="pres.php?pid=<?php echo $row['pid']; ?>" target="_blank">View</a>
+														<a role="button" class="btn btn-outline-secondary" href="edit.php?pid=<?php echo $row['pid']; ?>" target="_blank">Edit</a>
+													</div>
 												</div>
-											</div>
-											<div class="col">
-												<div class="dropdown float-end">
-													<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="optionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-														<i class="fas fa-ellipsis-v"></i>
-													</button>
-													<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown">
-														<li><button type="button" class="dropdown-item" id="edit" data-pid="<?php echo $row['pid']; ?>">Change attributes</button></li>
-														<li>
-														<?php
-															if(is_null($row['post'])) {
-																?><button type="button" class="dropdown-item" id="publish" data-pid="<?php echo $row['pid']; ?>">Publish map</button><?php
-															}else{
-																?><a class="dropdown-item" href="<?php echo $row['post']; ?>" target="_blank">View public post</a><?php
-															}
-														?>
-														</li>
-														<li><hr class="dropdown-divider"></li>
-														<li><button type="button" class="dropdown-item" id="delete" data-pid="<?php echo $row['pid']; ?>">Delete</button></li>
-													</ul>
+												<div class="col">
+													<div class="dropdown float-end">
+														<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="optionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+															<i class="fas fa-ellipsis-v"></i>
+														</button>
+														<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown">
+															<li><button type="button" class="dropdown-item" id="edit" data-pid="<?php echo $row['pid']; ?>">Change attributes</button></li>
+															<li>
+															<?php
+																if(is_null($row['post'])) {
+																	?><button type="button" class="dropdown-item" id="publish" data-pid="<?php echo $row['pid']; ?>">Publish map</button><?php
+																}else{
+																	?><a class="dropdown-item" href="<?php echo $row['post']; ?>" target="_blank">View public post</a><?php
+																}
+															?>
+															</li>
+															<li><hr class="dropdown-divider"></li>
+															<li><button type="button" class="dropdown-item" id="delete" data-pid="<?php echo $row['pid']; ?>">Delete</button></li>
+														</ul>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
+					<?php
+							}
+						}
+						else{
+					?>
+							<div class="col">
+								<p class="text-muted text-center">Create a new project</p>
 							</div>
 					<?php
 						}

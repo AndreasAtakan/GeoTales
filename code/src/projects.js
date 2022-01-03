@@ -34,8 +34,8 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 	});
@@ -63,8 +63,8 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#editModal").modal("hide"); }, 250);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#editModal").modal("hide"); }, 250);
 			}
 		});
 	});
@@ -93,8 +93,8 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 	});
@@ -124,8 +124,8 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 	});
@@ -143,17 +143,17 @@ window.onload = function(ev) {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
+				$(ev.target).prop("disabled", true);
 				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 
-				$(ev.target).prop("disabled", true);
 				window.open(result.url, "_blank");
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
 				console.log(error);
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 	});
