@@ -34,8 +34,19 @@
 - [Grunnkart kilde](https://maps.lib.utexas.edu/maps)
 
 
-- Ting å huske når man installerer Discourse:
+- Discourse installasjon:
 	- [SMTP issues](https://meta.discourse.org/t/discourse-with-other-websites-smtp-issue-end-of-file-reached/162893/3)
+	- [SSO provider](https://meta.discourse.org/t/using-discourse-as-an-identity-provider-sso-discourseconnect/32974/1)
+	- [Amazon S3 setup](https://meta.discourse.org/t/setting-up-file-and-image-uploads-to-s3/7229/1)
+	- [Header links](https://meta.discourse.org/t/custom-header-links/90588/1)
+	- Settings->Files->Authorized extensions; add *.tellus* extension
+	- Install *Grace* theme
+	- Set header color i *Default* theme; Admin settings->Customize->Colors->Light->Header background and Header primary
+
+
+- Down-the-line:
+	1. Bug with white lines on dark basemaps; porting all the code to MapBox will most likely fix this issue, but it will cost time. This should be done only if this bug hinders user-growth or if we have enought resources (money) to do it.
+	3. Avatar følger linje (rute) fra scene-til-scene. En linje som følger avataren fra scene-til-scene
 
 
 

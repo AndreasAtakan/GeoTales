@@ -7,20 +7,20 @@
 *******************************************************************************/
 
 BEGIN;
-INSERT INTO "User" (uid)
-VALUES (1);
+INSERT INTO "User" (uid, paid)
+VALUES (1, true);
 END;
 
 --
 
 BEGIN;
-INSERT INTO "Project" (title, description)
+INSERT INTO "Map" (title, description)
 VALUES ('main', 'main project');
 END;
 
 --
 
 BEGIN;
-INSERT INTO "User_Project" (uid, pid, status)
-VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT pid FROM "Project" LIMIT 1), 'owner' );
+INSERT INTO "User_Map" (user_id, map_id, status)
+VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Map" LIMIT 1), 'owner' );
 END;

@@ -21,15 +21,15 @@ include "init.php";
 
 $username = $_SESSION['username'];
 
-if(!isset($_GET['pid'])) {
+if(!isset($_GET['id'])) {
 	http_response_code(422);
 	exit;
 }
-$pid = $_GET['pid'];
+$id = $_GET['id'];
 
 
-$stmt = $pdo->prepare("SELECT title, description FROM \"Project\" WHERE pid = ?");
-$stmt->execute([$pid]);
+$stmt = $pdo->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+$stmt->execute([$id]);
 $row = $stmt->fetch();
 
 ?>
@@ -45,7 +45,7 @@ $row = $stmt->fetch();
 		<meta name="title" content="TellUs – <?php echo $row['title']; ?>" />
 		<meta name="description" content="<?php echo $row['description']; ?>" />
 
-		<link rel="icon" href="assets/logo.jpg" />
+		<link rel="icon" href="assets/logo.png" />
 
 		<!-- Load lib/ CSS -->
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
@@ -93,7 +93,7 @@ $row = $stmt->fetch();
 						<div class="mb-3">
 							<label for="fileInput" class="form-label">Choose a data-file</label>
 							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, TellUs project-file</div>
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, TellUs map-file</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -123,15 +123,7 @@ $row = $stmt->fetch();
 							</div>
 
 							<div class="row">
-								<div class="col-md-6 col-sm-12" id="clusteringInputCol">
-									<p>Clustering</p>
-									<select class="form-select" id="clusteringInput" aria-label="Clustering" disabled>
-										<option value="default" selected>Default</option>
-										<option value="tree">Tree</option>
-										<option value="spiral">Spiral</option>
-									</select>
-								</div>
-								<div class="col-md-6 col-sm-12">
+								<div class="col">
 									<p>Animation speed: <small><span id="avatarSpeedInputValue">2000 milliseconds</span></small></p>
 									<input type="range" class="form-range" id="avatarSpeedInput" min="200" max="3000" step="100" value="2000" />
 								</div>
@@ -148,58 +140,11 @@ $row = $stmt->fetch();
 							</div>
 
 							<div class="row">
-								<div class="col col-md-10">
+								<div class="col">
 									<p>Panning speed: <small><span id="panningSpeedInputValue">auto</span></small></p>
 									<input type="range" class="form-range" id="panningSpeedInput" min="0" max="4000" step="100" />
 								</div>
 							</div>
-
-							<br />
-							<hr />
-							<br />
-
-							<div class="row mb-2">
-								<div class="col">
-									<h5>Presentation mode</h5>
-								</div>
-							</div>
-
-							<div class="row mb-4">
-								<div class="col col-md-10">
-									<p>Font</p>
-									<select class="form-select" id="fontInput" aria-label="Font type">
-										<option value="default" selected>Default (Roboto)</option>
-										<option value="arial">Arial (sans-serif)</option>
-										<option value="verdana">Verdana (sans-serif)</option>
-										<option value="helvetica">Helvetica (sans-serif)</option>
-										<option value="times new roman">Times New Roman (serif)</option>
-										<option value="georgia">Georgia (serif)</option>
-										<option value="courier new">Courier New (monospace)</option>
-										<option value="brush script mt">Brush Script MT (cursive)</option>
-									</select>
-								</div>
-							</div>
-
-							<!--div class="row">
-								<div class="col">
-									<p>Color theme</p>
-									<div class="accordion" id="themeAccordion">
-										<div class="accordion-item">
-											<h2 class="accordion-header" id="themeAccordionHeading">
-												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#themeAccordionCollapse" aria-expanded="false" aria-controls="themeAccordionCollapse">
-													Choose a theme
-												</button>
-											</h2>
-											<div id="themeAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="themeAccordionHeading" data-bs-parent="#themeAccordion">
-												<div class="accordion-body">
-													<div class="row row-cols-2 row-cols-md-3" id="themeChoose"></div>
-												</div>
-											</div>
-										  </div>
-									</div>
-									<p class="text-muted"> <small>Only applies to presentation mode</small> </p>
-								</div>
-							</div-->
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -310,9 +255,9 @@ $row = $stmt->fetch();
 		<div class="container-fluid p-0">
 			<div class="row g-0">
 				<div class="col">
-					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #563d7c;">
-						<a class="navbar-brand" href="index.php">
-							<img src="assets/logo.jpg" alt="TellUs" width="30" height="30" style="border-radius: 2px;" />
+					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
+						<a class="navbar-brand" href="maps.php">
+							<img src="assets/logo.png" alt="TellUs" width="30" height="30" />
 						</a>
 
 						<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -326,7 +271,7 @@ $row = $stmt->fetch();
 										File
 									</a>
 									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown">
-										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import project</a></li>
+										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import map-file</a></li>
 										<li><a class="dropdown-item" href="#" id="export">Export</a></li>
 									</ul>
 								</li>
@@ -337,7 +282,7 @@ $row = $stmt->fetch();
 								<li class="nav-item mt-1 me-4">
 									<div class="btn-group btn-group-sm" role="group" aria-label="Save/Preview">
 										<button type="button" class="btn btn-light" id="save">Save</button>
-										<a role="button" class="btn btn-outline-light" href="pres.php?pid=<?php echo $pid; ?>" target="_blank">Preview</a>
+										<a role="button" class="btn btn-outline-light" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a>
 									</div>
 								</li>
 
@@ -346,8 +291,8 @@ $row = $stmt->fetch();
 										<i class="fas fa-user"></i>
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-										<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-										<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account" target="_blank">My profile</a></li>
+										<li><a class="dropdown-item" href="maps.php">My maps</a></li>
+										<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account">Profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider"></li>
 										<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -426,9 +371,9 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/trumbowyg/plugins/specialchars/trumbowyg.specialchars.min.js"></script>
 		<script type="text/javascript" src="lib/trumbowyg/plugins/table/trumbowyg.table.min.js"></script>
 
-		<!-- Set PID -->
+		<!-- Set ID -->
 		<script type="text/javascript">
-			const _PID = <?php echo $pid; ?>;
+			const _ID = <?php echo $id; ?>;
 		</script>
 
 		<!-- Load src/ JS -->

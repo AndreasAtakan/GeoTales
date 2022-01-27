@@ -13,15 +13,15 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 include "init.php";
 
-if(!isset($_GET['pid'])) {
+if(!isset($_GET['id'])) {
 	http_response_code(422);
 	exit;
 }
-$pid = $_GET['pid'];
+$mid = $_GET['id'];
 
 
-$stmt = $pdo->prepare("SELECT title, description FROM \"Project\" WHERE pid = ?");
-$stmt->execute([$pid]);
+$stmt = $pdo->prepare("SELECT title, description FROM \"Map\" WHERE mid = ?");
+$stmt->execute([$mid]);
 $row = $stmt->fetch();
 
 ?>
@@ -43,7 +43,7 @@ $row = $stmt->fetch();
 		<meta property="og:title" content="TellUs – <?php echo $row['title']; ?>" />
 		<meta property="og:description" content="<?php echo $row['description']; ?>" />
 		<meta property="og:site_name" content="TellUs" />
-		<meta property="og:image" content="assets/logo.jpg" />
+		<meta property="og:image" content="assets/logo.png" />
 		<meta property="og:image:type" content="image/png" />
 
 		<!-- Twitter -->
@@ -53,9 +53,9 @@ $row = $stmt->fetch();
 		<meta property="twitter:url" content="https://tellusmap.com/" />
 		<meta property="twitter:title" content="TellUs – <?php echo $row['title']; ?>" />
 		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
-		<meta property="twitter:image" content="assets/logo.jpg" />
+		<meta property="twitter:image" content="assets/logo.png" />
 
-		<link rel="icon" href="assets/logo.jpg" />
+		<link rel="icon" href="assets/logo.png" />
 
 		<!-- Load lib/ CSS -->
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
@@ -173,9 +173,9 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
 
-		<!-- Set PID -->
+		<!-- Set MID -->
 		<script type="text/javascript">
-			const _PID = <?php echo $pid; ?>;
+			const _MID = <?php echo $mid; ?>;
 		</script>
 
 		<!-- Load src/ JS -->

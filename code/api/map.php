@@ -23,14 +23,14 @@ $op = $_REQUEST['op'];
 
 if($op == "read") {
 
-	if(!isset($_GET['pid'])) {
+	if(!isset($_GET['id'])) {
 		http_response_code(422);
 		exit;
 	}
-	$pid = $_GET['pid'];
+	$id = $_GET['id'];
 
-	$stmt = $pdo->prepare("SELECT data FROM \"Project\" WHERE pid = ?");
-	$stmt->execute([$pid]);
+	$stmt = $pdo->prepare("SELECT data FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$id]);
 	$row = $stmt->fetch();
 
 	echo json_encode(array(
@@ -59,15 +59,15 @@ if($op == "create") {
 	$title = $_POST['title'];
 	$description = $_POST['description'];
 
-	$stmt = $pdo->prepare("INSERT INTO \"Project\" (title, description) VALUES (?, ?) RETURNING pid");
+	$stmt = $pdo->prepare("INSERT INTO \"Map\" (title, description) VALUES (?, ?) RETURNING id");
 	$stmt->execute([$title, $description]);
-	$pid = $stmt->fetchColumn();
+	$id = $stmt->fetchColumn();
 
-	$stmt = $pdo->prepare("INSERT INTO \"User_Project\" (uid, pid, status) VALUES (?, ?, ?)");
-	$stmt->execute([$uid, $pid, "owner"]);
+	$stmt = $pdo->prepare("INSERT INTO \"User_Map\" (user_id, map_id, status) VALUES (?, ?, ?)");
+	$stmt->execute([$uid, $id, "owner"]);
 
 	echo json_encode(array(
-		"pid" => $pid
+		"id" => $id
 	));
 	exit;
 
@@ -75,14 +75,14 @@ if($op == "create") {
 else
 if($op == "get") {
 
-	if(!isset($_GET['pid'])) {
+	if(!isset($_GET['id'])) {
 		http_response_code(422);
 		exit;
 	}
-	$pid = $_GET['pid'];
+	$id = $_GET['id'];
 
-	$stmt = $pdo->prepare("SELECT title, description FROM \"Project\" WHERE pid = ?");
-	$stmt->execute([$pid]);
+	$stmt = $pdo->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$id]);
 	$row = $stmt->fetch();
 
 	echo json_encode(array(
@@ -94,14 +94,14 @@ if($op == "get") {
 }
 else{
 
-	if(!isset($_POST['pid'])) {
+	if(!isset($_POST['id'])) {
 		http_response_code(422);
 		exit;
 	}
-	$pid = $_POST['pid'];
+	$id = $_POST['id'];
 
-	$stmt = $pdo->prepare("SELECT status FROM \"User_Project\" WHERE uid = ? AND pid = ?");
-	$stmt->execute([$uid, $pid]);
+	$stmt = $pdo->prepare("SELECT status FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
+	$stmt->execute([$uid, $id]);
 	$row = $stmt->fetch();
 
 	if($row['status'] != "owner"
@@ -120,8 +120,8 @@ else{
 		$title = $_POST['title'];
 		$description = $_POST['description'];
 
-		$stmt = $pdo->prepare("UPDATE \"Project\" SET title = ?, description = ? WHERE pid = ?");
-		$stmt->execute([$title, $description, $pid]);
+		$stmt = $pdo->prepare("UPDATE \"Map\" SET title = ?, description = ? WHERE id = ?");
+		$stmt->execute([$title, $description, $id]);
 
 		echo json_encode(array("status" => "success"));
 		exit;
@@ -130,8 +130,24 @@ else{
 	else
 	if($op == "delete") {
 
-		$stmt = $pdo->prepare("DELETE FROM \"Project\" WHERE pid = ?");
-		$stmt->execute([$pid]);
+		$stmt = $pdo->prepare("DELETE FROM \"Map\" WHERE id = ?");
+		$stmt->execute([$id]);
+
+		echo json_encode(array("status" => "success"));
+		exit;
+
+	}
+	else
+	if($op == "write") {
+
+		if(!isset($_POST['data'])) {
+			http_response_code(422);
+			exit;
+		}
+		$data = $_POST['data'];
+
+		$stmt = $pdo->prepare("UPDATE \"Map\" SET data = ? WHERE id = ?");
+		$stmt->execute([$data, $id]);
 
 		echo json_encode(array("status" => "success"));
 		exit;
@@ -140,8 +156,8 @@ else{
 	else
 	if($op == "publish") {
 
-		$stmt = $pdo->prepare("SELECT title, description FROM \"Project\" WHERE pid = ?");
-		$stmt->execute([$pid]);
+		$stmt = $pdo->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+		$stmt->execute([$id]);
 		$row = $stmt->fetch();
 
 		$ch = curl_init();
@@ -155,9 +171,11 @@ else{
 		));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
 			"title" => $row['title'],
-			"raw" => "{$row['description']}
+			"raw" => "<iframe src=\"https://tellusmap.com/pres.php?id=$id\" width=\"100%\" height=\"450\" allowfullscreen=\"true\" style=\"border:none !important;\"></iframe>
+<a href=\"https://tellusmap.com/pres.php?id=$id\" target=\"_blank\">Open in separate window</a>
 
-[Click to view map](https://tellusmap.com/pres.php?pid=$pid)
+{$row['description']}
+
 Created by: @{$_SESSION['username']}",
 			"category" => 5
 		)));
@@ -167,28 +185,12 @@ Created by: @{$_SESSION['username']}",
 
 		$url = "https://forum.tellusmap.com/t/{$res['topic_slug']}/{$res['topic_id']}";
 
-		$stmt = $pdo->prepare("UPDATE \"Project\" SET post = ? WHERE pid = ?");
-		$stmt->execute([$url, $pid]);
+		$stmt = $pdo->prepare("UPDATE \"Map\" SET post = ? WHERE id = ?");
+		$stmt->execute([$url, $id]);
 
 		echo json_encode(array(
 			"url" => $url
 		));
-		exit;
-
-	}
-	else
-	if($op == "write") {
-
-		if(!isset($_POST['data'])) {
-			http_response_code(422);
-			exit;
-		}
-		$data = $_POST['data'];
-
-		$stmt = $pdo->prepare("UPDATE \"Project\" SET data = ? WHERE pid = ?");
-		$stmt->execute([$data, $pid]);
-
-		echo json_encode(array("status" => "success"));
 		exit;
 
 	}

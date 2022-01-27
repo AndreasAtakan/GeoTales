@@ -13,7 +13,7 @@ session_start();
 
 include "init.php";
 
-$loc = "projects.php";
+$loc = "maps.php";
 
 // user is already logged in
 if(isset($_SESSION['uid'])) {

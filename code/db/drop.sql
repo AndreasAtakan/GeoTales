@@ -8,8 +8,8 @@
 
 BEGIN;
 
-DROP TABLE "User_Project";
-DROP TABLE "Project";
+DROP TABLE "User_Map";
+DROP TABLE "Map";
 DROP TABLE "User";
 
 END;

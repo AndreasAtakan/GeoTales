@@ -25,25 +25,25 @@ $username = $_SESSION['username'];
 $title = "%";
 if(isset($_GET['title'])) { $title .= "{$_GET['title']}%"; }
 
-$sql = "
+$stmt = $pdo->prepare("
 	SELECT
-		P.pid AS pid,
-		P.title AS title,
-		P.description AS description,
-		P.created AS created,
-		P.post AS post
+		M.id AS id,
+		M.title AS title,
+		M.description AS description,
+		M.created AS created,
+		M.post AS post,
+		M.preview AS preview
 	FROM
-		\"User_Project\" AS UP INNER JOIN
-		\"Project\" AS P
-			ON UP.pid = P.pid
+		\"User_Map\" AS UM INNER JOIN
+		\"Map\" AS M
+			ON UM.map_id = M.id
 	WHERE
-		UP.status IN ('owner', 'editor') AND
-		UP.uid = ? AND
-		lower(P.title) LIKE lower(?)
+		UM.status IN ('owner', 'editor') AND
+		UM.user_id = ? AND
+		lower(M.title) LIKE lower(?)
 	ORDER BY
-		P.created DESC
-";
-$stmt = $pdo->prepare($sql); $stmt->execute([$uid, $title]);
+		M.created DESC
+"); $stmt->execute([$uid, $title]);
 $rows = $stmt->fetchAll();
 $count = $stmt->rowCount();
 
@@ -60,7 +60,7 @@ $count = $stmt->rowCount();
 		<meta name="title" content="TellUs" />
 		<meta name="description" content="Map stories" />
 
-		<link rel="icon" href="assets/logo.jpg" />
+		<link rel="icon" href="assets/logo.png" />
 
 		<!-- Load lib/ CSS -->
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
@@ -82,12 +82,12 @@ $count = $stmt->rowCount();
 	</head>
 	<body>
 
-		<!-- New project modal -->
+		<!-- New map modal -->
 		<div class="modal fade" id="newModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="newModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="newModalLabel">New project</h5>
+						<h5 class="modal-title" id="newModalLabel">New map</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -111,18 +111,18 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" id="create">Create project</button>
+						<button type="button" class="btn btn-primary" id="create">Create map</button>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- Edit project modal -->
+		<!-- Edit map modal -->
 		<div class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="editModalLabel">Edit project</h5>
+						<h5 class="modal-title" id="editModalLabel">Change attributes</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -146,7 +146,66 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" id="save" data-pid="" disabled>Save changes</button>
+						<button type="button" class="btn btn-primary" id="save" data-id="" disabled>Save changes</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Share modal -->
+		<div class="modal fade" id="shareModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="shareModalLabel">Share map</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row mb-1">
+								<div class="col">
+									<div class="input-group input-group-lg">
+										<input type="text" class="form-control" id="linkInput" aria-label="linkInput" aria-describedby="copyLink" readonly />
+										<button class="btn btn-outline-secondary" type="button" id="copyLink" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col">
+									<div class="input-group input-group-sm">
+										<input type="text" class="form-control" id="embedInput" aria-label="embedInput" aria-describedby="copyEmbed" readonly />
+										<button class="btn btn-outline-secondary" type="button" id="copyEmbed" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+									</div>
+								</div>
+							</div>
+
+							<div class="row my-3">
+								<hr />
+							</div>
+
+							<div class="row">
+								<div class="col-7">
+									<a role="button" class="btn btn-sm btn-outline-secondary mb-2" href="#" id="publish" data-id=""></a>
+									<p class="small text-muted" id="publishText"></p>
+								</div>
+								<div class="col-1">
+									<a role="button" class="btn btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
+								</div>
+								<div class="col-1">
+									<a role="button" class="btn btn-outline-light" href="#" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
+								</div>
+								<div class="col-1">
+									<a role="button" class="btn btn-outline-light" href="#" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
+								</div>
+								<div class="col-1">
+									<a role="button" class="btn btn-outline-light" href="#" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
+								</div>
+								<div class="col-1">
+									<a role="button" class="btn btn-outline-light" href="#" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -157,7 +216,7 @@ $count = $stmt->rowCount();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="deleteModalLabel">Delete project</h5>
+						<h5 class="modal-title" id="deleteModalLabel">Delete map</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -165,7 +224,7 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-danger" id="deleteConfirm" data-pid="">Delete</button>
+						<button type="button" class="btn btn-danger" id="deleteConfirm" data-id="">Delete</button>
 					</div>
 				</div>
 			</div>
@@ -206,10 +265,10 @@ $count = $stmt->rowCount();
 
 
 		<header>
-			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #563d7c;">
+			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img id="logo" src="assets/logo.jpg" alt="TellUs" width="30" height="30" />
+						<img src="assets/logo.png" alt="TellUs" width="30" height="30" />
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -219,10 +278,10 @@ $count = $stmt->rowCount();
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link" href="index.php">Home</a>
+								<a class="nav-link" href="index.php">Gallery</a>
 							</li>
 							<li class="nav-item me-auto">
-								<a class="nav-link" href="https://forum.tellusmap.com/c/public-maps/5" target="_blank">Gallery</a>
+								<a class="nav-link active" aria-current="page" href="maps.php">My maps</a>
 							</li>
 
 							<li class="nav-item dropdown">
@@ -230,8 +289,7 @@ $count = $stmt->rowCount();
 									<i class="fas fa-user"></i>
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-									<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account" target="_blank">My profile</a></li>
+									<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -256,7 +314,7 @@ $count = $stmt->rowCount();
 						<form method="get">
 							<div class="row mb-2">
 								<div class="col-sm-5 order-sm-2 mb-4 mb-sm-0">
-									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New project</button>
+									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New map</button>
 								</div>
 								<div class="col-sm-7 order-sm-1">
 									<div class="input-group">
@@ -267,7 +325,7 @@ $count = $stmt->rowCount();
 							</div>
 							<div class="row">
 								<div class="col-12 col-sm-7">
-									<a role="button" class="btn btn-sm btn-outline-secondary float-end" href="projects.php">Clear search</a>
+									<a role="button" class="btn btn-sm btn-outline-secondary float-end" href="maps.php">Clear search</a>
 								</div>
 								<div class="col-12 col-sm-5"></div>
 							</div>
@@ -279,61 +337,70 @@ $count = $stmt->rowCount();
 					<div class="col"></div>
 				</div>
 
-				<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" id="projects">
-					<?php
-						if($count > 0) {
-							foreach($rows as $row) {
-								$created = date_format(date_create($row['created']), "d.M Y, H:i");
-					?>
-								<div class="col">
-									<div class="card">
-										<div class="card-body">
-											<h5 class="card-title"><?php echo $row['title']; ?></h5>
-											<h6 class="card-subtitle mb-2 text-muted"><?php echo $created; ?></h6>
-											<p class="card-text"><?php echo $row['description']; ?></p>
-											<div class="row">
-												<div class="col">
-													<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
-														<a role="button" class="btn btn-outline-secondary" href="pres.php?pid=<?php echo $row['pid']; ?>" target="_blank">View</a>
-														<a role="button" class="btn btn-outline-secondary" href="edit.php?pid=<?php echo $row['pid']; ?>" target="_blank">Edit</a>
-													</div>
-												</div>
-												<div class="col">
-													<div class="dropdown float-end">
-														<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="optionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-															<i class="fas fa-ellipsis-v"></i>
-														</button>
-														<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown">
-															<li><button type="button" class="dropdown-item" id="edit" data-pid="<?php echo $row['pid']; ?>">Change attributes</button></li>
-															<li>
-															<?php
-																if(is_null($row['post'])) {
-																	?><button type="button" class="dropdown-item" id="publish" data-pid="<?php echo $row['pid']; ?>">Publish map</button><?php
-																}else{
-																	?><a class="dropdown-item" href="<?php echo $row['post']; ?>" target="_blank">View public post</a><?php
-																}
-															?>
-															</li>
-															<li><hr class="dropdown-divider"></li>
-															<li><button type="button" class="dropdown-item" id="delete" data-pid="<?php echo $row['pid']; ?>">Delete</button></li>
-														</ul>
-													</div>
-												</div>
+				<div class="row">
+					<div class="col">
+						<div class="table-responsive" style="min-height: 300px;">
+							<table class="table table-striped table-hover">
+						<?php
+							if($count > 0) {
+						?>
+								<caption>List of your maps</caption>
+								<thead>
+									<tr>
+										<th scope="col">#</th>
+										<th scope="col"></th>
+										<th scope="col"></th>
+										<th scope="col"></th>
+										<th scope="col"></th>
+										<th scope="col"></th>
+									</tr>
+								</thead>
+								<tbody>
+						<?php
+								foreach($rows as $row) {
+									$created = date_format(date_create($row['created']), "d.M Y, H:i");
+						?>
+									<tr>
+										<th style="width: 8.33%;" scope="row">
+											<img class="img-fluid" src="<?php echo $row['preview']; ?>" alt="&nbsp;" />
+										</th>
+										<td style="width: 16.66%;"><?php echo $row['title']; ?></td>
+										<td style="width: 25%; max-width: 65px;" class="text-truncate"><?php echo $row['description']; ?></td>
+										<td style="width: 16.66%;"><?php echo $created; ?></td>
+										<td style="width: 8.33%;">
+											<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
+												<a role="button" class="btn btn-outline-secondary" href="edit.php?id=<?php echo $row['id']; ?>">Edit</a>
+												<a role="button" class="btn btn-outline-secondary" href="pres.php?id=<?php echo $row['id']; ?>" target="_blank">View</a>
 											</div>
-										</div>
-									</div>
-								</div>
-					<?php
+										</td>
+										<td style="width: 8.33%;">
+											<div class="dropdown float-end">
+												<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="optionsDropdown<?php echo $row['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+													<i class="fas fa-ellipsis-v"></i>
+												</button>
+												<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown<?php echo $row['id']; ?>">
+													<li><button type="button" class="dropdown-item" id="edit" data-id="<?php echo $row['id']; ?>">Change</button></li>
+													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>" data-post="<?php echo $row['post']; ?>">Share</button></li>
+													<li><hr class="dropdown-divider"></li>
+													<li><button type="button" class="dropdown-item" id="delete" data-id="<?php echo $row['id']; ?>">Delete</button></li>
+												</ul>
+											</div>
+										</td>
+									</tr>
+						<?php
+								}
+						?>
+								</tbody>
+						<?php
+							}else{
+						?>
+								<caption>No maps found</caption>
+						<?php
 							}
-						}
-						else{
-					?>
-							<div class="col">
-								<p class="text-muted text-center">Create a new project</p>
-							</div>
-					<?php
-						}
-					?>
+						?>
+							</table>
+						</div>
+					</div>
 				</div>
 
 				<div class="row my-5">
@@ -341,7 +408,6 @@ $count = $stmt->rowCount();
 						<hr />
 					</div>
 				</div>
-
 			</div>
 		</main>
 
@@ -353,7 +419,7 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-4 mt-2">
 						<center>
-							<img class="d-none d-sm-block" id="logo" src="assets/logo.jpg" alt="TellUs" width="60" height="60" />
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="60" height="60" />
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">
@@ -373,7 +439,7 @@ $count = $stmt->rowCount();
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/projects.js"></script>
+		<script type="text/javascript" src="src/maps.js"></script>
 
 	</body>
 </html>

@@ -32,7 +32,7 @@ $username = $_SESSION['username'];
 		<meta name="title" content="TellUs" />
 		<meta name="description" content="Map stories" />
 
-		<link rel="icon" href="assets/logo.jpg" />
+		<link rel="icon" href="assets/logo.png" />
 
 		<!-- Load lib/ CSS -->
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
@@ -55,10 +55,10 @@ $username = $_SESSION['username'];
 	<body>
 
 		<header>
-			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #563d7c;">
+			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img id="logo" src="assets/logo.jpg" alt="TellUs" width="30" height="30" />
+						<img src="assets/logo.png" alt="TellUs" width="30" height="30" />
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,10 +68,10 @@ $username = $_SESSION['username'];
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link" href="index.php">Home</a>
+								<a class="nav-link" href="index.php">Gallery</a>
 							</li>
 							<li class="nav-item me-auto">
-								<a class="nav-link" href="https://forum.tellusmap.com/c/public-maps/5" target="_blank">Gallery</a>
+								<a class="nav-link" href="maps.php">My maps</a>
 							</li>
 
 							<li class="nav-item dropdown">
@@ -79,9 +79,8 @@ $username = $_SESSION['username'];
 									<i class="fas fa-user"></i>
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="projects.php">Projects</a></li>
-									<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account" target="_blank">My profile</a></li>
-									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
+									<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account">Profile</a></li>
+									<li><a class="dropdown-item active" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
 								</ul>
@@ -151,7 +150,7 @@ $username = $_SESSION['username'];
 					</div>
 					<div class="col-sm-4 mt-2">
 						<center>
-							<img class="d-none d-sm-block" id="logo" src="assets/logo.jpg" alt="TellUs" width="60" height="60" />
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="60" height="60" />
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">
@@ -171,7 +170,7 @@ $username = $_SESSION['username'];
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<!--script type="text/javascript" src="src/main.js"></script-->
+		<!--script type="text/javascript" src="src/settings.js"></script-->
 
 	</body>
 </html>
