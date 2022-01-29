@@ -12,13 +12,13 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 session_start();
 
 include "init.php";
+include_once("helper.php");
 
 $loc = "maps.php";
 
 // user is already logged in
-if(isset($_SESSION['uid'])) {
-	header("location: $loc");
-	exit;
+if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
+	header("location: $loc"); exit;
 }
 
 if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
@@ -27,9 +27,8 @@ if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 	$sig = $_GET['sig'];
 
 	// validate sso
-	if(hash_hmac('sha256', urldecode($sso), $sso_secret) !== $sig) {
-		http_response_code(404);
-		exit;
+	if(hash_hmac('sha256', urldecode($sso), $CONFIG['sso_secret']) !== $sig) {
+		http_response_code(404); exit;
 	}
 
 	$sso = urldecode($sso);
@@ -39,18 +38,18 @@ if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 	// verify nonce with generated nonce
 	$nonce = $_SESSION['nonce']; unset($_SESSION['nonce']);
 	if($query['nonce'] != $nonce) {
-		http_response_code(404);
-		exit;
+		http_response_code(404); exit;
 	}
 
 	// check if user is in database
 	$uid = $query['external_id'];
 	$username = $query['username'];
 
-	$stmt = $pdo->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?"); $stmt->execute([$uid]);
+	$stmt = $PDO->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?");
+	$stmt->execute([$uid]);
 	$row = $stmt->fetch();
 	if($row['c'] < 1) {
-		$stmt = $pdo->prepare("INSERT INTO \"User\" (uid) VALUES (?)");
+		$stmt = $PDO->prepare("INSERT INTO \"User\" (uid) VALUES (?)");
 		$stmt->execute([$uid]);
 	}
 	elseif($row['c'] > 1) { http_response_code(500); exit; }
@@ -70,9 +69,9 @@ else{ // redirect to SSO
 		$nonce = hash('sha512', mt_rand());
 		$_SESSION['nonce'] = $nonce;
 
-		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => 'https://'.$_SERVER['HTTP_HOST'].'/login.php')));
-		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $sso_secret)));
-		$url = "https://forum.tellusmap.com/session/sso_provider?$query";
+		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "https://{$CONFIG['host']}/login.php")));
+		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['sso_secret'])));
+		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
 
 		header("location: $url");
 		exit;

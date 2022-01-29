@@ -12,20 +12,21 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-if(!isset($_SESSION['uid'])) { // Not logged in
-	header("location: index.php");
-	exit;
-}
-
 include "init.php";
+include_once("helper.php");
 
+// Not logged in
+if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
+	header("location: index.php"); exit;
+}
 $uid = $_SESSION['uid'];
 $username = $_SESSION['username'];
+$avatar = getAvatar($CONFIG['forum_host'], $username);
 
 $title = "%";
 if(isset($_GET['title'])) { $title .= "{$_GET['title']}%"; }
 
-$stmt = $pdo->prepare("
+$stmt = $PDO->prepare("
 	SELECT
 		M.id AS id,
 		M.title AS title,
@@ -43,7 +44,8 @@ $stmt = $pdo->prepare("
 		lower(M.title) LIKE lower(?)
 	ORDER BY
 		M.created DESC
-"); $stmt->execute([$uid, $title]);
+");
+$stmt->execute([$uid, $title]);
 $rows = $stmt->fetchAll();
 $count = $stmt->rowCount();
 
@@ -286,10 +288,10 @@ $count = $stmt->rowCount();
 
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<i class="fas fa-user"></i>
+									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account">Profile</a></li>
+									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -415,16 +417,28 @@ $count = $stmt->rowCount();
 			<div class="container">
 				<div class="row">
 					<div class="col-sm-4 mt-2">
-						<p class="text-muted text-center">© <a class="text-decoration-none" href="https://tellusmap.com">tellusmap.com</a> – all rights reserved</p>
-					</div>
-					<div class="col-sm-4 mt-2">
 						<center>
-							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="60" height="60" />
+							<div class="btn-group btn-group-lg" role="group" aria-label="Socials">
+								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+									<i class="fab fa-facebook" style="color: #4267b2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
+									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+									<i class="fab fa-linkedin" style="color: #0072b1;"></i>
+								</a>
+							</div>
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">
-						<p class="text-muted text-center"><a class="text-decoration-none" href="mailto:contact@tellusmap.com">contact@tellusmap.com</a></p>
-						<p class="text-muted text-center"><a class="text-decoration-none" href="tel:+4748006325">+47 48 00 63 25</a></p>
+						<center>
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="40" height="40" />
+						</center>
+					</div>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo "https://{$CONFIG['host']}"; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
+						<p class="text-muted text-center"><a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a></p>
 					</div>
 				</div>
 			</div>

@@ -102,11 +102,12 @@ window.onload = function(ev) {
 	$("button#share").click(ev => {
 		let id = $(ev.target).data("id"),
 			post = $(ev.target).data("post");
+		let host = window.location.host;
 
 		$("#shareModal").modal("show");
 
-		$("#shareModal input#linkInput").val(`https://tellusmap.com/pres.php?id=${id}`);
-		$("#shareModal input#embedInput").val(`<iframe src="https://tellusmap.com/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
+		$("#shareModal input#linkInput").val(`https://${host}/pres.php?id=${id}`);
+		$("#shareModal input#embedInput").val(`<iframe src="https://${host}/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
 
 		if(post) {
 			$("#shareModal a#publish").data("id", "");
@@ -120,11 +121,11 @@ window.onload = function(ev) {
 			$("#shareModal p#publishText").html("This will post your map to the public gallery");
 		}
 
-		$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://tellusmap.com/pres.php?id=${id}`);
-		$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://tellusmap.com/pres.php?id=${id}&text=`);
-		$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://tellusmap.com/pres.php?id=${id}`);
-		$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://tellusmap.com/pres.php?id=${id}&media=&description=`);
-		$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://tellusmap.com/pres.php?id=${id}%0A`);
+		$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${host}/pres.php?id=${id}`);
+		$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${host}/pres.php?id=${id}&text=`);
+		$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${host}/pres.php?id=${id}`);
+		$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${host}/pres.php?id=${id}&media=&description=`);
+		$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${host}/pres.php?id=${id}%0A`);
 	});
 	$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
 	$("#shareModal button#copyEmbed").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#embedInput").val() ); });

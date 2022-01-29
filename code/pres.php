@@ -14,14 +14,13 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 include "init.php";
 
 if(!isset($_GET['id'])) {
-	http_response_code(422);
-	exit;
+	http_response_code(422); exit;
 }
-$mid = $_GET['id'];
+$id = $_GET['id'];
 
 
-$stmt = $pdo->prepare("SELECT title, description FROM \"Map\" WHERE mid = ?");
-$stmt->execute([$mid]);
+$stmt = $PDO->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+$stmt->execute([$id]);
 $row = $stmt->fetch();
 
 ?>
@@ -173,9 +172,9 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
 
-		<!-- Set MID -->
+		<!-- Set ID -->
 		<script type="text/javascript">
-			const _MID = <?php echo $mid; ?>;
+			const _ID = <?php echo $id; ?>;
 		</script>
 
 		<!-- Load src/ JS -->

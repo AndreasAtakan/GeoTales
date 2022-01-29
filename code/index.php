@@ -12,6 +12,60 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
+include "init.php";
+include_once("helper.php");
+
+$logged_in = false;
+if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
+	$logged_in = true;
+	$username = $_SESSION['username'];
+	$avatar = getAvatar($CONFIG['forum_host'], $username);
+}
+
+
+// Get top posts
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/c/public-maps/5.json");
+$res = curl_exec($ch);
+curl_close($ch);
+$res = json_decode($res, true);
+$res = $res['topic_list']['topics'];
+
+function s($a, $b) { return $b['views'] - $a['views']; }
+uasort($res, "s");
+
+$posts = array(); $i = 0;
+foreach($res as $r) {
+	if($i > 15) { break; } $i++;
+	$url = "https://{$CONFIG['forum_host']}/t/{$r['slug']}/{$r['id']}";
+	$posts[ $url ] = array( "views" => $r['views'], "likes" => $r['like_count'] );
+}
+
+$urls = array();
+foreach($posts as $url => $val) { array_push($urls, "'{$url}'"); }
+$urls = implode(', ', $urls);
+
+$stmt = $PDO->prepare("
+	SELECT
+		M.id AS id,
+		M.title AS title,
+		M.description AS description,
+		M.created AS created,
+		M.post AS post,
+		M.preview AS preview
+	FROM
+		\"Map\" AS M
+	WHERE
+		M.post IN ({$urls}) OR
+		1 = 1
+	ORDER BY
+		M.created DESC
+");
+$stmt->execute();
+$rows = $stmt->fetchAll();
+$count = $stmt->rowCount();
+
 ?>
 
 <!DOCTYPE html>
@@ -40,31 +94,19 @@ session_start();
 				/**/
 			}
 
-			img#jumbotron {
-				width: 100%;
-				max-height: 650px;
-				object-fit: cover;
-				filter: blur(3px);
-			}
-			#jumbotron-text {
-				position: absolute;
-				top: 15vw;
-				left: 20%;
-
-				color: white;
-				text-shadow: #333 1px 1px 3px;
-				-webkit-font-smoothing: antialiased;
-				font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+			main {
+				background-image: url('assets/jumbotron2.png');
+				background-size: contain;
+				background-repeat: no-repeat;
 			}
 
-			#map-preview {
-				text-shadow: #000 1px 1px 3px;
+			#header-text {
+				text-shadow: #fff -1px 1px 3px;
 				-webkit-font-smoothing: antialiased;
 			}
-			#map-preview img { filter: blur(1px); }
 
 			@media (max-width: 575.98px) {
-				#jumbotron-text { top: 25vw; }
+				/**/
 			}
 		</style>
 	</head>
@@ -83,23 +125,22 @@ session_start();
 
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
-							<li class="nav-item<?php if(!isset($_SESSION['uid'])) { echo " me-auto"; } ?>">
+							<li class="nav-item<?php if(!$logged_in) { echo " me-auto"; } ?>">
 								<a class="nav-link active" aria-current="page" href="index.php">Gallery</a>
 							</li>
 
 					<?php
-						if(isset($_SESSION['uid'])) { // logged in
-							$username = $_SESSION['username'];
+						if($logged_in) {
 					?>
 							<li class="nav-item me-auto">
 								<a class="nav-link" href="maps.php">My maps</a>
 							</li>
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<i class="fas fa-user"></i>
+									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account">Profile</a></li>
+									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -121,175 +162,72 @@ session_start();
 		</header>
 
 		<main role="main">
-			<div class="container-fluid p-0">
-				<img class="img-fluid shadow" src="assets/jumbotron.png" alt="map" id="jumbotron" />
-
-				<div class="row" id="jumbotron-text">
-					<div class="col">
-						<h1 class="display-3">TellUs</h1>
-						<h2 class="ms-2">Map stories</h2>
-					</div>
-				</div>
-			</div>
-
 			<div class="container" id="main">
 				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
+					<div class="col"></div>
 				</div>
 
-				<div class="row mx-auto" style="max-width: 950px;">
-					<div class="col">
-						<h4>
-							TellUs is a map-based tool designed to tell stories.
-							Create incredible maps for presentations, as a teaching-tool or for your personal stories.
-						</h4>
+				<div class="row" id="header-text">
+					<div class="col-sm-9">
+						<h2 class="text-muted">TellUs – Map stories</h2>
+						<h5 class="text-muted">Top 15 most popular maps</h5>
+					</div>
+					<div class="col-sm-3 mt-3">
+						<div class="d-grid" style="text-shadow: none;">
+							<a role="button" href="login.php" class="btn btn-lg btn-primary">Try now</a>
+						</div>
+						<p class="text-muted text-center mt-2">Create your own map for <strong>free</strong></p>
 					</div>
 				</div>
 
 				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
+					<div class="col"></div>
 				</div>
 
-				<div class="row row-cols-1 row-cols-md-2 g-4" id="map-preview">
+				<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+		<?php
+			if($count > 0) {
+				foreach($rows as $row) {
+					$created = date_format(date_create($row['created']), "d.M Y, H:i");
+					$views = 0; // $posts[ $row['post'] ]['views'];
+					$likes = 0; // $posts[ $row['post'] ]['likes'];
+		?>
 					<div class="col">
 						<div class="card">
-							<img src="assets/map-preview-1.png" class="card-img" alt="map-preview-1" />
-							<a class="text-decoration-none text-light" href="#" target="_blank">
-								<div class="card-img-overlay">
-									<h3 class="card-title">Map of Saint Paul's journey to Rome</h3>
-									<p class="card-text">Click the image to open demo map</p>
+							<a class="text-decoration-none" href="<?php echo $row['post']; ?>">
+								<img src="<?php echo $row['preview']; ?>" class="card-img-top" alt="&nbsp;">
+								<div class="card-body">
+									<h5 class="card-title" style="color: black;"><?php echo $row['title']; ?></h5>
+									<h6 class="card-subtitle mb-2 text-muted"><?php echo $created; ?></h6>
+									<span class="badge bg-primary">Views: <?php echo $views; ?></span>
+									<span class="badge bg-secondary">Likes: <?php echo $likes; ?></span>
 								</div>
 							</a>
 						</div>
 					</div>
+		<?php
+				}
+		?>
 					<div class="col">
-						<div class="card">
-							<img src="assets/map-preview-2.png" class="card-img" alt="map-preview-2" />
-							<a class="text-decoration-none text-light" href="#" target="_blank">
-								<div class="card-img-overlay">
-									<h3 class="card-title">Visual presentation of the Wars of the Roses</h3>
-									<p class="card-text">Click the image to open demo map</p>
-								</div>
-							</a>
-						</div>
-					</div>
-				</div>
-
-				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-
-				<div class="row mx-auto" style="max-width: 950px;">
-					<div class="col">
-						<h2>TellUs is the perfect tool for:</h2>
-					</div>
-				</div>
-
-				<div class="row mx-auto mt-3 g-4" style="max-width: 950px;">
-					<div class="col-sm-6 col-md-3">
-						<h4>
-							<i class="fas fa-chalkboard-teacher" style="color: #080;"></i> <br />
-							Teachers and lecturers
-						</h4>
-					</div>
-					<div class="col-sm-6 col-md-3">
-						<h4>
-							<i class="fas fa-graduation-cap" style="color: #e60000;"></i> <br />
-							Students and academics
-						</h4>
-					</div>
-					<div class="col-sm-6 col-md-3">
-						<h4>
-							<i class="fas fa-sitemap" style="color: #00f;"></i> <br />
-							Genealogists
-						</h4>
-					</div>
-					<div class="col-sm-6 col-md-3">
-						<h4>
-							<i class="fas fa-users" style="color: #e69500;"></i> <br />
-							Conferences
-						</h4>
-					</div>
-				</div>
-
-				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-
-				<div class="row mx-auto" style="max-width: 950px;">
-					<div class="col">
-						<h2>Pricing</h2>
-					</div>
-				</div>
-
-				<div class="row mx-auto mt-2 g-4" style="max-width: 950px;">
-					<div class="col-sm-6">
 						<div class="card">
 							<div class="card-body">
-								<h4 class="card-title">Single user</h4>
-								<h6 class="card-subtitle mb-4"><em>$15 / month</em></h6>
-
-								<p class="card-text">
-									<i class="fas fa-check"></i> All map features
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Unlimited projects
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Share and publish projects
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Forum priority account
-								</p>
-
-								<div class="d-grid mt-4">
-									<a role="button" class="btn btn-secondary" href="login.php">Sign up</a>
+								<div class="d-grid">
+									<a role="button" class="btn btn-lg btn-outline-secondary" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">
+										Browse more maps
+									</a>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-6">
-						<div class="card">
-							<div class="card-body">
-								<h4 class="card-title">Organization</h4>
-								<h6 class="card-subtitle mb-4"><em>Contact sales</em></h6>
-
-								<p class="card-text">
-									<i class="fas fa-check"></i> All map features
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Unlimited projects
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Share and publish projects
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Forum priority account
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Dedicated support
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Dedicated server
-								</p>
-								<p class="card-text">
-									<i class="fas fa-check"></i> Much more...
-								</p>
-
-								<div class="d-grid mt-4">
-									<a role="button" class="btn btn-secondary" href="mailto:contact@tellusmap.com">Contact sales</a>
-								</div>
-							</div>
-						</div>
+		<?php
+			}else{
+		?>
+					<div class="col">
+						<p class="text-muted text-center">No maps found</p>
 					</div>
+		<?php
+			}
+		?>
 				</div>
 
 				<div class="row my-5">
@@ -298,24 +236,21 @@ session_start();
 					</div>
 				</div>
 
-				<div class="row mx-auto" style="max-width: 950px;">
+				<div class="row">
 					<div class="col">
-						<h2 class="text-center">Sign up and get a free 30-day trial</h2>
-					</div>
-				</div>
-
-				<div class="row mx-auto mt-5" style="max-width: 450px;">
-					<div class="col">
-						<div class="d-grid">
-							<a role="button" class="btn btn-lg btn-primary" href="login.php">Sign up</a>
-						</div>
+						<p class="small text-muted">
+							For technical questions,
+							please contact us at <a href="mailto:contact@tellusmap.com">contact@tellusmap.com</a>
+						</p>
+						<p class="small text-muted">
+							Do you have feedback you want to share?
+							<a href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Let us know</a>!
+						</p>
 					</div>
 				</div>
 
 				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
+					<div class="col"></div>
 				</div>
 
 			</div>
@@ -325,16 +260,28 @@ session_start();
 			<div class="container">
 				<div class="row">
 					<div class="col-sm-4 mt-2">
-						<p class="text-muted text-center">© <a class="text-decoration-none" href="https://tellusmap.com">tellusmap.com</a> – all rights reserved</p>
-					</div>
-					<div class="col-sm-4 mt-2">
 						<center>
-							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="60" height="60" />
+							<div class="btn-group btn-group-lg" role="group" aria-label="Socials">
+								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+									<i class="fab fa-facebook" style="color: #4267b2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
+									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+									<i class="fab fa-linkedin" style="color: #0072b1;"></i>
+								</a>
+							</div>
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">
-						<p class="text-muted text-center"><a class="text-decoration-none" href="mailto:contact@tellusmap.com">contact@tellusmap.com</a></p>
-						<p class="text-muted text-center"><a class="text-decoration-none" href="tel:+4748006325">+47 48 00 63 25</a></p>
+						<center>
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="40" height="40" />
+						</center>
+					</div>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo "https://{$CONFIG['host']}"; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
+						<p class="text-muted text-center"><a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a></p>
 					</div>
 				</div>
 			</div>

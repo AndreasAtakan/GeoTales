@@ -9,34 +9,28 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
-session_start();
 
-include "init.php";
-include_once("helper.php");
 
-// user is not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	http_response_code(401); exit;
+//
+function validUID($PDO, $uid) {
+	$stmt = $PDO->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?");
+	$stmt->execute([$uid]);
+	$row = $stmt->fetch();
+
+	return $row['c'] == 1;
 }
 
-if($FLAG) {
-	$uid = $_SESSION['uid'];
 
+
+//
+function getAvatar($host, $username) {
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/admin/users/$uid/log_out.json");
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		"Api-Key: {$CONFIG['apikey']}",
-		"Api-Username: system"
-	));
+	curl_setopt($ch, CURLOPT_URL, "https://$host/u/$username.json");
 	$res = curl_exec($ch);
 	curl_close($ch);
+	$res = json_decode($res, true);
+	$res = str_replace('{size}', '30', $res['user']['avatar_template']);
+
+	return "https://{$host}{$res}";
 }
-
-session_destroy();
-
-header("location: index.php");
-
-exit;

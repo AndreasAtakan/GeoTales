@@ -13,10 +13,11 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 session_start();
 
 include "../init.php";
+include_once("../helper.php");
 
-if(!isset($_SESSION['uid'])) { // Not logged in
-	http_response_code(401);
-	exit;
+// Not logged in
+if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
+	http_response_code(401); exit;
 }
 $uid = $_SESSION['uid'];
 
@@ -53,17 +54,15 @@ if($fileType != "jpg"
 if($uploadOk) { // Only if all checks are passed
 
 	if(move_uploaded_file($_FILES["image"]["tmp_name"], $path)) {
-		if($FLAG) { echo "https://tellusmap.com/assets/img/$file"; }
+		if($FLAG) { echo "https://{$CONFIG['host']}/assets/img/$file"; }
 		else{ echo "http://localhost/tellus/assets/img/$file"; }
 		exit;
 	}
 	else{
-		http_response_code(500);
-		exit;
+		http_response_code(500); exit;
 	}
 
 }
 else{
-	http_response_code(422);
-	exit;
+	http_response_code(422); exit;
 }

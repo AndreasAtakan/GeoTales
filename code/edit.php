@@ -12,23 +12,24 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-if(!isset($_SESSION['uid'])) { // Not logged in
-	header("location: index.php");
-	exit;
-}
-
 include "init.php";
+include_once("helper.php");
 
+// Not logged in
+if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
+	header("location: index.php"); exit;
+}
 $username = $_SESSION['username'];
+$avatar = getAvatar($CONFIG['forum_host'], $username);
+
 
 if(!isset($_GET['id'])) {
-	http_response_code(422);
-	exit;
+	http_response_code(422); exit;
 }
 $id = $_GET['id'];
 
 
-$stmt = $pdo->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+$stmt = $PDO->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
 $stmt->execute([$id]);
 $row = $stmt->fetch();
 
@@ -288,11 +289,11 @@ $row = $stmt->fetch();
 
 								<li class="nav-item dropdown">
 									<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-										<i class="fas fa-user"></i>
+										<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 										<li><a class="dropdown-item" href="maps.php">My maps</a></li>
-										<li><a class="dropdown-item" href="https://forum.tellusmap.com/u/<?php echo $username; ?>/preferences/account">Profile</a></li>
+										<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider"></li>
 										<li><a class="dropdown-item" href="logout.php">Log out</a></li>

@@ -22,20 +22,20 @@ $options = array(
 	PDO::ATTR_EMULATE_PREPARES   => false
 );
 try {
-	$pdo = new PDO($dsn, $user, $pass, $options);
+	$PDO = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
 	throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 
 
 
-// SSO init
+// config
 
 $FLAG = false;
-$sso_secret = 'xnUhKjs4HfYqmPhLTgKFutvN7';
-
-
-
-// API init
-
-$apikey = "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017";
+$CONFIG = array(
+	"host" => "tellusmap.com",
+	"forum_host" => "forum.tellusmap.com",
+	"email" => "contact@tellusmap.com",
+	"sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7",
+	"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017"
+);
