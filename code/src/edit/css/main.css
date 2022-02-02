@@ -16,10 +16,13 @@ input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
 }*/
+/* Hide arrow-down on select  */
+select { -webkit-appearance: none; -moz-appearance: none; }
+select::-ms-expand { display: none; }
 
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
-.leaflet-top.leaflet-right { top: 50px; }
+.leaflet-top.leaflet-right { top: 54px; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
 
@@ -27,51 +30,49 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 .ui-sortable-helper { left: auto !important; }
 
-#sceneCol {
+#sectionCol {
 	position: absolute;
 	z-index: 1002;
-	height: calc(100vh - 50px);
-	margin-top: 50px;
+	height: calc(100vh - 54px);
+	margin-top: 54px;
 	overflow-y: auto;
 	background-color: rgba(242, 242, 242, 0.7);
 }
-#sceneCol:focus { outline: none; }
+#sectionCol:focus { outline: none; }
 
-#sceneContainer li:hover:not(.active),
-#sceneContainer li:focus:not(.active) {
+#section li:hover:not(.active),
+#section li:focus:not(.active) {
 	cursor: pointer;
 }
 
-#sceneContainer li {
-	max-height: 80vh;
-	background-color: rgba(242, 242, 242, 0.2);
+#section li {
+	max-height: 80px;
 	border-color: rgba(0, 0, 0, 0.4);
 }
-#sceneContainer li.inactive,
-#sceneContainer li.active { background-color: #f9f9f9; }
+#section li,
+#section li button:not(.chapter) { background-color: rgba(242, 242, 242, 0.2); }
+#section li.chapter { background-color: rgba(242, 242, 242, 0.8); }
+#section li.inactive,
+#section li.active { background-color: #f9f9f9; }
 
-#sceneContainer li #reorder,
-#sceneContainer li #capture,
-#sceneContainer li #delete,
-#sceneContainer li #add { color: #999999; }
-#sceneContainer li.active #reorder,
-#sceneContainer li.active #capture,
-#sceneContainer li.active #delete,
-#sceneContainer li.active #add { color: #800000; }
-#sceneContainer li .textInput { max-height: calc(80vh - 100px); }
-#sceneContainer li #textInput {
+#section li button { color: #999999; }
+#section li.inactive #capture,
+#section li.active #delete,
+#section li.active #add { color: #800000; }
+/*#section li .textInput { max-height: calc(80vh - 100px); }
+#section li #textInput {
 	color: #212529;
 	background-color: inherit !important;
-}
+}*/
 
-#sceneContainer li[class*="active"] #reorder:hover {
+#section li #reorder:hover {
 	cursor: move;
 }
-#sceneContainer li[class*="active"] #capture:hover,
-#sceneContainer li[class*="active"] #delete:hover,
-#sceneContainer li[class*="active"] #add:hover {
+/*#section li[class*="active"] #capture:hover,
+#section li[class*="active"] #delete:hover,
+#section li[class*="active"] #add:hover {
 	cursor: pointer;
-}
+}*/
 
 #mapCol { height: 100%; }
 
@@ -89,12 +90,12 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	opacity: 0.6;
 }
 
-#topPadScene { margin-top: 100px; }
-#bottomPadScene { margin-bottom: 100px; }
+#topPadSection { margin-top: 100px; }
+#bottomPadSection { margin-bottom: 100px; }
 
 #markerPopup, #polylinePopup, #polygonPopup, #editPopup { width: 300px; }
 
-#basemapModal #basemaps:hover, #basemapModal #basemaps:focus { cursor: pointer; }
+#basemapModal #basemaps:hover { cursor: pointer; }
 
 
 
@@ -107,20 +108,20 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 767.98px) {
-	/*#clusteringInputCol { margin-bottom: 1rem !important; }*/
+	/**/
 }
 
 @media (max-width: 575.98px) {
-	.leaflet-bottom.leaflet-right { bottom: 45%; }
+	.leaflet-bottom.leaflet-right { bottom: 35%; }
 
-	#sceneCol {
-		height: 45%;
+	#sectionCol {
+		height: 35%;
 		bottom: 0;
 	}
 
-	#sceneContainer li { max-height: 40vh; }
-	#sceneContainer li .textInput { max-height: calc(40vh - 100px); }
+	/*#section li { max-height: 40vh; }*/
+	/*#section li .textInput { max-height: calc(40vh - 100px); }*/
 
-	#topPadScene { margin-top: 0; }
-	#bottomPadScene { margin-bottom: 0; }
+	#topPadSection { margin-top: 0; }
+	#bottomPadSection { margin-bottom: 0; }
 }

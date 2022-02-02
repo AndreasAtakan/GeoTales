@@ -9,242 +9,54 @@
 "use strict";
 
 
-_EVENTS.scene = {
+_EVENTS.section = {
 
 	setup: function() {
-		init_scene();
+		init_section();
 
-		$("ul#sceneContainer").sortable({ // https://api.jqueryui.com/sortable/
-			cursor: "move",
-			handle: "#reorder",
-			items: "> li",
-			axis: "y",
-			containment: "parent",
-			tolerance: "pointer",
-			//scroll: false,
-			start: (ev, ui) => {
-				ev.stopPropagation();
-				this.unset_click();
-			},
-			update: (ev, ui) => {
-				ev.stopPropagation();
+		_CONTENT = new Content();
 
-				let order = $("ul#sceneContainer").sortable("toArray"),
-					sceneId = $(ui.item[0]).data("sceneid");
-				this.reorder( order, sceneId );
-			},
-			stop: (ev, ui) => {
-				ev.stopPropagation();
-				this.set_click();
-			}
-		});
+		$("#sectionCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
+		$("#sectionCol").keyup(ev => {
+			let keycode = ev.code;
 
-		$("#sceneCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
-		$("#sceneCol").keyup(ev => {
-			let keycode = ev.code,
-				id = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
-			if(!id) return;
-
-			let s = get_scene(id);
-
-			if(keycode == "ArrowUp" && s.index > 0) {
+			if(keycode == "ArrowUp") {
 				ev.preventDefault();
-				this.set_scene( _SCENES[s.index - 1].id, true );
+				_CONTENT.prev();
 			}
 
-			if(keycode == "ArrowDown" && s.index < _SCENES.length - 1) {
+			if(keycode == "ArrowDown") {
 				ev.preventDefault();
-				this.set_scene( _SCENES[s.index + 1].id, true );
+				_CONTENT.next();
 			}
 
 			if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
 		});
 
 		_MAP.setup();
+
+		_CONTENT.add("scene");
 	},
 
 	reset: function() {
-		reset_scene();
-		$("#sceneCol button#addScene").click( ev => { this.setup(); this.add(); } );
+		reset_section();
 
+		_CONTENT = null;
 		_MAP.reset();
+
+		$("#sectionCol button#add").click(ev => { this.setup(); });
 	},
 
-	prepare: function(prevId) {
-		prepare_scene(prevId);
-
-		this.unset_click();
-
-		let handler = ev => { ev.stopPropagation(); };
-		$("#sceneContainer li #reorder").mousedown(handler);
-
-		$("#sceneContainer li").removeClass("inactive active");
-		$("li#prepare").addClass("active");
-
-		$("li#prepare")[0].scrollIntoView({ behavior: "smooth", block: "center" });
-
-		$("li#prepare button#capture").click(ev => {
-			$("#sceneContainer li #reorder").unbind("mousedown", handler);
-			$("li#prepare").remove();
-
-			this.add(prevId);
-		});
-	},
-
-	add: function(prevId) {
-		let id = uuid();
-
-		this.set_add(id, prevId);
-
-		let s = { id: id };
-
-		if(prevId) {
-			let prevScene = get_scene(prevId);
-			if(prevScene.period)	s.period = prevScene.period;
-			if(prevScene.date)		s.date = prevScene.date;
-			if(prevScene.time)		s.time = prevScene.time;
-			if(prevScene.content)	s.content = prevScene.content;
-
-			$(`li[data-sceneid="${id}"] select#periodInput`).val( s.period || "ad" );
-			$(`li[data-sceneid="${id}"] input#dateInput`).val( s.date || "" );
-			$(`li[data-sceneid="${id}"] input#timeInput`).val( s.time || "" );
-			$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("html", s.content || "");
-
-			_SCENES.splice(prevScene.index + 1, 0, s);
-		}
-		else{ _SCENES.push(s); }
-
-		this.capture(id);
-		this.set_scene(id);
-	},
-
-	input: function(id, type, value) {
-		let s = get_scene(id);
-
-		_SCENES[s.index][type] = value;
-
-		if(type == "date" && !s.period) { _SCENES[s.index].period = "ad"; }
-	},
-
-	capture: function(id) {
-		let s = get_scene(id);
-
-		let nw = _MAP.getBounds().getNorthWest(),
-			se = _MAP.getBounds().getSouthEast();
-		_SCENES[s.index].bounds = [[nw.lat, nw.lng], [se.lat, se.lng]];
-
-		_SCENES[s.index].basemap = _MAP.getBasemap();
-
-		this.flash_map();
-	},
-
-	delete: function(id) {
-		let s = get_scene(id);
-		let i = s.index == _SCENES.length - 1 ? s.index - 1 : s.index;
-
-		_SCENES.splice(s.index, 1);
-
-		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("destroy");
-		$(`li[data-sceneid="${id}"]`).remove();
-
-		if(_SCENES.length <= 0) { this.reset(); }
-		else { this.set_scene( _SCENES[i].id ); }
-
-		_MAP.deleteScene(id);
-	},
-
-	reorder: function(order, id) {
-		let scene = get_scene(id);
-		if(!scene) { console.error("No scene found"); return; }
-
-		_SCENES.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
-
-		this.set_scene( $("#sceneContainer li[class*=\"active\"]").data("sceneid") );
-	},
-
-
-
-	set_scene: function(id, animate) {
-		let s = get_scene(id);
-
-		this.set_scene_input(id);
-		this.set_scene_style(id);
-		this.set_click();
-
-		$(`li[data-sceneid="${id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
-
-		this.set_basemap( s.basemap );
-
-		_MAP.setObjects(id, animate);
-
-		_MAP.setFlyTo(s.bounds);
-	},
-
-	set_scene_input: function(id) {
-		$("#sceneContainer span#capture, #sceneContainer span#delete, #sceneContainer span#add").off("click");
-		$("#sceneContainer select#periodInput, #sceneContainer input#dateInput, #sceneContainer input#timeInput").prop("disabled", true);
-		$("#sceneContainer #textInput").each(function(index) { $(this).trumbowyg("disable"); });
-
-		$(`li[data-sceneid="${id}"] span#capture`).click( ev => { this.capture(id); this.set_scene_style(id); } );
-		$(`li[data-sceneid="${id}"] span#delete`).click( ev => { this.delete(id); } );
-		$(`li[data-sceneid="${id}"] span#add`).click( ev => { this.prepare(id); ev.stopPropagation(); } );
-		$(`li[data-sceneid="${id}"] select#periodInput, li[data-sceneid="${id}"] input#dateInput, li[data-sceneid="${id}"] input#timeInput`).prop("disabled", false);
-		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("enable");
-	},
-
-	set_scene_style: function(id) {
-		if( $(`li[data-sceneid="${id}"]`).hasClass("active") ) return;
-
-		$("#sceneContainer li").removeClass("inactive active");
-		$(`li[data-sceneid="${id}"]`).addClass("active");
-	},
-
-	set_click: function() {
-		this.unset_click();
-
-		$("#sceneContainer li:not([class*=\"active\"])").click(ev => {
-			let scene = get_element_scene(ev.target);
-			if(!scene) return;
-			let id = scene.id;
-
-			let prevId = $("#sceneContainer li[class*=\"active\"]").data("sceneid"), t = false;
-			if(prevId) { t = Math.abs( get_scene(id).index - get_scene(prevId).index ) == 1; }
-
-			this.set_scene( id, t );
-		});
-
-		$("#sceneContainer li[class*=\"active\"]").click(ev => {
-			if(_IS_MAP_MOVING) return;
-
-			let scene = get_element_scene(ev.target);
-			if(!scene) return;
-			let id = scene.id;
-
-			if( $(`li[data-sceneid="${id}"]`).hasClass("inactive") ) {
-				$(`li[data-sceneid="${id}"]`).removeClass("inactive");
-				$(`li[data-sceneid="${id}"]`).addClass("active");
-			}
-
-			_MAP.setFlyTo(scene.bounds);
-			_IS_MAP_MOVING = true;
-		});
-
-		$("#sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").click(ev => { ev.stopPropagation(); });
-	},
-	unset_click: function() {
-		$("#sceneContainer li, #sceneContainer li input, #sceneContainer li select, #sceneContainer li .trumbowyg-box").off("click");
-	},
-
-	set_add: function(id, prevId) {
+	/*set_add: function(id, prevId) {
 		let self = this;
-		add_scene(id, prevId);
+		add_section(id, prevId);
 
-		$(`li[data-sceneid="${id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
+		$(`li[data-id="${id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
 
-		$(`li[data-sceneid="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
-		$(`li[data-sceneid="${id}"] #textInput`).trumbowyg({
+		$(`li[data-id="${id}"] select#periodInput`).change( ev => { this.input(id, "period", ev.target.value); } );
+		$(`li[data-id="${id}"] input#dateInput`).change( ev => { this.input(id, "date", ev.target.value); } );
+		$(`li[data-id="${id}"] input#timeInput`).change( ev => { this.input(id, "time", ev.target.value); } );
+		$(`li[data-id="${id}"] #textInput`).trumbowyg({
 			autogrow: true,
 			semantic: false,
 			resetCss: true,
@@ -282,21 +94,21 @@ _EVENTS.scene = {
 								contentType: false,
 								processData: false,
 								success: function(result, status, xhr) {
-									$(`li[data-sceneid="${id}"] #textInput`).trumbowyg("execCmd", {
+									$(`li[data-id="${id}"] #textInput`).trumbowyg("execCmd", {
 										cmd: "insertImage",
 										param: result,
 										forceCss: false,
 										skipTrumbowyg: true
 									});
 
-									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+									$("#loadingModal").modal("hide");
 								},
 								error: function(xhr, status, error) {
 									console.log(xhr.status);
 									console.log(error);
 
+									$("#loadingModal").modal("hide");
 									$("#errorModal").modal("show");
-									setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 								}
 							});
 						});
@@ -322,24 +134,7 @@ _EVENTS.scene = {
 			let cont = $(this).trumbowyg("html");
 			self.input(id, "content", cont);
 		});
-	},
-
-	set_basemap: function(b) {
-		if(b.url) {
-			let basemap = get_basemap(b.url);
-
-			if(basemap) _MAP.setBasemap( basemap.tiles );
-			else _MAP.setBasemap(L.tileLayer(b.url, { minZoom: 0, maxZoom: 22, attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>" }), is_internal_roman_basemap(b.url));
-		}
-		else if(b.img) {
-			_MAP.imgBasemap(b.img, b.width, b.height);
-		}
-	},
-
-	flash_map: function() {
-		$("div#map").addClass("snapshot");
-		setTimeout(function() { $("div#map").removeClass("snapshot"); }, 240);
-	}
+	}*/
 
 };
 
@@ -375,8 +170,8 @@ _EVENTS.object = {
 			if(val) {
 				let tooltip = object.getTooltip();
 
-				if(!tooltip) object.bindTooltip(val, { direction: "bottom", permanent: true });
-				else object.setTooltipContent(val);
+				if(!tooltip) { object.bindTooltip(val, { direction: "bottom", permanent: true }); }
+				else{ object.setTooltipContent(val); }
 			}
 			else{ object.unbindTooltip(); }
 
@@ -440,14 +235,14 @@ _EVENTS.object = {
 							_MAP.updateObject(object.options.id);
 							_MAP.setIcon(object.options.id, [width, height]);
 
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+							$("#loadingModal").modal("hide");
 						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status);
 							console.log(error);
 
+							$("#loadingModal").modal("hide");
 							$("#errorModal").modal("show");
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 						}
 					});
 
@@ -459,7 +254,7 @@ _EVENTS.object = {
 		});
 
 		$("#markerPopup input#size").change(function(ev) {
-			let val = Math.min( Math.max( 10, $(this).val() ), 100 );
+			let val = $(this).val();
 
 			_MAP.setIcon(object.options.id, [ val, val / object.options.ratio ]);
 			_MAP.updateObject(object.options.id);
@@ -596,11 +391,6 @@ _EVENTS.options = {
 
 	setup: function() {
 
-		$("#optionsModal select#clusteringInput").change(function(ev) {
-			let val = $(this).val();
-			_CLUSTERING = val;
-		});
-
 		$("#optionsModal input#avatarSpeedInput").change(function(ev) {
 			let val = $(this).val();
 			_AVATARSPEED = parseInt(val);
@@ -615,30 +405,11 @@ _EVENTS.options = {
 			$("#optionsModal span#panningSpeedInputValue").html(val <= 0 ? `auto` : `${val} milliseconds`);
 		});
 
-		$("#optionsModal select#fontInput").change(function(ev) {
-			let val = $(this).val(), font;
-
-			switch(val) {
-				case "arial":			font = "Arial, sans-serif"; break;
-				case "verdana":			font = "Verdana, sans-serif"; break;
-				case "helvetica":		font = "Helvetica, sans-serif"; break;
-				case "times new roman":	font = "\"Times New Roman\", serif"; break;
-				case "georgia":			font = "Georgia, serif"; break;
-				case "courier new":		font = "\"Courier New\", monospace"; break;
-				case "brush script mt":	font = "\"Brush Script MT\", cursive"; break;
-				default:				font = "inherit"; break;
-			}
-
-			$(this).css("font-family", font);
-
-			_FONT = font;
-		});
-
 		//init_themes();
 
 		/*$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
 			let theme = $(ev.target).prop("id");
-			if(!theme) return;
+			if(!theme) { return; }
 
 			_THEME = theme;
 		});*/
@@ -649,7 +420,7 @@ _EVENTS.options = {
 
 
 
-_EVENTS.basemapOptions = {
+_EVENTS.basemap = {
 
 	setup: function() {
 
@@ -657,11 +428,11 @@ _EVENTS.basemapOptions = {
 
 		$("#basemapModal #basemaps").click(ev => {
 			let index = $(ev.target).data("basemap");
-			if(!index && index != 0) return;
+			if(!index && index != 0) { return; }
 			let basemap = _BASEMAPS[index];
 
 			_MAP.setBasemap( basemap.tiles );
-			this.setSceneBasemap();
+			_CONTENT.setBasemap();
 		});
 
 		$("#basemapModal input#basemapFile").change(ev => {
@@ -691,15 +462,15 @@ _EVENTS.basemapOptions = {
 						processData: false,
 						success: function(result, status, xhr) {
 							_MAP.imgBasemap(result, width, height);
-							self.setSceneBasemap();
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+							_CONTENT.setBasemap();
+							$("#loadingModal").modal("hide");
 						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status);
 							console.log(error);
 
+							$("#loadingModal").modal("hide");
 							$("#errorModal").modal("show");
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 						}
 					});
 
@@ -710,54 +481,34 @@ _EVENTS.basemapOptions = {
 			fr.readAsDataURL(file);
 		});
 
-		$("#basemapModal input#basemapLink").change(ev => {
-			$("#basemapModal input#basemapKey").off("change");
+		$("#basemapModal button#basemapFetch").click(ev => {
+			let url = $("#basemapModal input#basemapLink").val();
+			if(!url) { return; }
 
-			let url = $(ev.target).val();
-			if(!url) return;
-
-			let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>" });
+			let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">TellUs</a>` });
 
 			let protocol = url.split(/\:/ig)[0];
 			if(protocol == "mapbox") {
 				let username = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[0],
 					styleID = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[1],
 					key = $("#basemapModal input#basemapKey").val();
-				if(!key) {
-					$("#basemapModal input#basemapKey").change(ev => { //$(ev.target).off("change");
-						key = $(ev.target).val();
+				if(!key) { return; }
 
-						url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-						tiles.setUrl(url, true);
-						_MAP.setBasemap(tiles, is_internal_roman_basemap(url));
-					});
-				}else{
-					url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-					tiles.setUrl(url, true);
-					_MAP.setBasemap(tiles, is_internal_roman_basemap(url));
-				}
-			}else{
-				_MAP.setBasemap(tiles);
+				url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
+				tiles.setUrl(url, true);
 			}
 
-			this.setSceneBasemap();
+			_MAP.setBasemap(tiles, is_internal_basemap(url));
+			_CONTENT.setBasemap();
 		});
 
-	},
-
-	setSceneBasemap: function() {
-		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
-		if(!sceneId) { console.error("No active scene found"); return; }
-
-		let s = get_scene(sceneId);
-		_SCENES[s.index].basemap = _MAP.getBasemap();
 	}
 
 };
 
 
 
-_EVENTS.project = {
+_EVENTS.file = {
 
 	setup: function() {
 		let self = this;
@@ -791,7 +542,7 @@ _EVENTS.project = {
 				H = f(date.getHours()),
 				M = f(date.getMinutes()),
 				S = f(date.getSeconds());
-			let filename = `project-${y}.${m}.${d}-${H}.${M}.${S}.tellus`;
+			let filename = `${_TITLE} ${y}.${m}.${d} ${H}.${M}.${S}.tellus`;
 
 			let data = this.export();
 
@@ -816,23 +567,23 @@ _EVENTS.project = {
 
 			$.ajax({
 				type: "POST",
-				url: "api/project.php",
+				url: "api/map.php",
 				data: {
 					"op": "write",
-					"pid": _PID,
+					"id": _ID,
 					"data": data
 				},
 				dataType: "json",
 				success: function(result, status, xhr) {
 					saved_changes();
-					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+					$("#loadingModal").modal("hide");
 				},
 				error: function(xhr, status, error) {
 					console.log(xhr.status);
 					console.log(error);
 
+					$("#loadingModal").modal("hide");
 					$("#errorModal").modal("show");
-					setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 				}
 			});
 		});
@@ -840,10 +591,10 @@ _EVENTS.project = {
 		$("#loadingModal").modal("show");
 		$.ajax({
 			type: "GET",
-			url: "api/project.php",
+			url: "api/map.php",
 			data: {
 				"op": "read",
-				"pid": _PID
+				"id": _ID
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
@@ -852,60 +603,56 @@ _EVENTS.project = {
 					$(document).click(ev => { unsaved_changes(); });
 				}
 
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
+				$("#loadingModal").modal("hide");
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
 				console.log(error);
 
+				$("#loadingModal").modal("hide");
 				$("#errorModal").modal("show");
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 500);
 			}
 		});
 
 	},
 
-	import: function(data) {
-		_CLUSTERING = data.options.clustering;
+	import: function(data) { // !!!!!!!! TODO
 		_AVATARSPEED = data.options.avatarspeed;
 		_PANNINGSPEED = data.options.panningspeed;
 
-		_FONT = data.options.font;
 		_THEME = data.options.theme;
 
-		if(data.scenes.length <= 0) return;
+		if(data.content.length <= 0) { return; }
 
-		let index = _SCENES.length;
-		if(index <= 0) _EVENTS.scene.setup();
+		let index = _CONTENT.length;
+		if(index <= 0) _EVENTS.section.setup();
 
-		for(let i = 0; i < data.scenes.length; i++) {
-			let s = data.scenes[i];
+		for(let i = 0; i < data.content.length; i++) {
+			let c = data.content[i];
 
-			_EVENTS.scene.set_add(s.id);
+			_EVENTS.section.set_add(c.id);
 
-			_SCENES.push(s);
+			_CONTENT.push(c);
 
-			$(`li[data-sceneid="${s.id}"] select#periodInput`).val( s.period || "ad" );
-			$(`li[data-sceneid="${s.id}"] input#dateInput`).val( s.date || "" );
-			$(`li[data-sceneid="${s.id}"] input#timeInput`).val( s.time || "" );
-			$(`li[data-sceneid="${s.id}"] #textInput`).trumbowyg("html", s.content || "");
+			/*$(`li[data-id="${c.id}"] select#periodInput`).val( s.period || "ad" );
+			$(`li[data-id="${c.id}"] input#dateInput`).val( s.date || "" );
+			$(`li[data-id="${c.id}"] input#timeInput`).val( s.time || "" );
+			//$(`li[data-id="${c.id}"] #textInput`).trumbowyg("html", s.content || "");*/
 		}
 
 		_MAP.importData(data.objects);
 
-		_EVENTS.scene.set_scene( _SCENES[index].id );
+		_EVENTS.section.set_scene( _CONTENT[index].id );
 	},
 
 	export: function() {
 		return JSON.stringify({
 			options: {
-				clustering: _CLUSTERING,
 				avatarspeed: _AVATARSPEED,
 				panningspeed: _PANNINGSPEED,
-				font: _FONT,
 				theme: _THEME
 			},
-			scenes: _SCENES,
+			content: _CONTENT.export(),
 			objects: _MAP.exportData()
 		});
 	}

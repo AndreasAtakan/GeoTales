@@ -11,7 +11,7 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 
-include "init.php";
+include "api/init.php";
 
 if(!isset($_GET['id'])) {
 	http_response_code(422); exit;

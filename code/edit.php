@@ -12,12 +12,12 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "init.php";
-include_once("helper.php");
+include "api/init.php";
+include_once("api/helper.php");
 
 // Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: index.php"); exit;
+	header("location: api/login.php?return_url=../maps.php"); exit;
 }
 $username = $_SESSION['username'];
 $avatar = getAvatar($CONFIG['forum_host'], $username);
@@ -80,8 +80,6 @@ $row = $stmt->fetch();
 	</head>
 	<body>
 
-
-
 		<!-- Import modal -->
 		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
@@ -98,7 +96,7 @@ $row = $stmt->fetch();
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
 						<button type="button" class="btn btn-secondary" id="import">Import</button>
 					</div>
 				</div>
@@ -117,32 +115,16 @@ $row = $stmt->fetch();
 					</div>
 					<div class="modal-body">
 						<div class="container-fluid">
-							<div class="row mb-3">
-								<div class="col">
-									<h5>Avatar</h5>
-								</div>
-							</div>
-
-							<div class="row">
-								<div class="col">
-									<p>Animation speed: <small><span id="avatarSpeedInputValue">2000 milliseconds</span></small></p>
+							<div class="row mb-5">
+								<div class="col-md-10">
+									<p>Avatar animation speed: <small><span id="avatarSpeedInputValue">2000 milliseconds</span></small></p>
 									<input type="range" class="form-range" id="avatarSpeedInput" min="200" max="3000" step="100" value="2000" />
 								</div>
 							</div>
 
-							<br />
-							<hr />
-							<br />
-
-							<div class="row mb-2">
-								<div class="col">
-									<h5>Map</h5>
-								</div>
-							</div>
-
 							<div class="row">
-								<div class="col">
-									<p>Panning speed: <small><span id="panningSpeedInputValue">auto</span></small></p>
+								<div class="col-md-10">
+									<p>Map panning speed: <small><span id="panningSpeedInputValue">auto</span></small></p>
 									<input type="range" class="form-range" id="panningSpeedInput" min="0" max="4000" step="100" />
 								</div>
 							</div>
@@ -198,10 +180,11 @@ $row = $stmt->fetch();
 								<div class="col">
 									<label for="basemapLink"><small>Or link to an online basemap</small></label>
 									<div class="input-group input-group-sm">
-										<input type="text" class="form-control" id="basemapLink" aria-label="Url" aria-describedby="inputGroup-sizing-sm" placeholder="URL" style="width: 70%;" />
-										<input type="text" class="form-control" id="basemapKey" aria-label="Access key" aria-describedby="inputGroup-sizing-sm" placeholder="Access key" style="width: 30%;" />
+										<input type="text" class="form-control" id="basemapLink" aria-label="Url" aria-describedby="keyText" placeholder="URL" />
+										<input type="text" class="form-control" id="basemapKey" aria-label="Access key" aria-describedby="keyText" placeholder="Access key (optional)" />
+										<button type="button" class="btn btn-outline-secondary" id="basemapFetch">Fetch</button>
 									</div>
-									<div id="basemapKey" class="form-text">XYZ-tiles or a Mapbox style. Access key is required with Mapbox style</div>
+									<div id="keyText" class="form-text">XYZ-tiles or a Mapbox style. Access key is required with Mapbox style</div>
 								</div>
 							</div>
 						</div>
@@ -251,8 +234,6 @@ $row = $stmt->fetch();
 
 
 
-
-
 		<div class="container-fluid p-0">
 			<div class="row g-0">
 				<div class="col">
@@ -272,17 +253,22 @@ $row = $stmt->fetch();
 										File
 									</a>
 									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown">
-										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import map-file</a></li>
+										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import</a></li>
 										<li><a class="dropdown-item" href="#" id="export">Export</a></li>
+										<li><hr class="dropdown-divider"></li>
+										<li><a class="dropdown-item" href="#" id="save">Save</a></li>
+										<li><a class="dropdown-item" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a></li>
+										<li><hr class="dropdown-divider"></li>
+										<li><a class="dropdown-item" href="maps.php">Exit</a></li>
 									</ul>
 								</li>
 								<li class="nav-item me-auto">
 									<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal">Options</a>
 								</li>
 
-								<li class="nav-item mt-1 me-4">
+								<li class="nav-item mt-2 me-4">
 									<div class="btn-group btn-group-sm" role="group" aria-label="Save/Preview">
-										<button type="button" class="btn btn-light" id="save">Save</button>
+										<a role="button" class="btn btn-light" href="#" id="save">Save</button>
 										<a role="button" class="btn btn-outline-light" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a>
 									</div>
 								</li>
@@ -296,7 +282,7 @@ $row = $stmt->fetch();
 										<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider"></li>
-										<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+										<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
 									</ul>
 								</li>
 							</ul>
@@ -311,19 +297,15 @@ $row = $stmt->fetch();
 					<div id="map"></div>
 				</div>
 
-				<div class="col-12 col-sm-6 col-lg-5 col-xl-4 col-xxl-3 shadow" id="sceneCol" tabindex="0">
+				<div class="col-12 col-sm-5 col-lg-4 col-xl-3 col-xxl-2 shadow" id="sectionCol" tabindex="0">
 
 					<div class="row align-items-center h-100 g-0">
-						<div class="col">
-							<center>
-								<button type="button" class="btn btn-outline-secondary px-5" id="addScene">
-									<strong>+</strong>
-								</button>
+						<div class="col text-center">
+							<button type="button" class="btn btn-outline-secondary px-5" id="add">
+								<strong>+</strong>
+							</button>
 
-								<p class="text-muted mt-3">
-									Click to capture scene
-								</p>
-							</center>
+							<p class="text-muted mt-3">Click to capture scene</p>
 						</div>
 					</div>
 
@@ -372,9 +354,10 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/trumbowyg/plugins/specialchars/trumbowyg.specialchars.min.js"></script>
 		<script type="text/javascript" src="lib/trumbowyg/plugins/table/trumbowyg.table.min.js"></script>
 
-		<!-- Set ID -->
+		<!-- Set ID and TITLE -->
 		<script type="text/javascript">
-			const _ID = <?php echo $id; ?>;
+			const _ID = <?php echo $id; ?>,
+				  _TITLE = "<?php echo $row['title']; ?>";
 		</script>
 
 		<!-- Load src/ JS -->
@@ -385,6 +368,8 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="src/edit/js/helpers.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/generate.js"></script>
+
+		<script type="text/javascript" src="src/edit/js/classes.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/events.js"></script>
 

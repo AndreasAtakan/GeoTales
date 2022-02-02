@@ -12,12 +12,12 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "init.php";
-include_once("helper.php");
+include "api/init.php";
+include_once("api/helper.php");
 
 // Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: index.php"); exit;
+	header("location: api/login.php?return_url=../maps.php"); exit;
 }
 $uid = $_SESSION['uid'];
 $username = $_SESSION['username'];
@@ -294,7 +294,7 @@ $count = $stmt->rowCount();
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
 								</ul>
 							</li>
 						</ul>
@@ -311,25 +311,20 @@ $count = $stmt->rowCount();
 					</div>
 				</div>
 
-				<div class="row mx-auto" style="max-width: 950px;">
+				<div class="row">
 					<div class="col">
 						<form method="get">
 							<div class="row mb-2">
-								<div class="col-sm-5 order-sm-2 mb-4 mb-sm-0">
+								<div class="col-sm-3 order-sm-2 mb-4 mb-sm-0">
 									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New map</button>
 								</div>
-								<div class="col-sm-7 order-sm-1">
-									<div class="input-group">
+								<div class="col-sm-9 order-sm-1">
+									<div class="input-group d-inline-flex" style="max-width: 650px;">
+										<a role="button" class="btn btn-outline-secondary" href="maps.php" title="Clear search"><i class="fas fa-minus"></i></a>
 										<input type="text" class="form-control" name="title" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
-										<button type="submit" class="btn btn-outline-secondary" id="search-button">Search</button>
+										<button type="submit" class="btn btn-secondary" id="search-button">Search</button>
 									</div>
 								</div>
-							</div>
-							<div class="row">
-								<div class="col-12 col-sm-7">
-									<a role="button" class="btn btn-sm btn-outline-secondary float-end" href="maps.php">Clear search</a>
-								</div>
-								<div class="col-12 col-sm-5"></div>
 							</div>
 						</form>
 					</div>

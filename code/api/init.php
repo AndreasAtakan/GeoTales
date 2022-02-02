@@ -11,7 +11,7 @@
 
 $host = "localhost";
 $user = "www-data";
-$pass = "vleowemnxoyvq"; # secret
+$pass = "vleowemnxoyvq"; // secret
 $db   = "www-data";
 //$charset = "utf8mb4";
 
@@ -36,6 +36,7 @@ $CONFIG = array(
 	"host" => "tellusmap.com",
 	"forum_host" => "forum.tellusmap.com",
 	"email" => "contact@tellusmap.com",
-	"sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7",
-	"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017"
+	"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017", // secret
+	"sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
+	"webhooks_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7" // secret
 );

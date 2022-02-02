@@ -12,12 +12,12 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "init.php";
-include_once("helper.php");
+include "api/init.php";
+include_once("api/helper.php");
 
 // Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: index.php"); exit;
+	header("location: api/login.php?return_url=../settings.php"); exit;
 }
 $username = $_SESSION['username'];
 $avatar = getAvatar($CONFIG['forum_host'], $username);
@@ -85,7 +85,7 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item active" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
 								</ul>
 							</li>
 						</ul>

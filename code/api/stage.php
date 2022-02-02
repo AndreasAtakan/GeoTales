@@ -15,28 +15,23 @@ session_start();
 include "init.php";
 include_once("helper.php");
 
-// user is not logged in
+// Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	http_response_code(401); exit;
+	header("location: login.php?return_url=stage.php"); exit;
 }
+$uid = $_SESSION['uid'];
 
-if($FLAG) {
-	$uid = $_SESSION['uid'];
+//
+// Onboarding users; "Try now" button on landing-page links here throught login.php's return_url parameter
 
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/admin/users/$uid/log_out.json");
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		"Api-Key: {$CONFIG['apikey']}",
-		"Api-Username: system"
-	));
-	$res = curl_exec($ch);
-	curl_close($ch);
-}
+$title = "First map";
+$description = "My first map";
 
-session_destroy();
+$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description) VALUES (?, ?) RETURNING id");
+$stmt->execute([$title, $description]);
+$id = $stmt->fetchColumn();
 
-header("location: index.php");
+$stmt = $PDO->prepare("INSERT INTO \"User_Map\" (user_id, map_id, status) VALUES (?, ?, ?)");
+$stmt->execute([$uid, $id, "owner"]);
 
-exit;
+header("location: ../edit.php?id=$id");

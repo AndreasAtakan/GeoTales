@@ -39,10 +39,10 @@ window.onload = function(ev) {
 		]
 	});
 
-	$("#sceneCol button#addScene").click(ev => { _EVENTS.scene.setup(); _EVENTS.scene.add(); });
+	$("#sectionCol button#add").click(ev => { _EVENTS.section.setup(); });
 
-	_EVENTS.project.setup();
+	_EVENTS.file.setup();
 	_EVENTS.options.setup();
-	_EVENTS.basemapOptions.setup();
+	_EVENTS.basemap.setup();
 
 };

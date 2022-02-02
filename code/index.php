@@ -12,8 +12,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "init.php";
-include_once("helper.php");
+include "api/init.php";
+include_once("api/helper.php");
 
 $logged_in = false;
 if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
@@ -57,8 +57,8 @@ $stmt = $PDO->prepare("
 	FROM
 		\"Map\" AS M
 	WHERE
-		M.post IN ({$urls}) OR
-		1 = 1
+		M.post IN ({$urls})
+		OR 1 = 1
 	ORDER BY
 		M.created DESC
 ");
@@ -143,14 +143,14 @@ $count = $stmt->rowCount();
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
 								</ul>
 							</li>
 					<?php
 						}else{
 					?>
 							<li class="nav-item">
-								<a role="button" class="btn btn-sm btn-light mt-1" href="login.php">Login</a>
+								<a role="button" class="btn btn-sm btn-light mt-1" href="api/login.php">Login</a>
 							</li>
 					<?php
 						}
@@ -174,9 +174,25 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-3 mt-3">
 						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" href="login.php" class="btn btn-lg btn-primary">Try now</a>
+							<a role="button" href="api/login.php?return_url=stage.php" class="btn btn-lg btn-primary">Try now</a>
 						</div>
 						<p class="text-muted text-center mt-2">Create your own map for <strong>free</strong></p>
+					</div>
+				</div>
+
+				<div class="row my-5">
+					<div class="col"></div>
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<form method="get" action="<?php echo "https://{$CONFIG['forum_host']}/search"; ?>" id="search">
+							<input type="hidden" name="expanded" value="true" />
+							<div class="input-group" style="max-width: 650px;">
+								<input type="text" class="form-control" name="q" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
+								<button type="submit" class="btn btn-outline-secondary" id="search-button">Search</button>
+							</div>
+						</form>
 					</div>
 				</div>
 
@@ -296,7 +312,7 @@ $count = $stmt->rowCount();
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<!--script type="text/javascript" src="src/index.js"></script-->
+		<script type="text/javascript" src="src/index.js"></script>
 
 	</body>
 </html>

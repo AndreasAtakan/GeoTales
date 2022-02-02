@@ -9,12 +9,12 @@
 "use strict";
 
 
-function init_scene() {
+function init_section() {
 
-	$("#sceneCol").html(`
+	$("#sectionCol").html(`
 		<div class="row align-items-center g-0 h-100">
 			<div class="col">
-				<div class="row gx-0 mx-2" id="topPadScene">
+				<div class="row gx-0 mx-2" id="topPadSection">
 					<div class="col">
 						<hr />
 					</div>
@@ -22,11 +22,11 @@ function init_scene() {
 
 				<div class="row mx-2">
 					<div class="col">
-						<ul class="list-group" id="sceneContainer"></ul>
+						<ul class="list-group" id="section"></ul>
 					</div>
 				</div>
 
-				<div class="row gx-0 mx-2" id="bottomPadScene">
+				<div class="row gx-0 mx-2" id="bottomPadSection">
 					<div class="col">
 						<hr />
 					</div>
@@ -37,48 +37,43 @@ function init_scene() {
 
 }
 
-function reset_scene() {
+function reset_section() {
 
-	$("#sceneCol").html(`
+	$("#sectionCol").html(`
 		<div class="row align-items-center h-100 g-0">
-			<div class="col">
-				<center>
-					<button type="button" class="btn btn-outline-secondary px-5" id="addScene" title="Add new scene">
-						<strong>+</strong>
-					</button>
+			<div class="col text-center">
+				<button type="button" class="btn btn-outline-secondary px-5" id="add">
+					<strong>+</strong>
+				</button>
 
-					<p class="text-muted mt-3">
-						Click to capture scene
-					</p>
-				</center>
+				<p class="text-muted mt-3">Click to capture scene</p>
 			</div>
 		</div>
 	`);
 
 }
 
-function prepare_scene(prevId) {
+function prepare_section(prevId) {
 
-	$(`li[data-sceneid="${prevId}"]`).after(`
+	$(`li[data-id="${prevId}"]`).after(`
 		<li class="list-group-item" id="prepare">
-			<div class="row">
-				<!--div class="col-6">
-					<center>
-						<button type="button" class="btn btn-light px-5 mt-3" id="chapter" title="Add chapter">
-							<i class="fas fa-paragraph"></i>
-						</button>
-
-						<p class="text-muted mt-3">Chapter division</p>
-					</center>
-				</div-->
-				<div class="col">
-					<center>
-						<button type="button" class="btn btn-light px-5 mt-3" id="capture" title="Capture new scene">
-							<i class="fas fa-camera"></i>
-						</button>
-
-						<p class="text-muted mt-3">New scene</p>
-					</center>
+			<div class="row g-0">
+				<div class="col-5 text-center">
+					<button type="button" class="btn btn-sm btn-light" id="chapter" title="Add chapter">
+						<i class="fas fa-paragraph"></i>
+					</button>
+					<p class="small text-muted mb-0">Add chapter</p>
+				</div>
+				<div class="col-5 text-center">
+					<button type="button" class="btn btn-sm btn-light" id="scene" title="Capture new scene">
+						<i class="fas fa-camera"></i>
+					</button>
+					<p class="small text-muted mb-0">New scene</p>
+				</div>
+				<div class="col-2 text-center">
+					<button type="button" class="btn btn-sm btn-light" id="cancel" title="Cancel">
+						<i class="fas fa-times"></i>
+					</button>
 				</div>
 			</div>
 		</li>
@@ -86,59 +81,21 @@ function prepare_scene(prevId) {
 
 }
 
-function add_scene(id, prevId) {
+function chapter_section(id, prevId) {
 
 	let cont = `
-		<li class="list-group-item" id="${id}" data-sceneid="${id}">
+		<li class="list-group-item chapter p-0" id="${id}" data-id="${id}">
 			<form class="container-fluid gx-0">
-				<div class="row g-0">
-					<div class="col-1">
-						<div class="row gx-0 mb-3">
-							<div class="col">
-								<span id="reorder" title="Change ordering">
-									<i class="fas fa-bars"></i>
-								</span>
-							</div>
-						</div>
-						<div class="row gx-0">
-							<div class="col">
-								<span id="capture" title="Recapture scene">
-									<i class="fas fa-camera"></i>
-								</span>
-							</div>
-						</div>
-						<div class="row gx-0 mb-3" style="position: absolute; bottom: 55px;">
-							<div class="col">
-								<span id="delete" title="Delete scene">
-									<i class="fas fa-trash"></i>
-								</span>
-							</div>
-						</div>
-						<div class="row gx-0 mb-3" style="position: absolute; bottom: 0;">
-							<div class="col">
-								<span id="add" title="Add scene below">
-									<i class="fas fa-plus"></i>
-								</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-10" style="width: 90%;">
-						<div class="row mb-3">
-							<div class="col">
-								<div class="input-group input-group-sm">
-									<select class="form-select" id="periodInput" aria-label="timeperiod" style="flex-grow: 0; width: auto;" disabled>
-										<option value="ad" selected>AD</option>
-										<option value="bc">BC</option>
-									</select>
-									<input type="date" class="form-control" id="dateInput" disabled />
-									<input type="time" class="form-control" id="timeInput" step="1" disabled />
-								</div>
-							</div>
-						</div>
-						<div class="row mb-2">
-							<div class="col textInput" style="overflow-y: auto;">
-								<div id="textInput"></div>
-							</div>
+				<div class="row g-0 p-1">
+					<div class="col">
+						<div class="input-group input-group-sm">
+							<button type="button" class="btn btn-light" id="reorder" title="Change ordering">
+								<i class="fas fa-bars"></i>
+							</button>
+							<input type="text" class="form-control" id="title" aria-label="Title" aria-describedby="reorder" />
+							<button type="button" class="btn btn-light" id="remove" title="Remove chapter">
+								<i class="fas fa-times"></i>
+							</button>
 						</div>
 					</div>
 				</div>
@@ -146,8 +103,54 @@ function add_scene(id, prevId) {
 		</li>
 	`;
 
-	if(prevId) { $(`li[data-sceneid="${prevId}"]`).after(cont); }
-	else{ $("ul#sceneContainer").append(cont); }
+	if(prevId) { $(`li[data-id="${prevId}"]`).after(cont); }
+	else{ $("ul#section").append(cont); }
+
+}
+
+function scene_section(id, prevId) {
+
+	let cont = `
+		<li class="list-group-item p-0" id="${id}" data-id="${id}">
+			<form class="container-fluid gx-0">
+				<div class="row g-0 p-1">
+					<div class="col">
+						<div class="input-group input-group-sm">
+							<button type="button" class="btn btn-light" id="reorder" title="Change ordering">
+								<i class="fas fa-bars"></i>
+							</button>
+							<select class="form-select pe-2" id="period" aria-label="Timeperiod" aria-describedby="reorder" style="max-width: 45px; background-image: none;">
+								<option value="ad" selected>AD</option>
+								<option value="bc">BC</option>
+							</select>
+							<input type="date" class="form-control" id="date" aria-label="Date" />
+							<input type="time" class="form-control" id="time" aria-label="Time" step="1" />
+						</div>
+					</div>
+				</div>
+				<div class="row g-0 my-1">
+					<div class="col text-center">
+						<button type="button" class="btn btn-sm btn-light" id="capture" title="Recapture scene">
+							<i class="fas fa-camera"></i>
+						</button>
+					</div>
+					<div class="col text-center">
+						<button type="button" class="btn btn-sm btn-light" id="add" title="Add below">
+							<i class="fas fa-plus"></i>
+						</button>
+					</div>
+					<div class="col text-center">
+						<button type="button" class="btn btn-sm btn-light" id="delete" title="Delete scene">
+							<i class="fas fa-trash"></i>
+						</button>
+					</div>
+				</div>
+			</form>
+		</li>
+	`;
+
+	if(prevId) { $(`li[data-id="${prevId}"]`).after(cont); }
+	else{ $("ul#section").append(cont); }
 
 }
 
@@ -168,7 +171,7 @@ function marker_popup() {
 					<h6>Icon</h6>
 					<div class="input-group input-group-sm">
 						<input type="file" class="form-control form-control-sm" id="icon" accept="image/gif, image/jpeg, image/png" />
-						<input type="number" min="10" max="100" class="form-control" id="size" placeholder="Size" />
+						<input type="number" class="form-control" id="size" placeholder="Size" />
 					</div>
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="checkbox" value="" id="rounded">

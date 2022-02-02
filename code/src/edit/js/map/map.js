@@ -76,7 +76,7 @@ L.Map.addInitHook(function() {
 		let object = ev.layer,
 			type = ev.layerType;
 
-		let sceneId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+		let sceneId = $("#section li[class*=\"active\"]").data("id");
 		object.options.sceneId = sceneId || console.error("No active scene found");
 
 		if(type == "marker") {
@@ -167,13 +167,7 @@ L.Map.addInitHook(function() {
 	this.editHandler = this.editControl.getModeHandlers()[0].handler;
 	this.editHandler._map = this; // NOTE: this is also a hack, but necessary to make editing work
 
-	this.on("movestart", ev => {
-		let activeScene = $("#sceneContainer li.active").data("sceneid");
-		if(!activeScene) return;
-
-		$(`li[data-sceneid="${activeScene}"]`).removeClass("active");
-		$(`li[data-sceneid="${activeScene}"]`).addClass("inactive");
-	});
+	this.on("movestart", ev => { _CONTENT.sceneInactive(); });
 	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
 	this.on("autopanstart", ev => {
 		let handler = ev => {
@@ -199,10 +193,13 @@ L.Map.include({
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
-	reset: function() {
+	clear: function() {
 		this.markerLayer.clearLayers();
 		this.editLayer.clearLayers();
 		this.fadeLayer.clearLayers();
+	},
+	reset: function() {
+		this.clear();
 
 		this.disableDrawing();
 		this.basemapButton.disable();
@@ -263,8 +260,8 @@ L.Map.include({
 	},
 
 	setObjects: function(sceneId, animate) {
-		let s = get_scene(sceneId),
-			prevSceneId = s.index > 0 ? _SCENES[s.index - 1].id : null;
+		let s = _CONTENT.get(sceneId),
+			prevSceneId = null; //_CONTENT.prev() ? _CONTENT.prev().id : null;
 
 		this.fadeLayer.clearLayers();
 		if(prevSceneId) {
@@ -311,7 +308,7 @@ L.Map.include({
 			}
 		}
 
-		let sId = $("#sceneContainer li[class*=\"active\"]").data("sceneid");
+		let sId = $("#section li[class*=\"active\"]").data("id");
 		object.options.sceneId = sId || console.error("No active scene found");
 
 		if(object.options.type == "marker") this.markerLayer.addLayer(object, object.options.id);

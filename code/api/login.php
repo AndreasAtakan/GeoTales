@@ -14,7 +14,11 @@ session_start();
 include "init.php";
 include_once("helper.php");
 
-$loc = "maps.php";
+$loc = "../maps.php";
+if(isset($_GET['return_url'])) {
+	$loc = $_GET['return_url'];
+	//$_SESSION['return_url'] = $loc;
+}/*else{ unset($_SESSION['return_url']); }*/
 
 // user is already logged in
 if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
@@ -69,7 +73,7 @@ else{ // redirect to SSO
 		$nonce = hash('sha512', mt_rand());
 		$_SESSION['nonce'] = $nonce;
 
-		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "https://{$CONFIG['host']}/login.php")));
+		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "https://{$CONFIG['host']}/api/login.php?return_url=$loc")));
 		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['sso_secret'])));
 		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
 
