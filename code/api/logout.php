@@ -17,7 +17,7 @@ include_once("helper.php");
 
 // user is not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	http_response_code(401); exit;
+	header("location: ../index.php"); exit;
 }
 
 if($FLAG) {

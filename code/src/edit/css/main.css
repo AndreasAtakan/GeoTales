@@ -40,34 +40,27 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 #sectionCol:focus { outline: none; }
 
-#section li:hover:not(.active),
-#section li:focus:not(.active) {
-	cursor: pointer;
-}
-
 #section li {
 	max-height: 80px;
 	border-color: rgba(0, 0, 0, 0.4);
 }
-#section li,
-#section li button:not(.chapter) { background-color: rgba(242, 242, 242, 0.2); }
+#section li { background-color: rgba(242, 242, 242, 0.2); }
 #section li.chapter { background-color: rgba(242, 242, 242, 0.8); }
 #section li.inactive,
 #section li.active { background-color: #f9f9f9; }
+#section li:hover:not(.chapter):not(.active) { cursor: pointer; }
 
 #section li button { color: #999999; }
+#section li.chapter #remove { color: #000080; }
 #section li.inactive #capture,
 #section li.active #delete,
 #section li.active #add { color: #800000; }
+#section li #reorder:hover { cursor: move; }
 /*#section li .textInput { max-height: calc(80vh - 100px); }
 #section li #textInput {
 	color: #212529;
 	background-color: inherit !important;
 }*/
-
-#section li #reorder:hover {
-	cursor: move;
-}
 /*#section li[class*="active"] #capture:hover,
 #section li[class*="active"] #delete:hover,
 #section li[class*="active"] #add:hover {

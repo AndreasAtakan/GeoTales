@@ -185,6 +185,7 @@ L.Map.addInitHook(function() {
 
 
 
+
 L.Map.include({
 
 	setup: function() {
@@ -375,7 +376,7 @@ L.Map.include({
 		for(let i = 0; i < this.objects.length; i++) {
 			let oo = this.objects[i];
 			if(oo.id == id && oo.sceneId != object.options.sceneId) {
-				this.objects[i] = mergeObjects(oo, o);
+				this.objects[i] = Object.assign({}, oo, o);
 			}
 		}
 
@@ -383,7 +384,7 @@ L.Map.include({
 		if(object) {
 			this.fadeLayer.removeLayer(object);
 
-			let oo = mergeObjects(this.extractObject(object), o);
+			let oo = Object.assign({}, this.extractObject(object), o);
 			this.fadeLayer.addLayer(this.createObject(oo), oo.type, oo.id);
 		}
 	},

@@ -9,7 +9,7 @@
 "use strict";
 
 
-_EVENTS.section = {
+/*_EVENTS.section = {
 
 	setup: function() {
 		init_section();
@@ -47,7 +47,7 @@ _EVENTS.section = {
 		$("#sectionCol button#add").click(ev => { this.setup(); });
 	},
 
-	/*set_add: function(id, prevId) {
+	set_add: function(id, prevId) {
 		let self = this;
 		add_section(id, prevId);
 
@@ -134,9 +134,9 @@ _EVENTS.section = {
 			let cont = $(this).trumbowyg("html");
 			self.input(id, "content", cont);
 		});
-	}*/
+	}
 
-};
+};*/
 
 
 
@@ -387,7 +387,7 @@ _EVENTS.object = {
 
 
 
-_EVENTS.options = {
+/*_EVENTS.options = {
 
 	setup: function() {
 
@@ -406,21 +406,19 @@ _EVENTS.options = {
 		});
 
 		//init_themes();
-
-		/*$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
+		$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
 			let theme = $(ev.target).prop("id");
 			if(!theme) { return; }
-
 			_THEME = theme;
-		});*/
+		});
 
 	}
 
-};
+};*/
 
 
 
-_EVENTS.basemap = {
+/*_EVENTS.basemap = {
 
 	setup: function() {
 
@@ -504,11 +502,11 @@ _EVENTS.basemap = {
 
 	}
 
-};
+};*/
 
 
 
-_EVENTS.file = {
+/*_EVENTS.file = {
 
 	setup: function() {
 		let self = this;
@@ -600,8 +598,8 @@ _EVENTS.file = {
 			success: function(result, status, xhr) {
 				if(result.data) {
 					self.import( JSON.parse(result.data) );
-					$(document).click(ev => { unsaved_changes(); });
 				}
+				$(document).click(ev => { unsaved_changes(); });
 
 				$("#loadingModal").modal("hide");
 			},
@@ -634,10 +632,10 @@ _EVENTS.file = {
 
 			_CONTENT.push(c);
 
-			/*$(`li[data-id="${c.id}"] select#periodInput`).val( s.period || "ad" );
+			$(`li[data-id="${c.id}"] select#periodInput`).val( s.period || "ad" );
 			$(`li[data-id="${c.id}"] input#dateInput`).val( s.date || "" );
 			$(`li[data-id="${c.id}"] input#timeInput`).val( s.time || "" );
-			//$(`li[data-id="${c.id}"] #textInput`).trumbowyg("html", s.content || "");*/
+			//$(`li[data-id="${c.id}"] #textInput`).trumbowyg("html", s.content || "");
 		}
 
 		_MAP.importData(data.objects);
@@ -657,4 +655,4 @@ _EVENTS.file = {
 		});
 	}
 
-};
+};*/

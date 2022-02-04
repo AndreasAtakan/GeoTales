@@ -15,8 +15,33 @@ function uuid(a) {
 
 
 
-function mergeObjects(o, u) {
-	return Object.assign({}, o, u);
+function import_data(data) {
+	_AVATARSPEED = data.options.avatarspeed;
+	_PANNINGSPEED = data.options.panningspeed;
+
+	_THEME = data.options.theme;
+
+	if(data.content.length <= 0) { return; }
+
+	let index = _CONTENT.store.length;
+	if(index <= 0) { document.dispatchEvent( new Event("section_setup") ); }
+
+	_CONTENT.importData(data.content);
+	_MAP.importData(data.objects);
+
+	_CONTENT.current();
+}
+
+function export_data() {
+	return JSON.stringify({
+		options: {
+			avatarspeed: _AVATARSPEED,
+			panningspeed: _PANNINGSPEED,
+			theme: _THEME
+		},
+		content: _CONTENT.exportData(),
+		objects: _MAP.exportData()
+	});
 }
 
 

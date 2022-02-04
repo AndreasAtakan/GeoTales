@@ -59,19 +59,19 @@ function prepare_section(prevId) {
 		<li class="list-group-item" id="prepare">
 			<div class="row g-0">
 				<div class="col-5 text-center">
-					<button type="button" class="btn btn-sm btn-light" id="chapter" title="Add chapter">
+					<button type="button" class="btn btn-sm btn-outline-light" id="chapter" title="Add chapter">
 						<i class="fas fa-paragraph"></i>
 					</button>
 					<p class="small text-muted mb-0">Add chapter</p>
 				</div>
 				<div class="col-5 text-center">
-					<button type="button" class="btn btn-sm btn-light" id="scene" title="Capture new scene">
+					<button type="button" class="btn btn-sm btn-outline-light" id="scene" title="Capture new scene">
 						<i class="fas fa-camera"></i>
 					</button>
 					<p class="small text-muted mb-0">New scene</p>
 				</div>
 				<div class="col-2 text-center">
-					<button type="button" class="btn btn-sm btn-light" id="cancel" title="Cancel">
+					<button type="button" class="btn btn-sm btn-outline-light" id="cancel" title="Cancel">
 						<i class="fas fa-times"></i>
 					</button>
 				</div>
@@ -89,11 +89,11 @@ function chapter_section(id, prevId) {
 				<div class="row g-0 p-1">
 					<div class="col">
 						<div class="input-group input-group-sm">
-							<button type="button" class="btn btn-light" id="reorder" title="Change ordering">
+							<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
 								<i class="fas fa-bars"></i>
 							</button>
-							<input type="text" class="form-control" id="title" aria-label="Title" aria-describedby="reorder" />
-							<button type="button" class="btn btn-light" id="remove" title="Remove chapter">
+							<input type="text" class="form-control" id="title" aria-label="Title" aria-describedby="reorder" style="z-index: 3;" />
+							<button type="button" class="btn btn-outline-light" id="remove" title="Remove chapter">
 								<i class="fas fa-times"></i>
 							</button>
 						</div>
@@ -116,10 +116,10 @@ function scene_section(id, prevId) {
 				<div class="row g-0 p-1">
 					<div class="col">
 						<div class="input-group input-group-sm">
-							<button type="button" class="btn btn-light" id="reorder" title="Change ordering">
+							<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
 								<i class="fas fa-bars"></i>
 							</button>
-							<select class="form-select pe-2" id="period" aria-label="Timeperiod" aria-describedby="reorder" style="max-width: 45px; background-image: none;">
+							<select class="form-select pe-2" id="period" aria-label="Timeperiod" aria-describedby="reorder" style="z-index: 3; max-width: 45px; background-image: none;">
 								<option value="ad" selected>AD</option>
 								<option value="bc">BC</option>
 							</select>
@@ -130,17 +130,17 @@ function scene_section(id, prevId) {
 				</div>
 				<div class="row g-0 my-1">
 					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-light" id="capture" title="Recapture scene">
+						<button type="button" class="btn btn-sm btn-outline-light" id="capture" title="Recapture scene">
 							<i class="fas fa-camera"></i>
 						</button>
 					</div>
 					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-light" id="add" title="Add below">
+						<button type="button" class="btn btn-sm btn-outline-light" id="add" title="Add below">
 							<i class="fas fa-plus"></i>
 						</button>
 					</div>
 					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-light" id="delete" title="Delete scene">
+						<button type="button" class="btn btn-sm btn-outline-light" id="delete" title="Delete scene">
 							<i class="fas fa-trash"></i>
 						</button>
 					</div>
@@ -151,6 +151,55 @@ function scene_section(id, prevId) {
 
 	if(prevId) { $(`li[data-id="${prevId}"]`).after(cont); }
 	else{ $("ul#section").append(cont); }
+
+}
+
+
+
+/*function init_themes() {
+
+	let html = ``;
+
+	for(let t of _THEMES) {
+		html += `
+			<div class="col">
+				<div class="card ${t.style == "dark" ? "text-white" : ""} mt-2" style="background-color: ${t.primary};">
+					<div class="card-header" style="background-color: ${t.secondary};">
+						${t.name}
+					</div>
+					<div class="card-body">
+						<input class="form-check-input" type="radio" name="themeRadio" id="${t.name}" ${t.name == "default" ? "checked" : ""} />
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	$("#optionsModal #themeChoose").html(html);
+
+}*/
+
+
+
+function init_basemaps() {
+
+	let html = ``;
+
+	for(let i = 0; i < _BASEMAPS.length; i++) {
+		let b = _BASEMAPS[i];
+		html += `
+			<div class="col">
+				<div class="card mt-2">
+					<div class="card-body">
+						<h6 class="card-title mb-0">${b.name}</h6>
+					</div>
+					<img class="card-img-bottom" id="basemaps" src="${b.preview}" alt="${b.name}" data-basemap="${i}" />
+				</div>
+			</div>
+		`;
+	}
+
+	$("#basemapModal #basemapChoose").html(html);
 
 }
 
@@ -287,54 +336,5 @@ function polygon_popup() {
 			</div>
 		</form>
 	`;
-
-}
-
-
-
-/*function init_themes() {
-
-	let html = ``;
-
-	for(let t of _THEMES) {
-		html += `
-			<div class="col">
-				<div class="card ${t.style == "dark" ? "text-white" : ""} mt-2" style="background-color: ${t.primary};">
-					<div class="card-header" style="background-color: ${t.secondary};">
-						${t.name}
-					</div>
-					<div class="card-body">
-						<input class="form-check-input" type="radio" name="themeRadio" id="${t.name}" ${t.name == "default" ? "checked" : ""} />
-					</div>
-				</div>
-			</div>
-		`;
-	}
-
-	$("#optionsModal #themeChoose").html(html);
-
-}*/
-
-
-
-function init_basemaps() {
-
-	let html = ``;
-
-	for(let i = 0; i < _BASEMAPS.length; i++) {
-		let b = _BASEMAPS[i];
-		html += `
-			<div class="col">
-				<div class="card mt-2">
-					<div class="card-body">
-						<h6 class="card-title mb-0">${b.name}</h6>
-					</div>
-					<img class="card-img-bottom" id="basemaps" src="${b.preview}" alt="${b.name}" data-basemap="${i}" />
-				</div>
-			</div>
-		`;
-	}
-
-	$("#basemapModal #basemapChoose").html(html);
 
 }

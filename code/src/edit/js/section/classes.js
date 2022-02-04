@@ -14,23 +14,29 @@ function Content() {
 	this.active = ""; // The scene that is currently active
 	this.prep = false; // If Content is in "prepare" mode
 
-	$("#section").sortable({ // https://api.jqueryui.com/sortable/
-		cursor: "move", handle: "button#reorder", items: "> li", axis: "y", containment: "parent", tolerance: "pointer", cancel: "", /*scroll: false,*/
-		start: (ev, ui) => {
-			ev.stopPropagation();
-			this.unbind();
-		},
-		update: (ev, ui) => {
-			ev.stopPropagation();
-			let order = $("#section").sortable("toArray"); //id = $(ui.item[0]).data("id");
-			this.reorder(order);
-		},
-		stop: (ev, ui) => {
-			ev.stopPropagation();
-			this.bind();
-		}
-	});
 
+	this.setup = function() {
+		$("#section").sortable({ // https://api.jqueryui.com/sortable/
+			cursor: "move", handle: "button#reorder", items: "> li", axis: "y", containment: "parent", tolerance: "pointer", cancel: "", /*scroll: false,*/
+			start: (ev, ui) => {
+				ev.stopPropagation();
+				this.unbind();
+			},
+			update: (ev, ui) => {
+				ev.stopPropagation();
+				let order = $("#section").sortable("toArray"); //id = $(ui.item[0]).data("id");
+				this.reorder(order);
+			},
+			stop: (ev, ui) => {
+				ev.stopPropagation();
+				this.bind();
+			}
+		});
+	};
+
+	this.reset = function() {
+		$("#section").sortable("destroy");
+	};
 
 	this.get = function(id) {
 		for(let i = 0; i < this.store.length; i++) {
@@ -54,7 +60,7 @@ function Content() {
 	};
 
 	this.prepare = function() {
-		new Prepare(this.active);
+		new Prepare(this, this.active);
 
 		this.get(this.active).disable();
 		this.unbind();
@@ -64,8 +70,8 @@ function Content() {
 	this.add = function(type) {
 		let c;
 		switch(type) {
-			case "chapter": c = new Chapter(this.active); break;
-			case "scene": c = new Scene(this.active); break;
+			case "chapter": c = new Chapter(this, this.active); break;
+			case "scene": c = new Scene(this, this.active); break;
 			default: console.error("Content type invalid"); break;
 		}
 
@@ -99,7 +105,7 @@ function Content() {
 
 		$(`li[data-id="${s.id}"]`).remove();
 
-		if(this.store.length <= 0) { _EVENTS.section.reset(); }
+		if(this.store.length <= 0) { document.dispatchEvent( new Event("section_reset") ); }
 	};
 
 	this.sceneInactive = function() {
@@ -133,7 +139,7 @@ function Content() {
 
 	this.prev = function() {
 		let c = this.get(this.active);
-		if(c.index <= 0) { return; }
+		if(!c || c.index <= 0) { return; }
 
 		for(let i = c.index - 1; i >= 0; i--) {
 			let s = Object.assign({}, this.store[i]);
@@ -149,7 +155,7 @@ function Content() {
 
 	this.next = function() {
 		let c = this.get(this.active);
-		if(c.index >= this.store.length-1) { return; }
+		if(!c || c.index >= this.store.length-1) { return; }
 
 		for(let i = c.index + 1; i < this.store.length; i++) {
 			let s = Object.assign({}, this.store[i]);
@@ -183,16 +189,40 @@ function Content() {
 		this.get(this.active).setBasemap();
 	};
 
-	this.export = function() {
+	this.importData = function(data) {
+		if(this.store.length <= 0
+		|| !this.active) { this.active = data[0].id; }
+
+		for(let o of data.length) {
+			let c;
+			switch(o.type) {
+				case "chapter": c = new Chapter(this); break;
+				case "scene": c = new Scene(this); break;
+				default: console.error("Content type invalid"); break;
+			}
+
+			c.id = o.id; c.bounds = o.bounds; c.basemap = o.basemap;
+			c.period = o.period; c.date = o.date; c.time = o.time;
+
+			$(`li[data-id="${c.id}"] select#period`).val( c.period );
+			$(`li[data-id="${c.id}"] input#date`).val( c.date );
+			$(`li[data-id="${c.id}"] input#time`).val( c.time );
+			//$(`li[data-id="${c.id}"] #textInput`).trumbowyg("html", s.content || "");
+
+			this.store.push(c);
+		}
+	};
+
+	this.exportData = function() {
 		let r = [];
-		for(let c of this.store) { r.push( c.export() ); }
+		for(let c of this.store) { r.push( c.exportData() ); }
 		return r;
 	};
 }
 
 
 
-function Prepare(prevId) {
+function Prepare(_super, prevId) {
 	this.id = uuid();
 	this.type = "prepare";
 
@@ -202,19 +232,19 @@ function Prepare(prevId) {
 	$("li#prepare")[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
 	$("li#prepare button#cancel").click(ev => {
-		$("li#prepare").remove(); _CONTENT.current();
+		$("li#prepare").remove(); _super.current();
 	});
 	$("li#prepare button#chapter").click(ev => {
-		$("li#prepare").remove(); _CONTENT.add("chapter");
+		$("li#prepare").remove(); _super.add("chapter");
 	});
 	$("li#prepare button#scene").click(ev => {
-		$("li#prepare").remove(); _CONTENT.add("scene");
+		$("li#prepare").remove(); _super.add("scene");
 	});
 }
 
 
 
-function Chapter(prevId) {
+function Chapter(_super, prevId) {
 	this.id = uuid();
 	this.type = "chapter";
 
@@ -224,10 +254,10 @@ function Chapter(prevId) {
 
 	$(`li[data-id="${this.id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
 	$(`li[data-id="${this.id}"] input#title`).change(ev => { this.title = ev.target.value; });
-	$(`li[data-id="${this.id}"] button#remove`).click(ev => { _CONTENT.delete(this.id); });
+	$(`li[data-id="${this.id}"] button#remove`).click(ev => { _super.delete(this.id); });
 	$(`li[data-id="${this.id}"] input`).click(ev => { ev.stopPropagation(); });
 
-	this.export = function() {
+	this.exportData = function() {
 		return {
 			id: this.id,
 			type: "chapter",
@@ -238,7 +268,7 @@ function Chapter(prevId) {
 
 
 
-function Scene(prevId) {
+function Scene(_super, prevId) {
 	this.id = uuid();
 	this.type = "scene";
 
@@ -256,8 +286,8 @@ function Scene(prevId) {
 	$(`li[data-id="${this.id}"] input#date`).change(ev => { this.date = ev.target.value; });
 	$(`li[data-id="${this.id}"] input#time`).change(ev => { this.time = ev.target.value; });
 	$(`li[data-id="${this.id}"] button#capture`).click(ev => { this.capture(); this.active(); });
-	$(`li[data-id="${this.id}"] button#add`).click(ev => { _CONTENT.prepare(); });
-	$(`li[data-id="${this.id}"] button#delete`).click(ev => { _CONTENT.delete(this.id); });
+	$(`li[data-id="${this.id}"] button#add`).click(ev => { _super.prepare(); });
+	$(`li[data-id="${this.id}"] button#delete`).click(ev => { _super.delete(this.id); });
 	$(`li[data-id="${this.id}"] select, li[data-id="${this.id}"] input`).click(ev => { ev.stopPropagation(); });
 
 
@@ -304,7 +334,7 @@ function Scene(prevId) {
 	};
 	this.capture();
 
-	this.export = function() {
+	this.exportData = function() {
 		return {
 			id: this.id,
 			type: "scene",

@@ -369,12 +369,12 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/edit/js/generate.js"></script>
 
-		<script type="text/javascript" src="src/edit/js/classes.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/events.js"></script>
+		<script type="text/javascript" src="src/edit/js/section/classes.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/map.js"></script>
+
+		<script type="text/javascript" src="src/edit/js/events.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/main.js"></script>
 

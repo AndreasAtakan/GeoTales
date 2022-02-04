@@ -70,7 +70,7 @@ L.FadeLayer = L.FeatureGroup.extend({
 		L.FeatureGroup.prototype.initialize.call(this);
 
 		this.options.id = uuid();
-		this.options = mergeObjects(this.options, options);
+		this.options = Object.assign({}, this.options, options);
 	}
 
 });
@@ -143,7 +143,7 @@ L.EditLayer = L.FeatureGroup.extend({
 		L.FeatureGroup.prototype.initialize.call(this);
 
 		this.options.id = uuid();
-		this.options = mergeObjects(this.options, options);
+		this.options = Object.assign({}, this.options, options);
 
 		//this.markercluster = L.markerClusterGroup();
 		//L.FeatureGroup.prototype.addLayer.call(this, this.markercluster);
@@ -256,7 +256,7 @@ L.MarkerLayer = L.FeatureGroup.extend({
 		L.FeatureGroup.prototype.initialize.call(this);
 
 		this.options.id = uuid();
-		this.options = mergeObjects(this.options, options);
+		this.options = Object.assign({}, this.options, options);
 
 		//this.markercluster = L.markerClusterGroup();
 		//L.FeatureGroup.prototype.addLayer.call(this, this.markercluster);

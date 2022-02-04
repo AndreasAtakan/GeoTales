@@ -57,6 +57,7 @@
 	- (!) Start on edit- and pres-mode
 	- Edit-mode scene-content redesign; instead of having a trumbow text-box in the scene panel on the left, this shoud instead be a popup-map-object that can be drawn on the map from the LeafletDraw panel, and moved around as a standalone popup (not connected to another object)
 		- The popup-scene's position is not linked to the underlying map, but it is rather linked to the screen-position, so when the map is moved around, the popup stays in the same position on the screen (linked to pixel-pos and not latlng-pos)
+	- *events.js* is deprecate; move all popup-events to a file in *map/* folder
 
 
 
