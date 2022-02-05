@@ -65,46 +65,43 @@ L.Map.addInitHook(function() {
 
 	this.objects = [];
 	this.fadeLayer = L.fadeLayer();
-	this.editLayer = L.editLayer();
-	this.markerLayer = L.markerLayer();
+	this.objectLayer = L.objectLayer();
 
 	this.addLayer( this.fadeLayer );
-	this.addLayer( this.editLayer );
-	this.addLayer( this.markerLayer );
+	this.addLayer( this.objectLayer );
 
 	this.on(L.Draw.Event.CREATED, ev => {
 		let object = ev.layer,
 			type = ev.layerType;
 
-		let sceneId = $("#section li[class*=\"active\"]").data("id");
-		object.options.sceneId = sceneId || console.error("No active scene found");
+		switch(type) {
+			case "circlemarker":
+				let latlng = object.getLatLng();
+				object = L.popup({
+						keepInView: true,
+						closeButton: false,
+						autoClose: false,
+						closeOnEscapeKey: false,
+						closeOnClick: false,
+						maxWidth: 3500,
+						maxHeight: 450,
+						autoPanPadding: L.point(60,60)
+					})
+					.setLatLng(latlng);
+				type = "textbox";
+				break;
 
-		if(type == "marker") {
-			object.options.ratio = 496 / 512; // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
-			object.options.rounded = false;
-			object.options.angle = 0;
-			object.options.borderColor = "#563d7c";
-			object.options.borderThickness = 0;
-			object.options.overlayBlur = 0;
-			object.options.overlayGrayscale = 0;
-			object.options.overlayBrightness = 0;
-			object.options.overlayTransparency = 0;
-
-			this.markerLayer.addLayer(object);
+			default: break;
 		}
-		else this.editLayer.addLayer(object, type);
 
+		object.options.contentId = _CONTENT.active;
+
+		this.objectLayer.addLayer(object, type);
 		this.objects.push( this.extractObject(object) );
-
-		if(!this.editHandler.enabled()) { this.editHandler.enable(); }
 	});
 
-	this.on(`${L.Draw.Event.EDITMOVE} ${L.Draw.Event.EDITRESIZE}`, ev => {
-		let object = ev.layer;
-		this.updateObject(object.options.id);
-	});
-	this.on(L.Draw.Event.EDITVERTEX, ev => {
-		let object = ev.poly;
+	this.on(`${L.Draw.Event.EDITMOVE} ${L.Draw.Event.EDITRESIZE} ${L.Draw.Event.EDITVERTEX}`, ev => {
+		let object = ev.layer || ev.poly;
 		this.updateObject(object.options.id);
 	});
 
@@ -114,71 +111,51 @@ L.Map.addInitHook(function() {
 
 	// Draw and edit control
 
-	L.EditToolbar.Delete.include({ removeAllLayers: false });
-	this.drawingControl = new L.Control.Draw({
-		position: "topright",
-		edit: false,
-		draw: {
-			marker: {
-				icon: L.icon({
-					iconUrl: "assets/user-circle-solid.svg",
-					iconSize: [30, 30],
-					popupAnchor: [0, -15],
-					tooltipAnchor: [0, 15]
-				})
-			},
-			polyline: {
-				shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 }
-			},
-			polygon: {
-				shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 }
-			},
-			rectangle: {
-				shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 }
-			},
-			circle: false,
-			circlemarker: false
-		}
-	});
 	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
-	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
+	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place.";
 	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
 	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
 	L.drawLocal.edit.handlers.remove.tooltip.text = null;
-
-	this.addControl( this.drawingControl );
-
-	// Disable drawing-control
-	this._drawingClick = function(ev) { ev.preventDefault(); return false; };
-	this.disableDrawing();
-
-
-	this.editControl = new L.EditToolbar({
-		edit: {
-			selectedPathOptions: {
-				dashArray: "none",
-				maintainColor: true
-			}
-		},
-		featureGroup: this.editLayer
+	L.EditToolbar.Delete.include({ removeAllLayers: false });
+	L.DrawToolbar.include({
+		getModeHandlers: function(map) {
+			return [
+				{ enabled: this.options.polyline, handler: new L.Draw.Polyline(map, this.options.polyline), title: L.drawLocal.draw.toolbar.buttons.polyline },
+				{ enabled: this.options.polygon, handler: new L.Draw.Polygon(map, this.options.polygon), title: L.drawLocal.draw.toolbar.buttons.polygon },
+				{ enabled: this.options.rectangle, handler: new L.Draw.Rectangle(map, this.options.rectangle), title: L.drawLocal.draw.toolbar.buttons.rectangle },
+				{ enabled: this.options.circle, handler: new L.Draw.Circle(map, this.options.circle), title: L.drawLocal.draw.toolbar.buttons.circle },
+				{ enabled: this.options.circlemarker, handler: new L.Draw.CircleMarker(map, this.options.circlemarker), title: L.drawLocal.draw.toolbar.buttons.circlemarker },
+				{ enabled: this.options.marker, handler: new L.Draw.Marker(map, this.options.marker), title: L.drawLocal.draw.toolbar.buttons.marker },
+				{
+					enabled: this.options.textbox,
+					handler: new L.Draw.CircleMarker(map, { color: "#000000", radius: 5 }),
+					title: "Place a textbox"
+				}
+			];
+		}
 	});
+	this.addControl(
+		new L.Control.Draw({
+			position: "topright",
+			edit: false,
+			draw: {
+				textbox: true,
+				marker: {
+					icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
+				},
+				polyline: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 } },
+				polygon: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
+				rectangle: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
+				circle: false,
+				circlemarker: false
+			}
+		})
+	);
+	this.disableDrawing(); // Disable drawing-control
 
-	delete this.editControl.options.edit.selectedPathOptions.fillOpacity; // NOTE: this is a crazy hack, but necessary to make use that the fill opacity of the map objects are not changed when entered into editing mode
-	this.editHandler = this.editControl.getModeHandlers()[0].handler;
-	this.editHandler._map = this; // NOTE: this is also a hack, but necessary to make editing work
 
 	this.on("movestart", ev => { _CONTENT.sceneInactive(); });
 	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
-	this.on("autopanstart", ev => {
-		let handler = ev => {
-			this.off("moveend", handler);
-
-			let c = this.getCenter(), z = this.getZoom();
-			c = this.project(c, z); c.y -= 50;
-			this.setView(this.unproject(c, z), z);
-		};
-		this.on("moveend", handler);
-	});
 
 });
 
@@ -195,8 +172,7 @@ L.Map.include({
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 	clear: function() {
-		this.markerLayer.clearLayers();
-		this.editLayer.clearLayers();
+		this.objectLayer.clearLayers();
 		this.fadeLayer.clearLayers();
 	},
 	reset: function() {
@@ -207,17 +183,13 @@ L.Map.include({
 	},
 
 	enableDrawing: function() {
-		let buttons = [ $(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker") ];
-		for(let b of buttons) {
+		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) {
 			b.removeClass("draw-control-disabled");
-			b.unbind("click", this._drawingClick);
 		}
 	},
 	disableDrawing: function() {
-		let buttons = [ $(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker") ];
-		for(let b of buttons) {
+		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) {
 			b.addClass("draw-control-disabled");
-			b.click(this._drawingClick);
 		}
 	},
 
@@ -225,19 +197,13 @@ L.Map.include({
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
-	deleteScene: function(sceneId) {
-		let newO = [];
-
-		for(let o of this.objects) {
-			if(o.sceneId != sceneId) newO.push(o);
-		}
-
-		this.objects = newO;
+	deleteScene: function(contentId) {
+		this.objects = this.objects.filter(o => o.contentId != contentId);
 	},
 
 	highlightObject: function(id) {
 		let o = this.fadeLayer.getObject(id);
-		if(!o) return;
+		if(!o) { return; }
 
 		if(o.options.type == "marker") {
 			$(o._icon).css("filter", `
@@ -245,11 +211,12 @@ L.Map.include({
 				grayscale(${o.options.overlayGrayscale*100}%)
 				opacity(70%)
 			`);
-		} else o.setStyle({ opacity: 0.8 });
+		}
+		else{ o.setStyle({ opacity: 0.8 }); }
 	},
 	unhighlightObject: function(id) {
 		let o = this.fadeLayer.getObject(id);
-		if(!o) return;
+		if(!o) { return; }
 
 		if(o.options.type == "marker") {
 			$(o._icon).css("filter", `
@@ -257,95 +224,84 @@ L.Map.include({
 				grayscale(${o.options.overlayGrayscale*100}%)
 				opacity(40%)
 			`);
-		} else o.setStyle({ opacity: 0.3 });
+		}
+		else{ o.setStyle({ opacity: 0.3 }); }
 	},
 
-	setObjects: function(sceneId, animate) {
-		let s = _CONTENT.get(sceneId),
-			prevSceneId = null; //_CONTENT.prev() ? _CONTENT.prev().id : null;
+	setObjects: function(contentId, animate) { // !!!!!!!!!!!!!! TODO
+		let prev = _CONTENT.getPrevScene(contentId);
+		let prevId = prev ? prev.id : null;
 
 		this.fadeLayer.clearLayers();
-		if(prevSceneId) {
+		if(prevId) {
 			for(let o of this.objects) {
-				if(o.sceneId == prevSceneId) this.fadeLayer.addLayer(this.createObject(o), o.type, o.id);
+				if(o.contentId == prevId) { this.fadeLayer.addLayer(this.createObject(o), o.type, o.id); }
 			}
 		}
 
-		let os = this.markerLayer.getLayers().map(o => {
+		let os = this.objectLayer.getLayers().filter(o => o.options.type == "marker").map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
 		});
-		this.markerLayer.clearLayers();
-		this.editLayer.clearLayers();
+		this.objectLayer.clearLayers();
 		for(let o of this.objects) {
-			if(o.sceneId == sceneId) {
-				if(o.type == "marker") {
-					let m = this.createObject(o);
-					this.markerLayer.addLayer(m, o.id);
+			if(o.contentId == contentId) {
+				let object = this.createObject(o);
+				this.objectLayer.addLayer(object, o.type, o.id);
 
-					if(animate) {
-						for(let oo of os) {
-							if(o.id == oo.id) {
-								m.setLatLng(oo.pos);
-								m.slideTo(o.pos, { duration: _AVATARSPEED });
-								break;
-							}
+				if(animate && o.type == "marker") {
+					for(let oo of os) {
+						if(o.id == oo.id) {
+							object.setLatLng(oo.pos);
+							object.slideTo(o.pos, { duration: _AVATARSPEED });
+							break;
 						}
 					}
 				}
-				else{ this.editLayer.addLayer(this.createObject(o), o.type, o.id); }
 			}
 		}
 	},
 
-	insertObject: function(id, sceneId) {
-		if(this.editLayer.getObject(id)
-		|| this.markerLayer.getObject(id)) return;
+	insertObject: function(id, contentId) {
+		if(this.objectLayer.getObject(id)) { return; }
 
 		let object;
-		for(let oo of this.objects) {
-			if(oo.id == id && oo.sceneId == sceneId) {
-				object = this.createObject(oo);
+		for(let o of this.objects) {
+			if(o.id == id && o.contentId == contentId) {
+				object = Object.assign({}, o);
 				break;
 			}
 		}
+		object.contentId = _CONTENT.active;
 
-		let sId = $("#section li[class*=\"active\"]").data("id");
-		object.options.sceneId = sId || console.error("No active scene found");
-
-		if(object.options.type == "marker") this.markerLayer.addLayer(object, object.options.id);
-		else this.editLayer.addLayer(object, object.options.type, object.options.id);
-
-		this.objects.push( this.extractObject(object) );
+		this.objectLayer.addLayer(this.createObject(object), object.type, object.id);
+		this.objects.push(object);
 	},
-	cloneAvatar: function(id, sceneId) {
+	cloneAvatar: function(id, contentId) {
 		let object, zoom = this.getZoom();
 		for(let o of this.objects) {
-			if(o.id == id && o.sceneId == sceneId) {
+			if(o.id == id && o.contentId == contentId) {
 				object = Object.assign({}, o);
-
-				object.id = uuid();
-
-				let pos = this.project(object.pos, zoom);
-					pos.x += 50; pos.y += 50;
-					pos = this.unproject(pos, zoom);
-				object.pos = { lat: pos.lat, lng: pos.lng };
-
-				object = this.createObject(object);
 				break;
 			}
 		}
 
-		this.markerLayer.addLayer(object, object.options.id);
+		object.id = uuid();
 
-		this.objects.push( this.extractObject(object) );
+		let pos = this.project(object.pos, zoom);
+			pos.x += 50; pos.y += 50;
+			pos = this.unproject(pos, zoom);
+		object.pos = { lat: pos.lat, lng: pos.lng };
+
+		this.objectLayer.addLayer(this.createObject(object), object.id);
+		this.objects.push(object);
 	},
 
 	updateObject: function(id) {
-		let object = this.editLayer.getObject(id) || this.markerLayer.getObject(id);
+		let object = this.objectLayer.getObject(id);
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let o = this.objects[i];
-			if(o.id == id && o.sceneId == object.options.sceneId) {
+			if(o.id == id && o.contentId == object.options.contentId) {
 				this.objects[i] = this.extractObject(object);
 				break;
 			}
@@ -353,15 +309,14 @@ L.Map.include({
 	},
 
 	deleteObject: function(id, type) {
-		let object = this.editLayer.getObject(id) || this.markerLayer.getObject(id);
-		let sceneId = object.options.sceneId;
+		let object = this.objectLayer.getObject(id);
+		let contentId = object.options.contentId;
 
-		if(type == "marker") this.markerLayer.removeLayer(object);
-		else this.editLayer.removeLayer(object);
+		this.objectLayer.removeLayer(object);
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let o = this.objects[i];
-			if(o.id == id && o.sceneId == sceneId) {
+			if(o.id == id && o.contentId == contentId) {
 				this.objects.splice(i, 1);
 				break;
 			}
@@ -369,13 +324,13 @@ L.Map.include({
 	},
 
 	globalObjectOptions: function(id) {
-		let object = this.editLayer.getObject(id) || this.markerLayer.getObject(id);
+		let object = this.objectLayer.getObject(id);
 		let o = this.extractObject(object);
-		delete o.id; delete o.sceneId; delete o.type; delete o.pos;
+		delete o.id; delete o.contentId; delete o.type; delete o.pos;
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let oo = this.objects[i];
-			if(oo.id == id && oo.sceneId != object.options.sceneId) {
+			if(oo.id == id && oo.contentId != object.options.contentId) {
 				this.objects[i] = Object.assign({}, oo, o);
 			}
 		}
@@ -389,7 +344,7 @@ L.Map.include({
 		}
 	},
 
-	setIcon: function(id, size, icon) { this.markerLayer.setIcon(id, size, icon); },
+	setIcon: function(id, size, icon) { this.objectLayer.setIcon(id, size, icon); },
 
 	getBasemap: function() { return this.basemap.options.source; },
 
@@ -416,8 +371,7 @@ L.Map.include({
 		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
 
 		this.basemap = L.imageOverlay(img, bounds, {
-			zIndex: 0,
-			attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
+			zIndex: 0, attribution: `&copy; <a href="https://${_HOST}" target="_blank">TellUs</a>`
 		});
 		this.basemap.options.source = { img: img, width: width, height: height };
 
@@ -525,7 +479,7 @@ L.Map.include({
 		}
 
 		oo.options.id = o.id;
-		oo.options.sceneId = o.sceneId;
+		oo.options.contentId = o.contentId;
 		oo.options.type = o.type;
 
 		return oo;
@@ -538,7 +492,7 @@ L.Map.include({
 			case "marker":
 				oo = {
 					id:					o.options.id,
-					sceneId:			o.options.sceneId,
+					contentId:			o.options.contentId,
 					type:				o.options.type,
 					pos:				{ lat: o.getLatLng().lat, lng: o.getLatLng().lng },
 					label:				o.options.label,
@@ -559,7 +513,7 @@ L.Map.include({
 			case "polyline":
 				oo = {
 					id:				o.options.id,
-					sceneId:		o.options.sceneId,
+					contentId:		o.options.contentId,
 					type:			o.options.type,
 					pos:			o.getLatLngs().map(e => {
 						if(!e.length) return { lat: e.lat, lng: e.lng };
@@ -575,7 +529,7 @@ L.Map.include({
 			case "rectangle":
 				oo = {
 					id:					o.options.id,
-					sceneId:			o.options.sceneId,
+					contentId:			o.options.contentId,
 					type:				o.options.type,
 					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 					lineColor:			o.options.color,

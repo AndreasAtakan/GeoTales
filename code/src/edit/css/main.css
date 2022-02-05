@@ -25,8 +25,19 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 .leaflet-top.leaflet-right { top: 54px; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
+.leaflet-popup-tip-container { display: none; }
 
-.draw-control-disabled { filter: contrast(22%) brightness(157%); pointer-events: none; }
+.draw-control-disabled { cursor: default; pointer-events: none; opacity: 0.4; }
+.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
+	background-image: linear-gradient(transparent, transparent), url('../../../assets/user-circle-solid.svg');
+	background-size: 14px 14px;
+	background-position: 8px 8px !important;
+}
+.leaflet-draw-toolbar a[title="Place a textbox"].leaflet-draw-draw-circlemarker {
+	background-image: linear-gradient(transparent, transparent), url('../../../assets/textbox.svg');
+	background-size: 14px 14px;
+	background-position: 8px 8px !important;
+}
 
 .ui-sortable-helper { left: auto !important; }
 
@@ -86,7 +97,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #topPadSection { margin-top: 100px; }
 #bottomPadSection { margin-bottom: 100px; }
 
-#markerPopup, #polylinePopup, #polygonPopup, #editPopup { width: 300px; }
+#markerPopup, #shapePopup, #editPopup { width: 300px; }
 
 #basemapModal #basemaps:hover { cursor: pointer; }
 

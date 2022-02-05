@@ -34,8 +34,7 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				$("#loadingModal").modal("hide");
-				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
@@ -63,8 +62,7 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				$("#editModal").modal("hide");
-				$("#errorModal").modal("show");
+				setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
@@ -93,8 +91,7 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				$("#loadingModal").modal("hide");
-				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
@@ -144,20 +141,18 @@ window.onload = function(ev) {
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				$("#loadingModal").modal("hide");
-
 				$(ev.target).data("id", "");
 				$(ev.target).prop("href", result.url);
 				$(ev.target).html("View map in gallery");
 				$("#shareModal p#publishText").html("Map has been published");
+
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
 				console.log(error);
 
-				$("#loadingModal").modal("hide");
-				$("#shareModal").modal("hide");
-				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#shareModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
@@ -187,8 +182,7 @@ window.onload = function(ev) {
 				console.log(xhr.status);
 				console.log(error);
 
-				$("#loadingModal").modal("hide");
-				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});

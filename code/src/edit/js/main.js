@@ -124,14 +124,13 @@ window.onload = function(ev) {
 					success: function(result, status, xhr) {
 						_MAP.imgBasemap(result, width, height);
 						_CONTENT.setBasemap();
-						$("#loadingModal").modal("hide");
+						setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 					},
 					error: function(xhr, status, error) {
 						console.log(xhr.status);
 						console.log(error);
 
-						$("#loadingModal").modal("hide");
-						$("#errorModal").modal("show");
+						setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 					}
 				});
 				return true;
@@ -183,7 +182,7 @@ window.onload = function(ev) {
 		let f = v => v < 10 && v >= 0 ? `0${v}` : `${v}`;
 		let date = new Date();
 		let y = date.getFullYear(), m = f(date.getMonth() + 1), d = f(date.getDate()), H = f(date.getHours()), M = f(date.getMinutes()), S = f(date.getSeconds());
-		let filename = `${_TITLE} ${y}.${m}.${d} ${H}.${M}.${S}.tellus`,
+		let filename = `${_TITLE} - ${y}.${m}.${d} - ${H}.${M}.${S}.tellus`,
 			data = export_data();
 
 		el.setAttribute("href", "data:application/json;charset=utf-8," + encodeURIComponent(data));
@@ -212,14 +211,13 @@ window.onload = function(ev) {
 			dataType: "json",
 			success: function(result, status, xhr) {
 				saved_changes();
-				$("#loadingModal").modal("hide");
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status);
 				console.log(error);
 
-				$("#loadingModal").modal("hide");
-				$("#errorModal").modal("show");
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
@@ -237,14 +235,13 @@ window.onload = function(ev) {
 			if(result.data) { import_data( JSON.parse(result.data) ); }
 			$(document).click(ev => { unsaved_changes(); });
 
-			$("#loadingModal").modal("hide");
+			setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 		},
 		error: function(xhr, status, error) {
 			console.log(xhr.status);
 			console.log(error);
 
-			$("#loadingModal").modal("hide");
-			$("#errorModal").modal("show");
+			setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 		}
 	});
 

@@ -12,11 +12,9 @@ let _AVATARSPEED = 2000,
 	_PANNINGSPEED,
 	_THEME = "default";
 
-let _EVENTS = {},
-	_CONTENT,
+let _CONTENT,
 	_MAP,
-	_IS_MAP_MOVING = false,
-	_HOST = window.location.host;
+	/**/_IS_MAP_MOVING = false;
 
 /*const _THEMES = [
 	{ name: "default",	style: "light",	primary: "#f2f2f2",	secondary: "#bfbfbf" },

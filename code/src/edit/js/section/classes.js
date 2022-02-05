@@ -52,7 +52,29 @@ function Content() {
 			if( $(`li[data-id="${c.id}"]`)[0].contains(el) ) { c.index = i; return c; }
 		}
 		return null;
-	}
+	};
+
+	this.getPrevScene = function(id) {
+		let c = this.get(id);
+		if(!c || c.index <= 0) { return; }
+
+		for(let i = c.index - 1; i >= 0; i--) {
+			let s = Object.assign({}, this.store[i]);
+			if(s.type == "scene") { return s; }
+		}
+		return null;
+	};
+
+	this.getNextScene = function(id) {
+		let c = this.get(id);
+		if(!c || c.index >= this.store.length-1) { return; }
+
+		for(let i = c.index + 1; i < this.store.length; i++) {
+			let s = Object.assign({}, this.store[i]);
+			if(s.type == "scene") { return s; }
+		}
+		return null;
+	};
 
 	this.reorder = function(order) {
 		this.store.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
@@ -70,8 +92,8 @@ function Content() {
 	this.add = function(type) {
 		let c;
 		switch(type) {
-			case "chapter": c = new Chapter(this, this.active); break;
-			case "scene": c = new Scene(this, this.active); break;
+			case "chapter": c = new Chapter(this, null, this.active); break;
+			case "scene": c = new Scene(this, null, this.active); break;
 			default: console.error("Content type invalid"); break;
 		}
 
@@ -90,14 +112,12 @@ function Content() {
 
 		if(s.type == "scene"
 		&& s.id == this.active) {
-			_MAP.deleteScene(id); // !!!!!!!!!! TODO?
+			_MAP.deleteScene(id);
 
-			if(s.index <= 0) {
-				this.next();
-				if(s.id != this.active) { _MAP.clear(); }
-			}else{
-				this.prev();
-				if(s.id != this.active) { _MAP.clear(); }
+			let r = this.prev();
+			if(!r) {
+				r = this.next();
+				if(!r) { _MAP.clear(); }
 			}
 		}
 
@@ -105,11 +125,14 @@ function Content() {
 
 		$(`li[data-id="${s.id}"]`).remove();
 
-		if(this.store.length <= 0) { document.dispatchEvent( new Event("section_reset") ); }
+		if(this.store.length <= 0) {
+			this.active = "";
+			document.dispatchEvent( new Event("section_reset") );
+		}
 	};
 
 	this.sceneInactive = function() {
-		if(!this.prep) { this.get(this.active).inactive(); }
+		if(!this.prep && this.active) { this.get(this.active).inactive(); }
 	};
 
 	this.unbind = function() {
@@ -138,13 +161,9 @@ function Content() {
 	};
 
 	this.prev = function() {
-		let c = this.get(this.active);
-		if(!c || c.index <= 0) { return; }
-
-		for(let i = c.index - 1; i >= 0; i--) {
-			let s = Object.assign({}, this.store[i]);
-			if(s.type == "scene") { this.set(s.id); break; }
-		}
+		let s = this.getPrevScene(this.active);
+		if(!s) { return; }
+		this.set(s.id);
 	};
 
 	this.current = function() {
@@ -154,13 +173,9 @@ function Content() {
 	};
 
 	this.next = function() {
-		let c = this.get(this.active);
-		if(!c || c.index >= this.store.length-1) { return; }
-
-		for(let i = c.index + 1; i < this.store.length; i++) {
-			let s = Object.assign({}, this.store[i]);
-			if(s.type == "scene") { this.set(s.id); break; }
-		}
+		let s = this.getNextScene(this.active);
+		if(!s) { return; }
+		this.set(s.id);
 	};
 
 	this.set = function(id) {
@@ -191,23 +206,31 @@ function Content() {
 
 	this.importData = function(data) {
 		if(this.store.length <= 0
-		|| !this.active) { this.active = data[0].id; }
+		|| !this.active) {
+			for(let o of data) { if(o.type == "scene") { this.active = o.id; break; } }
+		}
 
-		for(let o of data.length) {
+		for(let o of data) {
 			let c;
 			switch(o.type) {
-				case "chapter": c = new Chapter(this); break;
-				case "scene": c = new Scene(this); break;
+				case "chapter":
+					c = new Chapter(this, o.id);
+					c.title = o.title;
+					$(`li[data-id="${c.id}"] input#title`).val( c.title );
+					break;
+
+				case "scene":
+					c = new Scene(this, o.id);
+					c.bounds = o.bounds; c.basemap = o.basemap;
+					c.period = o.period; c.date = o.date; c.time = o.time;
+
+					$(`li[data-id="${c.id}"] select#period`).val( c.period );
+					$(`li[data-id="${c.id}"] input#date`).val( c.date );
+					$(`li[data-id="${c.id}"] input#time`).val( c.time );
+					break;
+
 				default: console.error("Content type invalid"); break;
 			}
-
-			c.id = o.id; c.bounds = o.bounds; c.basemap = o.basemap;
-			c.period = o.period; c.date = o.date; c.time = o.time;
-
-			$(`li[data-id="${c.id}"] select#period`).val( c.period );
-			$(`li[data-id="${c.id}"] input#date`).val( c.date );
-			$(`li[data-id="${c.id}"] input#time`).val( c.time );
-			//$(`li[data-id="${c.id}"] #textInput`).trumbowyg("html", s.content || "");
 
 			this.store.push(c);
 		}
@@ -244,8 +267,8 @@ function Prepare(_super, prevId) {
 
 
 
-function Chapter(_super, prevId) {
-	this.id = uuid();
+function Chapter(_super, id, prevId) {
+	this.id = id || uuid();
 	this.type = "chapter";
 
 	this.title = "";
@@ -268,8 +291,8 @@ function Chapter(_super, prevId) {
 
 
 
-function Scene(_super, prevId) {
-	this.id = uuid();
+function Scene(_super, id, prevId) {
+	this.id = id || uuid();
 	this.type = "scene";
 
 	this.bounds = null;

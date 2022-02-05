@@ -19,14 +19,14 @@
 		- X Contains a copy-field with the link to pres-mode in iframe, user can click "copy to clipboard"
 		- X User can share to FB, Twitter, email, etc.
 - Edit-mode:
-	0. When user saves the map; also write the center basemap-tile as the map's *preview*
+	0. (!) When user saves the map; also write the center basemap-tile as the map's *preview*
 	1. X BUG; "Pluss" button on scene (under delete); click-event is still active in prepare-mode
 	2. X Prepare-scene box should have a cancel button (X) to remove
-	3. When in prepare mode, all avatars should be moved to fadeLayer
+	3. (!) When in prepare mode, all avatars should be moved to fadeLayer
 	4. X Kapittelinndeling
 	5. Library of avilable avatar icons (this will save a lot of storage space and cost)
 	6. Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
-	7. Avatar-sizing looks wierd on different screen-sizes; solution could be to fix avatar size to a certain zoom-level
+	7. (!) Avatar-sizing looks wierd on different screen-sizes; solution could be to fix avatar size to a certain zoom-level
 	8. GEDCOM import:
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
@@ -55,9 +55,9 @@
 	- W DB change; Rename "Project" to "Map", complete change in *edit.php*, *pres.php*, etc.
 	- W Paramater change; Rename "pid" to "id", complete change in *edit.php*, *pres.php*, etc.
 	- (!) Start on edit- and pres-mode
-	- Edit-mode scene-content redesign; instead of having a trumbow text-box in the scene panel on the left, this shoud instead be a popup-map-object that can be drawn on the map from the LeafletDraw panel, and moved around as a standalone popup (not connected to another object)
+	- W Edit-mode scene-content redesign; instead of having a trumbow text-box in the scene panel on the left, this shoud instead be a popup-map-object that can be drawn on the map from the LeafletDraw panel, and moved around as a standalone popup (not connected to another object)
 		- The popup-scene's position is not linked to the underlying map, but it is rather linked to the screen-position, so when the map is moved around, the popup stays in the same position on the screen (linked to pixel-pos and not latlng-pos)
-	- *events.js* is deprecate; move all popup-events to a file in *map/* folder
+		- Continue in *layers.js* and also fix extractObject() and createObject() methods in *map.js*
 
 
 

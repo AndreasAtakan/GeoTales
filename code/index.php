@@ -95,7 +95,7 @@ $count = $stmt->rowCount();
 			}
 
 			main {
-				background-image: url('assets/jumbotron2.png');
+				background-image: url('assets/jumbotron.png');
 				background-size: contain;
 				background-repeat: no-repeat;
 			}

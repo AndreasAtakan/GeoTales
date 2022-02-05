@@ -69,14 +69,6 @@ $row = $stmt->fetch();
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/edit/css/main.css" />
-
-		<style type="text/css">
-			.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
-				background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
-				background-size: 14px 14px;
-				background-position: 8px 8px !important;
-			}
-		</style>
 	</head>
 	<body>
 
@@ -257,7 +249,6 @@ $row = $stmt->fetch();
 										<li><a class="dropdown-item" href="#" id="export">Export</a></li>
 										<li><hr class="dropdown-divider"></li>
 										<li><a class="dropdown-item" href="#" id="save">Save</a></li>
-										<li><a class="dropdown-item" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a></li>
 										<li><hr class="dropdown-divider"></li>
 										<li><a class="dropdown-item" href="maps.php">Exit</a></li>
 									</ul>
@@ -357,7 +348,8 @@ $row = $stmt->fetch();
 		<!-- Set ID and TITLE -->
 		<script type="text/javascript">
 			const _ID = <?php echo $id; ?>,
-				  _TITLE = "<?php echo $row['title']; ?>";
+				  _TITLE = `<?php echo $row['title']; ?>`,
+				  _HOST = window.location.host;
 		</script>
 
 		<!-- Load src/ JS -->
@@ -373,8 +365,6 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/map.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/events.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/main.js"></script>
 

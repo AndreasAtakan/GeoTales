@@ -124,24 +124,22 @@ function scene_section(id, prevId) {
 								<option value="bc">BC</option>
 							</select>
 							<input type="date" class="form-control" id="date" aria-label="Date" />
-							<input type="time" class="form-control" id="time" aria-label="Time" step="1" />
+							<input type="time" class="form-control" id="time" aria-label="Time" step="1" style="z-index: 3;" />
+							<button type="button" class="btn btn-outline-light" id="delete" title="Delete scene">
+								<i class="fas fa-times"></i>
+							</button>
 						</div>
 					</div>
 				</div>
 				<div class="row g-0 my-1">
-					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-outline-light" id="capture" title="Recapture scene">
-							<i class="fas fa-camera"></i>
-						</button>
-					</div>
 					<div class="col text-center">
 						<button type="button" class="btn btn-sm btn-outline-light" id="add" title="Add below">
 							<i class="fas fa-plus"></i>
 						</button>
 					</div>
 					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-outline-light" id="delete" title="Delete scene">
-							<i class="fas fa-trash"></i>
+						<button type="button" class="btn btn-sm btn-outline-light" id="capture" title="Recapture scene">
+							<i class="fas fa-camera"></i>
 						</button>
 					</div>
 				</div>
@@ -278,14 +276,14 @@ function marker_popup() {
 function polyline_popup() {
 
 	return `
-		<form class="container-fluid" id="polylinePopup">
+		<form class="container-fluid" id="shapePopup">
 			<div class="row">
 				<div class="col">
 					<h6>Color</h6>
 					<div class="input-group input-group-sm mb-3">
-						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
-						<input type="number" min="2" max="10" class="form-control" id="thickness" placeholder="Thickness" />
-						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
+						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
+						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
+						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
 					</div>
 				</div>
 			</div>
@@ -305,7 +303,7 @@ function polyline_popup() {
 function polygon_popup() {
 
 	return `
-		<form class="container-fluid" id="polygonPopup">
+		<form class="container-fluid" id="shapePopup">
 			<div class="row">
 				<div class="col">
 					<h6>Line</h6>
