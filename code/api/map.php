@@ -135,13 +135,15 @@ else{
 	else
 	if($op == "write") {
 
-		if(!isset($_POST['data'])) {
+		if(!isset($_POST['data'])
+		|| !isset($_POST['preview'])) {
 			http_response_code(422); exit;
 		}
 		$data = $_POST['data'];
+		$preview = $_POST['preview'];
 
-		$stmt = $PDO->prepare("UPDATE \"Map\" SET data = ? WHERE id = ?");
-		$stmt->execute([$data, $id]);
+		$stmt = $PDO->prepare("UPDATE \"Map\" SET data = ?, preview = ? WHERE id = ?");
+		$stmt->execute([$data, $preview, $id]);
 
 		echo json_encode(array("status" => "success"));
 		exit;

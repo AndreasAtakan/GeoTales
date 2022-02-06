@@ -25,7 +25,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 .leaflet-top.leaflet-right { top: 54px; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
-.leaflet-popup-tip-container { display: none; }
+/*.leaflet-popup-tip-container { display: none; }*/
 
 .draw-control-disabled { cursor: default; pointer-events: none; opacity: 0.4; }
 .leaflet-draw-toolbar a.leaflet-draw-draw-marker {
@@ -52,7 +52,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #sectionCol:focus { outline: none; }
 
 #section li {
-	max-height: 80px;
+	max-height: 80vh;
 	border-color: rgba(0, 0, 0, 0.4);
 }
 #section li { background-color: rgba(242, 242, 242, 0.2); }
@@ -67,16 +67,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #section li.active #delete,
 #section li.active #add { color: #800000; }
 #section li #reorder:hover { cursor: move; }
-/*#section li .textInput { max-height: calc(80vh - 100px); }
-#section li #textInput {
-	color: #212529;
-	background-color: inherit !important;
-}*/
-/*#section li[class*="active"] #capture:hover,
-#section li[class*="active"] #delete:hover,
-#section li[class*="active"] #add:hover {
-	cursor: pointer;
-}*/
+#section li .content { max-height: calc(80vh - 100px); }
+#section li #content { background-color: inherit !important; }
 
 #mapCol { height: 100%; }
 
@@ -97,7 +89,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #topPadSection { margin-top: 100px; }
 #bottomPadSection { margin-bottom: 100px; }
 
-#markerPopup, #shapePopup, #editPopup { width: 300px; }
+#avatarPopup, #shapePopup, #editPopup { width: 300px; }
 
 #basemapModal #basemaps:hover { cursor: pointer; }
 
@@ -123,8 +115,8 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 		bottom: 0;
 	}
 
-	/*#section li { max-height: 40vh; }*/
-	/*#section li .textInput { max-height: calc(40vh - 100px); }*/
+	#section li { max-height: 40vh; }
+	#section li .content { max-height: calc(40vh - 100px); }
 
 	#topPadSection { margin-top: 0; }
 	#bottomPadSection { margin-bottom: 0; }

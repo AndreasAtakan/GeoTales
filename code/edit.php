@@ -259,7 +259,7 @@ $row = $stmt->fetch();
 
 								<li class="nav-item mt-2 me-4">
 									<div class="btn-group btn-group-sm" role="group" aria-label="Save/Preview">
-										<a role="button" class="btn btn-light" href="#" id="save">Save</button>
+										<a role="button" class="btn btn-light" href="#" id="save">Save</a>
 										<a role="button" class="btn btn-outline-light" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a>
 									</div>
 								</li>
@@ -288,7 +288,7 @@ $row = $stmt->fetch();
 					<div id="map"></div>
 				</div>
 
-				<div class="col-12 col-sm-5 col-lg-4 col-xl-3 col-xxl-2 shadow" id="sectionCol" tabindex="0">
+				<div class="col-12 col-sm-6 col-lg-5 col-xl-4 col-xxl-3 shadow" id="sectionCol" tabindex="0">
 
 					<div class="row align-items-center h-100 g-0">
 						<div class="col text-center">
@@ -322,6 +322,7 @@ $row = $stmt->fetch();
 		<!--script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
+		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
@@ -363,6 +364,7 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/edit/js/section/classes.js"></script>
 
+		<script type="text/javascript" src="src/edit/js/map/classes.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/map.js"></script>
 

@@ -87,13 +87,27 @@ function Content() {
 		this.get(this.active).disable();
 		this.unbind();
 		this.prep = true;
+
+		_MAP.setObjectsPrepare(this.active);
 	};
 
 	this.add = function(type) {
 		let c;
 		switch(type) {
 			case "chapter": c = new Chapter(this, null, this.active); break;
-			case "scene": c = new Scene(this, null, this.active); break;
+			case "scene":
+				c = new Scene(this, null, this.active);
+				c.capture();
+
+				if(this.active) {
+					let p = this.get(this.active);
+					c.period = p.period; c.date = p.date; c.time = p.time; c.content = p.content;
+					$(`li[data-id="${c.id}"] select#period`).val( c.period );
+					$(`li[data-id="${c.id}"] input#date`).val( c.date );
+					$(`li[data-id="${c.id}"] input#time`).val( c.time );
+					$(`li[data-id="${c.id}"] div#content`).trumbowyg("html", c.content);
+				}
+				break;
 			default: console.error("Content type invalid"); break;
 		}
 
@@ -123,6 +137,7 @@ function Content() {
 
 		this.store.splice(s.index, 1);
 
+		$(`li[data-id="${s.id}"] div#content`).trumbowyg("destroy");
 		$(`li[data-id="${s.id}"]`).remove();
 
 		if(this.store.length <= 0) {
@@ -164,6 +179,7 @@ function Content() {
 		let s = this.getPrevScene(this.active);
 		if(!s) { return; }
 		this.set(s.id);
+		return s;
 	};
 
 	this.current = function() {
@@ -176,6 +192,7 @@ function Content() {
 		let s = this.getNextScene(this.active);
 		if(!s) { return; }
 		this.set(s.id);
+		return s;
 	};
 
 	this.set = function(id) {
@@ -201,12 +218,11 @@ function Content() {
 	};
 
 	this.setBasemap = function() {
-		this.get(this.active).setBasemap();
+		this.store[ this.get(this.active).index ].setBasemap();
 	};
 
 	this.importData = function(data) {
-		if(this.store.length <= 0
-		|| !this.active) {
+		if(this.store.length <= 0 || !this.active) {
 			for(let o of data) { if(o.type == "scene") { this.active = o.id; break; } }
 		}
 
@@ -222,11 +238,14 @@ function Content() {
 				case "scene":
 					c = new Scene(this, o.id);
 					c.bounds = o.bounds; c.basemap = o.basemap;
-					c.period = o.period; c.date = o.date; c.time = o.time;
+					c.period = o.period; c.date = o.date; c.time = o.time; c.content = o.content;
 
 					$(`li[data-id="${c.id}"] select#period`).val( c.period );
 					$(`li[data-id="${c.id}"] input#date`).val( c.date );
 					$(`li[data-id="${c.id}"] input#time`).val( c.time );
+					$(`li[data-id="${c.id}"] div#content`).trumbowyg("html", c.content);
+
+					c.disable();
 					break;
 
 				default: console.error("Content type invalid"); break;
@@ -301,9 +320,11 @@ function Scene(_super, id, prevId) {
 	this.period = "ad";
 	this.date = "";
 	this.time = "";
+	this.content = "";
 
 	scene_section(this.id, prevId);
 
+	var id = this.id;
 	$(`li[data-id="${this.id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
 	$(`li[data-id="${this.id}"] select#period`).change(ev => { this.period = ev.target.value; });
 	$(`li[data-id="${this.id}"] input#date`).change(ev => { this.date = ev.target.value; });
@@ -311,7 +332,59 @@ function Scene(_super, id, prevId) {
 	$(`li[data-id="${this.id}"] button#capture`).click(ev => { this.capture(); this.active(); });
 	$(`li[data-id="${this.id}"] button#add`).click(ev => { _super.prepare(); });
 	$(`li[data-id="${this.id}"] button#delete`).click(ev => { _super.delete(this.id); });
-	$(`li[data-id="${this.id}"] select, li[data-id="${this.id}"] input`).click(ev => { ev.stopPropagation(); });
+	$(`li[data-id="${this.id}"] div#content`).trumbowyg({
+		autogrow: true, semantic: false, resetCss: true, removeformatPasted: true, urlProtocol: true,
+		defaultLinkTarget: "_blank",
+		tagsToRemove: ["script", "link"],
+		btnsDef: {
+			format: { dropdown: ["bold", "italic", "underline", "del"], title: "Format", ico: "bold" },
+			align: {
+				dropdown: ["justifyLeft", "justifyCenter", "justifyRight", "justifyFull", "unorderedList", "orderedList"],
+				title: "List/Align",
+				ico: "justifyLeft"
+			},
+			uploadImg: {
+				fn: function(e) {
+					$("input#_img").off("change");
+					$("input#_img").change(function(ev) {
+						let file = $(this)[0].files[0];
+						if(!file) { return; }
+
+						$("#loadingModal").modal("show");
+						let data = new FormData(); data.append("image", file);
+						$.ajax({
+							type: "POST",
+							url: "api/img.php",
+							data: data,
+							contentType: false,
+							processData: false,
+							success: function(result, status, xhr) {
+								$(`li[data-id="${id}"] div#content`).trumbowyg("execCmd", {
+									cmd: "insertImage", param: result, forceCss: false, skipTrumbowyg: true
+								});
+
+								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							},
+							error: function(xhr, status, error) {
+								console.log(xhr.status);
+								console.log(error);
+
+								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+							}
+						});
+					});
+					$("input#_img").click();
+				},
+				title: "Add image",
+				ico: "insertImage"
+			}
+		},
+		btns: [
+			["formatting"], ["format"], ["align"], ["fontfamily"], ["foreColor", "backColor"], /*["link"],*/ ["uploadImg"]
+		],
+		plugins: {}
+	}).on("tbwchange", () => { this.content = $(`li[data-id="${this.id}"] div#content`).trumbowyg("html"); });
+	$(`li[data-id="${this.id}"] select, li[data-id="${this.id}"] input, li[data-id="${this.id}"] .trumbowyg-box *`).click(ev => { ev.stopPropagation(); });
 
 
 	this.active = function() {
@@ -331,6 +404,7 @@ function Scene(_super, id, prevId) {
 
 	this.enable = function() {
 		$(`li[data-id="${this.id}"] select, li[data-id="${this.id}"] input, li[data-id="${this.id}"] button`).prop("disabled", false);
+		$(`li[data-id="${this.id}"] div#content`).trumbowyg("enable");
 	};
 
 	this.disable = function() {
@@ -340,6 +414,9 @@ function Scene(_super, id, prevId) {
 		   li[data-id="${this.id}"] button#capture,
 		   li[data-id="${this.id}"] button#add,
 		   li[data-id="${this.id}"] button#delete`).prop("disabled", true);
+		$(`li[data-id="${this.id}"] div#content`).trumbowyg("disable");
+		let h = (ev) => { $(`li[data-id="${this.id}"] div#content`).unbind("click", h); _super.set(this.id); };
+		$(`li[data-id="${this.id}"] div#content`).click(h);
 	};
 
 	this.setBasemap = function() {
@@ -355,7 +432,6 @@ function Scene(_super, id, prevId) {
 
 		flash_map();
 	};
-	this.capture();
 
 	this.exportData = function() {
 		return {
@@ -365,7 +441,8 @@ function Scene(_super, id, prevId) {
 			basemap: this.basemap,
 			period: this.period,
 			date: this.date,
-			time: this.time
+			time: this.time,
+			content: this.content
 		};
 	};
 }

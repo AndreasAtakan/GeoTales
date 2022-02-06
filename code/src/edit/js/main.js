@@ -28,6 +28,7 @@ window.onload = function(ev) {
 		wheelPxPerZoomLevel: 1500,
 		keyboard: false,
 		tap: false,
+		paddingTopLeft: L.point(0, 320), // TODO; fix
 		//touchZoom: false,
 		//worldCopyJump: true
 
@@ -175,7 +176,7 @@ window.onload = function(ev) {
 	});
 
 	let exportEv = ev => {
-		$("#export").off("click");
+		$("a#export").off("click");
 
 		let el = document.createElement("a");
 
@@ -192,12 +193,12 @@ window.onload = function(ev) {
 		document.body.appendChild(el);
 		$(el).ready(() => {
 			el.click(); document.body.removeChild(el);
-			$("#export").click(exportEv);
+			$("a#export").click(exportEv);
 		});
 	};
-	$("#export").click(exportEv);
+	$("a#export").click(exportEv);
 
-	$("#save").click(ev => {
+	$("a#save").click(ev => {
 		$("#loadingModal").modal("show");
 
 		$.ajax({
@@ -206,7 +207,8 @@ window.onload = function(ev) {
 			data: {
 				"op": "write",
 				"id": _ID,
-				"data": export_data()
+				"data": export_data(),
+				"preview": ""
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {

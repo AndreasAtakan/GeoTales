@@ -132,6 +132,11 @@ function scene_section(id, prevId) {
 					</div>
 				</div>
 				<div class="row g-0 my-1">
+					<div class="col content" style="overflow-y: auto;">
+						<div id="content"></div>
+					</div>
+				</div>
+				<div class="row g-0 my-1">
 					<div class="col text-center">
 						<button type="button" class="btn btn-sm btn-outline-light" id="add" title="Add below">
 							<i class="fas fa-plus"></i>
@@ -203,19 +208,18 @@ function init_basemaps() {
 
 
 
-function marker_popup() {
+function avatar_popup() {
 
 	return `
-		<form class="container-fluid" id="markerPopup">
+		<form class="container-fluid" id="avatarPopup">
 			<div class="row">
 				<div class="col">
 					<input type="text" class="form-control form-control-sm" id="label" aria-label="label" placeholder="Label" />
 				</div>
 			</div>
 
-			<div class="row mt-3">
+			<div class="row my-3">
 				<div class="col">
-					<h6>Icon</h6>
 					<div class="input-group input-group-sm">
 						<input type="file" class="form-control form-control-sm" id="icon" accept="image/gif, image/jpeg, image/png" />
 						<input type="number" class="form-control" id="size" placeholder="Size" />
@@ -227,9 +231,8 @@ function marker_popup() {
 				</div>
 			</div>
 
-			<div class="row mt-2">
+			<div class="row my-3">
 				<div class="col">
-					<h6>Border</h6>
 					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="color" value="#563d7c" title="Choose color" />
 						<input type="number" min="0" max="10" class="form-control" id="thickness" placeholder="Thickness" />
@@ -237,9 +240,8 @@ function marker_popup() {
 				</div>
 			</div>
 
-			<div class="row mt-4">
+			<div class="row my-3">
 				<div class="col">
-					<h6>Overlay</h6>
 					<div class="input-group input-group-sm">
 						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="grayscale" placeholder="Grayscale" />
@@ -253,9 +255,9 @@ function marker_popup() {
 
 			<div class="row">
 				<div class="col-7">
-					<!--button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
+					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
 						<i class="fas fa-share"></i>
-					</button-->
+					</button>
 				</div>
 				<div class="col-3">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
@@ -279,7 +281,6 @@ function polyline_popup() {
 		<form class="container-fluid" id="shapePopup">
 			<div class="row">
 				<div class="col">
-					<h6>Color</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
@@ -306,7 +307,6 @@ function polygon_popup() {
 		<form class="container-fluid" id="shapePopup">
 			<div class="row">
 				<div class="col">
-					<h6>Line</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
@@ -317,7 +317,6 @@ function polygon_popup() {
 
 			<div class="row">
 				<div class="col">
-					<h6>Fill</h6>
 					<div class="input-group input-group-sm mb-3">
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />

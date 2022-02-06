@@ -75,10 +75,32 @@ L.Map.addInitHook(function() {
 			type = ev.layerType;
 
 		switch(type) {
-			case "circlemarker":
-				let latlng = object.getLatLng();
+			case "marker":
+				let zoom = this.getZoom();
+				let p = this.project(object.getLatLng(), zoom),
+					url = object.getIcon().options.iconUrl,
+					size = object.getIcon().options.iconSize;
+				object = L.imageOverlay(url, [
+					this.unproject([ p.x - size[0] / 2, p.y - size[1] / 2 ], zoom),
+					this.unproject([ p.x + size[0] / 2, p.y + size[1] / 2 ], zoom)
+				], { interactive: true });
+
+				object.options.ratio = 496 / 512; // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
+				object.options.rounded = false;
+				object.options.angle = 0;
+				object.options.borderColor = "#563d7c";
+				object.options.borderThickness = 0;
+				object.options.overlayBlur = 0;
+				object.options.overlayGrayscale = 0;
+				object.options.overlayBrightness = 0;
+				object.options.overlayTransparency = 0;
+				type = "avatar";
+				break;
+
+			/*case "circlemarker":
+				let p = this.latLngToContainerPoint(object.getLatLng());
 				object = L.popup({
-						keepInView: true,
+						//keepInView: true,
 						closeButton: false,
 						autoClose: false,
 						closeOnEscapeKey: false,
@@ -86,10 +108,10 @@ L.Map.addInitHook(function() {
 						maxWidth: 3500,
 						maxHeight: 450,
 						autoPanPadding: L.point(60,60)
-					})
-					.setLatLng(latlng);
+					});
+				object.options.pos = p;
 				type = "textbox";
-				break;
+				break;*/
 
 			default: break;
 		}
@@ -112,12 +134,13 @@ L.Map.addInitHook(function() {
 	// Draw and edit control
 
 	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
-	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place.";
+	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
+	//L.drawLocal.draw.handlers.circlemarker.tooltip.start = "Click map to place textbox.";
 	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
 	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
 	L.drawLocal.edit.handlers.remove.tooltip.text = null;
 	L.EditToolbar.Delete.include({ removeAllLayers: false });
-	L.DrawToolbar.include({
+	/*L.DrawToolbar.include({
 		getModeHandlers: function(map) {
 			return [
 				{ enabled: this.options.polyline, handler: new L.Draw.Polyline(map, this.options.polyline), title: L.drawLocal.draw.toolbar.buttons.polyline },
@@ -133,13 +156,13 @@ L.Map.addInitHook(function() {
 				}
 			];
 		}
-	});
+	});*/
 	this.addControl(
 		new L.Control.Draw({
 			position: "topright",
 			edit: false,
 			draw: {
-				textbox: true,
+				//textbox: true,
 				marker: {
 					icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
 				},
@@ -205,30 +228,29 @@ L.Map.include({
 		let o = this.fadeLayer.getObject(id);
 		if(!o) { return; }
 
-		if(o.options.type == "marker") {
-			$(o._icon).css("filter", `
-				blur(${o.options.overlayBlur}px)
-				grayscale(${o.options.overlayGrayscale*100}%)
-				opacity(70%)
-			`);
-		}
+		if(o.options.type == "avatar") { o.setOpacity(0.8); }
 		else{ o.setStyle({ opacity: 0.8 }); }
 	},
 	unhighlightObject: function(id) {
 		let o = this.fadeLayer.getObject(id);
 		if(!o) { return; }
 
-		if(o.options.type == "marker") {
-			$(o._icon).css("filter", `
-				blur(${o.options.overlayBlur}px)
-				grayscale(${o.options.overlayGrayscale*100}%)
-				opacity(40%)
-			`);
-		}
+		if(o.options.type == "avatar") { o.setOpacity(0.3); }
 		else{ o.setStyle({ opacity: 0.3 }); }
 	},
 
-	setObjects: function(contentId, animate) { // !!!!!!!!!!!!!! TODO
+	setObjectsPrepare: function(prevId) {
+		this.objectLayer.clearLayers();
+		this.fadeLayer.clearLayers();
+		for(let o of this.objects) {
+			if(o.contentId == prevId) {
+				let oo = this.createObject(o);
+				this.fadeLayer.addLayer(oo, o.type, o.id);
+				oo.off("click");
+			}
+		}
+	},
+	setObjects: function(contentId, animate) {
 		let prev = _CONTENT.getPrevScene(contentId);
 		let prevId = prev ? prev.id : null;
 
@@ -239,7 +261,7 @@ L.Map.include({
 			}
 		}
 
-		let os = this.objectLayer.getLayers().filter(o => o.options.type == "marker").map(o => {
+		let os = this.objectLayer.getLayers().filter(o => o.options.type == "avatar").map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
 		});
 		this.objectLayer.clearLayers();
@@ -248,11 +270,11 @@ L.Map.include({
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
-				if(animate && o.type == "marker") {
+				if(animate && o.type == "avatar") {
 					for(let oo of os) {
 						if(o.id == oo.id) {
-							object.setLatLng(oo.pos);
-							object.slideTo(o.pos, { duration: _AVATARSPEED });
+							object.setBounds( L.latLngBounds(oo.pos) );
+							object.slideTo( L.latLngBounds(o.pos) , { duration: _AVATARSPEED });
 							break;
 						}
 					}
@@ -424,15 +446,8 @@ L.Map.include({
 		let oo = null;
 
 		switch(o.type) {
-			case "marker":
-				oo = L.marker(o.pos, {
-					icon: L.icon({
-						iconUrl: o.icon,
-						iconSize: o.size,
-						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
-						tooltipAnchor: [ 0, o.size[1] / 2 ]
-					})
-				});
+			case "avatar":
+				oo = L.imageOverlay(o.icon, o.pos, { interactive: true });
 				oo.options.label = o.label;
 				oo.options.ratio = o.ratio;
 				oo.options.rounded = o.rounded;
@@ -489,15 +504,15 @@ L.Map.include({
 		let oo = null;
 
 		switch(o.options.type) {
-			case "marker":
+			case "avatar":
+				let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
 				oo = {
 					id:					o.options.id,
 					contentId:			o.options.contentId,
 					type:				o.options.type,
-					pos:				{ lat: o.getLatLng().lat, lng: o.getLatLng().lng },
+					pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
 					label:				o.options.label,
-					icon:				o.getIcon().options.iconUrl,
-					size:				o.getIcon().options.iconSize,
+					icon:				o._url,
 					ratio:				o.options.ratio,
 					rounded:			o.options.rounded,
 					angle:				0,
@@ -516,8 +531,8 @@ L.Map.include({
 					contentId:		o.options.contentId,
 					type:			o.options.type,
 					pos:			o.getLatLngs().map(e => {
-						if(!e.length) return { lat: e.lat, lng: e.lng };
-						else return e.map(f => { return { lat: f.lat, lng: f.lng }; });
+						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
+						else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
 					}),
 					color:			o.options.color,
 					thickness:		o.options.weight,
