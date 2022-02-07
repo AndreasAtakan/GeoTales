@@ -1,4 +1,4 @@
-## TellUs
+## GeoTales
 
 [tellusmap.com](https://tellusmap.com)
 

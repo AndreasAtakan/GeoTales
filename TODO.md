@@ -19,7 +19,7 @@
 		- X Contains a copy-field with the link to pres-mode in iframe, user can click "copy to clipboard"
 		- X User can share to FB, Twitter, email, etc.
 - Edit-mode:
-	0. (!) When user saves the map; also write the center basemap-tile as the map's *preview*
+	0. X When user saves the map; also write the center basemap-tile as the map's *preview*
 	1. X BUG; "Pluss" button on scene (under delete); click-event is still active in prepare-mode
 	2. X Prepare-scene box should have a cancel button (X) to remove
 	3. X When in prepare mode, all avatars should be moved to fadeLayer
@@ -33,11 +33,11 @@
 		- Somehow mark relation between avatars (line between?, color-coding?, ect.)
 	9. Down the line; all changes should be auto-saved
 - Pres-mode:
-	1. When scene content is empty, scene box should not be shown
-	2. Extra buttons to navigate; "Back to forum", "Back to my projects", Chapter-navigation, "Clone to my maps", etc.
-	3. Fix date in scene box so that it "ticks" from previous date to next date
+	1. X When scene content is empty, scene box should not be shown
+	2. X Extra buttons to navigate; "Back to forum", "Back to my projects", Chapter-navigation, "Clone to my maps", etc.
+	3. X Fix date in scene box so that it "ticks" from previous date to next date
 	4. Legg til fade inn og ut på scenene
-	5. Når kartet ikke er på scenens bounds, og brukeren trykker på et bilde i scene-boksen, så skal det ikke åpne bilde-modal, men heller gå til scenens bounds og kun åpne bilde-modal når brukeren trykker på bildet og kartet allerde står på scnene-bounds
+	5. X Når kartet ikke er på scenens bounds, og brukeren trykker på et bilde i scene-boksen, så skal det ikke åpne bilde-modal, men heller gå til scenens bounds og kun åpne bilde-modal når brukeren trykker på bildet og kartet allerde står på scnene-bounds
 - Forum:
 	1. X When user publishes map to forum; embed pres-mode as an iframe into the post
 	2. X Add navigation buttons to header; "Gallery" button, "My maps" button
@@ -52,15 +52,7 @@
 
 
 - Working TODO:
-	- W DB change; Rename "Project" to "Map", complete change in *edit.php*, *pres.php*, etc.
-	- W Paramater change; Rename "pid" to "id", complete change in *edit.php*, *pres.php*, etc.
-	- Continue in edit- and pres-mode
-		- Save center-basemap-tile as map *preview*
-		- ` let s = _MAP.basemap.getTileSize();
-			let c = _MAP.latLngToContainerPoint( _MAP.getCenter() );
-			_MAP.basemap.getTileUrl( { x: c.x / s.x, y: c.y / s.y } );
-			_MAP.basemap.getTileUrl( { x: Math.floor(c.x / s.x), y: Math.floor(c.y / s.y) } );
-			_MAP.basemap.getTileUrl( { x: c.x % s.x, y: c.y % s.y } );`
+	- Paul map
 
 
 

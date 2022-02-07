@@ -145,7 +145,7 @@ window.onload = function(ev) {
 		let url = $("#basemapModal input#basemapLink").val();
 		if(!url) { return; }
 
-		let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">TellUs</a>` });
+		let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>` });
 
 		let protocol = url.split(/\:/ig)[0];
 		if(protocol == "mapbox") {
@@ -208,7 +208,7 @@ window.onload = function(ev) {
 				"op": "write",
 				"id": _ID,
 				"data": export_data(),
-				"preview": ""
+				"preview": _MAP.getCenterBasemapTile()
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {

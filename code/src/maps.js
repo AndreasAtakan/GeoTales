@@ -99,7 +99,7 @@ window.onload = function(ev) {
 	$("button#share").click(ev => {
 		let id = $(ev.target).data("id"),
 			post = $(ev.target).data("post");
-		let host = window.location.host;
+		const host = window.location.host;
 
 		$("#shareModal").modal("show");
 

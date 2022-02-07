@@ -43,7 +43,7 @@ L.ImageOverlay.include({
 
 		if (remaining < 0) {
 			this.setBounds(this._slideToBounds);
-			this.fire('moveend');
+			this.fire("moveend");
 			if (this._slideDraggingWasAllowed ) {
 				this._map.dragging.enable();
 				this._map.doubleClickZoom.enable();
@@ -54,21 +54,26 @@ L.ImageOverlay.include({
 			return this;
 		}
 
-		var zoom = this._map.getZoom();
-		var b = [ this.getBounds().getNorthWest(), this.getBounds().getSouthEast() ]
-				.map(p => this._map.project(p, zoom));
-		var size = [ b[1].x - b[0].x, b[1].y - b[0].y ];
+		var zoom = this._map.getZoom(), b;
+		b = [ this._slideFromBounds.getNorthWest(), this._slideFromBounds.getSouthEast() ].map(p => this._map.project(p, zoom));
+		var startSize = [ b[1].x - b[0].x, b[1].y - b[0].y ];
+		b = [ this._slideToBounds.getNorthWest(), this._slideToBounds.getSouthEast() ].map(p => this._map.project(p, zoom));
+		var endSize = [ b[1].x - b[0].x, b[1].y - b[0].y ];
 
 		var startPoint = this._map.latLngToContainerPoint( this._slideFromBounds.getCenter() );
 		var endPoint   = this._map.latLngToContainerPoint( this._slideToBounds.getCenter() );
 		var percentDone = (this._slideToDuration - remaining) / this._slideToDuration;
 
+		var currSize = [
+			endSize[0] * percentDone + startSize[0] * (1 - percentDone),
+			endSize[1] * percentDone + startSize[1] * (1 - percentDone)
+		];
 		var currPoint = endPoint.multiplyBy(percentDone).add(
 			startPoint.multiplyBy(1 - percentDone)
 		);
 		var currBounds = [
-			this._map.containerPointToLatLng([ currPoint.x - size[0] / 2, currPoint.y - size[1] / 2 ]),
-			this._map.containerPointToLatLng([ currPoint.x + size[0] / 2, currPoint.y + size[1] / 2 ])
+			this._map.containerPointToLatLng([ currPoint.x - currSize[0] / 2, currPoint.y - currSize[1] / 2 ]),
+			this._map.containerPointToLatLng([ currPoint.x + currSize[0] / 2, currPoint.y + currSize[1] / 2 ])
 		];
 		this.setBounds(currBounds);
 

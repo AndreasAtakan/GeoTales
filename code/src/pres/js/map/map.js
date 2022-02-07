@@ -24,35 +24,6 @@ L.Map.addInitHook(function() {
 	this.addControl( this.basemapLegend );
 
 	this.addControl(
-		L.easyBar([
-			L.easyButton({
-				id: "sceneBackward",
-				leafletClasses: true,
-				states: [
-					{
-						stateName: "main",
-						onClick: function(button, map) { _EVENTS.scene.backward_scene(); },
-						title: "Previous scene",
-						icon: "fa-chevron-left"
-					}
-				]
-			}),
-			L.easyButton({
-				id: "sceneForward",
-				leafletClasses: true,
-				states: [
-					{
-						stateName: "main",
-						onClick: function(button, map) { _EVENTS.scene.forward_scene(); },
-						title: "Next scene",
-						icon: "fa-chevron-right"
-					}
-				]
-			})
-		], { position: "topright", id: "navBtns" })
-	);
-
-	this.addControl(
 		L.control.zoom({ position: "topright" })
 	);
 
@@ -89,6 +60,35 @@ L.Map.addInitHook(function() {
 		})
 	);
 
+	this.addControl(
+		L.easyBar([
+			L.easyButton({
+				id: "sceneBackward",
+				leafletClasses: true,
+				states: [
+					{
+						stateName: "main",
+						onClick: function(button, map) { _CONTENT.prev(); },
+						title: "Previous scene",
+						icon: "fa-chevron-left"
+					}
+				]
+			}),
+			L.easyButton({
+				id: "sceneForward",
+				leafletClasses: true,
+				states: [
+					{
+						stateName: "main",
+						onClick: function(button, map) { _CONTENT.next(); },
+						title: "Next scene",
+						icon: "fa-chevron-right"
+					}
+				]
+			})
+		], { position: "topleft", id: "sceneNav" })
+	);
+
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
@@ -120,7 +120,7 @@ L.Map.addInitHook(function() {
 
 	// Map events
 
-	this.on("movestart", ev => { $("#scene").addClass("inactive"); });
+	this.on("movestart", ev => { _CONTENT.sceneInactive(); });
 	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
 
 });
@@ -141,22 +141,21 @@ L.Map.include({
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
-	setObjects: function(sceneId) {
-		let os = this.objectLayer.getLayers().filter(o => o.options.type == "marker").map(o => {
+	setObjects: function(contentId) {
+		let os = this.objectLayer.getLayers().filter(o => o.options.type == "avatar").map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
 		});
-
 		this.objectLayer.clearLayers();
 		for(let o of this.objects) {
-			if(o.sceneId == sceneId) {
+			if(o.contentId == contentId) {
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
-				if(o.type == "marker") {
+				if(o.type == "avatar") {
 					for(let oo of os) {
 						if(o.id == oo.id) {
-							object.setLatLng(oo.pos);
-							object.slideTo(o.pos, { duration: _AVATARSPEED });
+							object.setBounds( L.latLngBounds(oo.pos) );
+							object.slideTo( L.latLngBounds(o.pos) , { duration: _AVATARSPEED });
 							break;
 						}
 					}
@@ -165,9 +164,7 @@ L.Map.include({
 		}
 	},
 
-	getBasemap: function() {
-		return this.basemap.options.source;
-	},
+	getBasemap: function() { return this.basemap.options.source; },
 
 	imgBasemap: function(img, width, height) {
 		if(this.basemap.options.source.img
@@ -192,8 +189,7 @@ L.Map.include({
 		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
 
 		this.basemap = L.imageOverlay(img, bounds, {
-			zIndex: 0,
-			attribution: "&copy; <a href=\"https://tellusmap.com\" target=\"_blank\">TellUs</a>"
+			zIndex: 0, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 		});
 		this.basemap.options.source = { img: img, width: width, height: height };
 
@@ -244,22 +240,10 @@ L.Map.include({
 
 	createObject: function(o) {
 		let oo = null;
-		//let TransitionedIcon = L.TransitionedIcon.extend({ options: { cssTransitionName: "marker-transition" } });
 
 		switch(o.type) {
-			case "marker":
-				oo = L.marker(o.pos, {
-					keyboard: false,
-					interactive: false,
-					icon: L.icon({
-						iconUrl: o.icon,
-						iconSize: o.size,
-						popupAnchor: [ 0, (-1) * (o.size[1] / 2) ],
-						tooltipAnchor: [ 0, o.size[1] / 2 ]
-						//shadowUrl: "lib/leaflet/images/marker-shadow.png",
-						//shadowSize: [41, 41]
-					})
-				});
+			case "avatar":
+				oo = L.imageOverlay(o.icon, o.pos, { interactive: false });
 				oo.options.label = o.label;
 				oo.options.ratio = o.ratio;
 				oo.options.rounded = o.rounded;
@@ -309,7 +293,7 @@ L.Map.include({
 		}
 
 		oo.options.id = o.id;
-		oo.options.sceneId = o.sceneId;
+		oo.options.contentId = o.contentId;
 		oo.options.type = o.type;
 
 		return oo;
@@ -319,15 +303,15 @@ L.Map.include({
 		let oo = null;
 
 		switch(o.options.type) {
-			case "marker":
+			case "avatar":
+				let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
 				oo = {
 					id:					o.options.id,
-					sceneId:			o.options.sceneId,
+					contentId:			o.options.contentId,
 					type:				o.options.type,
-					pos:				{ lat: o.getLatLng().lat, lng: o.getLatLng().lng },
+					pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
 					label:				o.options.label,
-					icon:				o.getIcon().options.iconUrl,
-					size:				o.getIcon().options.iconSize,
+					icon:				o._url,
 					ratio:				o.options.ratio,
 					rounded:			o.options.rounded,
 					angle:				0,
@@ -343,11 +327,11 @@ L.Map.include({
 			case "polyline":
 				oo = {
 					id:				o.options.id,
-					sceneId:		o.options.sceneId,
+					contentId:		o.options.contentId,
 					type:			o.options.type,
 					pos:			o.getLatLngs().map(e => {
-						if(!e.length) return { lat: e.lat, lng: e.lng };
-						else return e.map(f => { return { lat: f.lat, lng: f.lng }; });
+						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
+						else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
 					}),
 					color:			o.options.color,
 					thickness:		o.options.weight,
@@ -359,7 +343,7 @@ L.Map.include({
 			case "rectangle":
 				oo = {
 					id:					o.options.id,
-					sceneId:			o.options.sceneId,
+					contentId:			o.options.contentId,
 					type:				o.options.type,
 					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 					lineColor:			o.options.color,

@@ -14,50 +14,55 @@ L.AvatarLayer = L.FeatureGroup.extend({
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 
 		this.setIcon(object.options.id);
-		this.bind(object);
+		this.bind(object.options.id);
 	},
 
-	bind: function(object) {
-		object.bindPopup(avatar_popup(), { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450, autoPanPadding: L.point(60,60) });
+	bind: function(id) {
+		let o = this.getObject(id);
 
-		if(object.options.label) { object.bindTooltip(object.options.label, { direction: "bottom", permanent: true }); }
+		o.bindPopup(avatar_popup(), { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450, autoPanPadding: L.point(60,60) });
 
-		let drag = new L.Draggable( object.getElement() ), isDragEv = false;
+		let label = o.options.label;
+		if(label) { o.bindTooltip(label, { direction: "bottom", permanent: true }); }
+
+		let drag = new L.Draggable( o.getElement() ), isDragEv = false;
 		drag.enable();
 		drag.on("dragstart", ev => { isDragEv = true; });
 		drag.on("dragend", ev => {
 			let zoom = _MAP.getZoom(), p = ev.target._newPos;
-			let b = [ object.getBounds().getNorthWest(), object.getBounds().getSouthEast() ]
+			let b = [ o.getBounds().getNorthWest(), o.getBounds().getSouthEast() ]
 					.map(p => _MAP.project(p, zoom));
 			let size = [ b[1].x - b[0].x, b[1].y - b[0].y ];
-			object.setBounds([
+			o.setBounds([
 				_MAP.layerPointToLatLng([ p.x, p.y ]),
 				_MAP.layerPointToLatLng([ p.x + size[0], p.y + size[1] ])
 			]);
-			_MAP.updateObject(object.options.id);
+			_MAP.updateObject(o.options.id);
 		});
 
-		object.on("popupopen", ev => {
-			if(isDragEv) { object.closePopup(); isDragEv = false; }
-			else{ bind_setup(object); }
+		o.on("popupopen", ev => {
+			if(isDragEv) { o.closePopup(); isDragEv = false; }
+			else{ bind_setup(o); }
 		});
-		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
-		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
+		o.on("mouseover", ev => { _MAP.highlightObject(o.options.id); });
+		o.on("mouseout", ev => { _MAP.unhighlightObject(o.options.id); });
 
-		/*object.bindContextMenu({
+		/*o.bindContextMenu({
 			contextmenu: true,
-			contextmenuItems: [ { text: "Clone avatar", callback: ev => { _MAP.cloneAvatar(object.options.id, object.options.contentId); }, index: 0 } ]
+			contextmenuItems: [ { text: "Clone avatar", callback: ev => { _MAP.cloneAvatar(o.options.id, o.options.contentId); }, index: 0 } ]
 		});*/
 	},
 
-	unbind: function(object) {
-		object.closeTooltip(); object.unbindTooltip();
-		object.closePopup(); object.unbindPopup();
+	unbind: function(id) {
+		let o = this.getObject(id);
 
-		object.off("popupopen"); object.off("mouseover"); object.off("mouseout");
+		o.closeTooltip(); o.unbindTooltip();
+		o.closePopup(); o.unbindPopup();
 
-		//object.slideCancel();
-		//object.dragging.disable();
+		o.off("popupopen"); o.off("mouseover"); o.off("mouseout");
+
+		o.slideCancel();
+		//o.dragging.disable();
 	},
 
 	getObject: function(id) {
@@ -95,7 +100,7 @@ L.AvatarLayer = L.FeatureGroup.extend({
 
 	removeLayer: function(object, id) {
 		var object = object || (id ? this.getObject(id) : null);
-		this.unbind(object);
+		this.unbind(object.options.id);
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
 
@@ -113,7 +118,7 @@ L.avatarLayer = function(options) { return new L.AvatarLayer(options); };
 L.EditLayer = L.FeatureGroup.extend({
 	addLayer: function(object) {
 		L.FeatureGroup.prototype.addLayer.call(this, object);
-		this.bind(object);
+		this.bind(object.options.id);
 
 		if(!this.editHandler.enabled()) {
 			this.editHandler._map = this._map; // NOTE: this is also a hack, but necessary to make editing work
@@ -121,24 +126,28 @@ L.EditLayer = L.FeatureGroup.extend({
 		}
 	},
 
-	bind: function(object) {
+	bind: function(id) {
+		let o = this.getObject(id);
+
 		let popup = "";
-		switch(object.options.type) {
+		switch(o.options.type) {
 			case "polyline": popup = polyline_popup(); break;
 			case "polygon":
 			case "rectangle": popup = polygon_popup(); break;
 			default: console.error("object type invalid"); break;
 		}
-		object.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450, autoPanPadding: L.point(60,60) });
+		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450, autoPanPadding: L.point(60,60) });
 
-		object.on("popupopen", ev => { bind_setup(object); });
-		object.on("mouseover", ev => { _MAP.highlightObject(object.options.id); });
-		object.on("mouseout", ev => { _MAP.unhighlightObject(object.options.id); });
+		o.on("popupopen", ev => { bind_setup(o); });
+		o.on("mouseover", ev => { _MAP.highlightObject(o.options.id); });
+		o.on("mouseout", ev => { _MAP.unhighlightObject(o.options.id); });
 	},
 
-	unbind: function(object) {
-		object.closePopup(); object.unbindPopup();
-		object.off("popupopen"); object.off("mouseover"); object.off("mouseout");
+	unbind: function(id) {
+		let o = this.getObject(id);
+
+		o.closePopup(); o.unbindPopup();
+		o.off("popupopen"); o.off("mouseover"); o.off("mouseout");
 	},
 
 	getObject: function(id) {
@@ -150,7 +159,7 @@ L.EditLayer = L.FeatureGroup.extend({
 
 	removeLayer: function(object, id) {
 		var object = object || (id ? this.getObject(id) : null);
-		this.unbind(object);
+		this.unbind(object.options.id);
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},
 

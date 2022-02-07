@@ -10,8 +10,15 @@
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
+session_start();
 
 include "api/init.php";
+include_once("api/helper.php");
+
+$logged_in = false;
+if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
+	$logged_in = true;
+}
 
 if(!isset($_GET['id'])) {
 	http_response_code(422); exit;
@@ -32,16 +39,16 @@ $row = $stmt->fetch();
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>TellUs – <?php echo $row['title']; ?></title>
-		<meta name="title" content="TellUs – <?php echo $row['title']; ?>" />
+		<title>GeoTales – <?php echo $row['title']; ?></title>
+		<meta name="title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta name="description" content="<?php echo $row['description']; ?>" />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="https://tellusmap.com/" />
-		<meta property="og:title" content="TellUs – <?php echo $row['title']; ?>" />
+		<meta property="og:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="og:description" content="<?php echo $row['description']; ?>" />
-		<meta property="og:site_name" content="TellUs" />
+		<meta property="og:site_name" content="GeoTales" />
 		<meta property="og:image" content="assets/logo.png" />
 		<meta property="og:image:type" content="image/png" />
 
@@ -50,7 +57,7 @@ $row = $stmt->fetch();
 		<meta name="twitter:site" content="@TellusMap" />
 		<meta name="twitter:creator" content="@TellusMap" />
 		<meta property="twitter:url" content="https://tellusmap.com/" />
-		<meta property="twitter:title" content="TellUs – <?php echo $row['title']; ?>" />
+		<meta property="twitter:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
 		<meta property="twitter:image" content="assets/logo.png" />
 
@@ -136,25 +143,31 @@ $row = $stmt->fetch();
 
 		<div class="container-fluid p-0">
 			<div class="row g-0" style="height: calc(100vh);">
-				<div class="col-12" id="col">
+				<div class="col-12" id="main">
 					<div id="map"></div>
-
-					<!--div class="card" id="dateticker">
-						<div class="card-body">
-							<h5 class="card-title text-muted mb-0" id="datetime">
-								<span id="time">
-									<span id="hour"></span>:<span id="minute"></span>:<span id="second"></span>
-								</span>
-								<span id="dateNtime">–</span>
-								<span id="date">
-									<span id="day"></span>/<span id="month"></span>/<span id="year"></span>
-								</span>
-								<span id="period"></span>
-							</h5>
-						</div>
-					</div-->
 				</div>
 
+				<div class="card" id="extraNav">
+					<div class="card-body p-0">
+						<div class="dropdown">
+							<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false"></button>
+							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
+								<li><a class="dropdown-item" href="index.php">Gallery</a></li>
+								<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">More maps</a></li>
+						<?php
+							if($logged_in) {
+						?>
+								<li><hr class="dropdown-divider" /></li>
+								<li><a class="dropdown-item" href="maps.php">My maps</a></li>
+								<li><hr class="dropdown-divider" /></li>
+								<li><a class="dropdown-item" href="#">Clone this map</a></li>
+						<?php
+							}
+						?>
+							</ul>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -167,14 +180,17 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
+		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.transitionedicon/leaflet-transitionedicon.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
 
-		<!-- Set ID -->
+		<!-- Set ID, TITLE and HOST -->
 		<script type="text/javascript">
-			const _ID = <?php echo $id; ?>;
+			const _ID = <?php echo $id; ?>,
+				  _TITLE = `<?php echo $row['title']; ?>`,
+				  _HOST = window.location.host;;
 		</script>
 
 		<!-- Load src/ JS -->
@@ -186,7 +202,7 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/pres/js/generate.js"></script>
 
-		<script type="text/javascript" src="src/pres/js/events.js"></script>
+		<script type="text/javascript" src="src/pres/js/section/classes.js"></script>
 
 		<script type="text/javascript" src="src/pres/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/pres/js/map/map.js"></script>

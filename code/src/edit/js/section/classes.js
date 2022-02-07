@@ -209,7 +209,7 @@ function Content() {
 			let basemap = get_basemap(s.basemap.url);
 
 			if(basemap) { _MAP.setBasemap( basemap.tiles ); }
-			else{ _MAP.setBasemap(L.tileLayer(s.basemap.url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">TellUs</a>` }), is_internal_basemap(s.basemap.url)); }
+			else{ _MAP.setBasemap(L.tileLayer(s.basemap.url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>` }), is_internal_basemap(s.basemap.url)); }
 		}
 		else if(s.basemap.img) { _MAP.imgBasemap(s.basemap.img, s.basemap.width, s.basemap.height); }
 

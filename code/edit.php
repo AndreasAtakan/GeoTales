@@ -42,8 +42,8 @@ $row = $stmt->fetch();
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>TellUs – <?php echo $row['title']; ?></title>
-		<meta name="title" content="TellUs – <?php echo $row['title']; ?>" />
+		<title>GeoTales – <?php echo $row['title']; ?></title>
+		<meta name="title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta name="description" content="<?php echo $row['description']; ?>" />
 
 		<link rel="icon" href="assets/logo.png" />
@@ -84,7 +84,7 @@ $row = $stmt->fetch();
 						<div class="mb-3">
 							<label for="fileInput" class="form-label">Choose a data-file</label>
 							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, TellUs map-file</div>
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, GeoTales map-file</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -231,7 +231,7 @@ $row = $stmt->fetch();
 				<div class="col">
 					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 						<a class="navbar-brand" href="maps.php">
-							<img src="assets/logo.png" alt="TellUs" width="30" height="30" />
+							<img src="assets/logo.png" alt="GeoTales" width="30" height="30" />
 						</a>
 
 						<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -346,7 +346,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/trumbowyg/plugins/specialchars/trumbowyg.specialchars.min.js"></script>
 		<script type="text/javascript" src="lib/trumbowyg/plugins/table/trumbowyg.table.min.js"></script>
 
-		<!-- Set ID and TITLE -->
+		<!-- Set ID, TITLE and HOST -->
 		<script type="text/javascript">
 			const _ID = <?php echo $id; ?>,
 				  _TITLE = `<?php echo $row['title']; ?>`,

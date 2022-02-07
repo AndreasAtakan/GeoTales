@@ -16,6 +16,8 @@ window.onload = function(ev) {
 		if(ev.scale !== 1) { ev.preventDefault(); }
 	}, false);
 
+
+
 	_MAP = L.map("map", {
 		center: [ 50, 6 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
@@ -39,6 +41,44 @@ window.onload = function(ev) {
 		]
 	});
 
-	_EVENTS.project.setup();
+
+
+	_CONTENT = new Content();
+
+	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
+	$(document).keyup(ev => {
+		let keycode = ev.code;
+		if(["ArrowUp","ArrowLeft"].indexOf(keycode) > -1) { ev.preventDefault(); _CONTENT.prev(); }
+		if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); _CONTENT.next(); }
+		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
+	});
+
+	document.addEventListener("section_setup", ev => { init_section(); _CONTENT.setup(); _MAP.setup(); });
+	document.addEventListener("section_reset", ev => { _MAP.reset(); _CONTENT.reset(); reset_section(); });
+
+
+
+	// Load data
+	$("#loadingModal").modal("show");
+	$.ajax({
+		type: "GET",
+		url: "api/map.php",
+		data: {
+			"op": "read",
+			"id": _ID
+		},
+		dataType: "json",
+		success: function(result, status, xhr) {
+			if(result.data) { import_data( JSON.parse(result.data) ); }
+
+			setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+		},
+		error: function(xhr, status, error) {
+			console.log(xhr.status);
+			console.log(error);
+
+			setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+		}
+	});
 
 };

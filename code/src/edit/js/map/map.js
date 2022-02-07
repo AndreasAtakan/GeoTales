@@ -370,6 +370,12 @@ L.Map.include({
 
 	getBasemap: function() { return this.basemap.options.source; },
 
+	getCenterBasemapTile: function() {
+		let s = this.basemap.getTileSize(),
+			c = this.project( this.getCenter(), this.getZoom() );
+		return this.basemap.getTileUrl({ x: Math.floor(c.x / s.x), y: Math.floor(c.y / s.y) });
+	},
+
 	imgBasemap: function(img, width, height) {
 		if(this.basemap.options.source.img
 		&& this.basemap.options.source.img == img) return;
@@ -393,7 +399,7 @@ L.Map.include({
 		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
 
 		this.basemap = L.imageOverlay(img, bounds, {
-			zIndex: 0, attribution: `&copy; <a href="https://${_HOST}" target="_blank">TellUs</a>`
+			zIndex: 0, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 		});
 		this.basemap.options.source = { img: img, width: width, height: height };
 

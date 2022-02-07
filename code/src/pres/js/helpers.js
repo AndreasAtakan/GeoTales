@@ -15,23 +15,37 @@ function uuid(a) {
 
 
 
-function mergeObjects(o, u) {
-	return Object.assign({}, o, u);
+function import_data(data) {
+	_AVATARSPEED = data.options.avatarspeed;
+	_PANNINGSPEED = data.options.panningspeed;
+
+	_THEME = data.options.theme;
+
+	if(data.content.length <= 0) { return; }
+
+	let index = _CONTENT.store.length;
+	if(index <= 0) { document.dispatchEvent( new Event("section_setup") ); }
+
+	_CONTENT.importData(data.content);
+	_MAP.importData(data.objects);
+
+	_CONTENT.current();
 }
 
 
 
-function get_scene(id) {
-	for(let i = 0; i < _SCENES.length; i++) {
-		let s = Object.assign({}, _SCENES[i]);
+function animate_val(el, start, end, duration) {
+	let startTimestamp = null;
+	const step = (timestamp) => {
+		if(!startTimestamp) startTimestamp = timestamp;
 
-		if(s.id == id) {
-			s.index = i;
-			return s;
-		}
-	}
+		const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+		let val = Math.floor(progress * (end - start) + start);
+		$(el).html( val < 10 && val >= 0 ? `0${val}` : val );
 
-	return null;
+		if(progress < 1) window.requestAnimationFrame(step);
+	};
+	window.requestAnimationFrame(step);
 }
 
 

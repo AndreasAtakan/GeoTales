@@ -9,12 +9,36 @@
 "use strict";
 
 
-function init_scene() {
+function init_section() {
 
-	$("div#col").append(`
-		<div class="card" id="scene" data-sceneid="">
+	$("div#main").append(`
+		<div class="card" id="chapters">
+			<div class="card-body p-0">
+				<div class="dropdown">
+					<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="chaptersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="fas fa-paragraph"></i>
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="chaptersDropdown">
+						<li><h6 class="dropdown-header">Chapters</h6></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	`);
+
+	$("div#main").append(`
+		<div class="card" id="section">
 			<div class="card-body">
-				<h6 class="card-subtitle my-2 text-muted" id="datetime"></h6>
+				<h6 class="card-subtitle my-2 text-muted" id="datetime">
+					<span id="time">
+						<span id="hour"></span>:<span id="minute"></span>:<span id="second"></span>
+					</span>
+					<span id="dateNtime">–</span>
+					<span id="date">
+						<span id="day"></span>/<span id="month"></span>/<span id="year"></span>
+					</span>
+					<span id="period"></span>
+				</h6>
 				<div id="content"></div>
 			</div>
 		</div>
@@ -22,8 +46,9 @@ function init_scene() {
 
 }
 
-function reset_scene() {
+function reset_section() {
 
-	$("div#scene").remove();
+	$("div#chapters").remove();
+	$("div#section").remove();
 
 }

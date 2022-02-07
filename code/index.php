@@ -58,7 +58,6 @@ $stmt = $PDO->prepare("
 		\"Map\" AS M
 	WHERE
 		M.post IN ({$urls})
-		OR 1 = 1
 	ORDER BY
 		M.created DESC
 ");
@@ -75,8 +74,8 @@ $count = $stmt->rowCount();
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>TellUs – Map stories</title>
-		<meta name="title" content="TellUs" />
+		<title>GeoTales – Map stories</title>
+		<meta name="title" content="GeoTales" />
 		<meta name="description" content="Map stories" />
 
 		<link rel="icon" href="assets/logo.png" />
@@ -116,7 +115,7 @@ $count = $stmt->rowCount();
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="TellUs" width="30" height="30" />
+						<img src="assets/logo.png" alt="GeoTales" width="30" height="30" />
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -169,7 +168,7 @@ $count = $stmt->rowCount();
 
 				<div class="row" id="header-text">
 					<div class="col-sm-9">
-						<h2 class="text-muted">TellUs – Map stories</h2>
+						<h2 class="text-muted">GeoTales – Map stories</h2>
 						<h5 class="text-muted">Top 15 most popular maps</h5>
 					</div>
 					<div class="col-sm-3 mt-3">
@@ -205,8 +204,8 @@ $count = $stmt->rowCount();
 			if($count > 0) {
 				foreach($rows as $row) {
 					$created = date_format(date_create($row['created']), "d.M Y, H:i");
-					$views = 0; // $posts[ $row['post'] ]['views'];
-					$likes = 0; // $posts[ $row['post'] ]['likes'];
+					$views = $posts[ $row['post'] ]['views'];
+					$likes = $posts[ $row['post'] ]['likes'];
 		?>
 					<div class="col">
 						<div class="card">
@@ -292,7 +291,7 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-4 mt-2">
 						<center>
-							<img class="d-none d-sm-block" src="assets/logo.png" alt="TellUs" width="40" height="40" />
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="GeoTales" width="40" height="40" />
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">

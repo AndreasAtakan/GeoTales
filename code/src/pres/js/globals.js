@@ -8,16 +8,13 @@
 
 "use strict";
 
-let _CLUSTERING = "default",
-	_AVATARSPEED = 2000,
+let _AVATARSPEED = 2000,
 	_PANNINGSPEED,
-	_FONT = "inherit",
-	_THEME = "default",
-	_SCENES = [];
+	_THEME = "default";
 
-let _EVENTS = {},
+let _CONTENT,
 	_MAP,
-	_IS_MAP_MOVING = false;
+	/**/_IS_MAP_MOVING = false;
 
 /*const _THEMES = [
 	{ name: "default",	style: "light",	primary: "#f2f2f2",	secondary: "#bfbfbf" },
