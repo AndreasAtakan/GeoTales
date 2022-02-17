@@ -58,13 +58,13 @@ function prepare_section(prevId) {
 	$(`li[data-id="${prevId}"]`).after(`
 		<li class="list-group-item" id="prepare">
 			<div class="row g-0">
-				<div class="col-5 text-center">
+				<!--div class="col-5 text-center">
 					<button type="button" class="btn btn-sm btn-outline-light" id="chapter" title="Add chapter">
 						<i class="fas fa-paragraph"></i>
 					</button>
 					<p class="small text-muted mb-0">Add chapter</p>
-				</div>
-				<div class="col-5 text-center">
+				</div-->
+				<div class="col-10 text-center">
 					<button type="button" class="btn btn-sm btn-outline-light" id="scene" title="Capture new scene">
 						<i class="fas fa-camera"></i>
 					</button>

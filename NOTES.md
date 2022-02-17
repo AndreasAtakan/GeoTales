@@ -7,8 +7,7 @@
 
 ##### Endringer – tilbakemeldinger runde 2:
 
-1. Redigere avatar icon før icon blir satt på avataren (litt som twitter-profilbilde)
-2. Legge inn tekst-boks som alternativ i kart-tegning
+1. Legge inn tekst-boks som alternativ i kart-tegning
 
 ##### Endringer – tilbakemeldinger runde 3:
 
@@ -27,10 +26,6 @@
 
 - V Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)
 
-- Ny avatar-icon funksjonalitet: Legg inn ny ui i avatar-popup under "overlay" hvor brukeren kan legge predefinerte ikoner med gjennomsiktighet (png), f.eks. båt, bil, ol., som vil legges på toppen av avatarens eksisterende ikon. Dette gir avataren ekstra "forteller"-verdi
-
-- Redigerings-modus: Brukeren kan dynamisk justere på bredden av scene-seksjonen
-
 - [Grunnkart kilde](https://maps.lib.utexas.edu/maps)
 
 
@@ -46,9 +41,12 @@
 
 
 - Down-the-line:
-	1. Bug with white lines on dark basemaps; porting all the code to MapBox will most likely fix this issue, but it will cost time. This should be done only if this bug hinders user-growth or if we have enought resources (money) to do it.
-	2. Avatar følger linje (rute) fra scene-til-scene. En linje som følger avataren fra scene-til-scene
-	3. Problem hvis grunnkart forsvinner fra grunnkart-leverandørene; Vi bør ha et mellom-system som behandler alle grunnkart-leverandørene, slik at edit-mode kobler selg til dette mellom-systemet og ikke direkte til leverandørene. Da kan vi kontrollere hvis et grunnkart forsvinner.
+	1. Alle endringer bør auto-lagres
+	2. Bug with white lines on dark basemaps; porting all the code to MapBox will most likely fix this issue, but it will cost time. This should be done only if this bug hinders user-growth or if we have enought resources (money) to do it.
+	3. Avatar følger linje (rute) fra scene-til-scene. En linje som følger avataren fra scene-til-scene
+		- Når en bruker trykker på en avatar i pres.-mode, vår man valg om å se hele avatarens "reise"/rute oppsumert og markert med sammenhenge linje
+		- [Cool font](https://exeterbookhand.com/)
+	4. Problem hvis grunnkart forsvinner fra grunnkart-leverandørene; Vi bør ha et mellom-system som behandler alle grunnkart-leverandørene, slik at edit-mode kobler selg til dette mellom-systemet og ikke direkte til leverandørene. Da kan vi kontrollere hvis et grunnkart forsvinner.
 
 
 
@@ -62,4 +60,3 @@
 	- Erstattet alle `L.Point(20,20)` med `L.Point(12,12)` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å gjøre resize/move boksene på polyline/polygon objekter mindre
 	- ~Fjernet alle kall til `_toggleMarkerHighlight` og fjernet selve metoden og medfølgende hjelpe-metoder på `L.Edit.Marker` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å fjerne objekt-styling på markers i editLayer~
 	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~
-

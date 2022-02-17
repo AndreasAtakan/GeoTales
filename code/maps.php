@@ -359,7 +359,7 @@ $count = $stmt->rowCount();
 						?>
 									<tr>
 										<th style="width: 8.33%;" scope="row">
-											<img class="img-fluid" src="<?php echo $row['preview']; ?>" alt="&nbsp;" />
+											<img class="img-fluid" src="<?php echo $row['preview']; ?>" alt="#" />
 										</th>
 										<td style="width: 16.66%;"><?php echo $row['title']; ?></td>
 										<td style="width: 25%; max-width: 65px;" class="text-truncate"><?php echo $row['description']; ?></td>

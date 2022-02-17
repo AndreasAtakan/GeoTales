@@ -153,7 +153,6 @@ $row = $stmt->fetch();
 							<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false"></button>
 							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
 								<li><a class="dropdown-item" href="index.php">Gallery</a></li>
-								<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">More maps</a></li>
 						<?php
 							if($logged_in) {
 						?>

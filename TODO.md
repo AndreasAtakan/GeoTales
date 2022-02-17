@@ -1,67 +1,71 @@
 ## TODO
 
 - Move the system out of Google Cloud, and onto klick.com server (4 CPU, 8GB RAM, 250 GB SSD)
-- Port Paul map onto system
 
 
 - Business:
-	1. Registrere AS hos Stripe for nettbetaling
+	* Registrere AS hos Stripe for nettbetaling
 
+- IN:
+	* Vedlegg i søknaden:
+		- Skjermbilde av GeoGebra modell med forklarende tekst under
+		- Tre skjermbilder, hvert av en scene i Paulus kartet, med videre forklaring av programmet
 
 - Landing page redesign:
-	1. X Top part of page should be a grid view of the top 15 posted maps from the forum (like a gallery)
-	2. X Add project preview image, this shoud be a link to the center basemap image (to keep things simple)
-	3. X Pricing should not be included (pricing info is on settings-page)
-	4. X Big "Create your own map here" button (directly to sign up, with Google, Facebook, etc.)
-- Projects page:
-	1. X Add a "Share" button; opens a share modal
-		- X Contains a copy-field with the link to pres-mode, user can click "copy to clipboard"
-		- X Contains a copy-field with the link to pres-mode in iframe, user can click "copy to clipboard"
-		- X User can share to FB, Twitter, email, etc.
+	* Move "Top 15 maps" text to under search field
+	* Rename "Try now" button to "Create map"
 - Edit-mode:
-	0. X When user saves the map; also write the center basemap-tile as the map's *preview*
-	1. X BUG; "Pluss" button on scene (under delete); click-event is still active in prepare-mode
-	2. X Prepare-scene box should have a cancel button (X) to remove
-	3. X When in prepare mode, all avatars should be moved to fadeLayer
-	4. X Kapittelinndeling
-	5. Library of avilable avatar icons (this will save a lot of storage space and cost)
-	6. Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
-	7. X Avatar-sizing looks wierd on different screen-sizes; solution could be to fix avatar size to a certain zoom-level
-	8. GEDCOM import:
+	* ~Kapittelinndeling~
+	* Numerert scene (1-n)
+	* Under "Available basemaps"; legg til mulighet for blankt/ensfarget grunnart
+	* Library of avilable avatar icons (this will save a lot of storage space and cost)
+	* Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
+	* Fix tootip for ImageOverlay
+	* Add textbox as a map-object drawing option:
+		- Before placing the textbox, when in "drwaing-mode", there will be a small circlemarker following the curser marking the bottom-center position of where the textbox will be placed
+		- When placed, textboxes on map will appear as a leaflet-popup with trumbowyg-textbox inside filling the entire popup
+		- (?) The popup's position will be static relative to the screen, and not to the map
+		- The popup is a Leaflet-Draggable object with a drag-handler in top-left corner
+		- The popup can be resized in both with and height
+		- (?) Have a date/time input above the textbox in the popup instead of the date/time in the scene-box in left section
+	* Remove textbox from left scene section
+	* Redo left scene-section:
+		- This section will ONLY contain scenes
+		- Change the section into a collapsable "drop-down/-up" with a much smaller total width
+		- The section will only contain small box-elements that represent a single scene with buttons for "recapture", "delete", "reorder", etc.
+		- Each box-element will have a checkbox that can mark that scene as the begining of a new chapter. When checked, a small textbox will appear where the user can input the chapter title
+	* Redo "create new scene" workflow:
+		- When user clicks "+" under a scene, the new scene must be created immediately, capturing the maps current extent. This will NOT trigger a "flash" on the map
+		- If user wants to change the scene's map-extent, user can simply click "recapture"
+		- Only "Recapture" will trigger a map flash-effect
+	* GEDCOM import:
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
 		- Somehow mark relation between avatars (line between?, color-coding?, ect.)
-	9. Down the line; all changes should be auto-saved
+	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 - Pres-mode:
-	1. X When scene content is empty, scene box should not be shown
-	2. X Extra buttons to navigate; "Back to forum", "Back to my projects", Chapter-navigation, "Clone to my maps", etc.
-	3. X Fix date in scene box so that it "ticks" from previous date to next date
-	4. Legg til fade inn og ut på scenene
-	5. X Når kartet ikke er på scenens bounds, og brukeren trykker på et bilde i scene-boksen, så skal det ikke åpne bilde-modal, men heller gå til scenens bounds og kun åpne bilde-modal når brukeren trykker på bildet og kartet allerde står på scnene-bounds
-- Forum:
-	1. X When user publishes map to forum; embed pres-mode as an iframe into the post
-	2. X Add navigation buttons to header; "Gallery" button, "My maps" button
-	3. Set up file and image upload to Amazon S3
-	4. Add login providers: Google, Apple, Facebook, Twitter, GitHub, Discord
+	* ~When scene content is empty, scene box should not be shown~
+	* When transitioning from on scene to the next, map-textboxes should be faded out when the scene is "exited", and faded in when the next scene is "entered"
+	* There should be an option to not auto-pan to the next scenes map-position. Lock/Unlock. When unlocked, the map will go to next scene as usual, but not automatically move the map
 - Forum-integration:
-	1. Cron-job for checking if a user is deleted from the forum; `https://forum.tellusmap.com/u/by-external/{external_id}.json`
-	2. Cron-job for checking if an image no longer exists in a map, and then deleting it from Amazon S3
-	3. `code/api/img.php`: Upload file to Discourse via API instead of saving to disk. This will utilize Amazon S3 via Discourse
-	4. X Use avatar from the forum instead of user-icon in navbar (fetch avatar from forum API)
-	5. Implement *webhooks.php* for reciving webhook calls from Discourse when user logs in and out; then log user in or out
+	* Set up file and image upload to Amazon S3
+	* Add login providers: Google, Apple, Facebook, Twitter, GitHub, Discord
+	* Cron-job for checking if a user is deleted from the forum; `https://forum.tellusmap.com/u/by-external/{external_id}.json`
+	* Cron-job for checking if an image no longer exists in a map, and then deleting it from Amazon S3
+	* `code/api/img.php`: Upload file to Discourse via API instead of saving to disk. This will utilize Amazon S3 via Discourse
+	* Implement *webhooks.php* for reciving webhook calls from Discourse when user logs in and out; then log user in or out
 
 
 - Working TODO:
-	- Paul map
+	* Paul map
+
+- Endringer etter tilbakemeldinger, ny runde:
+	* Scene text-box can't write?
 
 
 
 
 
 
-- WIP (not woking) Block zoom on mobile devices; meta tag
+- W (not woking) Block zoom on mobile devices; meta tag
 - X (extend this) Mulighet for grunnkart-legende
-- Edit-mode
-	- (?) Avatar-ikon; Mulighet til å rotere, slider i popup menyen, CSS transform
-- Presentation-mode
-	- (?) Avatar-ikon overganger; gjøre mer "smooth" (fade-overgang på avatar-ikoner fra scene til scene)

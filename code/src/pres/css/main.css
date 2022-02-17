@@ -65,9 +65,9 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	top: 55px;
 	left: 15px;
 
-	max-height: calc(100vh - 30px);
+	max-height: calc(100vh - 70px);
 	width: auto;
-	max-width: min(550px, 40vw);
+	max-width: min(550px, 35vw);
 
 	opacity: 0.9;
 	overflow-y: auto;

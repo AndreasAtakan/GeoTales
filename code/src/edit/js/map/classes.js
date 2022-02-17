@@ -23,7 +23,7 @@ L.AvatarLayer = L.FeatureGroup.extend({
 		o.bindPopup(avatar_popup(), { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450, autoPanPadding: L.point(60,60) });
 
 		let label = o.options.label;
-		if(label) { o.bindTooltip(label, { direction: "bottom", permanent: true }); }
+		//if(label) { o.bindTooltip(label, { direction: "bottom", permanent: true }); }
 
 		let drag = new L.Draggable( o.getElement() ), isDragEv = false;
 		drag.enable();
@@ -56,7 +56,7 @@ L.AvatarLayer = L.FeatureGroup.extend({
 	unbind: function(id) {
 		let o = this.getObject(id);
 
-		o.closeTooltip(); o.unbindTooltip();
+		//o.closeTooltip(); o.unbindTooltip();
 		o.closePopup(); o.unbindPopup();
 
 		o.off("popupopen"); o.off("mouseover"); o.off("mouseout");
@@ -95,7 +95,7 @@ L.AvatarLayer = L.FeatureGroup.extend({
 			opacity(${(1 - o.options.overlayTransparency)*100}%)
 		`);
 
-		o.closeTooltip(); o.openTooltip();
+		//o.closeTooltip(); o.openTooltip();
 	},
 
 	removeLayer: function(object, id) {
@@ -201,13 +201,13 @@ function bind_setup(object) {
 			$("#avatarPopup input#label").change(function(ev) {
 				let val = $(this).val();
 
-				if(val) {
+				/*if(val) {
 					if(!object.getTooltip()) {
 						object.bindTooltip( L.tooltip({ direction: "bottom", permanent: true }, object) );
 					}
 					object.setTooltipContent(val);
 				}
-				else{ object.unbindTooltip(); }
+				else{ object.unbindTooltip(); }*/
 
 				object.options.label = val;
 				_MAP.updateObject(object.options.id);

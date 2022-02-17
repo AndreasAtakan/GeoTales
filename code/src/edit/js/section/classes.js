@@ -152,11 +152,11 @@ function Content() {
 
 	this.unbind = function() {
 		$("#section li button#reorder, #section li button#remove").prop("disabled", true);
-		$("#section li").off("click");
+		$("#section li, #section li div#content").off("click");
 	};
 	this.bind = function() {
 		$("#section li button#reorder, #section li button#remove").prop("disabled", false);
-		$("#section li").click(ev => {
+		$("#section li, #section li div#content").click(ev => {
 			let c = this.getEl(ev.target);
 			if(!c || c.type != "scene") { return; }
 
@@ -276,9 +276,9 @@ function Prepare(_super, prevId) {
 	$("li#prepare button#cancel").click(ev => {
 		$("li#prepare").remove(); _super.current();
 	});
-	$("li#prepare button#chapter").click(ev => {
+	/*$("li#prepare button#chapter").click(ev => {
 		$("li#prepare").remove(); _super.add("chapter");
-	});
+	});*/
 	$("li#prepare button#scene").click(ev => {
 		$("li#prepare").remove(); _super.add("scene");
 	});
@@ -415,8 +415,6 @@ function Scene(_super, id, prevId) {
 		   li[data-id="${this.id}"] button#add,
 		   li[data-id="${this.id}"] button#delete`).prop("disabled", true);
 		$(`li[data-id="${this.id}"] div#content`).trumbowyg("disable");
-		let h = (ev) => { $(`li[data-id="${this.id}"] div#content`).unbind("click", h); _super.set(this.id); };
-		$(`li[data-id="${this.id}"] div#content`).click(h);
 	};
 
 	this.setBasemap = function() {
