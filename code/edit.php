@@ -58,7 +58,7 @@ $row = $stmt->fetch();
 		<!--link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
-		<link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" />
+		<!--link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
 		<!--link rel="stylesheet" href="lib/prism/prism.css" /-->
 		<link rel="stylesheet" href="lib/trumbowyg/ui/trumbowyg.min.css" />
@@ -84,7 +84,7 @@ $row = $stmt->fetch();
 						<div class="mb-3">
 							<label for="fileInput" class="form-label">Choose a data-file</label>
 							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, GeoTales map-file</div>
+							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, GeoTales-file</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -107,17 +107,14 @@ $row = $stmt->fetch();
 					</div>
 					<div class="modal-body">
 						<div class="container-fluid">
-							<div class="row mb-5">
-								<div class="col-md-10">
-									<p>Avatar animation speed: <small><span id="avatarSpeedInputValue">2000 milliseconds</span></small></p>
-									<input type="range" class="form-range" id="avatarSpeedInput" min="200" max="3000" step="100" value="2000" />
-								</div>
-							</div>
-
 							<div class="row">
-								<div class="col-md-10">
-									<p>Map panning speed: <small><span id="panningSpeedInputValue">auto</span></small></p>
-									<input type="range" class="form-range" id="panningSpeedInput" min="0" max="4000" step="100" />
+								<div class="col">
+									<label for="avatarSpeed" class="form-label">Avatar animation speed</label>
+									<input type="number" class="form-control" id="avatarSpeed" min="200" max="3000" value="2000" />
+								</div>
+								<div class="col">
+									<label for="panningSpeed" class="form-label">Map panning speed</label>
+									<input type="number" class="form-control" id="panningSpeed" min="500" max="4000" placeholder="auto" />
 								</div>
 							</div>
 						</div>
@@ -136,7 +133,7 @@ $row = $stmt->fetch();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="basemapModalLabel">Choose basemap</h5>
+						<h5 class="modal-title" id="basemapModalLabel">Change basemap</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -162,7 +159,7 @@ $row = $stmt->fetch();
 
 							<div class="row my-4">
 								<div class="col col-md-10">
-									<label for="basemapFile"><small>Or choose custom basemap</small></label>
+									<label for="basemapFile"><small>Or use custom basemap</small></label>
 									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/gif, image/jpeg, image/png" />
 									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
 								</div>
@@ -174,9 +171,9 @@ $row = $stmt->fetch();
 									<div class="input-group input-group-sm">
 										<input type="text" class="form-control" id="basemapLink" aria-label="Url" aria-describedby="keyText" placeholder="URL" />
 										<input type="text" class="form-control" id="basemapKey" aria-label="Access key" aria-describedby="keyText" placeholder="Access key (optional)" />
-										<button type="button" class="btn btn-outline-secondary" id="basemapFetch">Fetch</button>
+										<button type="button" class="btn btn-outline-secondary" id="basemapFetch">Apply</button>
 									</div>
-									<div id="keyText" class="form-text">XYZ-tiles or a Mapbox style. Access key is required with Mapbox style</div>
+									<div id="keyText" class="form-text">XYZ-tiles or Mapbox style. Access key is required with Mapbox style</div>
 								</div>
 							</div>
 						</div>
@@ -282,26 +279,43 @@ $row = $stmt->fetch();
 				</div>
 			</div>
 
-
-			<div class="row g-0" style="height: 100vh;">
-				<div class="col-12" id="mapCol">
-					<div id="map"></div>
-				</div>
-
-				<div class="col-12 col-sm-6 col-lg-5 col-xl-4 col-xxl-3 shadow" id="sectionCol" tabindex="0">
-
-					<div class="row align-items-center h-100 g-0">
-						<div class="col text-center">
-							<button type="button" class="btn btn-outline-secondary px-5" id="add">
-								<strong>+</strong>
+			<div class="row g-0" style="height: calc(100vh - 54px); margin-top: 54px;">
+				<div class="col-5 col-xs-4 col-sm-3 col-lg-2 col-xxl-1 shadow" id="sceneCol">
+					<div class="row g-0">
+						<div class="col-8 text-center py-3 ps-1 pe-1">
+							<button type="button" class="btn btn-sm btn-light w-100" id="add" title="Add new scene">
+								<i class="fas fa-plus"></i>
 							</button>
-
-							<p class="text-muted mt-3">Click to capture scene</p>
+						</div>
+						<div class="col-4 text-center py-3 ps-1 pe-1">
+							<button type="button" class="btn btn-sm btn-light w-100" id="recapture" title="Recapture scene">
+								<i class="fas fa-camera"></i>
+							</button>
 						</div>
 					</div>
 
+					<div class="row g-0">
+						<div class="col">
+							<hr class="my-1" />
+						</div>
+					</div>
+
+					<div class="row g-0">
+						<div class="col" tabindex="0">
+							<ul class="list-group" id="scenes" style="height: calc(100vh - 72px - 54px);"></ul>
+						</div>
+					</div>
 				</div>
 
+				<div class="col-7 col-xs-8 col-sm-9 col-lg-10 col-xxl-11" id="mapCol">
+					<div id="map"></div>
+
+					<!--div class="card" id="textbox">
+						<div class="card-body">
+							<div id="content"></div>
+						</div>
+					</div-->
+				</div>
 			</div>
 		</div>
 
@@ -324,7 +338,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
-		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
+		<!--script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
 		<!--script type="text/javascript" src="lib/geotiff/geotiff.js"></script-->
 		<!--script type="text/javascript" src="lib/plotty/plotty.min.js"></script-->
@@ -348,7 +362,7 @@ $row = $stmt->fetch();
 
 		<!-- Set ID, TITLE and HOST -->
 		<script type="text/javascript">
-			const _ID = <?php echo $id; ?>,
+			const _ID = `<?php echo $id; ?>`,
 				  _TITLE = `<?php echo $row['title']; ?>`,
 				  _HOST = window.location.host;
 		</script>
@@ -362,7 +376,7 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/edit/js/generate.js"></script>
 
-		<script type="text/javascript" src="src/edit/js/section/classes.js"></script>
+		<script type="text/javascript" src="src/edit/js/scenes.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/map/classes.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>

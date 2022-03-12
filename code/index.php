@@ -169,11 +169,10 @@ $count = $stmt->rowCount();
 				<div class="row" id="header-text">
 					<div class="col-sm-9">
 						<h2 class="text-muted">GeoTales – Map stories</h2>
-						<h5 class="text-muted">Top 15 most popular maps</h5>
 					</div>
 					<div class="col-sm-3 mt-3">
 						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" href="api/login.php?return_url=stage.php" class="btn btn-lg btn-primary">Try now</a>
+							<a role="button" href="api/login.php?return_url=stage.php" class="btn btn-lg btn-info" style="color: white;">Create map</a>
 						</div>
 						<p class="text-muted text-center mt-2">Create your own map for <strong>free</strong></p>
 					</div>
@@ -187,8 +186,9 @@ $count = $stmt->rowCount();
 					<div class="col">
 						<form method="get" action="<?php echo "https://{$CONFIG['forum_host']}/search"; ?>" id="search">
 							<input type="hidden" name="expanded" value="true" />
+							<input type="hidden" name="q" value="" />
 							<div class="input-group" style="max-width: 650px;">
-								<input type="text" class="form-control" name="q" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
+								<input type="text" class="form-control" name="none" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
 								<button type="submit" class="btn btn-outline-secondary" id="search-button">Search</button>
 							</div>
 						</form>
@@ -197,6 +197,12 @@ $count = $stmt->rowCount();
 
 				<div class="row my-5">
 					<div class="col"></div>
+				</div>
+
+				<div class="row my-2">
+					<div class="col">
+						<h5 class="text-muted">Top 15 most popular maps</h5>
+					</div>
 				</div>
 
 				<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">

@@ -14,10 +14,8 @@ window.onload = function(ev) {
 	let form = document.forms.search;
 	form.onsubmit = function(ev) {
 		ev.preventDefault();
-
-		let val = `#public-maps ${form.elements.q.value}`;
-		form.elements.q.value = val;
-
+		form.elements.q.value = `#public-maps ${form.elements.none.value}`;
+		form.elements.none.value = "";
 		form.submit();
 	};
 

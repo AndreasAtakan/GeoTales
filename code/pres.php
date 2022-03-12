@@ -187,7 +187,7 @@ $row = $stmt->fetch();
 
 		<!-- Set ID, TITLE and HOST -->
 		<script type="text/javascript">
-			const _ID = <?php echo $id; ?>,
+			const _ID = `<?php echo $id; ?>`,
 				  _TITLE = `<?php echo $row['title']; ?>`,
 				  _HOST = window.location.host;;
 		</script>

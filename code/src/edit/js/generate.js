@@ -9,178 +9,38 @@
 "use strict";
 
 
-function init_section() {
+function new_scene(id, prevId) {
 
-	$("#sectionCol").html(`
-		<div class="row align-items-center g-0 h-100">
-			<div class="col">
-				<div class="row gx-0 mx-2" id="topPadSection">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-
-				<div class="row mx-2">
-					<div class="col">
-						<ul class="list-group" id="section"></ul>
-					</div>
-				</div>
-
-				<div class="row gx-0 mx-2" id="bottomPadSection">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-			</div>
-		</div>
-	`);
-
-}
-
-function reset_section() {
-
-	$("#sectionCol").html(`
-		<div class="row align-items-center h-100 g-0">
-			<div class="col text-center">
-				<button type="button" class="btn btn-outline-secondary px-5" id="add">
-					<strong>+</strong>
-				</button>
-
-				<p class="text-muted mt-3">Click to capture scene</p>
-			</div>
-		</div>
-	`);
-
-}
-
-function prepare_section(prevId) {
-
-	$(`li[data-id="${prevId}"]`).after(`
-		<li class="list-group-item" id="prepare">
+	let cont = `
+		<li class="list-group-item p-0 pt-1 mx-2 my-1" id="${id}" data-id="${id}">
 			<div class="row g-0">
-				<!--div class="col-5 text-center">
-					<button type="button" class="btn btn-sm btn-outline-light" id="chapter" title="Add chapter">
-						<i class="fas fa-paragraph"></i>
-					</button>
-					<p class="small text-muted mb-0">Add chapter</p>
-				</div-->
-				<div class="col-10 text-center">
-					<button type="button" class="btn btn-sm btn-outline-light" id="scene" title="Capture new scene">
-						<i class="fas fa-camera"></i>
-					</button>
-					<p class="small text-muted mb-0">New scene</p>
-				</div>
-				<div class="col-2 text-center">
-					<button type="button" class="btn btn-sm btn-outline-light" id="cancel" title="Cancel">
-						<i class="fas fa-times"></i>
-					</button>
-				</div>
-			</div>
-		</li>
-	`);
-
-}
-
-function chapter_section(id, prevId) {
-
-	let cont = `
-		<li class="list-group-item chapter p-0" id="${id}" data-id="${id}">
-			<form class="container-fluid gx-0">
-				<div class="row g-0 p-1">
-					<div class="col">
-						<div class="input-group input-group-sm">
-							<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
-								<i class="fas fa-bars"></i>
-							</button>
-							<input type="text" class="form-control" id="title" aria-label="Title" aria-describedby="reorder" style="z-index: 3;" />
-							<button type="button" class="btn btn-outline-light" id="remove" title="Remove chapter">
-								<i class="fas fa-times"></i>
-							</button>
+				<div class="col">
+					<div class="input-group input-group-sm">
+						<div class="input-group-text px-1" style="border-radius: 0; background-color: initial; border: none;">
+							<input type="checkbox" class="form-check-input mt-0" id="chapter" value="" title="Start of chapter" aria-label="Start of chapter" />
 						</div>
+						<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
+							<i class="fas fa-bars"></i>
+						</button>
+						<input type="text" class="form-control" id="title" aria-label="Title" />
+						<button type="button" class="btn btn-outline-light" id="delete" title="Delete scene">
+							<i class="fas fa-times"></i>
+						</button>
 					</div>
 				</div>
-			</form>
+			</div>
+			<div class="row g-0">
+				<div class="col">
+					<span class="mx-2" id="num"></span>
+				</div>
+			</div>
 		</li>
 	`;
 
 	if(prevId) { $(`li[data-id="${prevId}"]`).after(cont); }
-	else{ $("ul#section").append(cont); }
+	else{ $("ul#scenes").append(cont); }
 
 }
-
-function scene_section(id, prevId) {
-
-	let cont = `
-		<li class="list-group-item p-0" id="${id}" data-id="${id}">
-			<form class="container-fluid gx-0">
-				<div class="row g-0 p-1">
-					<div class="col">
-						<div class="input-group input-group-sm">
-							<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
-								<i class="fas fa-bars"></i>
-							</button>
-							<select class="form-select pe-2" id="period" aria-label="Timeperiod" aria-describedby="reorder" style="z-index: 3; max-width: 45px; background-image: none;">
-								<option value="ad" selected>AD</option>
-								<option value="bc">BC</option>
-							</select>
-							<input type="date" class="form-control" id="date" aria-label="Date" />
-							<input type="time" class="form-control" id="time" aria-label="Time" step="1" style="z-index: 3;" />
-							<button type="button" class="btn btn-outline-light" id="delete" title="Delete scene">
-								<i class="fas fa-times"></i>
-							</button>
-						</div>
-					</div>
-				</div>
-				<div class="row g-0 my-1">
-					<div class="col content" style="overflow-y: auto;">
-						<div id="content"></div>
-					</div>
-				</div>
-				<div class="row g-0 my-1">
-					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-outline-light" id="add" title="Add below">
-							<i class="fas fa-plus"></i>
-						</button>
-					</div>
-					<div class="col text-center">
-						<button type="button" class="btn btn-sm btn-outline-light" id="capture" title="Recapture scene">
-							<i class="fas fa-camera"></i>
-						</button>
-					</div>
-				</div>
-			</form>
-		</li>
-	`;
-
-	if(prevId) { $(`li[data-id="${prevId}"]`).after(cont); }
-	else{ $("ul#section").append(cont); }
-
-}
-
-
-
-/*function init_themes() {
-
-	let html = ``;
-
-	for(let t of _THEMES) {
-		html += `
-			<div class="col">
-				<div class="card ${t.style == "dark" ? "text-white" : ""} mt-2" style="background-color: ${t.primary};">
-					<div class="card-header" style="background-color: ${t.secondary};">
-						${t.name}
-					</div>
-					<div class="card-body">
-						<input class="form-check-input" type="radio" name="themeRadio" id="${t.name}" ${t.name == "default" ? "checked" : ""} />
-					</div>
-				</div>
-			</div>
-		`;
-	}
-
-	$("#optionsModal #themeChoose").html(html);
-
-}*/
 
 
 

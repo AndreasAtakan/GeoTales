@@ -29,14 +29,13 @@ L.FadeLayer = L.FeatureGroup.extend({
 
 			case "polyline":
 			case "polygon":
-			case "rectangle":
 				object.setStyle({ opacity: 0.3 });
 				object.setStyle({ fillOpacity: 0.2 });
 				break;
 
 			default: console.error("object type invalid"); break;
 		}
-		object.on("click", ev => { _MAP.insertObject(object.options.id, object.options.contentId); });
+		object.on("click", ev => { _MAP.insertObject(object.options.id, object.options.sceneId); });
 	},
 
 	getObject: function(id) {
@@ -77,7 +76,6 @@ L.ObjectLayer = L.FeatureGroup.extend({
 
 			case "polyline":
 			case "polygon":
-			case "rectangle":
 				this.editLayer.addLayer(object);
 				break;
 
@@ -109,7 +107,6 @@ L.ObjectLayer = L.FeatureGroup.extend({
 
 			case "polyline":
 			case "polygon":
-			case "rectangle":
 				this.editLayer.removeLayer(object);
 				break;
 

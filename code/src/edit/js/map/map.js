@@ -15,27 +15,19 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( new L.Control.Fullscreen({ position: "topright" }) );*/
 
-	this.basemapLegend = L.control.htmllegend({
-		position: "bottomright",
-		collapsedOnInit: true,
-		disableVisibilityControls: true,
-		updateOpacity: null
-	});
-	this.addControl( this.basemapLegend );
-
 	this.addControl(
 		L.control.zoom({ position: "bottomright" })
 	);
 
 	this.basemapButton = L.easyButton({
-		id: "chooseBasemap",
+		id: "changeBasemap",
 		position: "bottomright",
 		leafletClasses: true,
 		states: [
 			{
 				stateName: "main",
 				onClick: function(button, map) { $("#basemapModal").modal("show"); },
-				title: "Choose a basemap",
+				title: "Change basemap",
 				icon: "fa-layer-group"
 			}
 		]
@@ -97,26 +89,13 @@ L.Map.addInitHook(function() {
 				type = "avatar";
 				break;
 
-			/*case "circlemarker":
-				let p = this.latLngToContainerPoint(object.getLatLng());
-				object = L.popup({
-						//keepInView: true,
-						closeButton: false,
-						autoClose: false,
-						closeOnEscapeKey: false,
-						closeOnClick: false,
-						maxWidth: 3500,
-						maxHeight: 450,
-						autoPanPadding: L.point(60,60)
-					});
-				object.options.pos = p;
-				type = "textbox";
-				break;*/
+			case "circlemarker":
+				break;
 
 			default: break;
 		}
 
-		object.options.contentId = _CONTENT.active;
+		object.options.sceneId = _SCENES.active;
 
 		this.objectLayer.addLayer(object, type);
 		this.objects.push( this.extractObject(object) );
@@ -168,7 +147,7 @@ L.Map.addInitHook(function() {
 				},
 				polyline: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 } },
 				polygon: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
-				rectangle: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
+				rectangle: false,
 				circle: false,
 				circlemarker: false
 			}
@@ -177,7 +156,7 @@ L.Map.addInitHook(function() {
 	this.disableDrawing(); // Disable drawing-control
 
 
-	this.on("movestart", ev => { _CONTENT.sceneInactive(); });
+	this.on("movestart", ev => { _SCENES.sceneInactive(); });
 	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
 
 });
@@ -194,12 +173,9 @@ L.Map.include({
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
-	clear: function() {
+	reset: function() {
 		this.objectLayer.clearLayers();
 		this.fadeLayer.clearLayers();
-	},
-	reset: function() {
-		this.clear();
 
 		this.disableDrawing();
 		this.basemapButton.disable();
@@ -220,8 +196,8 @@ L.Map.include({
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
-	deleteScene: function(contentId) {
-		this.objects = this.objects.filter(o => o.contentId != contentId);
+	deleteScene: function(sceneId) {
+		this.objects = this.objects.filter(o => o.sceneId != sceneId);
 	},
 
 	highlightObject: function(id) {
@@ -239,25 +215,14 @@ L.Map.include({
 		else{ o.setStyle({ opacity: 0.3 }); }
 	},
 
-	setObjectsPrepare: function(prevId) {
-		this.objectLayer.clearLayers();
-		this.fadeLayer.clearLayers();
-		for(let o of this.objects) {
-			if(o.contentId == prevId) {
-				let oo = this.createObject(o);
-				this.fadeLayer.addLayer(oo, o.type, o.id);
-				oo.off("click");
-			}
-		}
-	},
-	setObjects: function(contentId, animate) {
-		let prev = _CONTENT.getPrevScene(contentId);
+	setObjects: function(sceneId, animate) {
+		let prev = _SCENES.getPrevScene(sceneId);
 		let prevId = prev ? prev.id : null;
 
 		this.fadeLayer.clearLayers();
 		if(prevId) {
 			for(let o of this.objects) {
-				if(o.contentId == prevId) { this.fadeLayer.addLayer(this.createObject(o), o.type, o.id); }
+				if(o.sceneId == prevId) { this.fadeLayer.addLayer(this.createObject(o), o.type, o.id); }
 			}
 		}
 
@@ -266,7 +231,7 @@ L.Map.include({
 		});
 		this.objectLayer.clearLayers();
 		for(let o of this.objects) {
-			if(o.contentId == contentId) {
+			if(o.sceneId == sceneId) {
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
@@ -283,25 +248,25 @@ L.Map.include({
 		}
 	},
 
-	insertObject: function(id, contentId) {
+	insertObject: function(id, sceneId) {
 		if(this.objectLayer.getObject(id)) { return; }
 
 		let object;
 		for(let o of this.objects) {
-			if(o.id == id && o.contentId == contentId) {
+			if(o.id == id && o.sceneId == sceneId) {
 				object = Object.assign({}, o);
 				break;
 			}
 		}
-		object.contentId = _CONTENT.active;
+		object.sceneId = _SCENES.active;
 
 		this.objectLayer.addLayer(this.createObject(object), object.type, object.id);
 		this.objects.push(object);
 	},
-	cloneAvatar: function(id, contentId) {
+	cloneAvatar: function(id, sceneId) {
 		let object, zoom = this.getZoom();
 		for(let o of this.objects) {
-			if(o.id == id && o.contentId == contentId) {
+			if(o.id == id && o.sceneId == sceneId) {
 				object = Object.assign({}, o);
 				break;
 			}
@@ -323,7 +288,7 @@ L.Map.include({
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let o = this.objects[i];
-			if(o.id == id && o.contentId == object.options.contentId) {
+			if(o.id == id && o.sceneId == object.options.sceneId) {
 				this.objects[i] = this.extractObject(object);
 				break;
 			}
@@ -332,13 +297,13 @@ L.Map.include({
 
 	deleteObject: function(id, type) {
 		let object = this.objectLayer.getObject(id);
-		let contentId = object.options.contentId;
+		let sceneId = object.options.sceneId;
 
 		this.objectLayer.removeLayer(object);
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let o = this.objects[i];
-			if(o.id == id && o.contentId == contentId) {
+			if(o.id == id && o.sceneId == sceneId) {
 				this.objects.splice(i, 1);
 				break;
 			}
@@ -348,11 +313,11 @@ L.Map.include({
 	globalObjectOptions: function(id) {
 		let object = this.objectLayer.getObject(id);
 		let o = this.extractObject(object);
-		delete o.id; delete o.contentId; delete o.type; delete o.pos;
+		delete o.id; delete o.sceneId; delete o.type; delete o.pos;
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let oo = this.objects[i];
-			if(oo.id == id && oo.contentId != object.options.contentId) {
+			if(oo.id == id && oo.sceneId != object.options.sceneId) {
 				this.objects[i] = Object.assign({}, oo, o);
 			}
 		}
@@ -381,7 +346,6 @@ L.Map.include({
 		&& this.basemap.options.source.img == img) return;
 
 		this.removeLayer( this.basemap );
-		this.basemapLegend.removeLegend(1);
 
 		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
 		let zoom, bl, tr;
@@ -409,23 +373,14 @@ L.Map.include({
 		//this.fitBounds(bounds);
 	},
 
-	setBasemap: function(tiles, legend) {
+	setBasemap: function(tiles) {
 		if(this.basemap.options.source.url
 		&& this.basemap.options.source.url == tiles._url) return;
 
 		this.removeLayer( this.basemap );
-		this.basemapLegend.removeLegend(1);
 
 		this.basemap = tiles;
 		this.basemap.options.source = { url: this.basemap._url };
-
-		if(legend) {
-			this.basemapLegend.addLegend({
-				name: "Basemap legend",
-				layer: this.basemap,
-				elements: [ { html: legend } ]
-			});
-		}
 
 		this.presetZoom(this.basemap.options.minZoom, this.basemap.options.maxZoom);
 
@@ -500,7 +455,7 @@ L.Map.include({
 		}
 
 		oo.options.id = o.id;
-		oo.options.contentId = o.contentId;
+		oo.options.sceneId = o.sceneId;
 		oo.options.type = o.type;
 
 		return oo;
@@ -514,7 +469,7 @@ L.Map.include({
 				let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
 				oo = {
 					id:					o.options.id,
-					contentId:			o.options.contentId,
+					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
 					label:				o.options.label,
@@ -534,7 +489,7 @@ L.Map.include({
 			case "polyline":
 				oo = {
 					id:				o.options.id,
-					contentId:		o.options.contentId,
+					sceneId:		o.options.sceneId,
 					type:			o.options.type,
 					pos:			o.getLatLngs().map(e => {
 						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
@@ -550,7 +505,7 @@ L.Map.include({
 			case "rectangle":
 				oo = {
 					id:					o.options.id,
-					contentId:			o.options.contentId,
+					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 					lineColor:			o.options.color,

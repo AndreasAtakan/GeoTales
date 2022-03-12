@@ -9,19 +9,12 @@
 "use strict";
 
 let _AVATARSPEED = 2000,
-	_PANNINGSPEED,
-	_THEME = "default";
+	_PANNINGSPEED;
 
-let _CONTENT,
+let _SCENES,
+	_TEXTBOXES,
 	_MAP,
 	/**/_IS_MAP_MOVING = false;
-
-/*const _THEMES = [
-	{ name: "default",	style: "light",	primary: "#f2f2f2",	secondary: "#bfbfbf" },
-	{ name: "hot",		style: "light",	primary: "#cc0000",	secondary: "#ffcc66" },
-	{ name: "cold",		style: "light",	primary: "#ecf2f9",	secondary: "#336699" },
-	{ name: "dark",		style: "dark",	primary: "#a6a6a6",	secondary: "#1a1a1a" }
-];*/
 
 const _BASEMAPS = [
 	{ name: "OpenStreetMap",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",																					{ minZoom: 0, maxZoom: 19, attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																																							preview: "https://b.tile.openstreetmap.org/5/15/10.png" },

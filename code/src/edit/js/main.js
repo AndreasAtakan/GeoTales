@@ -19,7 +19,7 @@ window.onload = function(ev) {
 
 
 	_MAP = L.map("map", {
-		center: [ 50, 6 ],
+		center: [ 49, 14 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
 		zoomControl: false,
 		maxZoom: 18,
@@ -28,7 +28,6 @@ window.onload = function(ev) {
 		wheelPxPerZoomLevel: 1500,
 		keyboard: false,
 		tap: false,
-		paddingTopLeft: L.point(0, 320), // TODO; fix
 		//touchZoom: false,
 		//worldCopyJump: true
 
@@ -44,50 +43,33 @@ window.onload = function(ev) {
 
 
 
-	_CONTENT = new Content();
+	_SCENES = new Scenes();
+	_SCENES.setup();
 
-	$("#sectionCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
-	$("#sectionCol").keyup(ev => {
+	$("#sceneCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
+	$("#sceneCol").keyup(ev => {
 		let keycode = ev.code;
 
-		if(keycode == "ArrowUp") { ev.preventDefault(); _CONTENT.prev(); }
-		if(keycode == "ArrowDown") { ev.preventDefault(); _CONTENT.next(); }
+		if(keycode == "ArrowUp") { ev.preventDefault(); _SCENES.prev(); }
+		if(keycode == "ArrowDown") { ev.preventDefault(); _SCENES.next(); }
 		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
 	});
 
-	$("#sectionCol button#add").click(ev => {
-		document.dispatchEvent( new Event("section_setup") );
-		_CONTENT.add("scene");
+	$("#sceneCol button#add").click(ev => {
+		if(_SCENES.store.length <= 0) { document.dispatchEvent( new Event("_setup") ); }
+		_SCENES.add();
+	});
+	$("#sceneCol button#recapture").click(ev => {
+		_SCENES.capture();
 	});
 
-	document.addEventListener("section_setup", ev => { init_section(); _CONTENT.setup(); _MAP.setup(); });
-	document.addEventListener("section_reset", ev => { _MAP.reset(); _CONTENT.reset(); reset_section();
-		$("#sectionCol button#add").click(ev => {
-			document.dispatchEvent( new Event("section_setup") );
-			_CONTENT.add("scene");
-		});
-	});
+	document.addEventListener("_setup", ev => { _MAP.setup(); });
+	document.addEventListener("_reset", ev => { _MAP.reset(); });
 
 
 
-	$("#optionsModal input#avatarSpeedInput").change(function(ev) {
-		let val = $(this).val();
-		_AVATARSPEED = parseInt(val);
-		$("#optionsModal span#avatarSpeedInputValue").html(`${val} milliseconds`);
-	});
-
-	$("#optionsModal input#panningSpeedInput").change(function(ev) {
-		let val = $(this).val();
-		_PANNINGSPEED = (val / 1000) || null;
-		$("#optionsModal span#panningSpeedInputValue").html(val <= 0 ? `auto` : `${val} milliseconds`);
-	});
-
-	/*init_themes();
-	$("#optionsModal input[name=\"themeRadio\"]").click(ev => {
-		let theme = $(ev.target).prop("id");
-		if(!theme) { return; }
-		_THEME = theme;
-	});*/
+	$("#optionsModal input#avatarSpeed").change(function(ev) { _AVATARSPEED = parseInt( $(this).val() ); });
+	$("#optionsModal input#panningSpeed").change(function(ev) { _PANNINGSPEED = ( $(this).val() / 1000 ) || null; });
 
 
 
@@ -97,7 +79,7 @@ window.onload = function(ev) {
 		if(!index && index != 0) { return; }
 
 		_MAP.setBasemap( _BASEMAPS[index].tiles );
-		_CONTENT.setBasemap();
+		_SCENES.setBasemap();
 	});
 
 	$("#basemapModal input#basemapFile").change(ev => {
@@ -124,7 +106,7 @@ window.onload = function(ev) {
 					processData: false,
 					success: function(result, status, xhr) {
 						_MAP.imgBasemap(result, width, height);
-						_CONTENT.setBasemap();
+						_SCENES.setBasemap();
 						setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 					},
 					error: function(xhr, status, error) {
@@ -158,8 +140,8 @@ window.onload = function(ev) {
 			tiles.setUrl(url, true);
 		}
 
-		_MAP.setBasemap(tiles, is_internal_basemap(url));
-		_CONTENT.setBasemap();
+		_MAP.setBasemap(tiles);
+		_SCENES.setBasemap();
 	});
 
 

@@ -6,6 +6,8 @@
 * Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
 *******************************************************************************/
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 BEGIN;
 CREATE TABLE IF NOT EXISTS "User"(
 	uid int NOT NULL,
@@ -20,7 +22,7 @@ END;
 
 BEGIN;
 CREATE TABLE IF NOT EXISTS "Map"(
-	id serial,
+	id uuid DEFAULT uuid_generate_v4(),
 	title varchar(65) NOT NULL,
 	description text,
 	created timestamp DEFAULT NOW(),
@@ -36,9 +38,9 @@ END;
 
 BEGIN;
 CREATE TABLE IF NOT EXISTS "User_Map"(
-	id serial,
-	user_id serial NOT NULL,
-	map_id serial NOT NULL,
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id int NOT NULL,
+	map_id uuid NOT NULL,
 	status varchar(100) NOT NULL,
 
 	PRIMARY KEY (id),

@@ -49,7 +49,7 @@ L.AvatarLayer = L.FeatureGroup.extend({
 
 		/*o.bindContextMenu({
 			contextmenu: true,
-			contextmenuItems: [ { text: "Clone avatar", callback: ev => { _MAP.cloneAvatar(o.options.id, o.options.contentId); }, index: 0 } ]
+			contextmenuItems: [ { text: "Clone avatar", callback: ev => { _MAP.cloneAvatar(o.options.id, o.options.sceneId); }, index: 0 } ]
 		});*/
 	},
 
@@ -132,8 +132,7 @@ L.EditLayer = L.FeatureGroup.extend({
 		let popup = "";
 		switch(o.options.type) {
 			case "polyline": popup = polyline_popup(); break;
-			case "polygon":
-			case "rectangle": popup = polygon_popup(); break;
+			case "polygon": popup = polygon_popup(); break;
 			default: console.error("object type invalid"); break;
 		}
 		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450, autoPanPadding: L.point(60,60) });
@@ -345,7 +344,6 @@ function bind_setup(object) {
 
 		case "polyline":
 		case "polygon":
-		case "rectangle":
 			$("#shapePopup input#lineColor").change(function(ev) {
 				object.setStyle({ color: $(this).val() });
 				_MAP.updateObject(object.options.id);
@@ -362,8 +360,7 @@ function bind_setup(object) {
 				_MAP.updateObject(object.options.id);
 			});
 
-			if(object.options.type == "polygon"
-			|| object.options.type == "rectangle") {
+			if(object.options.type == "polygon") {
 				$("#shapePopup input#fillColor").change(function(ev) {
 					object.setStyle({ fillColor: $(this).val() });
 					_MAP.updateObject(object.options.id);
