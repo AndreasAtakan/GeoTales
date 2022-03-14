@@ -22,6 +22,14 @@ select::-ms-expand { display: none; }*/
 
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, label.btn, .leaflet-bar { border-radius: 2px !important; }
 
+.ui-dialog { z-index: 1003 !important; }
+.ui-dialog-titlebar { padding: 0 !important; }
+.ui-dialog-titlebar-close { /**/ }
+.ui-dialog-content { width: 100% !important; }
+
+.trumbowyg-box,
+.trumbowyg-editor { min-height: 200px; }
+
 .draw-control-disabled { cursor: default; pointer-events: none; opacity: 0.4; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
@@ -54,11 +62,14 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 #sceneCol #add { border-color: grey; }
 #scenes { overflow-y: auto; }
 #scenes li {
-	border-color: rgba(0, 0, 0, 0.6);
+	border-color: rgba(0, 0, 0, 0.4);
 	background-color: #f9f9f9;
 }
 #scenes li.inactive,
-#scenes li.active { background-color: white; }
+#scenes li.active {
+	border-color: black;
+	background-color: white;
+}
 #scenes li:hover:not(.active) { cursor: pointer; }
 #scenes li #delete { color: #800000; }
 #scenes li #reorder { color: #999999; }

@@ -44,6 +44,20 @@ function new_scene(id, prevId) {
 
 
 
+function new_textbox(id) {
+
+	let cont = `
+		<div id="${id}" data-id="${id}">
+			<div id="content"></div>
+		</div>
+	`;
+
+	$("div#mapCol").append(cont);
+
+}
+
+
+
 function init_basemaps() {
 
 	let html = ``;

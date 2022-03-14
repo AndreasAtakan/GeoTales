@@ -66,6 +66,9 @@ window.onload = function(ev) {
 	document.addEventListener("_setup", ev => { _MAP.setup(); });
 	document.addEventListener("_reset", ev => { _MAP.reset(); });
 
+	_TEXTBOXES = new Textboxes();
+	_TEXTBOXES.setup();
+
 
 
 	$("#optionsModal input#avatarSpeed").change(function(ev) { _AVATARSPEED = parseInt( $(this).val() ); });

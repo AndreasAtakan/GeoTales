@@ -288,7 +288,7 @@ $row = $stmt->fetch();
 							</button>
 						</div>
 						<div class="col-4 text-center py-3 ps-1 pe-1">
-							<button type="button" class="btn btn-sm btn-light w-100" id="recapture" title="Recapture scene">
+							<button type="button" class="btn btn-sm btn-light w-100" id="recapture" title="Recapture map-extent">
 								<i class="fas fa-camera"></i>
 							</button>
 						</div>
@@ -309,18 +309,12 @@ $row = $stmt->fetch();
 
 				<div class="col-7 col-xs-8 col-sm-9 col-lg-10 col-xxl-11" id="mapCol">
 					<div id="map"></div>
-
-					<!--div class="card" id="textbox">
-						<div class="card-body">
-							<div id="content"></div>
-						</div>
-					</div-->
 				</div>
 			</div>
 		</div>
 
 		<!-- NOTE: Used as placeholder input for trumbowyg image upload -->
-		<input type="file" id="_img" accept="image/gif, image/jpeg, image/png" style="display: none;" />
+		<input type="file" id="_img" accept="image/gif, image/jpeg, image/png" data-id="" style="display: none;" />
 
 		<!-- Load lib/ JS -->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
@@ -377,6 +371,8 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="src/edit/js/generate.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/scenes.js"></script>
+
+		<script type="text/javascript" src="src/edit/js/textboxes.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/map/classes.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>
