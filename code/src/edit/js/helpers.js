@@ -24,6 +24,7 @@ function import_data(data) {
 	if(_SCENES.store.length <= 0) { document.dispatchEvent( new Event("_setup") ); }
 
 	_SCENES.importData(data.scenes);
+	_TEXTBOXES.importData(data.textboxes);
 	_MAP.importData(data.objects);
 
 	_SCENES.current();
@@ -36,6 +37,7 @@ function export_data() {
 			panningspeed: _PANNINGSPEED
 		},
 		scenes: _SCENES.exportData(),
+		textboxes: _TEXTBOXES.exportData(),
 		objects: _MAP.exportData()
 	});
 }

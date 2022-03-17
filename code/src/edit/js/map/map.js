@@ -35,6 +35,22 @@ L.Map.addInitHook(function() {
 	this.addControl( this.basemapButton );
 	this.basemapButton.disable();
 
+	this.textboxButton = L.easyButton({
+		id: "addTextbox",
+		position: "topleft",
+		leafletClasses: true,
+		states: [
+			{
+				stateName: "main",
+				onClick: function(button, map) { _TEXTBOXES.add(); },
+				title: "Add textbox",
+				icon: "fa-comment-alt"
+			}
+		]
+	});
+	this.addControl( this.textboxButton );
+	this.textboxButton.disable();
+
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
@@ -170,6 +186,7 @@ L.Map.include({
 	setup: function() {
 		this.enableDrawing();
 		this.basemapButton.enable();
+		this.textboxButton.enable();
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
@@ -179,6 +196,7 @@ L.Map.include({
 
 		this.disableDrawing();
 		this.basemapButton.disable();
+		this.textboxButton.disable();
 	},
 
 	enableDrawing: function() {

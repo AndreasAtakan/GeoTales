@@ -77,6 +77,8 @@ function Scenes() {
 		if(this.active) { this.store.splice(this.get(this.active).index + 1, 0, s); }
 		else{ this.store.push(s); }
 
+		_TEXTBOXES.addScene(s.id);
+
 		this.setNumbering();
 
 		this.set(s.id);
@@ -87,6 +89,7 @@ function Scenes() {
 		let s = this.get(id);
 
 		if(s.id == this.active) {
+			_TEXTBOXES.deleteScene(id);
 			_MAP.deleteScene(id);
 
 			if( !this.prev() ) { this.next(); }
@@ -150,7 +153,7 @@ function Scenes() {
 
 	this.next = function() {
 		let s = this.get(this.active);
-		if(!s || s.index >= this.store.length-1) { return; }
+		if(!s || s.index >= this.store.length - 1) { return; }
 
 		s = this.store[ s.index + 1 ];
 		this.set(s.id);
@@ -166,7 +169,7 @@ function Scenes() {
 
 		$(`li[data-id="${s.id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
-		// TODO; Set textbox content
+		_TEXTBOXES.set(s.id);
 
 		if(s.basemap.url) {
 			let basemap = get_basemap(s.basemap.url);

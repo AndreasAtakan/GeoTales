@@ -58,9 +58,8 @@
 
 
 - Working TODO:
-	* Scene/Textbox redo; fortsett å jobbe i *textboxes.js*
-						  I will change it so that there is only one textbox on the map at the time, and this textbox is a replacement of the scene-textbox.
-						  I will use jQuery-UI [draggable](https://jqueryui.com/draggable/#constrain-movement) and [resizable](https://jqueryui.com/resizable/#constrain-area) to make them interactive
+	* Scene/Textbox redo; fortsett i *textboxes.js*
+		- BUG; When using the arrow up/down to navigate in scenes, the dialog auto-focus makes it so that the user can not contunue to click up or down and navigate scenes
 
 - Endringer etter tilbakemeldinger, ny runde:
 	* Scene text-box can't write?

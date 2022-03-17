@@ -64,7 +64,7 @@ window.onload = function(ev) {
 	});
 
 	document.addEventListener("_setup", ev => { _MAP.setup(); });
-	document.addEventListener("_reset", ev => { _MAP.reset(); });
+	document.addEventListener("_reset", ev => { _TEXTBOXES.reset(); _MAP.reset(); });
 
 	_TEXTBOXES = new Textboxes();
 	_TEXTBOXES.setup();

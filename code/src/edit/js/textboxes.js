@@ -41,6 +41,10 @@ function Textboxes() {
 		});
 	};
 
+	this.reset = function() {
+		for(let s of this.store) { this.delete(s.id); }
+	};
+
 	this.get = function(id) {
 		for(let i = 0; i < this.store.length; i++) {
 			let s = Object.assign({}, this.store[i]);
@@ -49,11 +53,37 @@ function Textboxes() {
 		return null;
 	};
 
-	this.add = function() {
-		let s = new Textbox(null);
+	this.new = function() {
+		let s = new Textbox(this, null);
 		s.sceneId = _SCENES.active;
-		s.enable();
 		this.store.push(s);
+		return this.get(s.id);
+	};
+
+	this.add = function() {
+		let s =  this.store[ this.new().index ];
+		s.enable();
+	};
+
+	this.addScene = function(sceneId) {
+		let prev = _SCENES.getPrevScene(sceneId), c = 0;
+		if(prev) {
+			for(let t of this.store) {
+				if(t.sceneId == prev.id && t.locked) { c++;
+					let s =  this.store[ this.new().index ];
+					s.sceneId = sceneId;
+					s.pos = t.pos; s.dim = t.dim; s.content = t.content;
+					s.locked = true;
+					s.enable();
+				}
+			}
+		}
+
+		if(c <= 0) {
+			let s =  this.store[ this.new().index ];
+			s.sceneId = sceneId;
+			s.enable();
+		}
 	};
 
 	this.delete = function(id) {
@@ -63,42 +93,48 @@ function Textboxes() {
 		this.store.splice(s.index, 1);
 	};
 
+	this.deleteScene = function(sceneId) {
+		for(let s of this.store) {
+			if(s.sceneId == sceneId) { this.delete(s.id); }
+		}
+	};
+
 	this.set = function(sceneId) {
 		for(let s of this.store) {
 			if(s.sceneId == sceneId) { s.enable(); }
 			else{ s.disable(); }
 		}
+		//$(":focus").blur();
+		//$("#sceneCol").click();
 	};
 
 	this.importData = function(data) {
 		if(data.length <= 0) { return; }
 
-		if(this.store.length <= 0 || !this.active) {
-			this.active = data[0].id;
-		}
-
 		for(let o of data) {
-			let s = new Scene(this, o.id);
-			s.bounds = o.bounds; s.basemap = o.basemap;
-			s.chapter = o.chapter; s.title = o.title;
+			let t = new Textbox(this, o.id);
+			t.pos = o.pos; t.dim = o.dim;
+			t.content = o.content;
 
-			s.disable();
+			t.disable();
 
-			this.store.push(s);
+			this.store.push(t);
 		}
 	};
 
 	this.exportData = function() {
 		let r = [];
-		for(let s of this.store) { r.push( s.exportData() ); }
+		for(let t of this.store) { r.push( t.exportData() ); }
 		return r;
 	};
 }
 
 
 
-function Textbox(id) {
+function Textbox(_super, id) {
 	this.id = id || uuid();
+
+	this.locked = false;
 
 	this.pos = null;
 	this.dim = null;
@@ -106,15 +142,17 @@ function Textbox(id) {
 
 	new_textbox(this.id);
 
-	var id = this.id, w = window.innerWidth * 0.3 - 30, h = window.innerHeight - 60;
+	var w = window.innerWidth * 0.3 - 30, h = window.innerHeight - 60;
 	$(`div[data-id="${this.id}"]`).dialog({
 		autoOpen: false, closeOnEscape: false, title: "", appendTo: "#mapCol", position: { my: "left top", at: "left top", of: "#mapCol", collision: "fit", within: "#mapCol" },
 		//show: true, hide: true,
 		width: w, minWidth: Math.min(250, w), minHeight: Math.min(200, h), maxHeight: h,
-		dragStop: function(ev, ui) { this.pos = [ ui.position.top, ui.position.left ]; },
-		resizeStop: function(ev, ui) { this.dim = [ ui.size.width, ui.size.height ]; }
+		dragStop: (ev, ui) => { this.pos = [ ui.position.left, ui.position.top ]; },
+		resizeStop: (ev, ui) => { this.dim = [ ui.size.width, ui.size.height ]; },
+		close: (ev, ui) => { if( $(ev.currentTarget).hasClass("ui-dialog-titlebar-close") ) { _super.delete(this.id); } }
 	});
 	let ui = $(`div[data-id="${this.id}"]`).closest(".ui-dialog"); ui.draggable("option", "containment", "#mapCol"); ui.resizable("option", "containment", "#mapCol");
+	//$(ui).off("focusin");
 	$(`div[data-id="${this.id}"] div#content`).trumbowyg({
 		autogrow: true, semantic: false, resetCss: true, removeformatPasted: true, urlProtocol: true,
 		defaultLinkTarget: "_blank",
@@ -127,17 +165,17 @@ function Textbox(id) {
 				ico: "justifyLeft"
 			},
 			uploadImg: {
-				fn: function(e) { $("input#_img").data("id", id); $("input#_img").click(); },
+				fn: ev => { $("input#_img").data("id", this.id); $("input#_img").click(); },
 				title: "Add image", ico: "insertImage"
 			},
 			makeLink: {
-				fn: function(e) {
-					$(`div[data-id="${id}"] div#content`).trumbowyg("saveRange");
-					let text = $(`div[data-id="${id}"] div#content`).trumbowyg("getRangeText");
+				fn: ev => {
+					$(`div[data-id="${this.id}"] div#content`).trumbowyg("saveRange");
+					let text = $(`div[data-id="${this.id}"] div#content`).trumbowyg("getRangeText");
 					if(text.replace(/\s/g, "") == "") { return; }
 
 					if(["http", "https"].indexOf(text.split("://")[0]) < 0) { text = `https://${text}`; }
-					$(`div[data-id="${id}"] div#content`).trumbowyg("execCmd", { cmd: "insertHTML", param: `<a href="${text}" target="_blank">${text}</a>`, forceCss: false });
+					$(`div[data-id="${this.id}"] div#content`).trumbowyg("execCmd", { cmd: "insertHTML", param: `<a href="${text}" target="_blank">${text}</a>`, forceCss: false });
 				},
 				title: "Create link", ico: "link"
 			}
@@ -148,18 +186,40 @@ function Textbox(id) {
 		plugins: {}
 	}).on("tbwchange", () => { this.content = $(`div[data-id="${this.id}"] div#content`).trumbowyg("html"); });
 
+	$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find(".ui-dialog-title").append(`
+		<input type="checkbox" class="form-check-input" value="" id="lockTextbox" title="Lock textbox" />
+	`);
+	$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").change(ev => {
+		this.locked = ev.target.checked;
+		$(`div[data-id="${this.id}"]`).dialog("option", { draggable: !this.locked, resizable: !this.locked });
+	});
+
 
 	this.enable = function() {
 		$(`div[data-id="${this.id}"]`).dialog("open");
+
 		$(`div[data-id="${this.id}"] div#content`).trumbowyg("enable");
+		$(`div[data-id="${this.id}"] div#content`).trumbowyg("html", this.content);
+
+		$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").prop({ disabled: false, checked: this.locked });
+
+		$(`div[data-id="${this.id}"]`).dialog("option", { draggable: !this.locked, resizable: !this.locked });
+		if(this.dim) { $(`div[data-id="${this.id}"]`).dialog("option", { width: this.dim[0], height: this.dim[1] }); }
+		if(this.pos) { $(`div[data-id="${this.id}"]`).closest(".ui-dialog").css({ left: `${this.pos[0]}px`, top: `${this.pos[1]}px` }); }
+
+		//$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find(".ui-dialog-titlebar-close")[0].blur();
+		//$(":focus").blur();
+		//$("#scenes")[0].focus();
 	};
 
 	this.disable = function() {
 		$(`div[data-id="${this.id}"]`).dialog("close");
 		$(`div[data-id="${this.id}"] div#content`).trumbowyg("disable");
+		$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").prop("disabled", true);
 	};
 
 	this.destroy = function() {
+		$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").off("change");
 		$(`div[data-id="${this.id}"] div#content`).trumbowyg("destroy");
 		$(`div[data-id="${this.id}"]`).dialog("destroy");
 		$(`div[data-id="${this.id}"]`).remove();
