@@ -18,6 +18,29 @@ window.onload = function(ev) {
 
 
 
+	_SCENES = new Scenes();
+	_SCENES.setup();
+
+	$("#sceneCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
+	$("#sceneCol").keyup(ev => {
+		let keycode = ev.code;
+
+		if(keycode == "ArrowUp") { ev.preventDefault(); _SCENES.prev(); }
+		if(keycode == "ArrowDown") { ev.preventDefault(); _SCENES.next(); }
+		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
+	});
+
+	$("#sceneCol button#add").click(ev => {
+		if(_SCENES.store.length <= 0) { document.dispatchEvent( new Event("_setup") ); }
+		_SCENES.add();
+	});
+	$("#sceneCol button#recapture").click(ev => {
+		_SCENES.capture();
+	});
+
+	_TEXTBOXES = new Textboxes();
+	_TEXTBOXES.setup();
+
 	_MAP = L.map("map", {
 		center: [ 49, 14 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
@@ -41,33 +64,8 @@ window.onload = function(ev) {
 		]
 	});
 
-
-
-	_SCENES = new Scenes();
-	_SCENES.setup();
-
-	$("#sceneCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
-	$("#sceneCol").keyup(ev => {
-		let keycode = ev.code;
-
-		if(keycode == "ArrowUp") { ev.preventDefault(); _SCENES.prev(); }
-		if(keycode == "ArrowDown") { ev.preventDefault(); _SCENES.next(); }
-		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
-	});
-
-	$("#sceneCol button#add").click(ev => {
-		if(_SCENES.store.length <= 0) { document.dispatchEvent( new Event("_setup") ); }
-		_SCENES.add();
-	});
-	$("#sceneCol button#recapture").click(ev => {
-		_SCENES.capture();
-	});
-
 	document.addEventListener("_setup", ev => { _MAP.setup(); });
 	document.addEventListener("_reset", ev => { _TEXTBOXES.reset(); _MAP.reset(); });
-
-	_TEXTBOXES = new Textboxes();
-	_TEXTBOXES.setup();
 
 
 
@@ -98,24 +96,21 @@ window.onload = function(ev) {
 			let img = new Image();
 			img.onload = function() {
 				let width = this.width, height = this.height;
-
 				let data = new FormData(); data.append("image", file);
 
 				$.ajax({
 					type: "POST",
-					url: "api/img.php",
+					url: "api/upload.php",
 					data: data,
 					contentType: false,
 					processData: false,
 					success: function(result, status, xhr) {
-						_MAP.imgBasemap(result, width, height);
+						_MAP.setBasemap({ type: "image", img: result, width: width, height: height });
 						_SCENES.setBasemap();
 						setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 					},
 					error: function(xhr, status, error) {
-						console.log(xhr.status);
-						console.log(error);
-
+						console.error(xhr.status, error);
 						setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 					}
 				});
@@ -130,20 +125,16 @@ window.onload = function(ev) {
 		let url = $("#basemapModal input#basemapLink").val();
 		if(!url) { return; }
 
-		let tiles = L.tileLayer(url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>` });
-
 		let protocol = url.split(/\:/ig)[0];
 		if(protocol == "mapbox") {
-			let username = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[0],
-				styleID = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[1],
+			let username = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[0], styleID = url.split(/mapbox\:\/\/styles\//ig)[1].split(/\//ig)[1],
 				key = $("#basemapModal input#basemapKey").val();
 			if(!key) { return; }
 
 			url = `https://api.mapbox.com/styles/v1/${username}/${styleID}/tiles/256/{z}/{x}/{y}?access_token=${key}`;
-			tiles.setUrl(url, true);
 		}
 
-		_MAP.setBasemap(tiles);
+		_MAP.setBasemap({ type: "tiles", url: url });
 		_SCENES.setBasemap();
 	});
 
@@ -201,9 +192,7 @@ window.onload = function(ev) {
 				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 			},
 			error: function(xhr, status, error) {
-				console.log(xhr.status);
-				console.log(error);
-
+				console.error(xhr.status, error);
 				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
@@ -225,11 +214,21 @@ window.onload = function(ev) {
 			setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 		},
 		error: function(xhr, status, error) {
-			console.log(xhr.status);
-			console.log(error);
-
+			console.error(xhr.status, error);
 			setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 		}
 	});
+
+	/*$.ajax({
+		type: "GET",
+		url: "api/icon.php",
+		dataType: "json",
+		success: function(result, status, xhr) {
+			//
+		},
+		error: function(xhr, status, error) {
+			console.error(xhr.status, error);
+		}
+	});*/
 
 };

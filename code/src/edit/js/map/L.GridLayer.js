@@ -6,35 +6,18 @@
 * Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
 *******************************************************************************/
 
-BEGIN;
-INSERT INTO "User" (uid, paid)
-VALUES (1, true);
-END;
+"use strict";
 
---
 
-BEGIN;
-INSERT INTO "Map" (title, description)
-VALUES ('main', 'main project');
-END;
+// BUG-FIX; White-lines on basemap
 
---
+let originalInitTile = L.GridLayer.prototype._initTile;
+L.GridLayer.include({
+	_initTile: function (tile) {
+		originalInitTile.call(this, tile);
 
-BEGIN;
-INSERT INTO "User_Map" (user_id, map_id, status)
-VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Map" LIMIT 1), 'owner' );
-END;
-
---
-
-BEGIN;
-INSERT INTO "Icon" (ref)
-VALUES ('main');
-END;
-
---
-
-BEGIN;
-INSERT INTO "User_Icon" (user_id, icon_id)
-VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Icon" LIMIT 1) );
-END;
+		let tileSize = this.getTileSize();
+		tile.style.width = `${tileSize.x + 1}px`;
+		tile.style.height = `${tileSize.y + 1}px`;
+	}
+});

@@ -15,28 +15,27 @@ session_start();
 include "init.php";
 include_once("helper.php");
 
-// user is not logged in
+
+// Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: ../index.php"); exit;
+	http_response_code(401); exit;
 }
+$uid = $_SESSION['uid'];
 
-if($TESTING) {
-	$uid = $_SESSION['uid'];
 
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/admin/users/$uid/log_out.json");
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		"Api-Key: {$CONFIG['apikey']}",
-		"Api-Username: system"
-	));
-	$res = curl_exec($ch);
-	curl_close($ch);
-}
+$stmt = $PDO->prepare("
+	SELECT
+		I.ref
+	FROM
+		\"User_Icon\" AS UI INNER JOIN
+		\"Icon\" AS I
+			ON UI.icon_id = I.id
+	WHERE
+		UI.user_id = ?
+");
+$stmt->execute([$uid]);
+$rows = $stmt->fetchAll();
 
-session_destroy();
-
-header("location: ../index.php");
+echo json_encode($rows);
 
 exit;

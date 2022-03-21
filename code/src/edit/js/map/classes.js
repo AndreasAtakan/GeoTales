@@ -239,7 +239,7 @@ function bind_setup(object) {
 
 						$.ajax({
 							type: "POST",
-							url: "api/img.php",
+							url: "api/upload.php",
 							data: data,
 							contentType: false,
 							processData: false,

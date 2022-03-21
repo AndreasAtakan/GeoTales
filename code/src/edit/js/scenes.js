@@ -171,15 +171,8 @@ function Scenes() {
 
 		_TEXTBOXES.set(s.id);
 
-		if(s.basemap.url) {
-			let basemap = get_basemap(s.basemap.url);
-
-			if(basemap) { _MAP.setBasemap( basemap.tiles ); }
-			else{ _MAP.setBasemap(L.tileLayer(s.basemap.url, { minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>` })); }
-		}
-		else if(s.basemap.img) { _MAP.imgBasemap(s.basemap.img, s.basemap.width, s.basemap.height); }
-
-		_MAP.setObjects(s.id, true);
+		_MAP.setBasemap(s.basemap);
+		_MAP.setObjects(s.id);
 		_MAP.setFlyTo(s.bounds);
 	};
 

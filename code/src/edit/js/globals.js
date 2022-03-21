@@ -16,7 +16,12 @@ let _SCENES,
 	_MAP,
 	/**/_IS_MAP_MOVING = false;
 
+let _ICONS = [
+	"assets/user-circle-solid.svg"
+];
+
 const _BASEMAPS = [
+	{ name: "Blank",				tiles: L.tileLayer("",																																		{ minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>` }),																																																													preview: "assets/blank.png" },
 	{ name: "OpenStreetMap",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",																					{ minZoom: 0, maxZoom: 19, attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																																							preview: "https://b.tile.openstreetmap.org/5/15/10.png" },
 	{ name: "OpenStreetMap.DE",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png",																			{ minZoom: 0, maxZoom: 18, attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																																							preview: "https://b.tile.openstreetmap.de/tiles/osmde/5/15/10.png" },
 	{ name: "OpenStreetMap.FR",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",																				{ minZoom: 0, maxZoom: 20, attribution: "&copy; OpenStreetMap France | &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																															preview: "https://b.tile.openstreetmap.fr/osmfr/5/15/10.png" },

@@ -61,8 +61,7 @@ L.Map.addInitHook(function() {
 
 	// Basemap
 
-	this.basemap = _BASEMAPS[9].tiles;
-	this.basemap.options.source = { url: this.basemap._url };
+	this.basemap = _BASEMAPS[10].tiles;
 	this.addLayer( this.basemap );
 
 
@@ -82,33 +81,26 @@ L.Map.addInitHook(function() {
 		let object = ev.layer,
 			type = ev.layerType;
 
-		switch(type) {
-			case "marker":
-				let zoom = this.getZoom();
-				let p = this.project(object.getLatLng(), zoom),
-					url = object.getIcon().options.iconUrl,
-					size = object.getIcon().options.iconSize;
-				object = L.imageOverlay(url, [
-					this.unproject([ p.x - size[0] / 2, p.y - size[1] / 2 ], zoom),
-					this.unproject([ p.x + size[0] / 2, p.y + size[1] / 2 ], zoom)
-				], { interactive: true });
+		if(type == "marker") {
+			let zoom = this.getZoom();
+			let p = this.project(object.getLatLng(), zoom),
+				url = object.getIcon().options.iconUrl,
+				size = object.getIcon().options.iconSize;
+			object = L.imageOverlay(url, [
+				this.unproject([ p.x - size[0] / 2, p.y - size[1] / 2 ], zoom),
+				this.unproject([ p.x + size[0] / 2, p.y + size[1] / 2 ], zoom)
+			], { interactive: true });
 
-				object.options.ratio = 496 / 512; // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
-				object.options.rounded = false;
-				object.options.angle = 0;
-				object.options.borderColor = "#563d7c";
-				object.options.borderThickness = 0;
-				object.options.overlayBlur = 0;
-				object.options.overlayGrayscale = 0;
-				object.options.overlayBrightness = 0;
-				object.options.overlayTransparency = 0;
-				type = "avatar";
-				break;
-
-			case "circlemarker":
-				break;
-
-			default: break;
+			object.options.ratio = 496 / 512; // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
+			object.options.rounded = false;
+			object.options.angle = 0;
+			object.options.borderColor = "#563d7c";
+			object.options.borderThickness = 0;
+			object.options.overlayBlur = 0;
+			object.options.overlayGrayscale = 0;
+			object.options.overlayBrightness = 0;
+			object.options.overlayTransparency = 0;
+			type = "avatar";
 		}
 
 		object.options.sceneId = _SCENES.active;
@@ -130,34 +122,15 @@ L.Map.addInitHook(function() {
 
 	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
 	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
-	//L.drawLocal.draw.handlers.circlemarker.tooltip.start = "Click map to place textbox.";
 	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
 	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
 	L.drawLocal.edit.handlers.remove.tooltip.text = null;
 	L.EditToolbar.Delete.include({ removeAllLayers: false });
-	/*L.DrawToolbar.include({
-		getModeHandlers: function(map) {
-			return [
-				{ enabled: this.options.polyline, handler: new L.Draw.Polyline(map, this.options.polyline), title: L.drawLocal.draw.toolbar.buttons.polyline },
-				{ enabled: this.options.polygon, handler: new L.Draw.Polygon(map, this.options.polygon), title: L.drawLocal.draw.toolbar.buttons.polygon },
-				{ enabled: this.options.rectangle, handler: new L.Draw.Rectangle(map, this.options.rectangle), title: L.drawLocal.draw.toolbar.buttons.rectangle },
-				{ enabled: this.options.circle, handler: new L.Draw.Circle(map, this.options.circle), title: L.drawLocal.draw.toolbar.buttons.circle },
-				{ enabled: this.options.circlemarker, handler: new L.Draw.CircleMarker(map, this.options.circlemarker), title: L.drawLocal.draw.toolbar.buttons.circlemarker },
-				{ enabled: this.options.marker, handler: new L.Draw.Marker(map, this.options.marker), title: L.drawLocal.draw.toolbar.buttons.marker },
-				{
-					enabled: this.options.textbox,
-					handler: new L.Draw.CircleMarker(map, { color: "#000000", radius: 5 }),
-					title: "Place a textbox"
-				}
-			];
-		}
-	});*/
 	this.addControl(
 		new L.Control.Draw({
 			position: "topright",
 			edit: false,
 			draw: {
-				//textbox: true,
 				marker: {
 					icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
 				},
@@ -200,14 +173,10 @@ L.Map.include({
 	},
 
 	enableDrawing: function() {
-		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) {
-			b.removeClass("draw-control-disabled");
-		}
+		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) { b.removeClass("draw-control-disabled"); }
 	},
 	disableDrawing: function() {
-		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) {
-			b.addClass("draw-control-disabled");
-		}
+		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) { b.addClass("draw-control-disabled"); }
 	},
 
 	setFlyTo: function(bounds) {
@@ -233,7 +202,7 @@ L.Map.include({
 		else{ o.setStyle({ opacity: 0.3 }); }
 	},
 
-	setObjects: function(sceneId, animate) {
+	setObjects: function(sceneId) {
 		let prev = _SCENES.getPrevScene(sceneId);
 		let prevId = prev ? prev.id : null;
 
@@ -253,7 +222,7 @@ L.Map.include({
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
-				if(animate && o.type == "avatar") {
+				if(o.type == "avatar") {
 					for(let oo of os) {
 						if(o.id == oo.id) {
 							object.setBounds( L.latLngBounds(oo.pos) );
@@ -282,7 +251,7 @@ L.Map.include({
 		this.objects.push(object);
 	},
 	cloneAvatar: function(id, sceneId) {
-		let object, zoom = this.getZoom();
+		let object;
 		for(let o of this.objects) {
 			if(o.id == id && o.sceneId == sceneId) {
 				object = Object.assign({}, o);
@@ -292,7 +261,8 @@ L.Map.include({
 
 		object.id = uuid();
 
-		let pos = this.project(object.pos, zoom);
+		let zoom = this.getZoom();
+		let pos = this.project(object.pos, zoom); // TODO: redo this with imageOverlay bounds
 			pos.x += 50; pos.y += 50;
 			pos = this.unproject(pos, zoom);
 		object.pos = { lat: pos.lat, lng: pos.lng };
@@ -313,7 +283,7 @@ L.Map.include({
 		}
 	},
 
-	deleteObject: function(id, type) {
+	deleteObject: function(id) {
 		let object = this.objectLayer.getObject(id);
 		let sceneId = object.options.sceneId;
 
@@ -349,9 +319,7 @@ L.Map.include({
 		}
 	},
 
-	setIcon: function(id, size, icon) { this.objectLayer.setIcon(id, size, icon); },
-
-	getBasemap: function() { return this.basemap.options.source; },
+	/* REDO */ setIcon: function(id, size, icon) { this.objectLayer.setIcon(id, size, icon); },
 
 	getCenterBasemapTile: function() {
 		let s = this.basemap.getTileSize(),
@@ -359,46 +327,76 @@ L.Map.include({
 		return this.basemap.getTileUrl({ x: Math.floor(c.x / s.x), y: Math.floor(c.y / s.y) });
 	},
 
-	imgBasemap: function(img, width, height) {
-		if(this.basemap.options.source.img
-		&& this.basemap.options.source.img == img) return;
-
-		this.removeLayer( this.basemap );
-
-		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
-		let zoom, bl, tr;
-		for(let i = 0; i < 18; i++) {
-			bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
-			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
-			if(bl.lat >= -85.06 && bl.lng >= -180
-			&& tr.lat <=  85.06 && tr.lng <=  180) {
-				zoom = i;
-				break;
-			}
+	getBasemap: function() {
+		if(this.basemap instanceof L.TileLayer) {
+			return {
+				type: "tiles",
+				url: this.basemap._url,
+				minZoom: this.basemap.options.minZoom,
+				maxZoom: this.basemap.options.maxZoom,
+				attribution: this.basemap.options.attribution
+			};
+		}else
+		if(this.basemap instanceof L.ImageOverlay) {
+			return {
+				type: "image",
+				img: this.basemap._url,
+				width: this.basemap.options.width,
+				height: this.basemap.options.height
+			};
 		}
-		if(zoom != 0 && !zoom) return;
-
-		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
-
-		this.basemap = L.imageOverlay(img, bounds, {
-			zIndex: 0, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
-		});
-		this.basemap.options.source = { img: img, width: width, height: height };
-
-		this.presetZoom(0, 18);
-
-		this.addLayer( this.basemap );
-		//this.fitBounds(bounds);
+		return null;
 	},
 
-	setBasemap: function(tiles) {
-		if(this.basemap.options.source.url
-		&& this.basemap.options.source.url == tiles._url) return;
+	setBasemap: function(source) {
+		let basemap;
+
+		if(source instanceof L.TileLayer) {
+			if(this.basemap instanceof L.TileLayer
+			&& source._url == this.basemap._url) { return; }
+
+			basemap = source;
+		}else
+		if(source.type == "tiles") {
+			if(this.basemap instanceof L.TileLayer
+			&& source.url == this.basemap._url) { return; }
+
+			basemap = L.tileLayer(source.url, {
+				minZoom: source.minZoom || 0,
+				maxZoom: source.maxZoom || 22,
+				attribution: source.attribution || `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+			});
+		}else
+		if(source.type == "image") {
+			if(this.basemap instanceof L.ImageOverlay
+			&& source.img == this.basemap._url) { return; }
+
+			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
+			let zoom, bl, tr;
+			for(let i = 0; i < 18; i++) {
+				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
+				tr = L.CRS.EPSG3857.pointToLatLng(L.point(source.width, source.height), i);
+				if(bl.lat >= -85.06 && bl.lng >= -180
+				&& tr.lat <=  85.06 && tr.lng <=  180) {
+					zoom = i;
+					break;
+				}
+			}
+			if(!zoom && zoom != 0) { return; }
+			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
+
+			basemap = L.imageOverlay(source.img, bounds, {
+				zIndex: 0,
+				minZoom: 0, maxZoom: 22,
+				width: source.width, height: source.height,
+				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+			});
+		}
+		else{ return; }
 
 		this.removeLayer( this.basemap );
 
-		this.basemap = tiles;
-		this.basemap.options.source = { url: this.basemap._url };
+		this.basemap = basemap;
 
 		this.presetZoom(this.basemap.options.minZoom, this.basemap.options.maxZoom);
 
@@ -407,16 +405,14 @@ L.Map.include({
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 
-	resetBasemap: function() { this.setBasemap( _BASEMAPS[9].tiles ); },
+	resetBasemap: function() { this.setBasemap( _BASEMAPS[10].tiles ); },
 
 	presetZoom: function(min, max) {
 		let zoom = this.getZoom();
-
 		if(zoom < min || zoom > max) {
 			if(zoom < min) { this.setZoom(min); }
 			if(zoom > max) { this.setZoom(max); }
 		}
-
 		this.setMinZoom(min);
 		this.setMaxZoom(max);
 	},
@@ -449,16 +445,6 @@ L.Map.include({
 
 			case "polygon":
 				oo = L.polygon(o.pos, {
-					color:			o.lineColor,
-					weight:			o.lineThickness,
-					opacity:		1 - o.lineTransparency,
-					fillColor:		o.fillColor,
-					fillOpacity:	1 - o.fillTransparency
-				});
-				break;
-
-			case "rectangle":
-				oo = L.rectangle(o.pos, {
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -520,7 +506,6 @@ L.Map.include({
 				break;
 
 			case "polygon":
-			case "rectangle":
 				oo = {
 					id:					o.options.id,
 					sceneId:			o.options.sceneId,

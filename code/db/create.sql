@@ -54,3 +54,34 @@ CREATE TABLE IF NOT EXISTS "User_Map"(
 		ON UPDATE CASCADE
 );
 END;
+
+--
+
+BEGIN;
+CREATE TABLE IF NOT EXISTS "Icon"(
+	id uuid DEFAULT uuid_generate_v4(),
+	ref text,
+
+	PRIMARY KEY (id)
+);
+END;
+
+--
+
+BEGIN;
+CREATE TABLE IF NOT EXISTS "User_Icon"(
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id int NOT NULL,
+	icon_id uuid NOT NULL,
+
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id)
+		REFERENCES "User" (uid)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE,
+	FOREIGN KEY (icon_id)
+		REFERENCES "Icon" (id)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+);
+END;

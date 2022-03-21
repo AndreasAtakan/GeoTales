@@ -362,6 +362,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load src/ JS -->
+		<!--script type="text/javascript" src="src/edit/js/map/L.GridLayer.js"></script-->
 		<script type="text/javascript" src="src/edit/js/map/L.TileLayer.Mars.js"></script>
 
 		<script type="text/javascript" src="src/edit/js/globals.js"></script>

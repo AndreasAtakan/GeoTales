@@ -68,7 +68,7 @@ if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 }
 else{ // redirect to SSO
 
-	if($FLAG) {
+	if($TESTING) {
 		$nonce = hash('sha512', mt_rand());
 		$_SESSION['nonce'] = $nonce;
 

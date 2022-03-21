@@ -31,7 +31,7 @@ try {
 
 // config
 
-$FLAG = false;
+$TESTING = false;
 $CONFIG = array(
 	"host" => "tellusmap.com",
 	"forum_host" => "forum.tellusmap.com",

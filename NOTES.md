@@ -2,16 +2,15 @@
 
 ##### Endringer – tilbakemeldinger runde 1:
 
-1. V Vise hvilket tidsformat som bruks på scenene sitt tidspunkt-input
-2. Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
+- Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
 ##### Endringer – tilbakemeldinger runde 2:
 
-1. Legge inn tekst-boks som alternativ i kart-tegning
+- Legge inn tekst-boks som alternativ i kart-tegning
 
 ##### Endringer – tilbakemeldinger runde 3:
 
-1. Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
+- Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
 
 
 ###### Misc.
@@ -23,7 +22,7 @@
 	  [Alternativ til grunnkart-editor](https://github.com/maputnik/editor)
 	  Og "Available basemaps" bør ha et søkefelt på toppen
 
-- Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min). Gjelder Chrome
+- (no longer relevant) Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min). Gjelder Chrome
 
 - V Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)
 

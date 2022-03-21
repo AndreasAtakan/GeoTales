@@ -54,7 +54,7 @@ if($fileType != "jpg"
 if($uploadOk) { // Only if all checks are passed
 
 	if(move_uploaded_file($_FILES["image"]["tmp_name"], $path)) {
-		if($FLAG) { echo "https://{$CONFIG['host']}/assets/img/$file"; }
+		if($TESTING) { echo "https://{$CONFIG['host']}/assets/img/$file"; }
 		else{ echo "http://localhost/geotales/assets/img/$file"; }
 		exit;
 	}

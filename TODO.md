@@ -5,25 +5,29 @@
 
 - Business:
 	* Registrere AS hos Stripe for nettbetaling
-	* Svar på IN søknad
+	* IN søknad
 
 - W **Use uuid as map_id in database (security, you should not be able to "guess" the id's)**
 
 
+- Overall:
+	* (How?) Implement Stripe payment
 - Edit-mode:
 	* X Kapittelinndeling
 	* X Numerert scene (1-n)
-	* Under "Available basemaps"; legg til mulighet for blankt/ensfarget grunnart
+	* X Remove rectangle as drawing-option
 	* Library of avilable avatar icons (this will save a lot of storage space and cost)
+	* Library of uploaded basemaps under "Avilable basemaps"
+	* X Under "Available basemaps"; legg til mulighet for blankt/ensfarget grunnart
 	* Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
 	* Fix tootip for ImageOverlay
-	* D Add textbox as a map-object drawing option:
-		- D Before placing the textbox, when in "drwaing-mode", there will be a small circlemarker following the curser marking the bottom-center position of where the textbox will be placed
-		- D When placed, textboxes on map will appear as a leaflet-popup with trumbowyg-textbox inside filling the entire popup
-		- D (?) The popup's position will be static relative to the screen, and not to the map
-		- D The popup is a Leaflet-Draggable object with a drag-handler in top-left corner
-		- D The popup can be resized in both with and height
-		- D (?) Have a date/time input above the textbox in the popup instead of the date/time in the scene-box in left section
+	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
+	* Posibility to make hyperlink to other scenes in the textboxes
+	* Avatar-size; only from 10 to (f.ex) 200
+	* Map-objects from last scene should automatically be added to the next scene when creating
+	* X Add textbox as a map-object drawing option:
+		- X The popup's position will be static relative to the screen, and not to the map
+		- X The popup can be resized in both with and height
 	* X Remove textbox from left scene section
 	* X Redo left scene-section:
 		- X This section will ONLY contain scenes
@@ -38,11 +42,9 @@
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
 		- Somehow mark relation between avatars (line between?, color-coding?, ect.)
-	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
-	* X Remove rectangle as drawing-option
-	* Posibility to make hyperlink to other scenes in the textboxes
-	* Avatar-size; only from 10 to (f.ex) 200
-	* Map-objects from last scene should automatically be added to the next scene when creating
+	* GeoJSON import:
+		- Create a map-drawing-object for each feature in the file
+		- Give user choices to set color, fill, tooltip name, etc. as import options
 - Pres-mode:
 	* Kapittelinndeling
 	* ~When scene content is empty, scene box should not be shown~
@@ -50,16 +52,14 @@
 	* There should be an option to not auto-pan to the next scenes map-position. Lock/Unlock. When unlocked, the map will go to next scene as usual, but not automatically move the map
 	* Add logo to "flere knapper valg" dropdown in top right
 - Forum-integration:
-	* Set up file and image upload to Amazon S3
+	* X Set up file and image upload to Amazon S3
 	* `code/api/img.php`: Upload file to Discourse via API instead of saving to disk. This will utilize Amazon S3 via Discourse
-	* Cron-job for checking if a user is deleted from the forum; `https://forum.tellusmap.com/u/by-external/{external_id}.json`
-	* Cron-job for checking if an image no longer exists in a map, and then deleting it from Amazon S3
 	* Implement *webhooks.php* for reciving webhook calls from Discourse when user logs in and out; then log user in or out
+		- (? maybe obsolete) Cron-job for checking if a user is deleted from the forum; `https://forum.tellusmap.com/u/by-external/{external_id}.json`
 
 
 - Working TODO:
-	* Scene/Textbox redo; fortsett i *textboxes.js*
-		- BUG; When using the arrow up/down to navigate in scenes, the dialog auto-focus makes it so that the user can not contunue to click up or down and navigate scenes
+	* –
 
 - Endringer etter tilbakemeldinger, ny runde:
 	* Scene text-box can't write?
@@ -70,4 +70,3 @@
 
 
 - W (not woking) Block zoom on mobile devices; meta tag
-- W (not relevant) Mulighet for grunnkart-legende
