@@ -20,10 +20,10 @@
 	* Library of uploaded basemaps under "Avilable basemaps"
 	* X Under "Available basemaps"; legg til mulighet for blankt/ensfarget grunnart
 	* Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
-	* Fix tootip for ImageOverlay
+	* W Fix tootip for ImageOverlay; Wait for Leaflet to push version 1.8, bugs are fixed in dev
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 	* Posibility to make hyperlink to other scenes in the textboxes
-	* Avatar-size; only from 10 to (f.ex) 200
+	* X Avatar-size; only from 10 to (f.ex) 60
 	* Map-objects from last scene should automatically be added to the next scene when creating
 	* X Add textbox as a map-object drawing option:
 		- X The popup's position will be static relative to the screen, and not to the map

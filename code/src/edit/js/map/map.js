@@ -89,17 +89,18 @@ L.Map.addInitHook(function() {
 			object = L.imageOverlay(url, [
 				this.unproject([ p.x - size[0] / 2, p.y - size[1] / 2 ], zoom),
 				this.unproject([ p.x + size[0] / 2, p.y + size[1] / 2 ], zoom)
-			], { interactive: true });
-
-			object.options.ratio = 496 / 512; // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
-			object.options.rounded = false;
-			object.options.angle = 0;
-			object.options.borderColor = "#563d7c";
-			object.options.borderThickness = 0;
-			object.options.overlayBlur = 0;
-			object.options.overlayGrayscale = 0;
-			object.options.overlayBrightness = 0;
-			object.options.overlayTransparency = 0;
+			], {
+				interactive:			true,
+				ratio:					496 / 512, // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
+				rounded:				false,
+				angle:					0,
+				borderColor:			"#563d7c",
+				borderThickness:		0,
+				overlayBlur:			0,
+				overlayGrayscale:		0,
+				overlayBrightness:		0,
+				overlayTransparency:	0
+			});
 			type = "avatar";
 		}
 
@@ -112,6 +113,7 @@ L.Map.addInitHook(function() {
 	this.on(`${L.Draw.Event.EDITMOVE} ${L.Draw.Event.EDITRESIZE} ${L.Draw.Event.EDITVERTEX}`, ev => {
 		let object = ev.layer || ev.poly;
 		this.updateObject(object.options.id);
+		if(object.options.label) { object.closeTooltip(); object.openTooltip(); }
 	});
 
 
@@ -319,7 +321,7 @@ L.Map.include({
 		}
 	},
 
-	/* REDO */ setIcon: function(id, size, icon) { this.objectLayer.setIcon(id, size, icon); },
+	setIcon: function(id, size, icon) { this.objectLayer.setIcon(id, size, icon); },
 
 	getCenterBasemapTile: function() {
 		let s = this.basemap.getTileSize(),
@@ -422,21 +424,24 @@ L.Map.include({
 
 		switch(o.type) {
 			case "avatar":
-				oo = L.imageOverlay(o.icon, o.pos, { interactive: true });
-				oo.options.label = o.label;
-				oo.options.ratio = o.ratio;
-				oo.options.rounded = o.rounded;
-				oo.options.angle = o.angle;
-				oo.options.borderColor = o.borderColor;
-				oo.options.borderThickness = o.borderThickness;
-				oo.options.overlayBlur = o.blur;
-				oo.options.overlayBrightness = o.brightness;
-				oo.options.overlayGrayscale = o.grayscale;
-				oo.options.overlayTransparency = o.transparency;
+				oo = L.imageOverlay(o.icon, o.pos, {
+					interactive:			true,
+					label:					o.label,
+					ratio:					o.ratio,
+					rounded:				o.rounded,
+					angle:					o.angle,
+					borderColor:			o.borderColor,
+					borderThickness:		o.borderThickness,
+					overlayBlur:			o.blur,
+					overlayBrightness:		o.brightness,
+					overlayGrayscale:		o.grayscale,
+					overlayTransparency:	o.transparency
+				});
 				break;
 
 			case "polyline":
 				oo = L.polyline(o.pos, {
+					label:		o.label,
 					color:		o.color,
 					weight:		o.thickness,
 					opacity:	1 - o.transparency
@@ -445,6 +450,7 @@ L.Map.include({
 
 			case "polygon":
 				oo = L.polygon(o.pos, {
+					label:			o.label,
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -499,6 +505,7 @@ L.Map.include({
 						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
 						else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
 					}),
+					label:			o.options.label,
 					color:			o.options.color,
 					thickness:		o.options.weight,
 					transparency:	1 - o.options.opacity
@@ -511,6 +518,7 @@ L.Map.include({
 					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+					label:				o.options.label,
 					lineColor:			o.options.color,
 					lineThickness:		o.options.weight,
 					lineTransparency:	1 - o.options.opacity,

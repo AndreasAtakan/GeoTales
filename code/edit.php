@@ -375,7 +375,6 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/edit/js/textboxes.js"></script>
 
-		<script type="text/javascript" src="src/edit/js/map/classes.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/edit/js/map/map.js"></script>
 
