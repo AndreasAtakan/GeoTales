@@ -16,7 +16,7 @@ function Scenes() {
 
 	this.setup = function() {
 		$("#scenes").sortable({ // https://api.jqueryui.com/sortable/
-			cursor: "move", handle: "button#reorder", items: "> li", containment: "parent", tolerance: "pointer", cancel: "", zIndex: 1003, //scroll: false, axis: "x",
+			cursor: "move", handle: "button#reorder", items: "> li", containment: "parent", tolerance: "pointer", cancel: "", zIndex: 1003, axis: "x", //scroll: false,
 			start: (ev, ui) => {
 				ev.stopPropagation();
 				this.unbind();
@@ -31,8 +31,6 @@ function Scenes() {
 				this.bind();
 			}
 		});
-
-		$(`button#recapture`).prop("disabled", true);
 	};
 
 	this.get = function(id) {
@@ -60,40 +58,44 @@ function Scenes() {
 
 	this.reorder = function(order) {
 		this.store.sort((a,b) => order.indexOf(a.id) - order.indexOf(b.id));
-		this.setNumbering();
 		this.set(this.active);
 	};
 
 	this.add = function() {
-		let s = new Scene(this, null, this.active);
-		s.capture();
-
-		if(this.active) {
-			let p = this.get(this.active);
-			s.title = p.title;
-			$(`li[data-id="${s.id}"] input#title`).val(s.title);
+		if(this.store.length <= 0) {
+			document.dispatchEvent( new Event("_setup") );
 		}
+
+		let s = new Scene(null, this.active);
+		s.capture();
 
 		if(this.active) { this.store.splice(this.get(this.active).index + 1, 0, s); }
 		else{ this.store.push(s); }
 
 		_TEXTBOXES.addScene(s.id);
-
-		this.setNumbering();
+		_MAP.addScene(s.id);
 
 		this.set(s.id);
 		this.bind();
 	};
 
-	this.delete = function(id) {
-		let s = this.get(id);
+	this.capture = function() {
+		if(!this.active) { return; }
 
-		if(s.id == this.active) {
-			_TEXTBOXES.deleteScene(id);
-			_MAP.deleteScene(id);
+		let s = this.store[ this.get(this.active).index ];
+		s.capture();
+		flash_map();
+	};
 
-			if( !this.prev() ) { this.next(); }
-		}
+	this.delete = function() {
+		if(!this.active) { return; }
+
+		let s = this.get( this.active );
+
+		_TEXTBOXES.deleteScene(s.id);
+		_MAP.deleteScene(s.id);
+
+		if( !this.prev() ) { this.next(); }
 
 		this.store.splice(s.index, 1);
 
@@ -107,9 +109,9 @@ function Scenes() {
 		}
 	};
 
-	this.sceneInactive = function() {
-		if(this.active) { this.get(this.active).inactive(); }
-	};
+	/**/this.sceneInactive = function() {
+		//if(this.active) { this.get(this.active).inactive(); }
+	};/**/
 
 	this.unbind = function() {
 		$("#scenes li button#reorder").prop("disabled", true);
@@ -125,15 +127,7 @@ function Scenes() {
 			let el = $(`li[data-id="${s.id}"]`);
 			if(el.hasClass("active")) { return; }
 
-			if(el.hasClass("inactive")) {
-				if(_IS_MAP_MOVING) { return; }
-
-				_MAP.setFlyTo(s.bounds);
-				_IS_MAP_MOVING = true;
-
-				s.active();
-			}
-			else{ this.set(s.id); }
+			this.set(s.id);
 		});
 	};
 
@@ -165,7 +159,7 @@ function Scenes() {
 		this.active = id;
 
 		let s = this.get(id);
-		s.active();
+		s.enable();
 
 		$(`li[data-id="${s.id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
 
@@ -174,14 +168,12 @@ function Scenes() {
 		_MAP.setBasemap(s.basemap);
 		_MAP.setObjects(s.id);
 		_MAP.setFlyTo(s.bounds);
+
+		this.setNumbering();
 	};
 
 	this.setBasemap = function() {
 		this.store[ this.get(this.active).index ].setBasemap();
-	};
-	this.capture = function() {
-		let s = this.store[ this.get(this.active).index ];
-		s.capture(); s.active(); flash_map();
 	};
 
 	this.setNumbering = function() {
@@ -199,9 +191,12 @@ function Scenes() {
 		}
 
 		for(let o of data) {
-			let s = new Scene(this, o.id);
+			let s = new Scene(o.id);
 			s.bounds = o.bounds; s.basemap = o.basemap;
-			s.chapter = o.chapter; s.title = o.title;
+			s.bookmark = o.bookmark; s.title = o.title;
+
+			//$(`li[data-id="${s.id}"] input#bookmark`).prop("checked", s.bookmark);
+			$(`li[data-id="${s.id}"] input#title`).val(s.title);
 
 			s.disable();
 
@@ -218,49 +213,47 @@ function Scenes() {
 
 
 
-function Scene(_super, id, prevId) {
+function Scene(id, prevId) {
 	this.id = id || uuid();
 
 	this.bounds = null;
 	this.basemap = null;
 
-	this.chapter = false;
+	this.bookmark = false;
 	this.title = "";
 
 	new_scene(this.id, prevId);
 
 	$(`li[data-id="${this.id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
-	$(`li[data-id="${this.id}"] input#chapter`).change(ev => { this.chapter = ev.target.checked; });
+	//$(`li[data-id="${this.id}"] input#bookmark`).change(ev => { this.bookmark = ev.target.checked; });
 	$(`li[data-id="${this.id}"] input#title`).change(ev => { this.title = ev.target.value; });
-	$(`li[data-id="${this.id}"] button#delete`).click(ev => { _super.delete(this.id); });
 	$(`li[data-id="${this.id}"] button, li[data-id="${this.id}"] input`).click(ev => { ev.stopPropagation(); });
 
 
-	this.active = function() {
+	/*this.active = function() {
 		this.enable();
 		$(`li[data-id="${this.id}"]`).removeClass("inactive active");
 		$(`li[data-id="${this.id}"]`).addClass("active");
 		$(`button#recapture`).prop("disabled", true);
-	};
+	};*/
 
-	this.inactive = function() {
+	/*this.inactive = function() {
 		this.enable();
 		$(`li[data-id="${this.id}"]`).removeClass("inactive active");
 		$(`li[data-id="${this.id}"]`).addClass("inactive");
 		$(`li[data-id="${this.id}"] button#delete`).prop("disabled", true);
 		$(`button#recapture`).prop("disabled", false);
-	};
+	};*/
 
 	this.enable = function() {
+		$(`li[data-id="${this.id}"]`).addClass("active");
 		$(`li[data-id="${this.id}"] input,
 		   li[data-id="${this.id}"] button`).prop("disabled", false);
 	};
 
 	this.disable = function() {
-		$(`li[data-id="${this.id}"]`).removeClass("inactive active");
-		$(`button#recapture,
-		   li[data-id="${this.id}"] input,
-		   li[data-id="${this.id}"] button#delete`).prop("disabled", true);
+		$(`li[data-id="${this.id}"]`).removeClass("active");
+		$(`li[data-id="${this.id}"] input`).prop("disabled", true);
 	};
 
 	this.setBasemap = function() {
@@ -280,7 +273,7 @@ function Scene(_super, id, prevId) {
 			id: this.id,
 			bounds: this.bounds,
 			basemap: this.basemap,
-			chapter: this.chapter,
+			bookmark: this.bookmark,
 			title: this.title
 		};
 	};

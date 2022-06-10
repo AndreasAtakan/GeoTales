@@ -9,46 +9,37 @@
 "use strict";
 
 
-function init_section() {
+function init() {
 
 	$("div#main").append(`
-		<div class="card" id="chapters">
+		<div class="card" id="bookmarks">
 			<div class="card-body p-0">
 				<div class="dropdown">
-					<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="chaptersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-						<i class="fas fa-paragraph"></i>
+					<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="fas fa-bookmark"></i>
 					</button>
-					<ul class="dropdown-menu" aria-labelledby="chaptersDropdown">
-						<li><h6 class="dropdown-header">Chapters</h6></li>
+					<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
+						<li><h6 class="dropdown-header">Bookmarks</h6></li>
 					</ul>
 				</div>
 			</div>
 		</div>
 	`);
 
+}
+
+function new_textbox(id) {
 	$("div#main").append(`
-		<div class="card" id="section">
+		<div class="card" id="textbox" data-id="${id}">
 			<div class="card-body">
-				<h6 class="card-subtitle my-2 text-muted" id="datetime">
-					<span id="time">
-						<span id="hour"></span>:<span id="minute"></span>:<span id="second"></span>
-					</span>
-					<span id="dateNtime">–</span>
-					<span id="date">
-						<span id="day"></span>/<span id="month"></span>/<span id="year"></span>
-					</span>
-					<span id="period"></span>
-				</h6>
 				<div id="content"></div>
 			</div>
 		</div>
 	`);
-
 }
 
-function reset_section() {
+function reset() {
 
-	$("div#chapters").remove();
-	$("div#section").remove();
+	$("div#bookmarks").remove();
 
 }

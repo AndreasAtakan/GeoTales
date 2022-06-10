@@ -4,7 +4,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
 // DB init
@@ -31,12 +31,13 @@ try {
 
 // config
 
-$TESTING = false;
+$TESTING = true;
 $CONFIG = array(
-	"host" => "tellusmap.com",
-	"forum_host" => "forum.tellusmap.com",
-	"email" => "contact@tellusmap.com",
-	"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017", // secret
+	"host" => $_SERVER['SERVER_NAME'],
+	"forum_host" => "forum.geotales.io",
+	"email" => "contact@geotales.io",
+	//"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017", // old
+	"apikey" => "15f3af9ac9fed3435fbabdbecabbdc614cd7dd670dbf540adf6649846161c1ef", // secret
 	"sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
 	"webhooks_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7" // secret
 );

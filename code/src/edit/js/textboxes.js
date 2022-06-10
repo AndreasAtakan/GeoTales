@@ -14,10 +14,57 @@ function Textboxes() {
 
 
 	this.setup = function() {
+		$("#textbox").resizable({
+			containment: "#mapRow", handles: "e", minWidth: 50,
+			stop: (ev, ui) => {
+				let w = ui.size.width / ($("#mapRow").outerWidth() - 20),
+					t = this.get(_SCENES.active);
+				if(t) {
+					this.store[ t.index ].dim = [0, w];
+					$("#textbox").css({ width: `${w * 100}%` });
+				}
+			}
+		});
+
+		$("#textbox #content").trumbowyg({
+			autogrow: true, semantic: false, resetCss: true, removeformatPasted: true, urlProtocol: true,
+			defaultLinkTarget: "_blank",
+			tagsToRemove: ["script", "link"],
+			btnsDef: {
+				format: { dropdown: ["bold", "italic", "underline", "del"], title: "Format", ico: "bold" },
+				align: {
+					dropdown: ["justifyLeft", "justifyCenter", "justifyRight", "justifyFull", "unorderedList", "orderedList"],
+					title: "List/Align",
+					ico: "justifyLeft"
+				},
+				uploadImg: {
+					fn: ev => { $("input#_img").click(); },
+					title: "Add image", ico: "insertImage"
+				},
+				makeLink: {
+					fn: ev => {
+						$("#textbox #content").trumbowyg("saveRange");
+						let text = $("#textbox #content").trumbowyg("getRangeText");
+						if(text.replace(/\s/g, "") == "") { return; }
+
+						if(["http", "https"].indexOf(text.split("://")[0]) < 0) { text = `https://${text}`; }
+						$("#textbox #content").trumbowyg("execCmd", { cmd: "insertHTML", param: `<a href="${text}" target="_blank">${text}</a>`, forceCss: false });
+					},
+					title: "Create link", ico: "link"
+				}
+			},
+			btns: [
+				["formatting"], ["format"], ["align"], ["fontfamily"], ["foreColor", "backColor"], ["makeLink"], ["uploadImg"]
+			],
+			plugins: {}
+		}).on("tbwchange", () => {
+			let t = this.get(_SCENES.active);
+			if(t) { this.store[ t.index ].content = $("#textbox #content").trumbowyg("html"); }
+		});
+
 		$("input#_img").change(function(ev) {
-			let id = $(this).data("id"),
-				file = $(this)[0].files[0];
-			if(!id || !file) { return; }
+			let file = $(this)[0].files[0];
+			if(!file) { return; }
 
 			$("#loadingModal").modal("show");
 			let data = new FormData(); data.append("image", file);
@@ -28,81 +75,72 @@ function Textboxes() {
 				contentType: false,
 				processData: false,
 				success: function(result, status, xhr) {
-					$(`div[data-id="${id}"] div#content`).trumbowyg("execCmd", { cmd: "insertImage", param: result, forceCss: false, skipTrumbowyg: true });
+					$("#textbox #content").trumbowyg("execCmd", { cmd: "insertImage", param: result, forceCss: false, skipTrumbowyg: true });
 					setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 				},
 				error: function(xhr, status, error) {
-					console.log(xhr.status);
-					console.log(error);
-
+					console.log(xhr.status, error);
 					setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 				}
 			});
 		});
+
+		$("#textbox input#lock").change(ev => {
+			let t = this.get(_SCENES.active);
+			if(t) { this.store[ t.index ].locked = ev.target.checked; }
+		});
+
+		$("#textbox button#close").click(ev => { this.delete(_SCENES.active); });
 	};
 
-	this.reset = function() {
-		for(let s of this.store) { this.delete(s.id); }
-	};
-
-	this.get = function(id) {
+	this.get = function(sceneId) {
 		for(let i = 0; i < this.store.length; i++) {
-			let s = Object.assign({}, this.store[i]);
-			if(s.id == id) { s.index = i; return s; }
+			let t = Object.assign({}, this.store[i]);
+			if(t.sceneId == sceneId) { t.index = i; return t; }
 		}
 		return null;
 	};
 
-	this.new = function() {
-		let s = new Textbox(this, null);
-		s.sceneId = _SCENES.active;
-		this.store.push(s);
-		return this.get(s.id);
-	};
-
 	this.add = function() {
-		let s =  this.store[ this.new().index ];
-		s.enable();
+		let t = new Textbox(null);
+		t.sceneId = _SCENES.active;
+		t.enable();
+		this.store.push(t);
 	};
 
 	this.addScene = function(sceneId) {
-		let prev = _SCENES.getPrevScene(sceneId), c = 0;
+		let prev = _SCENES.getPrevScene(sceneId);
 		if(prev) {
 			for(let t of this.store) {
-				if(t.sceneId == prev.id && t.locked) { c++;
-					let s =  this.store[ this.new().index ];
-					s.sceneId = sceneId;
-					s.pos = t.pos; s.dim = t.dim; s.content = t.content;
-					s.locked = true;
-					s.enable();
+				if(t.sceneId == prev.id && t.locked) {
+					let tt = new Textbox(null);
+					tt.sceneId = sceneId;
+					tt.dim = t.dim; tt.content = t.content;
+					tt.locked = true;
+					tt.enable();
+					this.store.push(tt);
+					break;
 				}
 			}
 		}
-
-		if(c <= 0) {
-			let s =  this.store[ this.new().index ];
-			s.sceneId = sceneId;
-			s.enable();
-		}
 	};
 
-	this.delete = function(id) {
-		let s = this.get(id);
-		s.disable();
-		s.destroy();
-		this.store.splice(s.index, 1);
+	this.delete = function(sceneId) {
+		let t = this.get(sceneId);
+		t.disable();
+		this.store.splice(t.index, 1);
 	};
 
 	this.deleteScene = function(sceneId) {
-		for(let s of this.store) {
-			if(s.sceneId == sceneId) { this.delete(s.id); }
+		for(let t of this.store) {
+			if(t.sceneId == sceneId) { this.delete(t.id); }
 		}
 	};
 
 	this.set = function(sceneId) {
-		for(let s of this.store) {
-			if(s.sceneId == sceneId) { s.enable(); }
-			else{ s.disable(); }
+		for(let t of this.store) {
+			if(t.sceneId == sceneId) { t.enable(); break; }
+			else{ t.disable(); }
 		}
 	};
 
@@ -110,8 +148,9 @@ function Textboxes() {
 		if(data.length <= 0) { return; }
 
 		for(let o of data) {
-			let t = new Textbox(this, o.id);
-			t.pos = o.pos; t.dim = o.dim;
+			let t = new Textbox(o.id);
+			t.sceneId = o.sceneId;
+			t.locked = o.locked; t.dim = o.dim;
 			t.content = o.content;
 
 			t.disable();
@@ -129,102 +168,40 @@ function Textboxes() {
 
 
 
-function Textbox(_super, id) {
+function Textbox(id) {
 	this.id = id || uuid();
 
+	this.sceneId = "";
 	this.locked = false;
 
-	this.pos = null;
-	this.dim = null;
+	this.dim = [0, 0.25];
 	this.content = "";
-
-	new_textbox(this.id);
-
-	let w = $("#mapCol").outerWidth() - 40, h = $("#mapCol").outerHeight() - 60;
-	$(`div[data-id="${this.id}"]`).dialog({
-		autoOpen: false, closeOnEscape: false, title: "", appendTo: "#mapCol", position: { my: "left top", at: "left top", of: "#mapCol", collision: "fit", within: "#mapCol" },
-		//show: true, hide: true,
-		width: w * 0.3, maxWidth: w, minHeight: 200, maxHeight: h,
-		dragStop: (ev, ui) => { this.pos = [ ui.position.left, ui.position.top ]; },
-		resizeStop: (ev, ui) => { this.dim = [ ui.size.width, ui.size.height ]; },
-		close: (ev, ui) => { if( $(ev.currentTarget).hasClass("ui-dialog-titlebar-close") ) { _super.delete(this.id); } }
-	});
-	let ui = $(`div[data-id="${this.id}"]`).closest(".ui-dialog"); ui.draggable("option", "containment", "#mapCol"); ui.resizable("option", "containment", "#mapCol");
-	$(`div[data-id="${this.id}"] div#content`).trumbowyg({
-		autogrow: true, semantic: false, resetCss: true, removeformatPasted: true, urlProtocol: true,
-		defaultLinkTarget: "_blank",
-		tagsToRemove: ["script", "link"],
-		btnsDef: {
-			format: { dropdown: ["bold", "italic", "underline", "del"], title: "Format", ico: "bold" },
-			align: {
-				dropdown: ["justifyLeft", "justifyCenter", "justifyRight", "justifyFull", "unorderedList", "orderedList"],
-				title: "List/Align",
-				ico: "justifyLeft"
-			},
-			uploadImg: {
-				fn: ev => { $("input#_img").data("id", this.id); $("input#_img").click(); },
-				title: "Add image", ico: "insertImage"
-			},
-			makeLink: {
-				fn: ev => {
-					$(`div[data-id="${this.id}"] div#content`).trumbowyg("saveRange");
-					let text = $(`div[data-id="${this.id}"] div#content`).trumbowyg("getRangeText");
-					if(text.replace(/\s/g, "") == "") { return; }
-
-					if(["http", "https"].indexOf(text.split("://")[0]) < 0) { text = `https://${text}`; }
-					$(`div[data-id="${this.id}"] div#content`).trumbowyg("execCmd", { cmd: "insertHTML", param: `<a href="${text}" target="_blank">${text}</a>`, forceCss: false });
-				},
-				title: "Create link", ico: "link"
-			}
-		},
-		btns: [
-			["formatting"], ["format"], ["align"], ["fontfamily"], ["foreColor", "backColor"], ["makeLink"], ["uploadImg"]
-		],
-		plugins: {}
-	}).on("tbwchange", () => { this.content = $(`div[data-id="${this.id}"] div#content`).trumbowyg("html"); });
-
-	$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find(".ui-dialog-title").append(`
-		<input type="checkbox" class="form-check-input" value="" id="lockTextbox" title="Lock textbox" />
-	`);
-	$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").change(ev => {
-		this.locked = ev.target.checked;
-		$(`div[data-id="${this.id}"]`).dialog("option", { draggable: !this.locked, resizable: !this.locked });
-	});
-	$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find(".ui-dialog-titlebar-close").focus(ev => { // NOTE; this is to stop the autofocus on the dialog close-buttons, which will stop the arrow-key scene-navigation from working
-		$(ev.target).blur(); $("#sceneCol #add").focus();
-	});
 
 
 	this.enable = function() {
-		$(`div[data-id="${this.id}"]`).dialog("open");
+		$("#textbox").css("display", "block");
+		$("#textbox").css({ width: `${this.dim[1] * 100}%` });
 
-		$(`div[data-id="${this.id}"] div#content`).trumbowyg("enable");
-		$(`div[data-id="${this.id}"] div#content`).trumbowyg("html", this.content);
+		$("#textbox #content").trumbowyg("enable");
+		$("#textbox #content").trumbowyg("html", this.content);
 
-		$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").prop({ disabled: false, checked: this.locked });
+		$("#textbox #lock").prop({ disabled: false, checked: this.locked });
 
-		$(`div[data-id="${this.id}"]`).dialog("option", { draggable: !this.locked, resizable: !this.locked });
-		if(this.dim) { $(`div[data-id="${this.id}"]`).dialog("option", { width: this.dim[0], height: this.dim[1] }); }
-		if(this.pos) { $(`div[data-id="${this.id}"]`).closest(".ui-dialog").css({ left: `${this.pos[0]}px`, top: `${this.pos[1]}px` }); }
+		_MAP.textboxButton.disable();
 	};
 
 	this.disable = function() {
-		$(`div[data-id="${this.id}"]`).dialog("close");
-		$(`div[data-id="${this.id}"] div#content`).trumbowyg("disable");
-		$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").prop("disabled", true);
-	};
-
-	this.destroy = function() {
-		$(`div[data-id="${this.id}"]`).closest(".ui-dialog").find("input#lockTextbox").off("change");
-		$(`div[data-id="${this.id}"] div#content`).trumbowyg("destroy");
-		$(`div[data-id="${this.id}"]`).dialog("destroy");
-		$(`div[data-id="${this.id}"]`).remove();
+		$("#textbox").css("display", "none");
+		$("#textbox #content").trumbowyg("disable");
+		$("#textbox #lock").prop("disabled", true);
+		_MAP.textboxButton.enable();
 	};
 
 	this.exportData = function() {
 		return {
 			id: this.id,
-			pos: this.pos,
+			sceneId: this.sceneId,
+			locked: this.locked,
 			dim: this.dim,
 			content: this.content
 		};

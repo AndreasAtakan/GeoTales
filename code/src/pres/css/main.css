@@ -46,7 +46,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	border: none;
 }
 
-#chapters {
+#bookmarks {
 	position: absolute;
 	z-index: 1002;
 	top: 10px;
@@ -54,32 +54,25 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 	background: none;
 	border: 2px solid rgba(0,0,0,0.2);
-	display: none;
 }
-#chapters button { background-color: #fff; opacity: 0.8; }
-#chapters ul { opacity: 1; }
+#bookmarks button { background-color: #fff; opacity: 0.8; }
+#bookmarks ul { opacity: 1; }
 
-#section {
+#textbox {
 	position: absolute;
-	z-index: 1001;
-	top: 55px;
-	left: 15px;
+	z-index: 1002;
+	left: 0;
+	top: 0;
 
-	max-height: calc(100vh - 70px);
-	width: auto;
-	max-width: min(550px, 35vw);
-
-	opacity: 0.9;
+	opacity: 0.85;
 	overflow-y: auto;
 
 	display: none;
 }
-#section:focus { outline: none; }
-.inactive#section:hover,
-.inactive#section:focus { cursor: pointer; }
+#textbox:focus { outline: none; }
 
-#section #content img { max-width: 100%; }
-#section #content img:hover { cursor: pointer; }
+#textbox #content img { max-width: 100%; }
+#textbox #content img:hover { cursor: pointer; }
 
 #map {
 	width: 100%;
@@ -119,11 +112,5 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 }
 
 @media (max-width: 575.98px) {
-	#section {
-		top: auto;
-		bottom: 15px;
-
-		max-height: 40vh;
-		max-width: 80vw;
-	}
+	/**/
 }

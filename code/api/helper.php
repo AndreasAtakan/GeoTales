@@ -30,6 +30,9 @@ function getAvatar($host, $username) {
 	$res = curl_exec($ch);
 	curl_close($ch);
 	$res = json_decode($res, true);
+
+	if(!isset($res['user'])) { return "assets/user-circle-solid.svg"; }
+
 	$res = str_replace('{size}', '30', $res['user']['avatar_template']);
 
 	return "https://{$host}{$res}";

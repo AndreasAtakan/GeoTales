@@ -15,16 +15,8 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( new L.Control.Fullscreen({ position: "topleft" }) );*/
 
-	this.basemapLegend = L.control.htmllegend({
-		position: "topright",
-		collapsedOnInit: true,
-		disableVisibilityControls: true,
-		updateOpacity: null
-	});
-	this.addControl( this.basemapLegend );
-
 	this.addControl(
-		L.control.zoom({ position: "topright" })
+		L.control.zoom({ position: "bottomright" })
 	);
 
 	this.addControl(
@@ -68,7 +60,7 @@ L.Map.addInitHook(function() {
 				states: [
 					{
 						stateName: "main",
-						onClick: function(button, map) { _CONTENT.prev(); },
+						onClick: function(button, map) { _SCENES.prev(); },
 						title: "Previous scene",
 						icon: "fa-chevron-left"
 					}
@@ -80,7 +72,7 @@ L.Map.addInitHook(function() {
 				states: [
 					{
 						stateName: "main",
-						onClick: function(button, map) { _CONTENT.next(); },
+						onClick: function(button, map) { _SCENES.next(); },
 						title: "Next scene",
 						icon: "fa-chevron-right"
 					}
@@ -99,8 +91,7 @@ L.Map.addInitHook(function() {
 
 	// Basemap
 
-	this.basemap = _BASEMAPS[9].tiles;
-	this.basemap.options.source = { url: this.basemap._url };
+	this.basemap = _BASEMAPS[10].tiles;
 	this.addLayer( this.basemap );
 
 
@@ -119,9 +110,7 @@ L.Map.addInitHook(function() {
 
 
 	// Map events
-
-	this.on("movestart", ev => { _CONTENT.sceneInactive(); });
-	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
+	//this.on("moveend", ev => {});
 
 });
 
@@ -141,13 +130,13 @@ L.Map.include({
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
 	},
 
-	setObjects: function(contentId) {
+	setObjects: function(sceneId) {
 		let os = this.objectLayer.getLayers().filter(o => o.options.type == "avatar").map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
 		});
 		this.objectLayer.clearLayers();
 		for(let o of this.objects) {
-			if(o.contentId == contentId) {
+			if(o.sceneId == sceneId) {
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
@@ -164,58 +153,76 @@ L.Map.include({
 		}
 	},
 
-	getBasemap: function() { return this.basemap.options.source; },
-
-	imgBasemap: function(img, width, height) {
-		if(this.basemap.options.source.img
-		&& this.basemap.options.source.img == img) return;
-
-		this.removeLayer( this.basemap );
-		this.basemapLegend.removeLegend(1);
-
-		// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
-		let zoom, bl, tr;
-		for(let i = 0; i < 18; i++) {
-			bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
-			tr = L.CRS.EPSG3857.pointToLatLng(L.point(width, height), i);
-			if(bl.lat >= -85.06 && bl.lng >= -180
-			&& tr.lat <=  85.06 && tr.lng <=  180) {
-				zoom = i;
-				break;
-			}
+	getBasemap: function() {
+		if(this.basemap instanceof L.TileLayer) {
+			return {
+				type: "tiles",
+				url: this.basemap._url,
+				minZoom: this.basemap.options.minZoom,
+				maxZoom: this.basemap.options.maxZoom,
+				attribution: this.basemap.options.attribution
+			};
+		}else
+		if(this.basemap instanceof L.ImageOverlay) {
+			return {
+				type: "image",
+				img: this.basemap._url,
+				width: this.basemap.options.width,
+				height: this.basemap.options.height
+			};
 		}
-		if(zoom != 0 && !zoom) return;
-
-		let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
-
-		this.basemap = L.imageOverlay(img, bounds, {
-			zIndex: 0, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
-		});
-		this.basemap.options.source = { img: img, width: width, height: height };
-
-		this.presetZoom(0, 18);
-
-		this.addLayer( this.basemap );
-		//this.fitBounds(bounds);
+		return null;
 	},
 
-	setBasemap: function(tiles, legend) {
-		if(this.basemap.options.source.url
-		&& this.basemap.options.source.url == tiles._url) return;
+	setBasemap: function(source) {
+		let basemap;
 
-		this.removeLayer( this.basemap );
-		this.basemapLegend.removeLegend(1);
+		if(source instanceof L.TileLayer) {
+			if(this.basemap instanceof L.TileLayer
+			&& source._url == this.basemap._url) { return; }
 
-		this.basemap = tiles;
-		this.basemap.options.source = { url: this.basemap._url };
+			basemap = source;
+		}else
+		if(source.type == "tiles") {
+			if(this.basemap instanceof L.TileLayer
+			&& source.url == this.basemap._url) { return; }
 
-		if(legend) {
-			this.basemapLegend.addLegend({
-				name: "Basemap legend",
-				layer: this.basemap,
-				elements: [ { html: legend } ]
+			basemap = L.tileLayer(source.url, {
+				minZoom: source.minZoom || 0,
+				maxZoom: source.maxZoom || 22,
+				attribution: source.attribution || `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+			});
+		}else
+		if(source.type == "image") {
+			if(this.basemap instanceof L.ImageOverlay
+			&& source.img == this.basemap._url) { return; }
+
+			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
+			let zoom, bl, tr;
+			for(let i = 0; i < 18; i++) {
+				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
+				tr = L.CRS.EPSG3857.pointToLatLng(L.point(source.width, source.height), i);
+				if(bl.lat >= -85.06 && bl.lng >= -180
+				&& tr.lat <=  85.06 && tr.lng <=  180) {
+					zoom = i;
+					break;
+				}
+			}
+			if(!zoom && zoom != 0) { return; }
+			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
+
+			basemap = L.imageOverlay(source.img, bounds, {
+				zIndex: 0,
+				minZoom: 0, maxZoom: 22,
+				width: source.width, height: source.height,
+				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 			});
 		}
+		else{ return; }
+
+		this.removeLayer( this.basemap );
+
+		this.basemap = basemap;
 
 		this.presetZoom(this.basemap.options.minZoom, this.basemap.options.maxZoom);
 
@@ -224,7 +231,7 @@ L.Map.include({
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 
-	resetBasemap: function() { this.setBasemap( _BASEMAPS[9].tiles ); },
+	resetBasemap: function() { this.setBasemap( _BASEMAPS[10].tiles ); },
 
 	presetZoom: function(min, max) {
 		let zoom = this.getZoom();
@@ -243,42 +250,35 @@ L.Map.include({
 
 		switch(o.type) {
 			case "avatar":
-				oo = L.imageOverlay(o.icon, o.pos, { interactive: false });
-				oo.options.label = o.label;
-				oo.options.ratio = o.ratio;
-				oo.options.rounded = o.rounded;
-				oo.options.angle = o.angle;
-				oo.options.borderColor = o.borderColor;
-				oo.options.borderThickness = o.borderThickness;
-				oo.options.overlayBlur = o.blur;
-				oo.options.overlayBrightness = o.brightness;
-				oo.options.overlayGrayscale = o.grayscale;
-				oo.options.overlayTransparency = o.transparency;
+				oo = L.imageOverlay(o.icon, o.pos, {
+					interactive:			false,
+					label:					o.label,
+					ratio:					o.ratio,
+					rounded:				o.rounded,
+					angle:					o.angle,
+					borderColor:			o.borderColor,
+					borderThickness:		o.borderThickness,
+					overlayBlur:			o.blur,
+					overlayBrightness:		o.brightness,
+					overlayGrayscale:		o.grayscale,
+					overlayTransparency:	o.transparency
+				});
 				break;
 
 			case "polyline":
 				oo = L.polyline(o.pos, {
-					interactive: false,
-					color:		o.color,
-					weight:		o.thickness,
-					opacity:	1 - o.transparency
+					interactive:	false,
+					label:			o.label,
+					color:			o.color,
+					weight:			o.thickness,
+					opacity:		1 - o.transparency
 				});
 				break;
 
 			case "polygon":
 				oo = L.polygon(o.pos, {
-					interactive: false,
-					color:			o.lineColor,
-					weight:			o.lineThickness,
-					opacity:		1 - o.lineTransparency,
-					fillColor:		o.fillColor,
-					fillOpacity:	1 - o.fillTransparency
-				});
-				break;
-
-			case "rectangle":
-				oo = L.rectangle(o.pos, {
-					interactive: false,
+					interactive:	false,
+					label:			o.label,
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -293,7 +293,7 @@ L.Map.include({
 		}
 
 		oo.options.id = o.id;
-		oo.options.contentId = o.contentId;
+		oo.options.sceneId = o.sceneId;
 		oo.options.type = o.type;
 
 		return oo;
@@ -307,7 +307,7 @@ L.Map.include({
 				let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
 				oo = {
 					id:					o.options.id,
-					contentId:			o.options.contentId,
+					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
 					label:				o.options.label,
@@ -327,12 +327,13 @@ L.Map.include({
 			case "polyline":
 				oo = {
 					id:				o.options.id,
-					contentId:		o.options.contentId,
+					sceneId:		o.options.sceneId,
 					type:			o.options.type,
 					pos:			o.getLatLngs().map(e => {
 						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
 						else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
 					}),
+					label:			o.options.label,
 					color:			o.options.color,
 					thickness:		o.options.weight,
 					transparency:	1 - o.options.opacity
@@ -340,12 +341,12 @@ L.Map.include({
 				break;
 
 			case "polygon":
-			case "rectangle":
 				oo = {
 					id:					o.options.id,
-					contentId:			o.options.contentId,
+					sceneId:			o.options.sceneId,
 					type:				o.options.type,
 					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+					label:				o.options.label,
 					lineColor:			o.options.color,
 					lineThickness:		o.options.weight,
 					lineTransparency:	1 - o.options.opacity,

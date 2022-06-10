@@ -16,8 +16,7 @@ function uuid(a) {
 
 
 function import_data(data) {
-	_AVATARSPEED = data.options.avatarspeed;
-	_PANNINGSPEED = data.options.panningspeed;
+	_OPTIONS = data.options;
 
 	if(data.scenes.length <= 0) { return; }
 
@@ -32,10 +31,7 @@ function import_data(data) {
 
 function export_data() {
 	return JSON.stringify({
-		options: {
-			avatarspeed: _AVATARSPEED,
-			panningspeed: _PANNINGSPEED
-		},
+		options: _OPTIONS,
 		scenes: _SCENES.exportData(),
 		textboxes: _TEXTBOXES.exportData(),
 		objects: _MAP.exportData()
@@ -74,4 +70,15 @@ function get_basemap(url) {
 	}
 
 	return null;
+}
+
+
+
+function get_aspect_ratio_dimentions(w, h, r) {
+	let _w = r * h;
+	if(_w <= w) {
+		return [_w, h];
+	}else{
+		return [w, w / r];
+	}
 }

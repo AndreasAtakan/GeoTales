@@ -11,10 +11,10 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 session_start();
 
-include "init.php";
-include_once("helper.php");
+include "api/init.php";
+include_once("api/helper.php");
 
-$loc = "../maps.php";
+$loc = "maps.php";
 if(isset($_GET['return_url'])) {
 	$loc = $_GET['return_url'];
 }
@@ -69,21 +69,21 @@ if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 else{ // redirect to SSO
 
 	if($TESTING) {
-		$nonce = hash('sha512', mt_rand());
-		$_SESSION['nonce'] = $nonce;
-
-		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "https://{$CONFIG['host']}/api/login.php?return_url=$loc")));
-		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['sso_secret'])));
-		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
-
-		header("location: $url");
-		exit;
-	}
-	else{
 		$_SESSION['uid'] = 1;
 		$_SESSION['username'] = "andreas";
 
 		header("location: $loc");
+		exit;
+	}
+	else{
+		$nonce = hash('sha512', mt_rand());
+		$_SESSION['nonce'] = $nonce;
+
+		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "https://{$CONFIG['host']}/login.php?return_url=$loc")));
+		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['sso_secret'])));
+		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
+
+		header("location: $url");
 		exit;
 	}
 

@@ -71,11 +71,7 @@ L.ObjectLayer = L.FeatureGroup.extend({
 		var object = object || (id ? this.getObject(id) : null);
 		if(!object) return;
 
-		if(object.options.type == "avatar") {
-			object.slideCancel();
-			object.closeTooltip();
-			object.unbindTooltip();
-		}
+		this.unbind(object.options.id);
 
 		L.FeatureGroup.prototype.removeLayer.call(this, object);
 	},

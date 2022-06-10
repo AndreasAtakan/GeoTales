@@ -21,22 +21,19 @@ window.onload = function(ev) {
 	_SCENES = new Scenes();
 	_SCENES.setup();
 
-	$("#sceneCol").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
-	$("#sceneCol").keyup(ev => {
+	$("#sceneRow").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
+	$("#sceneRow").keyup(ev => {
 		let keycode = ev.code;
 
-		if(keycode == "ArrowUp") { ev.preventDefault(); _SCENES.prev(); }
-		if(keycode == "ArrowDown") { ev.preventDefault(); _SCENES.next(); }
+		if(keycode == "ArrowLeft") { ev.preventDefault(); _SCENES.prev(); }
+		if(keycode == "ArrowRight") { ev.preventDefault(); _SCENES.next(); }
 		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
 	});
 
-	$("#sceneCol button#add").click(ev => {
-		if(_SCENES.store.length <= 0) { document.dispatchEvent( new Event("_setup") ); }
-		_SCENES.add();
-	});
-	$("#sceneCol button#recapture").click(ev => {
-		_SCENES.capture();
-	});
+	$("#sceneRow button#add").click(ev => { _SCENES.add(); });
+	$("#sceneRow button#recapture").click(ev => { _SCENES.capture(); });
+	$("#sceneRow button#delete").click(ev => { _SCENES.delete(); });
+
 
 	_TEXTBOXES = new Textboxes();
 	_TEXTBOXES.setup();
@@ -65,12 +62,12 @@ window.onload = function(ev) {
 	});
 
 	document.addEventListener("_setup", ev => { _MAP.setup(); });
-	document.addEventListener("_reset", ev => { _TEXTBOXES.reset(); _MAP.reset(); });
+	document.addEventListener("_reset", ev => { _MAP.reset(); });
 
 
 
-	$("#optionsModal input#avatarSpeed").change(function(ev) { _AVATARSPEED = parseInt( $(this).val() ); });
-	$("#optionsModal input#panningSpeed").change(function(ev) { _PANNINGSPEED = ( $(this).val() / 1000 ) || null; });
+	$("#optionsModal input#avatarSpeed").change(function(ev) { _OPTIONS.avatarspeed = parseInt( $(this).val() ); });
+	$("#optionsModal input#panningSpeed").change(function(ev) { _OPTIONS.panningspeed = ( $(this).val() / 1000 ) || null; });
 
 
 

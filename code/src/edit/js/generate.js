@@ -12,47 +12,22 @@
 function new_scene(id, prevId) {
 
 	let cont = `
-		<li class="list-group-item p-0 pt-1 mx-2 my-1" id="${id}" data-id="${id}">
-			<div class="row g-0">
-				<div class="col">
-					<div class="input-group input-group-sm">
-						<div class="input-group-text px-1" style="border-radius: 0; background-color: initial; border: none;">
-							<input type="checkbox" class="form-check-input mt-0" id="chapter" value="" title="Start of chapter" aria-label="Start of chapter" />
-						</div>
-						<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
-							<i class="fas fa-bars"></i>
-						</button>
-						<input type="text" class="form-control" id="title" aria-label="Title" />
-						<button type="button" class="btn btn-outline-light" id="delete" title="Delete scene">
-							<i class="fas fa-times"></i>
-						</button>
-					</div>
-				</div>
-			</div>
-			<div class="row g-0">
-				<div class="col">
-					<span class="mx-2" id="num"></span>
-				</div>
+		<li class="list-group-item p-1 my-1" id="${id}" data-id="${id}">
+			<div class="input-group input-group-sm">
+				<!--div class="input-group-text px-1" style="border-radius: 0; background-color: initial; border: none;">
+					<input type="checkbox" class="form-check-input mt-0" id="bookmark" value="" title="Bookmark scene" aria-label="Bookmark scene" />
+				</div-->
+				<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
+					<i class="fas fa-bars"></i>
+				</button>
+				<input type="text" class="form-control" id="title" aria-label="Title" aria-describedby="num" />
+				<span class="input-group-text" id="num"></span>
 			</div>
 		</li>
 	`;
 
 	if(prevId) { $(`li[data-id="${prevId}"]`).after(cont); }
 	else{ $("ul#scenes").append(cont); }
-
-}
-
-
-
-function new_textbox(id) {
-
-	let cont = `
-		<div id="${id}" data-id="${id}">
-			<div id="content"></div>
-		</div>
-	`;
-
-	$("div#mapCol").append(cont);
 
 }
 

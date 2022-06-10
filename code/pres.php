@@ -69,18 +69,17 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
-		<link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" />
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/pres/css/main.css" />
 
 		<style type="text/css">
-			.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
+			/*.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
 				background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
 				background-size: 14px 14px;
 				background-position: 8px 8px !important;
-			}
+			}*/
 		</style>
 	</head>
 	<body>
@@ -150,7 +149,9 @@ $row = $stmt->fetch();
 				<div class="card" id="extraNav">
 					<div class="card-body p-0">
 						<div class="dropdown">
-							<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false"></button>
+							<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+								<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
+							</button>
 							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
 								<li><a class="dropdown-item" href="index.php">Gallery</a></li>
 						<?php
@@ -180,9 +181,8 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
-		<script type="text/javascript" src="lib/leaflet.transitionedicon/leaflet-transitionedicon.js"></script>
+		<!--script type="text/javascript" src="lib/leaflet.transitionedicon/leaflet-transitionedicon.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
-		<script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
 
 		<!-- Set ID, TITLE and HOST -->
@@ -193,6 +193,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load src/ JS -->
+		<!--script type="text/javascript" src="src/edit/js/map/L.GridLayer.js"></script-->
 		<script type="text/javascript" src="src/pres/js/map/L.TileLayer.Mars.js"></script>
 
 		<script type="text/javascript" src="src/pres/js/globals.js"></script>
@@ -201,7 +202,9 @@ $row = $stmt->fetch();
 
 		<script type="text/javascript" src="src/pres/js/generate.js"></script>
 
-		<script type="text/javascript" src="src/pres/js/section/classes.js"></script>
+		<script type="text/javascript" src="src/pres/js/scenes.js"></script>
+
+		<script type="text/javascript" src="src/pres/js/textboxes.js"></script>
 
 		<script type="text/javascript" src="src/pres/js/map/layers.js"></script>
 		<script type="text/javascript" src="src/pres/js/map/map.js"></script>

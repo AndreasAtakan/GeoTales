@@ -19,33 +19,15 @@ function import_data(data) {
 	_AVATARSPEED = data.options.avatarspeed;
 	_PANNINGSPEED = data.options.panningspeed;
 
-	_THEME = data.options.theme;
+	if(data.scenes.length <= 0) { return; }
 
-	if(data.content.length <= 0) { return; }
+	if(_SCENES.store.length <= 0) { document.dispatchEvent( new Event("_setup") ); }
 
-	let index = _CONTENT.store.length;
-	if(index <= 0) { document.dispatchEvent( new Event("section_setup") ); }
-
-	_CONTENT.importData(data.content);
+	_SCENES.importData(data.scenes);
+	_TEXTBOXES.importData(data.textboxes);
 	_MAP.importData(data.objects);
 
-	_CONTENT.current();
-}
-
-
-
-function animate_val(el, start, end, duration) {
-	let startTimestamp = null;
-	const step = (timestamp) => {
-		if(!startTimestamp) startTimestamp = timestamp;
-
-		const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-		let val = Math.floor(progress * (end - start) + start);
-		$(el).html( val < 10 && val >= 0 ? `0${val}` : val );
-
-		if(progress < 1) window.requestAnimationFrame(step);
-	};
-	window.requestAnimationFrame(step);
+	_SCENES.current();
 }
 
 

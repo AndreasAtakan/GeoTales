@@ -38,8 +38,9 @@
 	* [SSO provider](https://meta.discourse.org/t/using-discourse-as-an-identity-provider-sso-discourseconnect/32974/1)
 	* [Amazon S3 setup](https://meta.discourse.org/t/setting-up-file-and-image-uploads-to-s3/7229/1)
 	* [Header links](https://meta.discourse.org/t/custom-header-links/90588/1)
-	* Settings->Files->Authorized extensions; add *.tellus* extension
-	* Settings->?; add `https://tellusmap.com` to allowed iframe domains
+	* Settings->Files->Authorized extensions; add *.geotales* extension
+	* Settings->Security->Allowed iframes; add `https://geotales.io` to allowed iframe domains
+	* Settings->API->Revoke api; set to `0`
 	* Install *Grace* theme
 	* Set header color i *Default* theme; Admin settings->Customize->Colors->Light->Header background and Header primary
 	* Add login providers:
@@ -72,3 +73,6 @@
 	- Erstattet alle `L.Point(20,20)` med `L.Point(12,12)` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å gjøre resize/move boksene på polyline/polygon objekter mindre
 	- ~Fjernet alle kall til `_toggleMarkerHighlight` og fjernet selve metoden og medfølgende hjelpe-metoder på `L.Edit.Marker` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å fjerne objekt-styling på markers i editLayer~
 	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~
+
+- **leaflet.zoomhome**
+	- Endret `setHomeBounds` metode til å bruke `_map._getBoundsCenterZoom` i stedet for `_map.getBoundsZoom` og `bounds.getCenter`. `bounds.getCenter` produserer et annet senter-punkt enn `_getBoundsCenterZoom`, og vil dermed flytte kartet til et annet sted enn når scenen først blir satt

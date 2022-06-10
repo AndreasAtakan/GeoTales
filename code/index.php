@@ -142,14 +142,14 @@ $count = $stmt->rowCount();
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
 								</ul>
 							</li>
 					<?php
 						}else{
 					?>
 							<li class="nav-item">
-								<a role="button" class="btn btn-sm btn-light mt-1" href="api/login.php">Login</a>
+								<a role="button" class="btn btn-sm btn-light mt-1" href="login.php">Login</a>
 							</li>
 					<?php
 						}
@@ -172,7 +172,7 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-3 mt-3">
 						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" href="api/login.php?return_url=stage.php" class="btn btn-lg btn-info" style="color: white;">Create map</a>
+							<a role="button" href="login.php?return_url=stage.php" class="btn btn-lg btn-info" style="color: white;">Create map</a>
 						</div>
 						<p class="text-muted text-center mt-2">Create your own map for <strong>free</strong></p>
 					</div>

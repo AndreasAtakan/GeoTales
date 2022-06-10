@@ -17,7 +17,7 @@ include_once("api/helper.php");
 
 // Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: api/login.php?return_url=../maps.php"); exit;
+	header("location: login.php?return_url=maps.php"); exit;
 }
 $username = $_SESSION['username'];
 $avatar = getAvatar($CONFIG['forum_host'], $username);
@@ -54,7 +54,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
 		<!--link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" /-->
-		<!--link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" /-->
+		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<!--link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
@@ -226,35 +226,35 @@ $row = $stmt->fetch();
 		<div class="container-fluid p-0">
 			<div class="row g-0">
 				<div class="col">
-					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
-						<a class="navbar-brand" href="maps.php">
-							<img src="assets/logo.png" alt="GeoTales" width="30" height="30" />
+					<nav class="navbar navbar-expand-sm navbar-dark fixed-top px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
+						<a class="navbar-brand py-0" href="maps.php" style="line-height: 0;">
+							<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
 						</a>
 
-						<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+						<button class="navbar-toggler py-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 							<span class="navbar-toggler-icon"></span>
 						</button>
 
 						<div class="collapse navbar-collapse" id="navbarContent">
-							<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
+							<ul class="navbar-nav mb-0 px-0 w-100">
 								<li class="nav-item dropdown">
-									<a class="nav-link dropdown-toggle" href="#" id="navbarFileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<a class="nav-link dropdown-toggle py-0" href="#" id="navbarFileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 										File
 									</a>
 									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown">
 										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import</a></li>
 										<li><a class="dropdown-item" href="#" id="export">Export</a></li>
-										<li><hr class="dropdown-divider"></li>
+										<li><hr class="dropdown-divider" /></li>
 										<li><a class="dropdown-item" href="#" id="save">Save</a></li>
-										<li><hr class="dropdown-divider"></li>
+										<li><hr class="dropdown-divider" /></li>
 										<li><a class="dropdown-item" href="maps.php">Exit</a></li>
 									</ul>
 								</li>
-								<li class="nav-item me-auto">
-									<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal">Options</a>
+								<li class="nav-item mb-2 mb-sm-0 me-auto">
+									<a class="nav-link py-0" href="#" data-bs-toggle="modal" data-bs-target="#optionsModal">Options</a>
 								</li>
 
-								<li class="nav-item mt-2 me-4">
+								<li class="nav-item mb-2 mb-sm-0 me-4">
 									<div class="btn-group btn-group-sm" role="group" aria-label="Save/Preview">
 										<a role="button" class="btn btn-light" href="#" id="save">Save</a>
 										<a role="button" class="btn btn-outline-light" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a>
@@ -262,15 +262,15 @@ $row = $stmt->fetch();
 								</li>
 
 								<li class="nav-item dropdown">
-									<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-										<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
+									<a class="nav-link dropdown-toggle py-1 py-sm-0" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="25" height="25" />
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 										<li><a class="dropdown-item" href="maps.php">My maps</a></li>
 										<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
-										<li><hr class="dropdown-divider"></li>
-										<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
+										<li><hr class="dropdown-divider" /></li>
+										<li><a class="dropdown-item" href="logout.php">Log out</a></li>
 									</ul>
 								</li>
 							</ul>
@@ -279,42 +279,48 @@ $row = $stmt->fetch();
 				</div>
 			</div>
 
-			<div class="row g-0" style="height: calc(100vh - 54px); margin-top: 54px;">
-				<div class="col-5 col-xs-4 col-sm-3 col-lg-2 col-xxl-1 shadow" id="sceneCol">
+			<div class="row g-0" id="sceneRow" style="margin-top: 39px;">
+				<div class="col shadow" style="z-index: 1003;">
 					<div class="row g-0">
-						<div class="col-8 text-center py-3 ps-1 pe-1">
-							<button type="button" class="btn btn-sm btn-light w-100" id="add" title="Add new scene">
+						<div class="col text-center p-2" style="max-width: 150px;">
+							<button type="button" class="btn btn-sm btn-light" id="delete" title="Delete current scene">
+								<i class="fas fa-trash"></i>
+							</button>
+
+							<button type="button" class="btn btn-sm btn-light" id="recapture" title="Recapture map-extent">
+								<i class="fas fa-camera"></i>
+							</button>
+
+							<button type="button" class="btn btn-sm btn-light" id="add" title="Add new scene" style="width: 60px;">
 								<i class="fas fa-plus"></i>
 							</button>
 						</div>
-						<div class="col-4 text-center py-3 ps-1 pe-1">
-							<button type="button" class="btn btn-sm btn-light w-100" id="recapture" title="Recapture map-extent">
-								<i class="fas fa-camera"></i>
-							</button>
-						</div>
-					</div>
 
-					<div class="row g-0">
-						<div class="col">
-							<hr class="my-1" />
-						</div>
-					</div>
-
-					<div class="row g-0">
-						<div class="col" tabindex="0">
-							<ul class="list-group" id="scenes" style="height: calc(100vh - 72px - 54px);"></ul>
+						<div class="col px-2" tabindex="0" style="max-width: calc(100% - 150px); border-left: 1px solid grey;">
+							<ul class="list-group list-group-horizontal" id="scenes"></ul>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<div class="col-7 col-xs-8 col-sm-9 col-lg-10 col-xxl-11" id="mapCol">
-					<div id="map"></div>
+			<div class="row g-0" id="mapRow" style="height: calc(100vh - 39px - 49px);">
+				<div class="col">
+					<div class="shadow" id="map"></div>
+					<div class="shadow" id="textbox">
+						<div id="banner">
+							<input type="checkbox" class="form-check-input ms-1" value="" id="lock" title="Lock textbox" />
+							<button type="button" class="btn btn-outline-secondary btn-sm py-0" id="close" style="float: right;">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+						<div id="content"></div>
+					</div>
 				</div>
 			</div>
 		</div>
 
 		<!-- NOTE: Used as placeholder input for trumbowyg image upload -->
-		<input type="file" id="_img" accept="image/gif, image/jpeg, image/png" data-id="" style="display: none;" />
+		<input type="file" id="_img" accept="image/gif, image/jpeg, image/png" style="display: none;" />
 
 		<!-- Load lib/ JS -->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
@@ -326,7 +332,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script-->
-		<!--script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script-->
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>

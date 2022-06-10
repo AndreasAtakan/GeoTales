@@ -11,13 +11,38 @@
 
 L.Map.addInitHook(function() {
 
+	// Init map aspect ratio
+
+	let w = $("#mapRow").outerWidth(),
+		h = $("#mapRow").outerHeight(),
+		r = _OPTIONS.aspectratio;
+
+	let dim = get_aspect_ratio_dimentions(w, h, r);
+	$("#map").css({
+		width: `${(dim[0]/w) * 100}%`,
+		height: `calc(${(dim[1]/h) * 100}% - 39px - 49px)`,
+		left: `${(((w - dim[0]) / 2) / w) * 100}%`,
+		top: `calc(${(((h - dim[1]) / 2)/ h) * 100}% + 39px + 49px)`
+	});
+
+	this.invalidateSize();
+
+
+
+
+
 	// Plugins
 
 	/*this.addControl( new L.Control.Fullscreen({ position: "topright" }) );*/
 
-	this.addControl(
-		L.control.zoom({ position: "bottomright" })
-	);
+	/*this.addControl( L.control.zoom({ position: "bottomright" }) );*/
+
+	this.returnButton = L.Control.zoomHome({
+		position: "bottomright",
+		zoomHomeIcon: "expand",
+		zoomHomeTitle: "Return to map-extent"
+	});
+	this.addControl( this.returnButton );
 
 	this.basemapButton = L.easyButton({
 		id: "changeBasemap",
@@ -50,8 +75,6 @@ L.Map.addInitHook(function() {
 	});
 	this.addControl( this.textboxButton );
 	this.textboxButton.disable();
-
-	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
@@ -182,9 +205,13 @@ L.Map.include({
 	},
 
 	setFlyTo: function(bounds) {
-		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
+		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
+		this.returnButton.setHomeBounds(bounds, { maxZoom: this.getMaxZoom() });
 	},
 
+	addScene: function(sceneId) {
+		//
+	},
 	deleteScene: function(sceneId) {
 		this.objects = this.objects.filter(o => o.sceneId != sceneId);
 	},
@@ -228,7 +255,7 @@ L.Map.include({
 					for(let oo of os) {
 						if(o.id == oo.id) {
 							object.setBounds( L.latLngBounds(oo.pos) );
-							object.slideTo( L.latLngBounds(o.pos) , { duration: _AVATARSPEED });
+							object.slideTo( L.latLngBounds(o.pos) , { duration: _OPTIONS.avatarspeed });
 							break;
 						}
 					}
@@ -264,10 +291,14 @@ L.Map.include({
 		object.id = uuid();
 
 		let zoom = this.getZoom();
-		let pos = this.project(object.pos, zoom); // TODO: redo this with imageOverlay bounds
-			pos.x += 50; pos.y += 50;
-			pos = this.unproject(pos, zoom);
-		object.pos = { lat: pos.lat, lng: pos.lng };
+		let nw = this.project(object.pos[0], zoom),
+			se = this.project(object.pos[1], zoom);
+		nw.x += 50; nw.y += 50;
+		se.x += 50; se.y += 50;
+		nw = this.unproject(nw, zoom);
+		se = this.unproject(se, zoom);
+
+		object.pos = [[nw.lat, nw.lng], [se.lat, se.lng]];
 
 		this.objectLayer.addLayer(this.createObject(object), object.id);
 		this.objects.push(object);

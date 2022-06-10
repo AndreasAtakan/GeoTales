@@ -17,7 +17,7 @@ include_once("api/helper.php");
 
 // Not logged in
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: api/login.php?return_url=../maps.php"); exit;
+	header("location: login.php?return_url=maps.php"); exit;
 }
 $uid = $_SESSION['uid'];
 $username = $_SESSION['username'];
@@ -294,7 +294,7 @@ $count = $stmt->rowCount();
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="api/logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
 								</ul>
 							</li>
 						</ul>

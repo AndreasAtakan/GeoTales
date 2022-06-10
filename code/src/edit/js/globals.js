@@ -8,8 +8,11 @@
 
 "use strict";
 
-let _AVATARSPEED = 2000,
-	_PANNINGSPEED;
+let _OPTIONS = {
+	aspectratio: 16/9,
+	avatarspeed: 2000,
+	panningspeed: null
+};
 
 let _SCENES,
 	_TEXTBOXES,

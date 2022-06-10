@@ -18,6 +18,21 @@ window.onload = function(ev) {
 
 
 
+	_SCENES = new Scenes();
+	_SCENES.setup();
+
+	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
+	$(document).keyup(ev => {
+		let keycode = ev.code;
+
+		if(["ArrowUp","ArrowLeft"].indexOf(keycode) > -1) { ev.preventDefault(); _SCENES.prev(); }
+		if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); _SCENES.next(); }
+		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
+	});
+
+	_TEXTBOXES = new Textboxes();
+	_TEXTBOXES.setup();
+
 	_MAP = L.map("map", {
 		center: [ 50, 6 ],
 		zoom: window.innerWidth < 575.98 ? 3 : 5,
@@ -41,20 +56,8 @@ window.onload = function(ev) {
 		]
 	});
 
-
-
-	_CONTENT = new Content();
-
-	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
-	$(document).keyup(ev => {
-		let keycode = ev.code;
-		if(["ArrowUp","ArrowLeft"].indexOf(keycode) > -1) { ev.preventDefault(); _CONTENT.prev(); }
-		if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); _CONTENT.next(); }
-		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
-	});
-
-	document.addEventListener("section_setup", ev => { init_section(); _CONTENT.setup(); _MAP.setup(); });
-	document.addEventListener("section_reset", ev => { _MAP.reset(); _CONTENT.reset(); reset_section(); });
+	document.addEventListener("_setup", ev => { init(); _MAP.setup(); });
+	document.addEventListener("_reset", ev => { _TEXTBOXES.reset(); _MAP.reset(); reset(); });
 
 
 

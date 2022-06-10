@@ -1,17 +1,15 @@
 ## TODO
 
-- Move the system out of Google Cloud, and onto klick.com server (4 CPU, 8GB RAM, 250 GB SSD)
-
-
-- Business:
+- Biz:
 	* Registrere AS hos Stripe for nettbetaling
 	* IN søknad
-
-- W **Use uuid as map_id in database (security, you should not be able to "guess" the id's)**
 
 
 - Overall:
 	* (How?) Implement Stripe payment
+	* Reklamespalte i pres-modus for ubetalte brukere
+	* Password-beskyttede kart
+	* Scene-kartutsnitt; bruk aspect-ratio løsningen
 - Edit-mode:
 	* X Kapittelinndeling
 	* X Numerert scene (1-n)
@@ -46,11 +44,9 @@
 		- Create a map-drawing-object for each feature in the file
 		- Give user choices to set color, fill, tooltip name, etc. as import options
 - Pres-mode:
-	* Kapittelinndeling
-	* ~When scene content is empty, scene box should not be shown~
 	* When transitioning from on scene to the next, map-textboxes should be faded out when the scene is "exited", and faded in when the next scene is "entered"
 	* There should be an option to not auto-pan to the next scenes map-position. Lock/Unlock. When unlocked, the map will go to next scene as usual, but not automatically move the map
-	* Add logo to "flere knapper valg" dropdown in top right
+	* Alle knapper er "fadet ut" når brukeren ikke beveger musen, og kommer til syne når brukeren beveger eller trykker på skjermen
 - Forum-integration:
 	* X Set up file and image upload to Amazon S3
 	* `code/api/img.php`: Upload file to Discourse via API instead of saving to disk. This will utilize Amazon S3 via Discourse
@@ -59,7 +55,12 @@
 
 
 - Working TODO:
-	* –
+	* W Textboxes; sørg for at bredde, høyde og posisjon er en prosent-beregning i forhold til breden av mapCol. Dette vil føre til at ting skalerer med skjermstørrelse
+	* *map.js* linje 264; når jeg prøver å klone en avatar som i seg selv allerede er en klone av en annen avatar, produserer dette en feil
+	* Legg til en advarsel før scener blir slettet
+	* Tekstboks "Create link" knapp; når en tekst er markert bør man få en modal hvor man kan legge inn lenke også blir det `<a href="[Lenke]">[Den markerte teksten]</a>`
+	* Generelt; legg til støtte for WebP bilder
+	* Lenker i tekstboks; hvis teksten allerede var stor (header 1,2,..), så blir hyperlenke teksten automatisk liten; feil
 
 - Endringer etter tilbakemeldinger, ny runde:
 	* Scene text-box can't write?
@@ -70,3 +71,20 @@
 
 
 - W (not woking) Block zoom on mobile devices; meta tag
+
+
+
+
+
+
+
+
+
+
+
+
+
+- Teksten i boken skal være skalert basert på skjermstørrelse (bruk % eller rem)
+- Scene-elementer, tekstboks som er tynn
+- Pres-modus
+- My Maps; legg til knapp for å "unpublish", dvs. slette kartets post på forumet
