@@ -51,8 +51,8 @@ function Scenes() {
 			this.set( $(ev.target).data("id") );
 		});
 
-		$("#content img").off("click");
-		$("#content img").click(ev => { ev.stopPropagation();
+		$("#textbox #content img").off("click");
+		$("#textbox #content img").click(ev => { ev.stopPropagation();
 			$("#imageModal img#imgPreview").attr("src", ev.target.src);
 			$("#imageModal").modal("show");
 		});
@@ -80,7 +80,6 @@ function Scenes() {
 		let s = this.get(id);
 
 		this.active = id;
-		//this.sceneActive();
 
 		_TEXTBOXES.set(s.id);
 

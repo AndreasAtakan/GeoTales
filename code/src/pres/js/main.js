@@ -16,6 +16,17 @@ window.onload = function(ev) {
 		if(ev.scale !== 1) { ev.preventDefault(); }
 	}, false);
 
+	// Set up window resize start/end events
+	let resizeTimer = false;
+	$(window).on("resize", function(ev) {
+		if( !resizeTimer ) { $(window).trigger("resizestart"); }
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(function() {
+			resizeTimer = false;
+			$(window).trigger("resizeend");
+		}, 250);
+	}).on("resizeend", function() { _MAP.setAspectRatio(); });
+
 
 
 	_SCENES = new Scenes();
@@ -57,7 +68,7 @@ window.onload = function(ev) {
 	});
 
 	document.addEventListener("_setup", ev => { init(); _MAP.setup(); });
-	document.addEventListener("_reset", ev => { _TEXTBOXES.reset(); _MAP.reset(); reset(); });
+	document.addEventListener("_reset", ev => { _MAP.reset(); reset(); });
 
 
 

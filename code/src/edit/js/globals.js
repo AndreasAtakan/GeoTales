@@ -10,14 +10,13 @@
 
 let _OPTIONS = {
 	aspectratio: 16/9,
-	avatarspeed: 2000,
+	animationspeed: 2000,
 	panningspeed: null
 };
 
 let _SCENES,
 	_TEXTBOXES,
-	_MAP,
-	/**/_IS_MAP_MOVING = false;
+	_MAP;
 
 let _ICONS = [
 	"assets/user-circle-solid.svg"

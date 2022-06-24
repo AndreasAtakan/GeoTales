@@ -13,21 +13,7 @@ L.Map.addInitHook(function() {
 
 	// Init map aspect ratio
 
-	let w = $("#mapRow").outerWidth(),
-		h = $("#mapRow").outerHeight(),
-		r = _OPTIONS.aspectratio;
-
-	let dim = get_aspect_ratio_dimentions(w, h, r);
-	$("#map").css({
-		width: `${(dim[0]/w) * 100}%`,
-		height: `calc(${(dim[1]/h) * 100}% - 39px - 49px)`,
-		left: `${(((w - dim[0]) / 2) / w) * 100}%`,
-		top: `calc(${(((h - dim[1]) / 2)/ h) * 100}% + 39px + 49px)`
-	});
-
-	this.invalidateSize();
-
-
+	this.setAspectRatio();
 
 
 
@@ -39,7 +25,7 @@ L.Map.addInitHook(function() {
 
 	this.returnButton = L.Control.zoomHome({
 		position: "bottomright",
-		zoomHomeIcon: "expand",
+		zoomHomeIcon: "home",
 		zoomHomeTitle: "Return to map-extent"
 	});
 	this.addControl( this.returnButton );
@@ -68,7 +54,7 @@ L.Map.addInitHook(function() {
 			{
 				stateName: "main",
 				onClick: function(button, map) { _TEXTBOXES.add(); },
-				title: "Add textbox",
+				title: "Add a book",
 				icon: "fa-comment-alt"
 			}
 		]
@@ -91,25 +77,65 @@ L.Map.addInitHook(function() {
 
 
 
+	// Draw and edit control
+
+	//L.PM.setOptIn(true);
+	this.pm.addControls({
+		position: "topright",
+		drawCircleMarker: false,
+		oneBlock: true
+	});
+	this.pm.setPathOptions({
+		weight: 3,
+		color: "#563d7c",
+		opacity: 1,
+		fillColor: "#563d7c",
+		fillOpacity: 0.2
+	});
+
+	/*L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
+	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
+	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
+	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
+	L.drawLocal.edit.handlers.remove.tooltip.text = null;
+	L.EditToolbar.Delete.include({ removeAllLayers: false });
+	this.drawControl = new L.Control.Draw({
+		position: "topright",
+		edit: false,
+		draw: {
+			marker: {
+				icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
+			},
+			polyline: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 } },
+			polygon: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
+			rectangle: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0, className: "__custom_rectangle" } },
+			circle: false,
+			circlemarker: false
+		}
+	});
+	this.addControl( this.drawControl );
+	this.disableDrawing(); // Disable drawing-control*/
+
+
+
+
+
 	// Object layers
 
 	this.objects = [];
-	this.fadeLayer = L.fadeLayer();
-	this.objectLayer = L.objectLayer();
-
+	this.fadeLayer = L.fadeLayer({ pmIgnore: true });
 	this.addLayer( this.fadeLayer );
-	this.addLayer( this.objectLayer );
 
-	this.on(L.Draw.Event.CREATED, ev => {
-		let object = ev.layer,
-			type = ev.layerType;
+	this.on("pm:create", ev => {
+		let o = ev.layer, type = ev.shape;
 
-		if(type == "marker") {
+		if(o instanceof L.Marker) {
 			let zoom = this.getZoom();
-			let p = this.project(object.getLatLng(), zoom),
-				url = object.getIcon().options.iconUrl,
-				size = object.getIcon().options.iconSize;
-			object = L.imageOverlay(url, [
+			let p = this.project(o.getLatLng(), zoom),
+				url = o.getIcon().options.iconUrl,
+				size = o.getIcon().options.iconSize;
+			this.removeLayer(o);
+			o = L.imageOverlay(url, [
 				this.unproject([ p.x - size[0] / 2, p.y - size[1] / 2 ], zoom),
 				this.unproject([ p.x + size[0] / 2, p.y + size[1] / 2 ], zoom)
 			], {
@@ -124,54 +150,68 @@ L.Map.addInitHook(function() {
 				overlayBrightness:		0,
 				overlayTransparency:	0
 			});
-			type = "avatar";
+			this.addLayer(o); return;
 		}
 
-		object.options.sceneId = _SCENES.active;
+		o.options.id = uuid();
+		o.options.sceneId = _SCENES.active;
 
-		this.objectLayer.addLayer(object, type);
-		this.objects.push( this.extractObject(object) );
+		this.fire("_addedlayer", { layer: o });
+
+		this.objects.push( this.extractObject(o) );
 	});
 
-	this.on(`${L.Draw.Event.EDITMOVE} ${L.Draw.Event.EDITRESIZE} ${L.Draw.Event.EDITVERTEX}`, ev => {
-		let object = ev.layer || ev.poly;
-		this.updateObject(object.options.id);
-		if(object.options.label) { object.closeTooltip(); object.openTooltip(); }
+	this.on("_addedlayer", ev => {
+		let o = ev.layer;
+
+		let label = o.options.label;
+		if(label) { o.bindTooltip(label, { direction: "center", permanent: true }); }
+
+		let popup =
+			o instanceof L.ImageOverlay ? avatar_popup() :
+			o instanceof L.Polygon ? polygon_popup() :
+			o instanceof L.Rectangle ? polygon_popup() :
+			o instanceof L.Polyline ? polyline_popup() : "";
+		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450 });
+
+		o.on("popupopen", ev => { bind_setup(o); });
+		o.on("mouseover", ev => { this.highlightObject(o.options.id); });
+		o.on("mouseout", ev => { this.unhighlightObject(o.options.id); });
+
+		o.on("pm:edit", ev => {
+			let o = ev.layer;
+			this.updateObject(o);
+			if(o.options.label) { o.closeTooltip(); o.openTooltip(); }
+		});
+
+		o.on("pm:remove", ev => {
+			let o = ev.layer;
+
+			o.closeTooltip(); o.unbindTooltip();
+			o.closePopup(); o.unbindPopup();
+
+			o.off("popupopen"); o.off("mouseover"); o.off("mouseout");
+
+			//o.slideCancel();
+
+			this.deleteObject(o);
+		});
+
+		if(o instanceof L.ImageOverlay) {
+			o.bindContextMenu({
+				contextmenu: true,
+				contextmenuItems: [ { text: "Clone avatar", callback: ev => { this.cloneAvatar(o.options.id, o.options.sceneId); }, index: 0 } ]
+			});
+			this.setIcon(o);
+		}
 	});
 
 
+	this.on("load", ev => { this.disableDraw(); }); // Note: this is called here because if not, the "cancel"/"finish" buttons in the drawcontrol will not work
 
 
-
-	// Draw and edit control
-
-	L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
-	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
-	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
-	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
-	L.drawLocal.edit.handlers.remove.tooltip.text = null;
-	L.EditToolbar.Delete.include({ removeAllLayers: false });
-	this.addControl(
-		new L.Control.Draw({
-			position: "topright",
-			edit: false,
-			draw: {
-				marker: {
-					icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
-				},
-				polyline: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 } },
-				polygon: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
-				rectangle: false,
-				circle: false,
-				circlemarker: false
-			}
-		})
-	);
-	this.disableDrawing(); // Disable drawing-control
-
-
-	this.on("movestart", ev => { _SCENES.sceneInactive(); });
-	this.on("moveend", ev => { _IS_MAP_MOVING = false; });
+	this.on("movestart", ev => { /**/ });
+	this.on("moveend", ev => { /**/ });
 
 });
 
@@ -182,31 +222,109 @@ L.Map.addInitHook(function() {
 L.Map.include({
 
 	setup: function() {
-		this.enableDrawing();
+		this.enableDraw();
 		this.basemapButton.enable();
 		this.textboxButton.enable();
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
 	reset: function() {
-		this.objectLayer.clearLayers();
+		this.clearLayers();
 		this.fadeLayer.clearLayers();
 
-		this.disableDrawing();
+		this.disableDraw();
 		this.basemapButton.disable();
 		this.textboxButton.disable();
 	},
 
-	enableDrawing: function() {
-		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) { b.removeClass("draw-control-disabled"); }
+	enableDraw: function() {
+		this.pm.Toolbar.setButtonDisabled("Marker", false);
+		this.pm.Toolbar.setButtonDisabled("Line", false);
+		this.pm.Toolbar.setButtonDisabled("Polygon", false);
+		this.pm.Toolbar.setButtonDisabled("Rectangle", false);
+		this.pm.Toolbar.setButtonDisabled("Circle", false);
+		this.pm.Toolbar.setButtonDisabled("Text", false);
+		this.pm.Toolbar.setButtonDisabled("Edit", false);
+		this.pm.Toolbar.setButtonDisabled("Drag", false);
+		this.pm.Toolbar.setButtonDisabled("Cut", false);
+		this.pm.Toolbar.setButtonDisabled("Removal", false);
+		this.pm.Toolbar.setButtonDisabled("Rotate", false);
 	},
-	disableDrawing: function() {
-		for(let b of [$(".leaflet-draw-draw-polyline"), $(".leaflet-draw-draw-polygon"), $(".leaflet-draw-draw-rectangle"), $(".leaflet-draw-draw-marker")]) { b.addClass("draw-control-disabled"); }
+	disableDraw: function() {
+		this.pm.Toolbar.setButtonDisabled("Marker", true);
+		this.pm.Toolbar.setButtonDisabled("Line", true);
+		this.pm.Toolbar.setButtonDisabled("Polygon", true);
+		this.pm.Toolbar.setButtonDisabled("Rectangle", true);
+		this.pm.Toolbar.setButtonDisabled("Circle", true);
+		this.pm.Toolbar.setButtonDisabled("Text", true);
+		this.pm.Toolbar.setButtonDisabled("Edit", true);
+		this.pm.Toolbar.setButtonDisabled("Drag", true);
+		this.pm.Toolbar.setButtonDisabled("Cut", true);
+		this.pm.Toolbar.setButtonDisabled("Removal", true);
+		this.pm.Toolbar.setButtonDisabled("Rotate", true);
+	},
+
+	setOrientation: function(pos) {
+		switch(pos) {
+			case "left":
+				this.returnButton.setPosition("bottomleft");
+				this.basemapButton.setPosition("bottomleft");
+				this.pm.Toolbar.setBlockPosition("draw", "topleft");
+				this.pm.Toolbar.setBlockPosition("edit", "topleft");
+				this.textboxButton.setPosition("topright");
+				break;
+
+			case "right":
+				this.returnButton.setPosition("bottomright");
+				this.basemapButton.setPosition("bottomright");
+				this.pm.Toolbar.setBlockPosition("draw", "topright");
+				this.pm.Toolbar.setBlockPosition("edit", "topright");
+				this.textboxButton.setPosition("topleft");
+				break;
+
+			default: break;
+		}
+	},
+
+	setHomeBounds: function(bounds) {
+		if(this.returnButton) {
+			this.returnButton.setHomeBounds(bounds, { maxZoom: this.getMaxZoom() });
+		}
+	},
+
+	setAspectRatio: function(ratio) {
+		if(ratio) { _OPTIONS.aspectratio = ratio; }
+		let w = $("#mapRow").outerWidth(),
+			h = $("#mapRow").outerHeight(),
+			r = _OPTIONS.aspectratio;
+
+		let dim = get_aspect_ratio_dimentions(w, h, r);
+		$("#map").css({
+			width: `${(dim[0]/w) * 100}%`,
+			height: `calc(${(dim[1]/h) * 100}% - 39px - 49px)`,
+			left: `${(((w - dim[0]) / 2) / w) * 100}%`,
+			top: `calc(${(((h - dim[1]) / 2)/ h) * 100}% + 39px + 49px)`
+		});
+
+		this.invalidateSize();
+		if(_SCENES.active) { this.setHomeBounds( _SCENES.get( _SCENES.active ).bounds ); }
 	},
 
 	setFlyTo: function(bounds) {
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
-		this.returnButton.setHomeBounds(bounds, { maxZoom: this.getMaxZoom() });
+		this.setHomeBounds(bounds);
+	},
+
+
+
+	clearLayers: function() {
+		for(let o of L.PM.Utils.findLayers(this)) {
+			this.removeLayer(o);
+		}
+	},
+
+	getLayers: function() {
+		return L.PM.Utils.findLayers(this);
 	},
 
 	addScene: function(sceneId) {
@@ -220,14 +338,14 @@ L.Map.include({
 		let o = this.fadeLayer.getObject(id);
 		if(!o) { return; }
 
-		if(o.options.type == "avatar") { o.setOpacity(0.8); }
+		if(o instanceof L.ImageOverlay) { o.setOpacity(0.8); }
 		else{ o.setStyle({ opacity: 0.8 }); }
 	},
 	unhighlightObject: function(id) {
 		let o = this.fadeLayer.getObject(id);
 		if(!o) { return; }
 
-		if(o.options.type == "avatar") { o.setOpacity(0.3); }
+		if(o instanceof L.ImageOverlay) { o.setOpacity(0.3); }
 		else{ o.setStyle({ opacity: 0.3 }); }
 	},
 
@@ -238,24 +356,25 @@ L.Map.include({
 		this.fadeLayer.clearLayers();
 		if(prevId) {
 			for(let o of this.objects) {
-				if(o.sceneId == prevId) { this.fadeLayer.addLayer(this.createObject(o), o.type, o.id); }
+				if(o.sceneId == prevId) { this.fadeLayer.addLayer(this.createObject(o), o.id); }
 			}
 		}
 
-		let os = this.objectLayer.getLayers().filter(o => o.options.type == "avatar").map(o => {
+		let os = this.getLayers().filter(o => o instanceof L.ImageOverlay).map(o => {
 			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
 		});
-		this.objectLayer.clearLayers();
+		this.clearLayers();
 		for(let o of this.objects) {
 			if(o.sceneId == sceneId) {
 				let object = this.createObject(o);
-				this.objectLayer.addLayer(object, o.type, o.id);
+				this.addLayer( object );
+				this.fire("_addedlayer", { layer: object });
 
-				if(o.type == "avatar") {
+				if(false && o instanceof L.ImageOverlay) {
 					for(let oo of os) {
 						if(o.id == oo.id) {
 							object.setBounds( L.latLngBounds(oo.pos) );
-							object.slideTo( L.latLngBounds(o.pos) , { duration: _OPTIONS.avatarspeed });
+							object.slideTo( L.latLngBounds(o.pos) , { duration: _OPTIONS.animationspeed });
 							break;
 						}
 					}
@@ -264,19 +383,24 @@ L.Map.include({
 		}
 	},
 
-	insertObject: function(id, sceneId) {
-		if(this.objectLayer.getObject(id)) { return; }
+	insertObject: function(o) {
+		for(let oo of this.getLayers()) {
+			if(oo.options.id == o.options.id) { return; }
+		}
 
 		let object;
-		for(let o of this.objects) {
-			if(o.id == id && o.sceneId == sceneId) {
-				object = Object.assign({}, o);
+		for(let oo of this.objects) {
+			if(oo.id == o.options.id
+			&& oo.sceneId == o.options.sceneId) {
+				object = Object.assign({}, oo);
 				break;
 			}
 		}
 		object.sceneId = _SCENES.active;
 
-		this.objectLayer.addLayer(this.createObject(object), object.type, object.id);
+		let oo = this.createObject(object);
+		this.addLayer( oo );
+		this.fire("_addedlayer", { layer: oo });
 		this.objects.push(object);
 	},
 	cloneAvatar: function(id, sceneId) {
@@ -300,39 +424,33 @@ L.Map.include({
 
 		object.pos = [[nw.lat, nw.lng], [se.lat, se.lng]];
 
-		this.objectLayer.addLayer(this.createObject(object), object.id);
+		this.addLayer( this.createObject(object) );
 		this.objects.push(object);
 	},
 
-	updateObject: function(id) {
-		let object = this.objectLayer.getObject(id);
-
+	updateObject: function(o) {
 		for(let i = 0; i < this.objects.length; i++) {
-			let o = this.objects[i];
-			if(o.id == id && o.sceneId == object.options.sceneId) {
-				this.objects[i] = this.extractObject(object);
+			let oo = this.objects[i];
+			if(oo.id == o.options.id
+			&& oo.sceneId == o.options.sceneId) {
+				this.objects[i] = this.extractObject(o);
 				break;
 			}
 		}
 	},
 
-	deleteObject: function(id) {
-		let object = this.objectLayer.getObject(id);
-		let sceneId = object.options.sceneId;
-
-		this.objectLayer.removeLayer(object);
-
+	deleteObject: function(o) {
 		for(let i = 0; i < this.objects.length; i++) {
-			let o = this.objects[i];
-			if(o.id == id && o.sceneId == sceneId) {
+			let oo = this.objects[i];
+			if(oo.id == o.options.id
+			&& oo.sceneId == o.options.sceneId) {
 				this.objects.splice(i, 1);
 				break;
 			}
 		}
 	},
 
-	globalObjectOptions: function(id) {
-		let object = this.objectLayer.getObject(id);
+	globalObjectOptions: function(object) {
 		let o = this.extractObject(object);
 		delete o.id; delete o.sceneId; delete o.type; delete o.pos;
 
@@ -348,11 +466,35 @@ L.Map.include({
 			this.fadeLayer.removeLayer(object);
 
 			let oo = Object.assign({}, this.extractObject(object), o);
-			this.fadeLayer.addLayer(this.createObject(oo), oo.type, oo.id);
+			this.fadeLayer.addLayer(this.createObject(oo), oo.id);
 		}
 	},
 
-	setIcon: function(id, size, icon) { this.objectLayer.setIcon(id, size, icon); },
+	setIcon: function(o, size, icon) {
+		if(icon) { o.setUrl(icon); }
+		if(size) {
+			let zoom = _MAP.getZoom();
+			let c = _MAP.project(o.getBounds().getCenter(), zoom);
+			o.setBounds([
+				_MAP.unproject([ c.x - size[0] / 2, c.y - size[1] / 2 ], zoom),
+				_MAP.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
+			]);
+		}
+
+		$(o._image).css("border-radius", o.options.rounded ? "50%" : "0");
+		//$(o._image).css("transform", `rotate(${o.options.angle}deg)`);
+		$(o._image).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
+		$(o._image).css("filter", `
+			blur(${o.options.overlayBlur}px)
+			grayscale(${o.options.overlayGrayscale*100}%)
+			drop-shadow(0 0 ${o.options.overlayBrightness}px yellow)
+			opacity(${(1 - o.options.overlayTransparency)*100}%)
+		`);
+
+		if(o.options.label) { o.closeTooltip(); o.openTooltip(); }
+	},
+
+
 
 	getCenterBasemapTile: function() {
 		let s = this.basemap.getTileSize(),
@@ -450,6 +592,8 @@ L.Map.include({
 		this.setMaxZoom(max);
 	},
 
+
+
 	createObject: function(o) {
 		let oo = null;
 
@@ -490,6 +634,17 @@ L.Map.include({
 				});
 				break;
 
+			case "rectangle":
+				oo = L.rectangle(o.pos, {
+					label:			o.label,
+					color:			o.lineColor,
+					weight:			o.lineThickness,
+					opacity:		1 - o.lineTransparency,
+					fillColor:		o.fillColor,
+					fillOpacity:	1 - o.fillTransparency
+				});
+				break;
+
 			default:
 				console.error("object type invalid");
 				break;
@@ -497,7 +652,6 @@ L.Map.include({
 
 		oo.options.id = o.id;
 		oo.options.sceneId = o.sceneId;
-		oo.options.type = o.type;
 
 		return oo;
 	},
@@ -505,63 +659,56 @@ L.Map.include({
 	extractObject: function(o) {
 		let oo = null;
 
-		switch(o.options.type) {
-			case "avatar":
-				let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
-				oo = {
-					id:					o.options.id,
-					sceneId:			o.options.sceneId,
-					type:				o.options.type,
-					pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
-					label:				o.options.label,
-					icon:				o._url,
-					ratio:				o.options.ratio,
-					rounded:			o.options.rounded,
-					angle:				0,
-					borderColor:		o.options.borderColor,
-					borderThickness:	o.options.borderThickness,
-					blur:				o.options.overlayBlur,
-					grayscale:			o.options.overlayGrayscale,
-					brightness:			o.options.overlayBrightness,
-					transparency:		o.options.overlayTransparency
-				};
-				break;
-
-			case "polyline":
-				oo = {
-					id:				o.options.id,
-					sceneId:		o.options.sceneId,
-					type:			o.options.type,
-					pos:			o.getLatLngs().map(e => {
-						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
-						else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
-					}),
-					label:			o.options.label,
-					color:			o.options.color,
-					thickness:		o.options.weight,
-					transparency:	1 - o.options.opacity
-				};
-				break;
-
-			case "polygon":
-				oo = {
-					id:					o.options.id,
-					sceneId:			o.options.sceneId,
-					type:				o.options.type,
-					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
-					label:				o.options.label,
-					lineColor:			o.options.color,
-					lineThickness:		o.options.weight,
-					lineTransparency:	1 - o.options.opacity,
-					fillColor:			o.options.fillColor,
-					fillTransparency:	1 - o.options.fillOpacity
-				};
-				break;
-
-			default:
-				console.error("object type invalid");
-				break;
-		}
+		if(o instanceof L.ImageOverlay) {
+			let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
+			oo = {
+				id:					o.options.id,
+				sceneId:			o.options.sceneId,
+				type:				"avatar",
+				pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
+				label:				o.options.label,
+				icon:				o._url,
+				ratio:				o.options.ratio,
+				rounded:			o.options.rounded,
+				angle:				0,
+				borderColor:		o.options.borderColor,
+				borderThickness:	o.options.borderThickness,
+				blur:				o.options.overlayBlur,
+				grayscale:			o.options.overlayGrayscale,
+				brightness:			o.options.overlayBrightness,
+				transparency:		o.options.overlayTransparency
+			};
+		}else
+		if(o instanceof L.Polygon
+		|| o instanceof L.Rectangle) {
+			oo = {
+				id:					o.options.id,
+				sceneId:			o.options.sceneId,
+				type:				o instanceof L.Rectangle ? "rectangle" : "polygon",
+				pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+				label:				o.options.label,
+				lineColor:			o.options.color,
+				lineThickness:		o.options.weight,
+				lineTransparency:	1 - o.options.opacity,
+				fillColor:			o.options.fillColor,
+				fillTransparency:	1 - o.options.fillOpacity
+			};
+		}else
+		if(o instanceof L.Polyline) {
+			oo = {
+				id:				o.options.id,
+				sceneId:		o.options.sceneId,
+				type:			"polyline",
+				pos:			o.getLatLngs().map(e => {
+					if(!e.length) { return { lat: e.lat, lng: e.lng }; }
+					else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
+				}),
+				label:			o.options.label,
+				color:			o.options.color,
+				thickness:		o.options.weight,
+				transparency:	1 - o.options.opacity
+			};
+		}else{ console.error("object type invalid"); }
 
 		return oo;
 	},

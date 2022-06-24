@@ -56,10 +56,12 @@ $row = $stmt->fetch();
 		<!--link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<!--link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" /-->
-		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
+		<!--link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" /-->
+		<link rel="stylesheet" href="lib/leaflet.geoman/leaflet-geoman.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
 		<!--link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" /-->
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
+		<!--link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" /-->
 		<!--link rel="stylesheet" href="lib/prism/prism.css" /-->
 		<link rel="stylesheet" href="lib/trumbowyg/ui/trumbowyg.min.css" />
 		<link rel="stylesheet" href="lib/trumbowyg/plugins/colors/ui/trumbowyg.colors.min.css" />
@@ -109,14 +111,33 @@ $row = $stmt->fetch();
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col">
-									<label for="avatarSpeed" class="form-label">Avatar animation speed</label>
-									<input type="number" class="form-control" id="avatarSpeed" min="200" max="3000" value="2000" />
+									<label for="animationSpeed" class="form-label">Default animation speed</label>
+									<input type="number" class="form-control" id="animationSpeed" min="200" max="3000" value="2000" />
 								</div>
 								<div class="col">
 									<label for="panningSpeed" class="form-label">Map panning speed</label>
 									<input type="number" class="form-control" id="panningSpeed" min="500" max="4000" placeholder="auto" />
 								</div>
 							</div>
+							<div class="row">
+								<div class="col col-md-10 mt-4">
+									<label for="aspectRatio" class="form-label">Map aspect ratio</label>
+									<select class="form-select" id="aspectRatio" aria-label="Map aspect ratio">
+										<option value="16/9" selected>16/9</option>
+										<option value="4/3">4/3</option>
+										<option value="9/16">9/16</option>
+									</select>
+								</div>
+							</div>
+							<!--div class="row">
+								<div class="col col-md-10 mt-4">
+									<label for="bookOrientation" class="form-label">Book orientation</label>
+									<select class="form-select" id="bookOrientation" aria-label="Book orientation">
+										<option value="left" selected>Left</option>
+										<option value="right">Right</option>
+									</select>
+								</div>
+							</div-->
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -187,6 +208,57 @@ $row = $stmt->fetch();
 
 
 
+		<!-- Scene warning modal -->
+		<div class="modal fade" id="sceneWarningModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="sceneWarningModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="sceneWarningModalLabel">Delete scene</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Are you sure you want to delete the current scene?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-danger" id="delete">Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Textbox options modal -->
+		<div class="modal fade" id="textboxOptionsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="textboxOptionsModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="textboxOptionsModalLabel">Book options</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col col-md-10">
+									<label for="bookOrientation" class="form-label">Book orientation</label>
+									<select class="form-select" id="bookOrientation" aria-label="Book orientation">
+										<option value="left" selected>Left</option>
+										<option value="right">Right</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
 		<!-- Loading modal -->
 		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
@@ -224,7 +296,7 @@ $row = $stmt->fetch();
 
 
 		<div class="container-fluid p-0">
-			<div class="row g-0">
+			<div class="row g-0" style="height: 39px;">
 				<div class="col">
 					<nav class="navbar navbar-expand-sm navbar-dark fixed-top px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
 						<a class="navbar-brand py-0" href="maps.php" style="line-height: 0;">
@@ -248,6 +320,64 @@ $row = $stmt->fetch();
 										<li><a class="dropdown-item" href="#" id="save">Save</a></li>
 										<li><hr class="dropdown-divider" /></li>
 										<li><a class="dropdown-item" href="maps.php">Exit</a></li>
+									</ul>
+								</li>
+								<li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle py-0" href="#" id="navbarEditDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+										Edit
+									</a>
+									<ul class="dropdown-menu" aria-labelledby="navbarEditDropdown" style="max-height: calc(100vh - 39px); overflow-y: visible;">
+										<li class="dropend">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+												Scene
+											</button>
+											<ul class="dropdown-menu">
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.add();">Add new scene</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.capture();">Recapture</button></li>
+												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sceneWarningModal">Delete</button></li>
+												<li><button type="button" class="dropdown-item" onclick="">Bookmark scene</button></li>
+												<li><button type="button" class="dropdown-item" onclick="">Copy scene position</button></li>
+												<li><button type="button" class="dropdown-item" onclick="">Paste scene position</button></li>
+											</ul>
+										</li>
+										<li class="dropend">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+												Book
+											</button>
+											<ul class="dropdown-menu">
+												<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.add();">Add book</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.setLock(true);">Lock</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.setLock(false);">Unlock</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.delete(_SCENES.active);">Remove</button></li>
+												<li class="dropend">
+													<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+														Set orientation
+													</button>
+													<ul class="dropdown-menu">
+														<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.setOrientation('left');">Left</button></li>
+														<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.setOrientation('right');">Right</button></li>
+													</ul>
+												</li>
+											</ul>
+										</li>
+										<li class="dropend">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+												Map
+											</button>
+											<ul class="dropdown-menu">
+												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#basemapModal">Change basemap</button></li>
+												<li class="dropend">
+													<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+														Set aspect ratio
+													</button>
+													<ul class="dropdown-menu">
+														<li><button type="button" class="dropdown-item" onclick="_MAP.setAspectRatio(16/9);">16/9</button></li>
+														<li><button type="button" class="dropdown-item" onclick="_MAP.setAspectRatio(4/3);">4/3</button></li>
+														<li><button type="button" class="dropdown-item" onclick="_MAP.setAspectRatio(9/16);">9/16</button></li>
+													</ul>
+												</li>
+											</ul>
+										</li>
 									</ul>
 								</li>
 								<li class="nav-item mb-2 mb-sm-0 me-auto">
@@ -279,15 +409,15 @@ $row = $stmt->fetch();
 				</div>
 			</div>
 
-			<div class="row g-0" id="sceneRow" style="margin-top: 39px;">
+			<div class="row g-0" id="sceneRow" style="height: 49px;">
 				<div class="col shadow" style="z-index: 1003;">
 					<div class="row g-0">
 						<div class="col text-center p-2" style="max-width: 150px;">
-							<button type="button" class="btn btn-sm btn-light" id="delete" title="Delete current scene">
+							<button type="button" class="btn btn-sm btn-light" id="delete" title="Delete current scene" data-bs-toggle="modal" data-bs-target="#sceneWarningModal" disabled>
 								<i class="fas fa-trash"></i>
 							</button>
 
-							<button type="button" class="btn btn-sm btn-light" id="recapture" title="Recapture map-extent">
+							<button type="button" class="btn btn-sm btn-light" id="recapture" title="Recapture map-extent" disabled>
 								<i class="fas fa-camera"></i>
 							</button>
 
@@ -308,8 +438,11 @@ $row = $stmt->fetch();
 					<div class="shadow" id="map"></div>
 					<div class="shadow" id="textbox">
 						<div id="banner">
-							<input type="checkbox" class="form-check-input ms-1" value="" id="lock" title="Lock textbox" />
-							<button type="button" class="btn btn-outline-secondary btn-sm py-0" id="close" style="float: right;">
+							<button type="button" class="btn btn-outline-secondary btn-sm py-0" id="options" title="Book options" data-bs-toggle="modal" data-bs-target="#textboxOptionsModal" style="float: left;">
+								<i class="fas fa-cog"></i>
+							</button>
+							<input type="checkbox" class="form-check-input ms-1" value="" id="lock" title="Lock" />
+							<button type="button" class="btn btn-outline-secondary btn-sm py-0" id="close" title="Remove book" style="float: right;">
 								<i class="fas fa-times"></i>
 							</button>
 						</div>
@@ -332,14 +465,16 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script-->
-		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.js"></script>
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script-->
-		<script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script>
+		<!--script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script-->
+		<script type="text/javascript" src="lib/leaflet.geoman/leaflet-geoman.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
+		<!--script type="text/javascript" src="lib/leaflet.centercontrol/leaflet-control-topcenter.js"></script-->
 		<!--script type="text/javascript" src="lib/geotiff/geotiff.js"></script-->
 		<!--script type="text/javascript" src="lib/plotty/plotty.min.js"></script-->
 		<!--script type="text/javascript" src="lib/leaflet.geotiff/leaflet-geotiff.js"></script-->

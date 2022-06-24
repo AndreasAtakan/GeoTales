@@ -11,46 +11,24 @@
 
 L.Map.addInitHook(function() {
 
+	// Init map aspect ratio
+
+	this.setAspectRatio();
+
+
+
 	// Plugins
 
-	/*this.addControl( new L.Control.Fullscreen({ position: "topleft" }) );*/
+	/*this.addControl( new L.Control.Fullscreen({ position: "topright" }) );*/
 
-	this.addControl(
-		L.control.zoom({ position: "bottomright" })
-	);
+	/*this.addControl( L.control.zoom({ position: "bottomright" }) );*/
 
-	this.addControl(
-		L.easyButton({
-			id: "fullscreen",
-			position: "topright",
-			leafletClasses: true,
-			states: [
-				{
-					stateName: "enterFullscreen",
-					onClick: function(button, map) {
-						let el = document.body;
-						if (el.requestFullscreen) { el.requestFullscreen(); }
-						else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
-						else if (el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
-						button.state("exitFullscreen");
-					},
-					title: "Enter fullscreen",
-					icon: "fa-expand"
-				},
-				{
-					stateName: "exitFullscreen",
-					onClick: function(button, map) {
-						if (document.exitFullscreen) { document.exitFullscreen(); }
-						else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
-						else if (document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
-						button.state("enterFullscreen");
-					},
-					title: "Exit fullscreen",
-					icon: "fa-compress"
-				}
-			]
-		})
-	);
+	this.returnButton = L.Control.zoomHome({
+		position: "bottomright",
+		zoomHomeIcon: "square",
+		zoomHomeTitle: "Return to map-extent"
+	});
+	this.addControl( this.returnButton );
 
 	this.addControl(
 		L.easyBar([
@@ -67,6 +45,35 @@ L.Map.addInitHook(function() {
 				]
 			}),
 			L.easyButton({
+				id: "fullscreen",
+				leafletClasses: true,
+				states: [
+					{
+						stateName: "enterFullscreen",
+						onClick: function(button, map) {
+							let el = document.body;
+							if (el.requestFullscreen) { el.requestFullscreen(); }
+							else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
+							else if (el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
+							button.state("exitFullscreen");
+						},
+						title: "Enter fullscreen",
+						icon: "fa-expand"
+					},
+					{
+						stateName: "exitFullscreen",
+						onClick: function(button, map) {
+							if (document.exitFullscreen) { document.exitFullscreen(); }
+							else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
+							else if (document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
+							button.state("enterFullscreen");
+						},
+						title: "Exit fullscreen",
+						icon: "fa-compress"
+					}
+				]
+			}),
+			L.easyButton({
 				id: "sceneForward",
 				leafletClasses: true,
 				states: [
@@ -78,8 +85,26 @@ L.Map.addInitHook(function() {
 					}
 				]
 			})
-		], { position: "topleft", id: "sceneNav" })
+		], { position: "topright", id: "sceneNav" })
 	);
+
+	// TODO!!
+	/*this.addControl(
+		L.control.select({
+			position: "topright",
+			items: [
+				{ label: "sunny", value: "☼" },
+				{ label: "sunny", value: "☼" },
+				{ label: "sunny", value: "☼" },
+				{ label: "sunny", value: "☼" },
+				{ label: "sunny", value: "☼" },
+				{ label: "sunny", value: "☼" }
+			],
+			onSelect: function(itemValue) {
+				console.log(itemValue);
+			}
+		})
+	);*/
 
 	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
 
@@ -126,8 +151,28 @@ L.Map.include({
 		this.objectLayer.clearLayers();
 	},
 
+	setAspectRatio: function() {
+		let w = $("#main").outerWidth(),
+			h = $("#main").outerHeight(),
+			r = _OPTIONS.aspectratio;
+
+		let dim = get_aspect_ratio_dimentions(w, h, r);
+		$("#map").css({
+			width: `${(dim[0]/w) * 100}%`,
+			height: `${(dim[1]/h) * 100}%`,
+			left: `${(((w - dim[0]) / 2) / w) * 100}%`,
+			top: `${(((h - dim[1]) / 2)/ h) * 100}%`
+		});
+
+		this.invalidateSize();
+		if(this.returnButton) {
+			this.returnButton.setHomeBounds( _SCENES.get( _SCENES.active ).bounds , { maxZoom: this.getMaxZoom() });
+		}
+	},
+
 	setFlyTo: function(bounds) {
-		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _PANNINGSPEED || null });
+		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
+		this.returnButton.setHomeBounds(bounds, { maxZoom: this.getMaxZoom() });
 	},
 
 	setObjects: function(sceneId) {
@@ -140,11 +185,11 @@ L.Map.include({
 				let object = this.createObject(o);
 				this.objectLayer.addLayer(object, o.type, o.id);
 
-				if(o.type == "avatar") {
+				if(false && o.type == "avatar") {
 					for(let oo of os) {
 						if(o.id == oo.id) {
 							object.setBounds( L.latLngBounds(oo.pos) );
-							object.slideTo( L.latLngBounds(o.pos) , { duration: _AVATARSPEED });
+							object.slideTo( L.latLngBounds(o.pos) , { duration: _OPTIONS.animationspeed });
 							break;
 						}
 					}

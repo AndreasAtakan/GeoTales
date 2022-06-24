@@ -16,8 +16,7 @@ function uuid(a) {
 
 
 function import_data(data) {
-	_AVATARSPEED = data.options.avatarspeed;
-	_PANNINGSPEED = data.options.panningspeed;
+	_OPTIONS = data.options;
 
 	if(data.scenes.length <= 0) { return; }
 
@@ -42,7 +41,18 @@ function get_basemap(url) {
 
 
 
-function is_internal_basemap(url) {
+function get_aspect_ratio_dimentions(w, h, r) {
+	let _w = r * h;
+	if(_w <= w) {
+		return [_w, h];
+	}else{
+		return [w, w / r];
+	}
+}
+
+
+
+/*function is_internal_basemap(url) {
 	if(url == "https://api.mapbox.com/styles/v1/andreasatakan/ckwjt95pj0zn714lvg9q9p7da/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYW5kcmVhc2F0YWthbiIsImEiOiJjazlndzM1cmUwMnl5M21tZjQ3dXpzeHJnIn0.oE5zp040ZzJj5QgCDznweg") {
 		return `
 			<p style="margin-right: 1rem;"><img style="width: 25px;" src="https://raw.githubusercontent.com/klokantech/roman-empire/master/icons/bath.svg" /> Bath house</p>
@@ -74,4 +84,4 @@ function is_internal_basemap(url) {
 	}
 
 	return null;
-}
+}*/

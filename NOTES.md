@@ -22,8 +22,6 @@
 	  [Alternativ til grunnkart-editor](https://github.com/maputnik/editor)
 	  Og "Available basemaps" bør ha et søkefelt på toppen
 
-- (no longer relevant) Dato-velger må være lettere å finne fram til ønsket år (ikke scrolle i 15 min). Gjelder Chrome
-
 - V Bilde på scenene; legge inn et mellomsteg før man setter inn hvor brukeren kan crop-e/omforme/legge inn tekst på bildet (litt som twitter profil-bilder)
 
 - [Grunnkart kilde](https://maps.lib.utexas.edu/maps)
@@ -75,4 +73,5 @@
 	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~
 
 - **leaflet.zoomhome**
+	- Endret FontAwesome `fa` til `far` (for å bruke *regular*)
 	- Endret `setHomeBounds` metode til å bruke `_map._getBoundsCenterZoom` i stedet for `_map.getBoundsZoom` og `bounds.getCenter`. `bounds.getCenter` produserer et annet senter-punkt enn `_getBoundsCenterZoom`, og vil dermed flytte kartet til et annet sted enn når scenen først blir satt

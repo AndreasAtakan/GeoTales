@@ -10,32 +10,25 @@
 
 
 L.FadeLayer = L.FeatureGroup.extend({
-	addLayer: function(object, type, id) {
+	addLayer: function(object, id) {
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 		if(id && !object.options.id) object.options.id = id;
-		if(type && !object.options.type) object.options.type = type;
+		object.options.pmIgnore = true;
 
-		switch(object.options.type) {
-			case "avatar":
-				object.setOpacity(0.3);
-				$(object._image).css("border-radius", object.options.rounded ? "50%" : "0");
-				//$(object._image).css("transform", `rotate(${object.options.angle}deg)`);
-				$(object._image).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
-				$(object._image).css("filter", `
-					blur(${object.options.overlayBlur}px)
-					grayscale(${object.options.overlayGrayscale*100}%)
-				`);
-				break;
-
-			case "polyline":
-			case "polygon":
-				object.setStyle({ opacity: 0.3 });
-				object.setStyle({ fillOpacity: 0.2 });
-				break;
-
-			default: console.error("object type invalid"); break;
+		if(object instanceof L.ImageOverlay) {
+			object.setOpacity(0.3);
+			$(object._image).css("border-radius", object.options.rounded ? "50%" : "0");
+			//$(object._image).css("transform", `rotate(${object.options.angle}deg)`);
+			$(object._image).css("border", `${object.options.borderThickness}px solid ${object.options.borderColor}`);
+			$(object._image).css("filter", `
+				blur(${object.options.overlayBlur}px)
+				grayscale(${object.options.overlayGrayscale*100}%)
+			`);
+		}else{
+			object.setStyle({ opacity: 0.3 });
+			object.setStyle({ fillOpacity: 0.2 });
 		}
-		object.on("click", ev => { _MAP.insertObject(object.options.id, object.options.sceneId); });
+		object.on("click", ev => { _MAP.insertObject(object); });
 	},
 
 	getObject: function(id) {
@@ -54,7 +47,7 @@ L.FadeLayer = L.FeatureGroup.extend({
 
 	initialize: function(options) {
 		L.FeatureGroup.prototype.initialize.call(this);
-		this.options.id = uuid();
+		this.options.id = "0";
 		this.options = Object.assign({}, this.options, options);
 	}
 });
@@ -68,6 +61,10 @@ L.ObjectLayer = L.FeatureGroup.extend({
 	addLayer: function(object, type, id) {
 		object.options.id = id || uuid();
 		if(type && !object.options.type) { object.options.type = type; }
+		console.log(object);
+
+		L.FeatureGroup.prototype.addLayer.call(this, object);
+		return;
 
 		switch(object.options.type) {
 			case "avatar":
@@ -76,6 +73,7 @@ L.ObjectLayer = L.FeatureGroup.extend({
 
 			case "polyline":
 			case "polygon":
+			case "rectangle":
 				this.editLayer.addLayer(object);
 				break;
 
@@ -84,21 +82,24 @@ L.ObjectLayer = L.FeatureGroup.extend({
 	},
 
 	getObject: function(id) {
-		for(let o of this.avatarLayer.getLayers().concat(this.editLayer.getLayers())) {
+		for(let o of this.getLayers()) {
 			if(o.options.id == id) { return o; }
 		}
 		return null;
 	},
 
-	getLayers: function() {
+	/*getLayers: function() {
 		return this.avatarLayer.getLayers().concat(this.editLayer.getLayers());
-	},
+	},*/
 
-	setIcon: function(id, size, icon) { this.avatarLayer.setIcon(id, size, icon); },
+	setIcon: function(id, size, icon) { /**/ },
 
 	removeLayer: function(object, id) {
 		var object = object || (id ? this.getObject(id) : null);
 		if(!object) { return; }
+
+		L.FeatureGroup.prototype.removeLayer.call(this, object);
+		return;
 
 		switch(object.options.type) {
 			case "avatar":
@@ -107,6 +108,7 @@ L.ObjectLayer = L.FeatureGroup.extend({
 
 			case "polyline":
 			case "polygon":
+			case "rectangle":
 				this.editLayer.removeLayer(object);
 				break;
 
@@ -114,21 +116,21 @@ L.ObjectLayer = L.FeatureGroup.extend({
 		}
 	},
 
-	clearLayers: function() {
+	/*clearLayers: function() {
 		this.avatarLayer.clearLayers();
 		this.editLayer.clearLayers();
-	},
+	},*/
 
 	initialize: function(options) {
 		L.FeatureGroup.prototype.initialize.call(this);
 		this.options.id = uuid();
 		this.options = Object.assign({}, this.options, options);
 
-		this.avatarLayer = L.avatarLayer();
-		this.editLayer = L.editLayer();
+		//this.avatarLayer = L.avatarLayer();
+		//this.editLayer = L.editLayer();
 
-		L.FeatureGroup.prototype.addLayer.call(this, this.avatarLayer);
-		L.FeatureGroup.prototype.addLayer.call(this, this.editLayer);
+		//L.FeatureGroup.prototype.addLayer.call(this, this.avatarLayer);
+		//L.FeatureGroup.prototype.addLayer.call(this, this.editLayer);
 	}
 });
 L.objectLayer = function(options) { return new L.ObjectLayer(options); };
@@ -246,10 +248,10 @@ L.EditLayer = L.FeatureGroup.extend({
 		L.FeatureGroup.prototype.addLayer.call(this, object);
 		this.bind(object.options.id);
 
-		if(!this.editHandler.enabled()) {
+		/*if(!this.editHandler.enabled()) {
 			this.editHandler._map = this._map; // NOTE: this is also a hack, but necessary to make editing work
 			this.editHandler.enable();
-		}
+		}*/
 	},
 
 	bind: function(id) {
@@ -261,7 +263,8 @@ L.EditLayer = L.FeatureGroup.extend({
 		let popup = "";
 		switch(o.options.type) {
 			case "polyline": popup = polyline_popup(); break;
-			case "polygon": popup = polygon_popup(); break;
+			case "polygon":
+			case "rectangle": popup = polygon_popup(); break;
 			default: console.error("object type invalid"); break;
 		}
 		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450 });
@@ -297,12 +300,12 @@ L.EditLayer = L.FeatureGroup.extend({
 		this.options.id = uuid();
 		this.options = Object.assign({}, this.options, options);
 
-		let editControl = new L.EditToolbar({
+		/*let editControl = new L.EditToolbar({
 			edit: { selectedPathOptions: { dashArray: "none", maintainColor: true } },
 			featureGroup: this
 		});
 		delete editControl.options.edit.selectedPathOptions.fillOpacity; // NOTE: this is a crazy hack, but necessary to make use that the fill opacity of the map objects are not changed when entered into editing mode
-		this.editHandler = editControl.getModeHandlers()[0].handler;
+		this.editHandler = editControl.getModeHandlers()[0].handler;*/
 	}
 });
 L.editLayer = function(options) { return new L.EditLayer(options); };

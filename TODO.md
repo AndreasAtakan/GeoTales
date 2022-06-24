@@ -2,40 +2,20 @@
 
 - Biz:
 	* Registrere AS hos Stripe for nettbetaling
-	* IN søknad
+	* IN markedsavklaring
 
 
 - Overall:
 	* (How?) Implement Stripe payment
 	* Reklamespalte i pres-modus for ubetalte brukere
 	* Password-beskyttede kart
-	* Scene-kartutsnitt; bruk aspect-ratio løsningen
 - Edit-mode:
-	* X Kapittelinndeling
-	* X Numerert scene (1-n)
-	* X Remove rectangle as drawing-option
 	* Library of avilable avatar icons (this will save a lot of storage space and cost)
 	* Library of uploaded basemaps under "Avilable basemaps"
-	* X Under "Available basemaps"; legg til mulighet for blankt/ensfarget grunnart
 	* Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
-	* W Fix tootip for ImageOverlay; Wait for Leaflet to push version 1.8, bugs are fixed in dev
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 	* Posibility to make hyperlink to other scenes in the textboxes
-	* X Avatar-size; only from 10 to (f.ex) 60
 	* Map-objects from last scene should automatically be added to the next scene when creating
-	* X Add textbox as a map-object drawing option:
-		- X The popup's position will be static relative to the screen, and not to the map
-		- X The popup can be resized in both with and height
-	* X Remove textbox from left scene section
-	* X Redo left scene-section:
-		- X This section will ONLY contain scenes
-		- X Change the section into a collapsable "drop-down/-up" with a much smaller total width
-		- X The section will only contain small box-elements that represent a single scene with buttons for "recapture", "delete", "reorder", etc.
-		- X Each box-element will have a checkbox that can mark that scene as the begining of a new chapter. When checked, a small textbox will appear where the user can input the chapter title
-	* X Redo "create new scene" workflow:
-		- X When user clicks "+" under a scene, the new scene must be created immediately, capturing the maps current extent. This will NOT trigger a "flash" on the map
-		- X If user wants to change the scene's map-extent, user can simply click "recapture"
-		- X Only "Recapture" will trigger a map flash-effect
 	* GEDCOM import:
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
@@ -55,22 +35,10 @@
 
 
 - Working TODO:
-	* W Textboxes; sørg for at bredde, høyde og posisjon er en prosent-beregning i forhold til breden av mapCol. Dette vil føre til at ting skalerer med skjermstørrelse
 	* *map.js* linje 264; når jeg prøver å klone en avatar som i seg selv allerede er en klone av en annen avatar, produserer dette en feil
-	* Legg til en advarsel før scener blir slettet
 	* Tekstboks "Create link" knapp; når en tekst er markert bør man få en modal hvor man kan legge inn lenke også blir det `<a href="[Lenke]">[Den markerte teksten]</a>`
 	* Generelt; legg til støtte for WebP bilder
 	* Lenker i tekstboks; hvis teksten allerede var stor (header 1,2,..), så blir hyperlenke teksten automatisk liten; feil
-
-- Endringer etter tilbakemeldinger, ny runde:
-	* Scene text-box can't write?
-
-
-
-
-
-
-- W (not woking) Block zoom on mobile devices; meta tag
 
 
 

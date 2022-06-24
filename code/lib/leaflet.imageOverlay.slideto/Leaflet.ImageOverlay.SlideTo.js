@@ -37,7 +37,7 @@ L.ImageOverlay.include({
 	},
 
 	_slideTo: function _slideTo() {
-		if (!this._map) return;
+		if (!this._map) { return; }
 
 		var remaining = this._slideToUntil - performance.now();
 

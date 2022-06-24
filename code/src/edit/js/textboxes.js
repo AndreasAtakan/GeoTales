@@ -12,16 +12,50 @@
 function Textboxes() {
 	this.store = [];
 
+	$("input#_img").change(function(ev) {
+		let file = $(this)[0].files[0];
+		if(!file) { return; }
+
+		$("#loadingModal").modal("show");
+		let data = new FormData(); data.append("image", file);
+		$.ajax({
+			type: "POST",
+			url: "api/upload.php",
+			data: data,
+			contentType: false,
+			processData: false,
+			success: function(result, status, xhr) {
+				$("#textbox #content").trumbowyg("execCmd", { cmd: "insertImage", param: result, forceCss: false, skipTrumbowyg: true });
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+			},
+			error: function(xhr, status, error) {
+				console.log(xhr.status, error);
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+			}
+		});
+	});
+
+	$("#textbox input#lock").change(ev => {
+		this.setLock( ev.target.checked );
+	});
+
+	$("#textbox button#close").click(ev => { this.delete(_SCENES.active); });
+
+	$("#textboxOptionsModal select#bookOrientation").change(ev => {
+		this.setOrientation( ev.target.value );
+	});
+
 
 	this.setup = function() {
-		$("#textbox").resizable({
-			containment: "#mapRow", handles: "e", minWidth: 50,
+		$("#textbox").resizable({ // https://api.jqueryui.com/resizable/
+			containment: "#mapRow", handles: "e", minWidth: 100,
 			stop: (ev, ui) => {
 				let w = ui.size.width / ($("#mapRow").outerWidth() - 20),
 					t = this.get(_SCENES.active);
 				if(t) {
 					this.store[ t.index ].dim = [0, w];
 					$("#textbox").css({ width: `${w * 100}%` });
+					if(t.pos == "right") { $("#textbox").css({ left: "auto" }); }
 				}
 			}
 		});
@@ -62,35 +96,13 @@ function Textboxes() {
 			if(t) { this.store[ t.index ].content = $("#textbox #content").trumbowyg("html"); }
 		});
 
-		$("input#_img").change(function(ev) {
-			let file = $(this)[0].files[0];
-			if(!file) { return; }
+		_MAP.setOrientation("right");
+	};
 
-			$("#loadingModal").modal("show");
-			let data = new FormData(); data.append("image", file);
-			$.ajax({
-				type: "POST",
-				url: "api/upload.php",
-				data: data,
-				contentType: false,
-				processData: false,
-				success: function(result, status, xhr) {
-					$("#textbox #content").trumbowyg("execCmd", { cmd: "insertImage", param: result, forceCss: false, skipTrumbowyg: true });
-					setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-				},
-				error: function(xhr, status, error) {
-					console.log(xhr.status, error);
-					setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-				}
-			});
-		});
-
-		$("#textbox input#lock").change(ev => {
-			let t = this.get(_SCENES.active);
-			if(t) { this.store[ t.index ].locked = ev.target.checked; }
-		});
-
-		$("#textbox button#close").click(ev => { this.delete(_SCENES.active); });
+	this.reset = function() {
+		$("#textbox").resizable("destroy");
+		$("#textbox #content").trumbowyg("destroy");
+		_MAP.setOrientation("right");
 	};
 
 	this.get = function(sceneId) {
@@ -102,6 +114,8 @@ function Textboxes() {
 	};
 
 	this.add = function() {
+		if(!_SCENES.active) { return; }
+
 		let t = new Textbox(null);
 		t.sceneId = _SCENES.active;
 		t.enable();
@@ -115,7 +129,8 @@ function Textboxes() {
 				if(t.sceneId == prev.id && t.locked) {
 					let tt = new Textbox(null);
 					tt.sceneId = sceneId;
-					tt.dim = t.dim; tt.content = t.content;
+					tt.pos = t.pos; tt.dim = t.dim;
+					tt.content = t.content;
 					tt.locked = true;
 					tt.enable();
 					this.store.push(tt);
@@ -127,13 +142,15 @@ function Textboxes() {
 
 	this.delete = function(sceneId) {
 		let t = this.get(sceneId);
+		if(!t) { return; }
+
 		t.disable();
 		this.store.splice(t.index, 1);
 	};
 
 	this.deleteScene = function(sceneId) {
 		for(let t of this.store) {
-			if(t.sceneId == sceneId) { this.delete(t.id); }
+			if(t.sceneId == sceneId) { this.delete(t.sceneId); }
 		}
 	};
 
@@ -144,14 +161,30 @@ function Textboxes() {
 		}
 	};
 
+	this.setLock = function(l) {
+		let t = this.get(_SCENES.active);
+		if(!t) { return; }
+
+		t.setLock(l);
+	};
+
+	this.setOrientation = function(pos) {
+		let t = this.get(_SCENES.active);
+		if(!t) { return; }
+
+		this.store[ t.index ].pos = pos;
+		this.store[ t.index ].setOrientation();
+	};
+
 	this.importData = function(data) {
 		if(data.length <= 0) { return; }
 
 		for(let o of data) {
 			let t = new Textbox(o.id);
 			t.sceneId = o.sceneId;
-			t.locked = o.locked; t.dim = o.dim;
+			t.pos = o.pos; t.dim = o.dim;
 			t.content = o.content;
+			t.locked = o.locked;
 
 			t.disable();
 
@@ -174,11 +207,37 @@ function Textbox(id) {
 	this.sceneId = "";
 	this.locked = false;
 
+	this.pos = "left";
 	this.dim = [0, 0.25];
 	this.content = "";
 
 
+	this.setOrientation = function() {
+		switch(this.pos) {
+			case "left":
+				$("#textbox").css({ left: "10px", right: "auto" });
+				$("#textbox").resizable("option", { handles: "e" });
+				_MAP.setOrientation("right");
+				break;
+
+			case "right":
+				$("#textbox").css({ left: "auto", right: "10px" });
+				$("#textbox").resizable("option", { handles: "w" });
+				_MAP.setOrientation("left");
+				break;
+
+			default: break;
+		}
+	};
+
+	this.setLock = function(l) {
+		this.locked = l;
+		$("#textbox input#lock").prop("checked", this.locked);
+	};
+
 	this.enable = function() {
+		this.setOrientation();
+
 		$("#textbox").css("display", "block");
 		$("#textbox").css({ width: `${this.dim[1] * 100}%` });
 
@@ -202,6 +261,7 @@ function Textbox(id) {
 			id: this.id,
 			sceneId: this.sceneId,
 			locked: this.locked,
+			pos: this.pos,
 			dim: this.dim,
 			content: this.content
 		};

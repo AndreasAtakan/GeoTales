@@ -31,6 +31,13 @@ function Scenes() {
 				this.bind();
 			}
 		});
+
+		$("#sceneRow button#delete, #sceneRow button#recapture").prop("disabled", false);
+	};
+
+	this.reset = function() {
+		$("#scenes").sortable("destroy");
+		$("#sceneRow button#delete, #sceneRow button#recapture").prop("disabled", true);
 	};
 
 	this.get = function(id) {
@@ -108,10 +115,6 @@ function Scenes() {
 			document.dispatchEvent( new Event("_reset") );
 		}
 	};
-
-	/**/this.sceneInactive = function() {
-		//if(this.active) { this.get(this.active).inactive(); }
-	};/**/
 
 	this.unbind = function() {
 		$("#scenes li button#reorder").prop("disabled", true);
@@ -264,6 +267,8 @@ function Scene(id, prevId) {
 		let nw = _MAP.getBounds().getNorthWest(),
 			se = _MAP.getBounds().getSouthEast();
 		this.bounds = [[nw.lat, nw.lng], [se.lat, se.lng]];
+
+		_MAP.setHomeBounds( this.bounds );
 
 		this.setBasemap();
 	};

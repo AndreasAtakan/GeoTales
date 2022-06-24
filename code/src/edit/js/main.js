@@ -16,15 +16,24 @@ window.onload = function(ev) {
 		if(ev.scale !== 1) { ev.preventDefault(); }
 	}, false);
 
+	// Set up window resize start/end events
+	let resizeTimer = false;
+	$(window).on("resize", function(ev) {
+		if( !resizeTimer ) { $(window).trigger("resizestart"); }
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(function() {
+			resizeTimer = false;
+			$(window).trigger("resizeend");
+		}, 250);
+	}).on("resizeend", function() { _MAP.setAspectRatio(); });
+
 
 
 	_SCENES = new Scenes();
-	_SCENES.setup();
 
 	$("#sceneRow").keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
 	$("#sceneRow").keyup(ev => {
 		let keycode = ev.code;
-
 		if(keycode == "ArrowLeft") { ev.preventDefault(); _SCENES.prev(); }
 		if(keycode == "ArrowRight") { ev.preventDefault(); _SCENES.next(); }
 		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
@@ -32,11 +41,11 @@ window.onload = function(ev) {
 
 	$("#sceneRow button#add").click(ev => { _SCENES.add(); });
 	$("#sceneRow button#recapture").click(ev => { _SCENES.capture(); });
-	$("#sceneRow button#delete").click(ev => { _SCENES.delete(); });
+	$("#sceneWarningModal button#delete").click(ev => { _SCENES.delete(); $("#sceneWarningModal").modal("hide"); });
 
 
 	_TEXTBOXES = new Textboxes();
-	_TEXTBOXES.setup();
+
 
 	_MAP = L.map("map", {
 		center: [ 49, 14 ],
@@ -61,13 +70,18 @@ window.onload = function(ev) {
 		]
 	});
 
-	document.addEventListener("_setup", ev => { _MAP.setup(); });
-	document.addEventListener("_reset", ev => { _MAP.reset(); });
+	document.addEventListener("_setup", ev => {
+		_SCENES.setup(); _TEXTBOXES.setup(); _MAP.setup();
+	});
+	document.addEventListener("_reset", ev => {
+		_SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset();
+	});
 
 
 
-	$("#optionsModal input#avatarSpeed").change(function(ev) { _OPTIONS.avatarspeed = parseInt( $(this).val() ); });
+	$("#optionsModal input#animationSpeed").change(function(ev) { _OPTIONS.animationspeed = parseInt( $(this).val() ); });
 	$("#optionsModal input#panningSpeed").change(function(ev) { _OPTIONS.panningspeed = ( $(this).val() / 1000 ) || null; });
+	$("#optionsModal select#aspectRatio").change(function(ev) { _MAP.setAspectRatio( eval( this.value ) ); });
 
 
 

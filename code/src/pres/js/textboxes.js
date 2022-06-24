@@ -18,28 +18,27 @@ function Textboxes() {
 	};
 
 	this.reset = function() {
-		for(let s of this.store) { this.delete(s.id); }
+		//
 	};
 
-	this.get = function(id) {
+	this.get = function(sceneId) {
 		for(let i = 0; i < this.store.length; i++) {
-			let s = Object.assign({}, this.store[i]);
-			if(s.id == id) { s.index = i; return s; }
+			let t = Object.assign({}, this.store[i]);
+			if(t.sceneId == sceneId) { t.index = i; return t; }
 		}
 		return null;
 	};
 
-	this.delete = function(id) {
-		let s = this.get(id);
-		s.disable();
-		s.destroy();
-		this.store.splice(s.index, 1);
+	this.delete = function(sceneId) {
+		let t = this.get(sceneId);
+		t.disable();
+		this.store.splice(t.index, 1);
 	};
 
 	this.set = function(sceneId) {
-		for(let s of this.store) {
-			if(s.sceneId == sceneId) { s.enable(); }
-			else{ s.disable(); }
+		for(let t of this.store) {
+			if(t.sceneId == sceneId) { t.enable(); break; }
+			else{ t.disable(); }
 		}
 	};
 
@@ -49,8 +48,7 @@ function Textboxes() {
 		for(let o of data) {
 			let t = new Textbox(o.id);
 			t.sceneId = o.sceneId;
-			t.locked = o.locked;
-			t.pos = o.pos; t.dim = o.dim;
+			t.locked = o.locked; t.dim = o.dim;
 			t.content = o.content;
 
 			t.disable();
@@ -68,39 +66,23 @@ function Textbox(id) {
 	this.sceneId = "";
 	this.locked = false;
 
-	this.pos = null;
-	this.dim = null;
+	this.dim = [0, 0.25];
 	this.content = "";
-
-	new_textbox(this.id);
 
 
 	this.enable = function() {
-		$(`div[data-id="${this.id}"]`).css("display", "block");
+		if(this.content == "") { return; }
 
-		$(`div[data-id="${this.id}"] #content`).html(this.content);
+		$("#textbox").css("display", "block");
+
+		$("#textbox #content").html(this.content);
 
 		if(this.dim) {
-			let w = $("#main").width(), h = $("#main").height();
-			$(`div[data-id="${this.id}"]`).css({
-				maxWidth: `${this.dim[0] * w}px`,
-				maxHeight: `${this.dim[1] * h}px`
-			});
-		}
-		if(this.pos) {
-			let p = $("#main").position(), w = $("#main").width(), h = $("#main").height();
-			$(`div[data-id="${this.id}"]`).css({
-				left: `${this.pos[0] * w + p.left}px`,
-				top: `${this.pos[1] * h + p.top}px`
-			});
+			$("#textbox").css({ maxWidth: `${this.dim[1] * 100}%` });
 		}
 	};
 
 	this.disable = function() {
-		$(`div[data-id="${this.id}"]`).css("display", "none");
-	};
-
-	this.destroy = function() {
-		$(`div[data-id="${this.id}"]`).remove();
+		$("#textbox").css("display", "none");
 	};
 }

@@ -68,8 +68,10 @@ $row = $stmt->fetch();
 		<!--link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" /-->
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.select/leaflet.control.select.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/pres/css/main.css" />
@@ -141,30 +143,49 @@ $row = $stmt->fetch();
 
 
 		<div class="container-fluid p-0">
-			<div class="row g-0" style="height: calc(100vh);">
-				<div class="col-12" id="main">
-					<div id="map"></div>
-				</div>
+			<div class="row g-0" id="main">
+				<div class="col-12">
+					<div class="shadow" id="map"></div>
 
-				<div class="card" id="extraNav">
-					<div class="card-body p-0">
-						<div class="dropdown">
-							<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-								<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
-							</button>
-							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
-								<li><a class="dropdown-item" href="index.php">Gallery</a></li>
-						<?php
-							if($logged_in) {
-						?>
-								<li><hr class="dropdown-divider" /></li>
-								<li><a class="dropdown-item" href="maps.php">My maps</a></li>
-								<li><hr class="dropdown-divider" /></li>
-								<li><a class="dropdown-item" href="#">Clone this map</a></li>
-						<?php
-							}
-						?>
-							</ul>
+					<div class="card shadow" id="textbox">
+						<div class="card-body">
+							<div id="content"></div>
+						</div>
+					</div>
+
+					<div class="card" id="bookmarks">
+						<div class="card-body p-0">
+							<div class="dropdown">
+								<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+									<i class="fas fa-bookmark"></i>
+								</button>
+								<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
+									<li><h6 class="dropdown-header">Bookmarks</h6></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div class="card" id="extraNav">
+						<div class="card-body p-0">
+							<div class="dropdown">
+								<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+									<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
+								</button>
+								<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
+									<li><a class="dropdown-item" href="index.php">Gallery</a></li>
+							<?php
+								if($logged_in) {
+							?>
+									<li><hr class="dropdown-divider" /></li>
+									<li><a class="dropdown-item" href="maps.php">My maps</a></li>
+									<li><hr class="dropdown-divider" /></li>
+									<li><a class="dropdown-item" href="#">Clone this map</a></li>
+							<?php
+								}
+							?>
+								</ul>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -179,11 +200,13 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.js"></script>
 		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.transitionedicon/leaflet-transitionedicon.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.select/leaflet.control.select.js"></script>
 
 		<!-- Set ID, TITLE and HOST -->
 		<script type="text/javascript">
