@@ -23,91 +23,6 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( L.control.zoom({ position: "bottomright" }) );*/
 
-	this.returnButton = L.Control.zoomHome({
-		position: "bottomright",
-		zoomHomeIcon: "square",
-		zoomHomeTitle: "Return to map-extent"
-	});
-	this.addControl( this.returnButton );
-
-	this.addControl(
-		L.easyBar([
-			L.easyButton({
-				id: "sceneBackward",
-				leafletClasses: true,
-				states: [
-					{
-						stateName: "main",
-						onClick: function(button, map) { _SCENES.prev(); },
-						title: "Previous scene",
-						icon: "fa-chevron-left"
-					}
-				]
-			}),
-			L.easyButton({
-				id: "fullscreen",
-				leafletClasses: true,
-				states: [
-					{
-						stateName: "enterFullscreen",
-						onClick: function(button, map) {
-							let el = document.body;
-							if (el.requestFullscreen) { el.requestFullscreen(); }
-							else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
-							else if (el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
-							button.state("exitFullscreen");
-						},
-						title: "Enter fullscreen",
-						icon: "fa-expand"
-					},
-					{
-						stateName: "exitFullscreen",
-						onClick: function(button, map) {
-							if (document.exitFullscreen) { document.exitFullscreen(); }
-							else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
-							else if (document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
-							button.state("enterFullscreen");
-						},
-						title: "Exit fullscreen",
-						icon: "fa-compress"
-					}
-				]
-			}),
-			L.easyButton({
-				id: "sceneForward",
-				leafletClasses: true,
-				states: [
-					{
-						stateName: "main",
-						onClick: function(button, map) { _SCENES.next(); },
-						title: "Next scene",
-						icon: "fa-chevron-right"
-					}
-				]
-			})
-		], { position: "topright", id: "sceneNav" })
-	);
-
-	// TODO!!
-	/*this.addControl(
-		L.control.select({
-			position: "topright",
-			items: [
-				{ label: "sunny", value: "☼" },
-				{ label: "sunny", value: "☼" },
-				{ label: "sunny", value: "☼" },
-				{ label: "sunny", value: "☼" },
-				{ label: "sunny", value: "☼" },
-				{ label: "sunny", value: "☼" }
-			],
-			onSelect: function(itemValue) {
-				console.log(itemValue);
-			}
-		})
-	);*/
-
-	/*this.addControl( L.Control.zoomHome({ position: "topright" }) );*/
-
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
 
@@ -126,9 +41,24 @@ L.Map.addInitHook(function() {
 	// Object layers
 
 	this.objects = [];
-	this.objectLayer = L.objectLayer();
-
+	this.objectLayer = L.featureGroup();
 	this.addLayer( this.objectLayer );
+
+	this.objectLayer.on("layeradd", ev => {
+		let o = ev.layer;
+
+		let label = o.options.label;
+		if(label) { o.bindTooltip(label, { direction: "center", permanent: true }); }
+
+		if(o instanceof L.ImageOverlay) { this.setIcon(o); }
+	});
+
+	this.objectLayer.on("layerremove", ev => {
+		let o = ev.layer;
+
+		o.closeTooltip(); o.unbindTooltip();
+		o.slideCancel();
+	});
 
 
 
@@ -146,9 +76,34 @@ L.Map.include({
 
 	setup: function() {
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
+
+		$("#sceneNav #prev").click(ev => { _SCENES.prev(); });
+		$("#sceneNav #next").click(ev => { _SCENES.next(); });
+		let isFullscreen = false;
+		$("#sceneNav #fullscreen").click(ev => {
+			if(isFullscreen) {
+				if(document.exitFullscreen) { document.exitFullscreen(); }
+				else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
+				else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
+			}else{
+				let el = document.body;
+				if(el.requestFullscreen) { el.requestFullscreen(); }
+				else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
+				else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
+			}
+			isFullscreen = !isFullscreen;
+		});
+
+		$("#mapNav #zoomIn").click(ev => { this.zoomIn(); });
+		$("#mapNav #zoomOut").click(ev => { this.zoomOut(); });
+		$("#mapNav #home").click(ev => {
+			if(_SCENES.active) {
+				this.setFlyTo( _SCENES.get( _SCENES.active ).bounds );
+			}
+		});
 	},
 	reset: function() {
-		this.objectLayer.clearLayers();
+		this.clearLayers();
 	},
 
 	setAspectRatio: function() {
@@ -165,38 +120,77 @@ L.Map.include({
 		});
 
 		this.invalidateSize();
-		if(this.returnButton) {
-			this.returnButton.setHomeBounds( _SCENES.get( _SCENES.active ).bounds , { maxZoom: this.getMaxZoom() });
-		}
 	},
 
 	setFlyTo: function(bounds) {
 		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
-		this.returnButton.setHomeBounds(bounds, { maxZoom: this.getMaxZoom() });
+	},
+
+
+
+	clearLayers: function() {
+		this.objectLayer.clearLayers();
+	},
+
+	getLayers: function() {
+		return this.objectLayer.getLayers();
 	},
 
 	setObjects: function(sceneId) {
-		let os = this.objectLayer.getLayers().filter(o => o.options.type == "avatar").map(o => {
-			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
+		let os = this.getLayers().map(o => {
+			let r = this.extractObject(o); return { id: r.id, pos: r.pos, radius: r.radius };
 		});
-		this.objectLayer.clearLayers();
-		for(let o of this.objects) {
+		this.clearLayers();
+		for(let i = 0; i < this.objects.length; i++) {
+			let o = Object.assign({}, this.objects[i]);
 			if(o.sceneId == sceneId) {
-				let object = this.createObject(o);
-				this.objectLayer.addLayer(object, o.type, o.id);
+				let pos = o.pos, rad = o.radius;
+				for(let oo of os) {
+					if(o.id == oo.id) {
+						o.pos = oo.pos;
+						if(o.type == "circle") { o.radius = oo.radius; }
+						break;
+					}
+				}
 
-				if(false && o.type == "avatar") {
-					for(let oo of os) {
-						if(o.id == oo.id) {
-							object.setBounds( L.latLngBounds(oo.pos) );
-							object.slideTo( L.latLngBounds(o.pos) , { duration: _OPTIONS.animationspeed });
-							break;
-						}
+				let object = this.createObject(o);
+				this.objectLayer.addLayer(object);
+
+				for(let oo of os) {
+					if(o.id == oo.id) {
+						object.slideTo( pos , { radius: rad, duration: _OPTIONS.animationspeed });
+						break;
 					}
 				}
 			}
 		}
 	},
+
+	setIcon: function(o, size, icon) {
+		if(icon) { o.setUrl(icon); }
+		if(size) {
+			let zoom = this.getZoom();
+			let c = this.project(o.getBounds().getCenter(), zoom);
+			o.setBounds([
+				this.unproject([ c.x - size[0] / 2, c.y - size[1] / 2 ], zoom),
+				this.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
+			]);
+		}
+
+		$(o._image).css("border-radius", o.options.rounded ? "50%" : "0");
+		//$(o._image).css("transform", `rotate(${o.options.angle}deg)`);
+		$(o._image).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
+		$(o._image).css("filter", `
+			blur(${o.options.overlayBlur}px)
+			grayscale(${o.options.overlayGrayscale*100}%)
+			drop-shadow(0 0 ${o.options.overlayBrightness}px yellow)
+			opacity(${(1 - o.options.overlayTransparency)*100}%)
+		`);
+
+		if(o.options.label) { o.closeTooltip(); o.openTooltip(); }
+	},
+
+
 
 	getBasemap: function() {
 		if(this.basemap instanceof L.TileLayer) {
@@ -290,6 +284,8 @@ L.Map.include({
 		this.setMaxZoom(max);
 	},
 
+
+
 	createObject: function(o) {
 		let oo = null;
 
@@ -332,6 +328,31 @@ L.Map.include({
 				});
 				break;
 
+			case "rectangle":
+				oo = L.rectangle(o.pos, {
+					interactive:	false,
+					label:			o.label,
+					color:			o.lineColor,
+					weight:			o.lineThickness,
+					opacity:		1 - o.lineTransparency,
+					fillColor:		o.fillColor,
+					fillOpacity:	1 - o.fillTransparency
+				});
+				break;
+
+			case "circle":
+				oo = L.circle(o.pos, {
+					interactive:	false,
+					radius:			o.radius,
+					label:			o.label,
+					color:			o.lineColor,
+					weight:			o.lineThickness,
+					opacity:		1 - o.lineTransparency,
+					fillColor:		o.fillColor,
+					fillOpacity:	1 - o.fillTransparency
+				});
+				break;
+
 			default:
 				console.error("object type invalid");
 				break;
@@ -339,7 +360,6 @@ L.Map.include({
 
 		oo.options.id = o.id;
 		oo.options.sceneId = o.sceneId;
-		oo.options.type = o.type;
 
 		return oo;
 	},
@@ -347,63 +367,71 @@ L.Map.include({
 	extractObject: function(o) {
 		let oo = null;
 
-		switch(o.options.type) {
-			case "avatar":
-				let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
-				oo = {
-					id:					o.options.id,
-					sceneId:			o.options.sceneId,
-					type:				o.options.type,
-					pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
-					label:				o.options.label,
-					icon:				o._url,
-					ratio:				o.options.ratio,
-					rounded:			o.options.rounded,
-					angle:				0,
-					borderColor:		o.options.borderColor,
-					borderThickness:	o.options.borderThickness,
-					blur:				o.options.overlayBlur,
-					grayscale:			o.options.overlayGrayscale,
-					brightness:			o.options.overlayBrightness,
-					transparency:		o.options.overlayTransparency
-				};
-				break;
-
-			case "polyline":
-				oo = {
-					id:				o.options.id,
-					sceneId:		o.options.sceneId,
-					type:			o.options.type,
-					pos:			o.getLatLngs().map(e => {
-						if(!e.length) { return { lat: e.lat, lng: e.lng }; }
-						else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
-					}),
-					label:			o.options.label,
-					color:			o.options.color,
-					thickness:		o.options.weight,
-					transparency:	1 - o.options.opacity
-				};
-				break;
-
-			case "polygon":
-				oo = {
-					id:					o.options.id,
-					sceneId:			o.options.sceneId,
-					type:				o.options.type,
-					pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
-					label:				o.options.label,
-					lineColor:			o.options.color,
-					lineThickness:		o.options.weight,
-					lineTransparency:	1 - o.options.opacity,
-					fillColor:			o.options.fillColor,
-					fillTransparency:	1 - o.options.fillOpacity
-				};
-				break;
-
-			default:
-				console.error("object type invalid");
-				break;
-		}
+		if(o instanceof L.ImageOverlay) {
+			let nw = o.getBounds().getNorthWest(), se = o.getBounds().getSouthEast();
+			oo = {
+				id:					o.options.id,
+				sceneId:			o.options.sceneId,
+				type:				"avatar",
+				pos:				[[nw.lat, nw.lng], [se.lat, se.lng]],
+				label:				o.options.label,
+				icon:				o._url,
+				ratio:				o.options.ratio,
+				rounded:			o.options.rounded,
+				angle:				0,
+				borderColor:		o.options.borderColor,
+				borderThickness:	o.options.borderThickness,
+				blur:				o.options.overlayBlur,
+				grayscale:			o.options.overlayGrayscale,
+				brightness:			o.options.overlayBrightness,
+				transparency:		o.options.overlayTransparency
+			};
+		}else
+		if(o instanceof L.Polygon) {
+			oo = {
+				id:					o.options.id,
+				sceneId:			o.options.sceneId,
+				type:				o instanceof L.Rectangle ? "rectangle" : "polygon",
+				pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+				label:				o.options.label,
+				lineColor:			o.options.color,
+				lineThickness:		o.options.weight,
+				lineTransparency:	1 - o.options.opacity,
+				fillColor:			o.options.fillColor,
+				fillTransparency:	1 - o.options.fillOpacity
+			};
+		}else
+		if(o instanceof L.Polyline) {
+			oo = {
+				id:				o.options.id,
+				sceneId:		o.options.sceneId,
+				type:			"polyline",
+				pos:			o.getLatLngs().map(e => {
+					if(!e.length) { return { lat: e.lat, lng: e.lng }; }
+					else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
+				}),
+				label:			o.options.label,
+				color:			o.options.color,
+				thickness:		o.options.weight,
+				transparency:	1 - o.options.opacity
+			};
+		}else
+		if(o instanceof L.Circle) {
+			let p = o.getLatLng();
+			oo = {
+				id:					o.options.id,
+				sceneId:			o.options.sceneId,
+				type:				"circle",
+				pos:				[ p.lat, p.lng ],
+				radius:				o.getRadius(),
+				label:				o.options.label,
+				lineColor:			o.options.color,
+				lineThickness:		o.options.weight,
+				lineTransparency:	1 - o.options.opacity,
+				fillColor:			o.options.fillColor,
+				fillTransparency:	1 - o.options.fillOpacity
+			};
+		}else{ console.error("object type invalid"); }
 
 		return oo;
 	},

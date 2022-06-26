@@ -84,6 +84,8 @@ function Scenes() {
 
 		this.set(s.id);
 		this.bind();
+
+		save_data();
 	};
 
 	this.capture = function() {
@@ -92,6 +94,7 @@ function Scenes() {
 		let s = this.store[ this.get(this.active).index ];
 		s.capture();
 		flash_map();
+		save_data();
 	};
 
 	this.delete = function() {
@@ -114,6 +117,8 @@ function Scenes() {
 			this.active = "";
 			document.dispatchEvent( new Event("_reset") );
 		}
+
+		save_data();
 	};
 
 	this.unbind = function() {

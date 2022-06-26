@@ -83,6 +83,7 @@ L.Map.addInitHook(function() {
 	this.pm.addControls({
 		position: "topright",
 		drawCircleMarker: false,
+		drawText: false,
 		oneBlock: true
 	});
 	this.pm.setPathOptions({
@@ -92,29 +93,12 @@ L.Map.addInitHook(function() {
 		fillColor: "#563d7c",
 		fillOpacity: 0.2
 	});
-
-	/*L.drawLocal.draw.toolbar.buttons.marker = "Place an avatar";
-	L.drawLocal.draw.handlers.marker.tooltip.start = "Click map to place avatar.";
-	L.drawLocal.edit.handlers.edit.tooltip.text = null; // NOTE: removes the instructions-tooltip for editing mode
-	L.drawLocal.edit.handlers.edit.tooltip.subtext = null;
-	L.drawLocal.edit.handlers.remove.tooltip.text = null;
-	L.EditToolbar.Delete.include({ removeAllLayers: false });
-	this.drawControl = new L.Control.Draw({
-		position: "topright",
-		edit: false,
-		draw: {
-			marker: {
-				icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
-			},
-			polyline: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1 } },
-			polygon: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0.2 } },
-			rectangle: { shapeOptions: { weight: 3, color: "#563d7c", opacity: 1, fillColor: "#563d7c", fillOpacity: 0, className: "__custom_rectangle" } },
-			circle: false,
-			circlemarker: false
+	this.pm.setGlobalOptions({
+		markerStyle: {
+			icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
 		}
 	});
-	this.addControl( this.drawControl );
-	this.disableDrawing(); // Disable drawing-control*/
+	this.disableDraw();
 
 
 
@@ -129,7 +113,7 @@ L.Map.addInitHook(function() {
 	this.on("pm:create", ev => {
 		let o = ev.layer, type = ev.shape;
 
-		if(o instanceof L.Marker) {
+		if(type == "Marker") {
 			let zoom = this.getZoom();
 			let p = this.project(o.getLatLng(), zoom),
 				url = o.getIcon().options.iconUrl,
@@ -150,7 +134,7 @@ L.Map.addInitHook(function() {
 				overlayBrightness:		0,
 				overlayTransparency:	0
 			});
-			this.addLayer(o); return;
+			this.addLayer(o);
 		}
 
 		o.options.id = uuid();
@@ -167,17 +151,6 @@ L.Map.addInitHook(function() {
 		let label = o.options.label;
 		if(label) { o.bindTooltip(label, { direction: "center", permanent: true }); }
 
-		let popup =
-			o instanceof L.ImageOverlay ? avatar_popup() :
-			o instanceof L.Polygon ? polygon_popup() :
-			o instanceof L.Rectangle ? polygon_popup() :
-			o instanceof L.Polyline ? polyline_popup() : "";
-		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450 });
-
-		o.on("popupopen", ev => { bind_setup(o); });
-		o.on("mouseover", ev => { this.highlightObject(o.options.id); });
-		o.on("mouseout", ev => { this.unhighlightObject(o.options.id); });
-
 		o.on("pm:edit", ev => {
 			let o = ev.layer;
 			this.updateObject(o);
@@ -187,15 +160,23 @@ L.Map.addInitHook(function() {
 		o.on("pm:remove", ev => {
 			let o = ev.layer;
 
+			this.deleteObject(o);
+
 			o.closeTooltip(); o.unbindTooltip();
 			o.closePopup(); o.unbindPopup();
-
 			o.off("popupopen"); o.off("mouseover"); o.off("mouseout");
 
-			//o.slideCancel();
-
-			this.deleteObject(o);
+			o.slideCancel();
 		});
+
+		this.setPopup(o);
+
+		o.on("pm:dragstart", ev => { o.unbindPopup(); });
+		o.on("pm:dragend", ev => { this.setPopup( ev.layer ); });
+
+		o.on("popupopen", ev => { bind_setup(o); });
+		o.on("mouseover", ev => { this.highlightObject(o.options.id); });
+		o.on("mouseout", ev => { this.unhighlightObject(o.options.id); });
 
 		if(o instanceof L.ImageOverlay) {
 			o.bindContextMenu({
@@ -205,9 +186,6 @@ L.Map.addInitHook(function() {
 			this.setIcon(o);
 		}
 	});
-
-
-	this.on("load", ev => { this.disableDraw(); }); // Note: this is called here because if not, the "cancel"/"finish" buttons in the drawcontrol will not work
 
 
 	this.on("movestart", ev => { /**/ });
@@ -243,7 +221,7 @@ L.Map.include({
 		this.pm.Toolbar.setButtonDisabled("Polygon", false);
 		this.pm.Toolbar.setButtonDisabled("Rectangle", false);
 		this.pm.Toolbar.setButtonDisabled("Circle", false);
-		this.pm.Toolbar.setButtonDisabled("Text", false);
+		//this.pm.Toolbar.setButtonDisabled("Text", false);
 		this.pm.Toolbar.setButtonDisabled("Edit", false);
 		this.pm.Toolbar.setButtonDisabled("Drag", false);
 		this.pm.Toolbar.setButtonDisabled("Cut", false);
@@ -256,7 +234,7 @@ L.Map.include({
 		this.pm.Toolbar.setButtonDisabled("Polygon", true);
 		this.pm.Toolbar.setButtonDisabled("Rectangle", true);
 		this.pm.Toolbar.setButtonDisabled("Circle", true);
-		this.pm.Toolbar.setButtonDisabled("Text", true);
+		//this.pm.Toolbar.setButtonDisabled("Text", true);
 		this.pm.Toolbar.setButtonDisabled("Edit", true);
 		this.pm.Toolbar.setButtonDisabled("Drag", true);
 		this.pm.Toolbar.setButtonDisabled("Cut", true);
@@ -318,13 +296,13 @@ L.Map.include({
 
 
 	clearLayers: function() {
-		for(let o of L.PM.Utils.findLayers(this)) {
+		for(let o of this.getLayers()) {
 			this.removeLayer(o);
 		}
 	},
 
 	getLayers: function() {
-		return L.PM.Utils.findLayers(this);
+		return this.pm.getGeomanLayers();
 	},
 
 	addScene: function(sceneId) {
@@ -338,14 +316,14 @@ L.Map.include({
 		let o = this.fadeLayer.getObject(id);
 		if(!o) { return; }
 
-		if(o instanceof L.ImageOverlay) { o.setOpacity(0.8); }
+		if(o instanceof L.ImageOverlay) { o.setOpacity( 0.8 ); }
 		else{ o.setStyle({ opacity: 0.8 }); }
 	},
 	unhighlightObject: function(id) {
 		let o = this.fadeLayer.getObject(id);
 		if(!o) { return; }
 
-		if(o instanceof L.ImageOverlay) { o.setOpacity(0.3); }
+		if(o instanceof L.ImageOverlay) { o.setOpacity( 0.3 ); }
 		else{ o.setStyle({ opacity: 0.3 }); }
 	},
 
@@ -360,23 +338,30 @@ L.Map.include({
 			}
 		}
 
-		let os = this.getLayers().filter(o => o instanceof L.ImageOverlay).map(o => {
-			let r = this.extractObject(o); return { id: r.id, pos: r.pos };
+		let os = this.getLayers().map(o => {
+			let r = this.extractObject(o); return { id: r.id, pos: r.pos, radius: r.radius };
 		});
 		this.clearLayers();
-		for(let o of this.objects) {
+		for(let i = 0; i < this.objects.length; i++) {
+			let o = Object.assign({}, this.objects[i]);
 			if(o.sceneId == sceneId) {
+				let pos = o.pos, rad = o.radius;
+				for(let oo of os) {
+					if(o.id == oo.id) {
+						o.pos = oo.pos;
+						if(o.type == "circle") { o.radius = oo.radius; }
+						break;
+					}
+				}
+
 				let object = this.createObject(o);
 				this.addLayer( object );
 				this.fire("_addedlayer", { layer: object });
 
-				if(false && o instanceof L.ImageOverlay) {
-					for(let oo of os) {
-						if(o.id == oo.id) {
-							object.setBounds( L.latLngBounds(oo.pos) );
-							object.slideTo( L.latLngBounds(o.pos) , { duration: _OPTIONS.animationspeed });
-							break;
-						}
+				for(let oo of os) {
+					if(o.id == oo.id) {
+						object.slideTo( pos , { radius: rad, duration: _OPTIONS.animationspeed });
+						break;
 					}
 				}
 			}
@@ -470,17 +455,7 @@ L.Map.include({
 		}
 	},
 
-	setIcon: function(o, size, icon) {
-		if(icon) { o.setUrl(icon); }
-		if(size) {
-			let zoom = _MAP.getZoom();
-			let c = _MAP.project(o.getBounds().getCenter(), zoom);
-			o.setBounds([
-				_MAP.unproject([ c.x - size[0] / 2, c.y - size[1] / 2 ], zoom),
-				_MAP.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
-			]);
-		}
-
+	setIcon: function(o) {
 		$(o._image).css("border-radius", o.options.rounded ? "50%" : "0");
 		//$(o._image).css("transform", `rotate(${o.options.angle}deg)`);
 		$(o._image).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
@@ -492,6 +467,17 @@ L.Map.include({
 		`);
 
 		if(o.options.label) { o.closeTooltip(); o.openTooltip(); }
+	},
+
+	setPopup: function(o) {
+		let popup =
+			o instanceof L.ImageOverlay ? avatar_popup() :
+			o instanceof L.Rectangle
+		 || o instanceof L.Polygon
+		 || o instanceof L.Circle ? polygon_popup() :
+			o instanceof L.Polyline ? polyline_popup() : "";
+		if(!popup) { return; }
+		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450 });
 	},
 
 
@@ -578,6 +564,7 @@ L.Map.include({
 		this.addLayer( this.basemap );
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
+		save_data();
 	},
 
 	resetBasemap: function() { this.setBasemap( _BASEMAPS[10].tiles ); },
@@ -645,6 +632,18 @@ L.Map.include({
 				});
 				break;
 
+			case "circle":
+				oo = L.circle(o.pos, {
+					radius:			o.radius,
+					label:			o.label,
+					color:			o.lineColor,
+					weight:			o.lineThickness,
+					opacity:		1 - o.lineTransparency,
+					fillColor:		o.fillColor,
+					fillOpacity:	1 - o.fillTransparency
+				});
+				break;
+
 			default:
 				console.error("object type invalid");
 				break;
@@ -679,8 +678,7 @@ L.Map.include({
 				transparency:		o.options.overlayTransparency
 			};
 		}else
-		if(o instanceof L.Polygon
-		|| o instanceof L.Rectangle) {
+		if(o instanceof L.Polygon) {
 			oo = {
 				id:					o.options.id,
 				sceneId:			o.options.sceneId,
@@ -707,6 +705,22 @@ L.Map.include({
 				color:			o.options.color,
 				thickness:		o.options.weight,
 				transparency:	1 - o.options.opacity
+			};
+		}else
+		if(o instanceof L.Circle) {
+			let p = o.getLatLng();
+			oo = {
+				id:					o.options.id,
+				sceneId:			o.options.sceneId,
+				type:				"circle",
+				pos:				[ p.lat, p.lng ],
+				radius:				o.getRadius(),
+				label:				o.options.label,
+				lineColor:			o.options.color,
+				lineThickness:		o.options.weight,
+				lineTransparency:	1 - o.options.opacity,
+				fillColor:			o.options.fillColor,
+				fillTransparency:	1 - o.options.fillOpacity
 			};
 		}else{ console.error("object type invalid"); }
 

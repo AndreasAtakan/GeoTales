@@ -71,7 +71,7 @@ window.onload = function(ev) {
 	});
 
 	document.addEventListener("_setup", ev => {
-		_SCENES.setup(); _TEXTBOXES.setup(); _MAP.setup();
+		_MAP.setup(); _TEXTBOXES.setup(); _SCENES.setup();
 	});
 	document.addEventListener("_reset", ev => {
 		_SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset();
@@ -162,7 +162,7 @@ window.onload = function(ev) {
 		fr.readAsText(file);
 	});
 
-	let exportEv = ev => {
+	$("a#export").click(function exportEv(ev) {
 		$("a#export").off("click");
 
 		let el = document.createElement("a");
@@ -182,31 +182,10 @@ window.onload = function(ev) {
 			el.click(); document.body.removeChild(el);
 			$("a#export").click(exportEv);
 		});
-	};
-	$("a#export").click(exportEv);
-
+	});
 	$("a#save").click(ev => {
 		$("#loadingModal").modal("show");
-
-		$.ajax({
-			type: "POST",
-			url: "api/map.php",
-			data: {
-				"op": "write",
-				"id": _ID,
-				"data": export_data(),
-				"preview": _MAP.getCenterBasemapTile()
-			},
-			dataType: "json",
-			success: function(result, status, xhr) {
-				saved_changes();
-				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-			},
-			error: function(xhr, status, error) {
-				console.error(xhr.status, error);
-				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-			}
-		});
+		save_data(function() { $("#loadingModal").modal("hide"); });
 	});
 
 	$("#loadingModal").modal("show");
@@ -220,7 +199,9 @@ window.onload = function(ev) {
 		dataType: "json",
 		success: function(result, status, xhr) {
 			if(result.data) { import_data( JSON.parse(result.data) ); }
-			$(document).click(ev => { unsaved_changes(); });
+			$(`div#sceneRow,
+			   div#mapRow,
+			   .navbar .navbarContent li`).click(ev => { unsaved_changes(); });
 
 			setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 		},

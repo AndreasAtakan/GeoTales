@@ -153,40 +153,56 @@ $row = $stmt->fetch();
 						</div>
 					</div>
 
-					<div class="card" id="bookmarks">
-						<div class="card-body p-0">
-							<div class="dropdown">
-								<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-									<i class="fas fa-bookmark"></i>
-								</button>
-								<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
-									<li><h6 class="dropdown-header">Bookmarks</h6></li>
-								</ul>
-							</div>
-						</div>
+					<div class="dropdown" id="bookmarks">
+						<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="fas fa-bookmark"></i>
+						</button>
+						<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
+							<li><h6 class="dropdown-header">Bookmarks</h6></li>
+						</ul>
 					</div>
 
-					<div class="card" id="extraNav">
-						<div class="card-body p-0">
-							<div class="dropdown">
-								<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-									<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
-								</button>
-								<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
-									<li><a class="dropdown-item" href="index.php">Gallery</a></li>
-							<?php
-								if($logged_in) {
-							?>
-									<li><hr class="dropdown-divider" /></li>
-									<li><a class="dropdown-item" href="maps.php">My maps</a></li>
-									<li><hr class="dropdown-divider" /></li>
-									<li><a class="dropdown-item" href="#">Clone this map</a></li>
-							<?php
-								}
-							?>
-								</ul>
-							</div>
-						</div>
+					<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
+						<button type="button" class="btn btn-outline-light" id="prev">
+							<i class="fas fa-chevron-left"></i>
+						</button>
+						<button type="button" class="btn btn-outline-light" id="fullscreen">
+							<i class="fas fa-expand"></i>
+						</button>
+						<button type="button" class="btn btn-outline-light" id="next">
+							<i class="fas fa-chevron-right"></i>
+						</button>
+					</div>
+
+					<div class="dropdown" id="extraNav">
+						<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
+						</button>
+						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
+							<li><a class="dropdown-item" href="index.php">Gallery</a></li>
+					<?php
+						if($logged_in) {
+					?>
+							<li><hr class="dropdown-divider" /></li>
+							<li><a class="dropdown-item" href="maps.php">My maps</a></li>
+							<li><hr class="dropdown-divider" /></li>
+							<li><a class="dropdown-item" href="#">Clone this map</a></li>
+					<?php
+						}
+					?>
+						</ul>
+					</div>
+
+					<div role="group" class="btn-group-vertical btn-group-sm" id="mapNav" aria-label="Map navigation">
+						<button type="button" class="btn btn-outline-light" id="zoomIn">
+							<i class="fas fa-plus"></i>
+						</button>
+						<button type="button" class="btn btn-outline-light" id="home">
+							<i class="fas fa-home"></i>
+						</button>
+						<button type="button" class="btn btn-outline-light" id="zoomOut">
+							<i class="fas fa-minus"></i>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -201,12 +217,9 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.js"></script>
-		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
-		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
-		<!--script type="text/javascript" src="lib/leaflet.transitionedicon/leaflet-transitionedicon.js"></script-->
+		<script type="text/javascript" src="lib/leaflet.slideto/Leaflet.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
-		<script type="text/javascript" src="lib/leaflet.select/leaflet.control.select.js"></script>
 
 		<!-- Set ID, TITLE and HOST -->
 		<script type="text/javascript">

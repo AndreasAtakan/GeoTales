@@ -103,7 +103,7 @@ function avatar_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-7">
+				<div class="col-9">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
 						<i class="fas fa-share"></i>
 					</button>
@@ -111,11 +111,6 @@ function avatar_popup() {
 				<div class="col-3">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
 						<i class="fas fa-save"></i> <strong>*</strong>
-					</button>
-				</div>
-				<div class="col-2">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;" title="Delete">
-						<i class="fas fa-trash"></i>
 					</button>
 				</div>
 			</div>
@@ -145,7 +140,7 @@ function polyline_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-7">
+				<div class="col-9">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
 						<i class="fas fa-share"></i>
 					</button>
@@ -153,11 +148,6 @@ function polyline_popup() {
 				<div class="col-3">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
 						<i class="fas fa-save"></i> <strong>*</strong>
-					</button>
-				</div>
-				<div class="col-2">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;" title="Delete">
-						<i class="fas fa-trash"></i>
 					</button>
 				</div>
 			</div>
@@ -196,7 +186,7 @@ function polygon_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-7">
+				<div class="col-9">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
 						<i class="fas fa-share"></i>
 					</button>
@@ -204,11 +194,6 @@ function polygon_popup() {
 				<div class="col-3">
 					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
 						<i class="fas fa-save"></i> <strong>*</strong>
-					</button>
-				</div>
-				<div class="col-2">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="delete" style="float: right;" title="Delete">
-						<i class="fas fa-trash"></i>
 					</button>
 				</div>
 			</div>

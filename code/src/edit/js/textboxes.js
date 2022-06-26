@@ -120,6 +120,7 @@ function Textboxes() {
 		t.sceneId = _SCENES.active;
 		t.enable();
 		this.store.push(t);
+		save_data();
 	};
 
 	this.addScene = function(sceneId) {
@@ -146,6 +147,7 @@ function Textboxes() {
 
 		t.disable();
 		this.store.splice(t.index, 1);
+		save_data();
 	};
 
 	this.deleteScene = function(sceneId) {

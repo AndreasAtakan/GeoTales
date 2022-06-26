@@ -4,10 +4,6 @@
 
 - Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
 
-##### Endringer – tilbakemeldinger runde 2:
-
-- Legge inn tekst-boks som alternativ i kart-tegning
-
 ##### Endringer – tilbakemeldinger runde 3:
 
 - Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
@@ -73,5 +69,4 @@
 	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~
 
 - **leaflet.zoomhome**
-	- Endret FontAwesome `fa` til `far` (for å bruke *regular*)
 	- Endret `setHomeBounds` metode til å bruke `_map._getBoundsCenterZoom` i stedet for `_map.getBoundsZoom` og `bounds.getCenter`. `bounds.getCenter` produserer et annet senter-punkt enn `_getBoundsCenterZoom`, og vil dermed flytte kartet til et annet sted enn når scenen først blir satt

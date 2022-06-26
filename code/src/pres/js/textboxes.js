@@ -37,7 +37,10 @@ function Textboxes() {
 
 	this.set = function(sceneId) {
 		for(let t of this.store) {
-			if(t.sceneId == sceneId) { t.enable(); break; }
+			if(t.sceneId == sceneId) {
+				setTimeout(() => { t.enable(); }, 150);
+				break;
+			}
 			else{ t.disable(); }
 		}
 	};
@@ -48,7 +51,8 @@ function Textboxes() {
 		for(let o of data) {
 			let t = new Textbox(o.id);
 			t.sceneId = o.sceneId;
-			t.locked = o.locked; t.dim = o.dim;
+			t.locked = o.locked;
+			t.pos = o.pos; t.dim = o.dim;
 			t.content = o.content;
 
 			t.disable();
@@ -66,23 +70,40 @@ function Textbox(id) {
 	this.sceneId = "";
 	this.locked = false;
 
+	this.pos = "left";
 	this.dim = [0, 0.25];
 	this.content = "";
 
 
+	this.setOrientation = function() {
+		switch(this.pos) {
+			case "left":
+				$("#textbox").css({ left: "10px", right: "auto" });
+				break;
+
+			case "right":
+				$("#textbox").css({ left: "auto", right: "65px" });
+				break;
+
+			default: break;
+		}
+	};
+
 	this.enable = function() {
 		if(this.content == "") { return; }
 
-		$("#textbox").css("display", "block");
+		this.setOrientation();
 
 		$("#textbox #content").html(this.content);
 
 		if(this.dim) {
 			$("#textbox").css({ maxWidth: `${this.dim[1] * 100}%` });
 		}
+
+		$("#textbox").css("opacity", 0.85);
 	};
 
 	this.disable = function() {
-		$("#textbox").css("display", "none");
+		$("#textbox").css("opacity", 0);
 	};
 }

@@ -30,7 +30,6 @@ window.onload = function(ev) {
 
 
 	_SCENES = new Scenes();
-	_SCENES.setup();
 
 	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
 	$(document).keyup(ev => {
@@ -42,7 +41,6 @@ window.onload = function(ev) {
 	});
 
 	_TEXTBOXES = new Textboxes();
-	_TEXTBOXES.setup();
 
 	_MAP = L.map("map", {
 		center: [ 50, 6 ],
@@ -67,8 +65,8 @@ window.onload = function(ev) {
 		]
 	});
 
-	document.addEventListener("_setup", ev => { init(); _MAP.setup(); });
-	document.addEventListener("_reset", ev => { _MAP.reset(); reset(); });
+	document.addEventListener("_setup", ev => { init(); _MAP.setup(); _TEXTBOXES.setup(); _SCENES.setup(); });
+	document.addEventListener("_reset", ev => { _SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset(); reset(); });
 
 
 

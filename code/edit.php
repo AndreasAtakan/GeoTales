@@ -469,8 +469,7 @@ $row = $stmt->fetch();
 		<!--script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script-->
 		<!--script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.geoman/leaflet-geoman.min.js"></script>
-		<script type="text/javascript" src="lib/leaflet.marker.slideto/Leaflet.Marker.SlideTo.js"></script>
-		<script type="text/javascript" src="lib/leaflet.imageOverlay.slideto/Leaflet.ImageOverlay.SlideTo.js"></script>
+		<script type="text/javascript" src="lib/leaflet.slideto/Leaflet.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.htmllegend/L.Control.HtmlLegend.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>

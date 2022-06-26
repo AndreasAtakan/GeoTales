@@ -19,93 +19,68 @@ input::-webkit-inner-spin-button {
 
 input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, div.modal-content, .leaflet-bar { border-radius: 2px !important; }
 
-.leaflet-control { opacity: 0.8; }
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
 
-/*.marker-transition { opacity: 1; -webkit-transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); -moz-transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); -o-transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); transition: top .25s cubic-bezier(0,0,.25,1), opacity .25s cubic-bezier(0,0,.25,1); }
-.marker-transition-enter { opacity: 0.01; }
-.marker-transition-leave, .marker-transition-leave-active { -webkit-transition: opacity .7s cubic-bezier(0,0,.25,1); -moz-transition: opacity .7s cubic-bezier(0,0,.25,1); -o-transition: opacity .7s cubic-bezier(0,0,.25,1); transition: opacity .7s cubic-bezier(0,0,.25,1); }
-.marker-transition-leave-active { opacity: 0.01; }*/
+#mapNav {
+	position: absolute;
+	z-index: 1002;
+	bottom: 10px;
+	right: 15px;
+}
 
-#sceneNav button {
-	display: inline-block;
-	border: none;
+#sceneNav {
+	position: absolute;
+	z-index: 1002;
+	top: 10px;
+	right: 15px;
 }
 
 #extraNav {
-	display: none !important; /* TODO: dropdowns have wrong placement, fix!  */
-
 	position: absolute;
 	z-index: 1002;
 	top: 10px;
-	right: 55px;
+	right: 110px;
 	width: auto;
-
-	background: none;
-	border: 2px solid rgba(0,0,0,0.2);
 }
-#extraNav button { background-color: #fff; opacity: 0.8; }
-#extraNav ul { opacity: 1; }
 
 #bookmarks {
-	display: none !important; /* TODO: dropdowns have wrong placement, fix!  */
-
 	position: absolute;
 	z-index: 1002;
 	top: 10px;
-	left: 85px;
-
-	background: none;
-	border: 2px solid rgba(0,0,0,0.2);
+	left: 15px;
 }
-#bookmarks button { background-color: #fff; opacity: 0.8; }
-#bookmarks ul { opacity: 1; }
 
 #textbox {
 	position: absolute;
 	z-index: 1002;
-	top: 10px;
+	top: 50px;
 	left: 10px;
 
 	width: auto;
 	height: auto;
 	max-height: calc(100% - 20px);
 
-	opacity: 0.85;
 	overflow-y: auto;
-
-	display: none;
+	-webkit-transition: opacity 0.15s;
+	-moz-transition: opacity 0.15s;
+	-ms-transition: opacity 0.15s;
+	-o-transition: opacity 0.15s;
+	transition: opacity 0.15s;
+	opacity: 0;
 }
 #textbox:focus { outline: none; }
 #textbox #content img { max-width: 100%; }
 #textbox #content img:hover { cursor: pointer; }
 
 #main {
-	height: calc(100vh);
+	height: 100vh;
 	background-color: #999999;
 }
 #map {
 	position: absolute;
 	opacity: 1;
 }
-
-/*.fadeOut {
-	-webkit-transition: 0.12s;
-	-moz-transition: 0.12s;
-	-ms-transition: 0.12s;
-	-o-transition: 0.12s;
-	transition: 0.12s;
-	opacity: 0;
-}
-.fadeIn {
-	-webkit-transition: 0.12s;
-	-moz-transition: 0.12s;
-	-ms-transition: 0.12s;
-	-o-transition: 0.12s;
-	transition: 0.12s;
-	opacity: 1;
-}*/
 
 
 

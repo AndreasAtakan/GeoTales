@@ -12,10 +12,8 @@
 - Edit-mode:
 	* Library of avilable avatar icons (this will save a lot of storage space and cost)
 	* Library of uploaded basemaps under "Avilable basemaps"
-	* Extra drawing-options; add a "pallette" with more map-drawing options (measurement, free-hand, etc.)
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 	* Posibility to make hyperlink to other scenes in the textboxes
-	* Map-objects from last scene should automatically be added to the next scene when creating
 	* GEDCOM import:
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
@@ -53,6 +51,5 @@
 
 
 - Teksten i boken skal være skalert basert på skjermstørrelse (bruk % eller rem)
-- Scene-elementer, tekstboks som er tynn
 - Pres-modus
 - My Maps; legg til knapp for å "unpublish", dvs. slette kartets post på forumet

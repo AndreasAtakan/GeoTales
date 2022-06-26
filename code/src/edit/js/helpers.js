@@ -38,6 +38,28 @@ function export_data() {
 	});
 }
 
+function save_data(callback) {
+	$.ajax({
+		type: "POST",
+		url: "api/map.php",
+		data: {
+			"op": "write",
+			"id": _ID,
+			"data": export_data(),
+			"preview": _MAP.getCenterBasemapTile()
+		},
+		dataType: "json",
+		success: function(result, status, xhr) {
+			saved_changes();
+			setTimeout(function() { if(callback) { callback(); } }, 750);
+		},
+		error: function(xhr, status, error) {
+			console.error(xhr.status, error);
+			setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+		}
+	});
+}
+
 
 
 function unsaved_changes() {
