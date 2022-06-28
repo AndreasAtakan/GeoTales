@@ -15,7 +15,25 @@ function Scenes() {
 
 
 	this.setup = function() {
+		$("#sceneNav #prev").click(ev => { _SCENES.prev(); });
+		$("#sceneNav #next").click(ev => { _SCENES.next(); });
+		let isFullscreen = false;
+		$("#sceneNav #fullscreen").click(ev => {
+			if(isFullscreen) {
+				if(document.exitFullscreen) { document.exitFullscreen(); }
+				else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
+				else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
+			}else{
+				let el = document.body;
+				if(el.requestFullscreen) { el.requestFullscreen(); }
+				else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
+				else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
+			}
+			isFullscreen = !isFullscreen;
+		});
+
 		$("#bookmarks").css("display", "block");
+
 		this.bind();
 	};
 
@@ -87,7 +105,7 @@ function Scenes() {
 		_MAP.setObjects(s.id);
 		_MAP.setFlyTo(s.bounds);
 
-		this.bind();
+		setTimeout(() => { this.bind(); }, 151);
 	};
 
 	this.importData = function(data) {

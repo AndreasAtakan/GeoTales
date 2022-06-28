@@ -25,6 +25,8 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
+	this.panLock = true;
+
 
 
 
@@ -77,29 +79,16 @@ L.Map.include({
 	setup: function() {
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 
-		$("#sceneNav #prev").click(ev => { _SCENES.prev(); });
-		$("#sceneNav #next").click(ev => { _SCENES.next(); });
-		let isFullscreen = false;
-		$("#sceneNav #fullscreen").click(ev => {
-			if(isFullscreen) {
-				if(document.exitFullscreen) { document.exitFullscreen(); }
-				else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
-				else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
-			}else{
-				let el = document.body;
-				if(el.requestFullscreen) { el.requestFullscreen(); }
-				else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
-				else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
-			}
-			isFullscreen = !isFullscreen;
-		});
-
 		$("#mapNav #zoomIn").click(ev => { this.zoomIn(); });
 		$("#mapNav #zoomOut").click(ev => { this.zoomOut(); });
-		$("#mapNav #home").click(ev => {
-			if(_SCENES.active) {
-				this.setFlyTo( _SCENES.get( _SCENES.active ).bounds );
-			}
+
+		$("#mapNav #panLock").click(ev => {
+			let c = "";
+			if(this.panLock) { c = "🔓"; }
+			else{ c = "🔒"; }
+
+			$(ev.target).html(c);
+			this.panLock = !this.panLock;
 		});
 	},
 	reset: function() {
@@ -123,7 +112,9 @@ L.Map.include({
 	},
 
 	setFlyTo: function(bounds) {
-		this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
+		if(this.panLock) {
+			this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
+		}
 	},
 
 

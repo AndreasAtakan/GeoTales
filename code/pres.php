@@ -197,8 +197,8 @@ $row = $stmt->fetch();
 						<button type="button" class="btn btn-outline-light" id="zoomIn">
 							<i class="fas fa-plus"></i>
 						</button>
-						<button type="button" class="btn btn-outline-light" id="home">
-							<i class="fas fa-home"></i>
+						<button type="button" class="btn btn-outline-light" id="panLock">
+							🔒
 						</button>
 						<button type="button" class="btn btn-outline-light" id="zoomOut">
 							<i class="fas fa-minus"></i>
