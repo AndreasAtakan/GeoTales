@@ -167,7 +167,7 @@ function Textboxes() {
 		let t = this.get(_SCENES.active);
 		if(!t) { return; }
 
-		t.setLock(l);
+		this.store[ t.index ].setLock(l);
 	};
 
 	this.setOrientation = function(pos) {

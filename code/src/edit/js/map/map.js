@@ -455,7 +455,19 @@ L.Map.include({
 		}
 	},
 
-	setIcon: function(o) {
+	setIcon: function(o, size, icon) {
+		if(!(o instanceof L.ImageOverlay)) { return; }
+
+		if(icon) { o.setUrl(icon); }
+		if(size) {
+			let zoom = _MAP.getZoom();
+			let c = _MAP.project(o.getBounds().getCenter(), zoom);
+			o.setBounds([
+				_MAP.unproject([ c.x - size[0] / 2, c.y - size[1] / 2 ], zoom),
+				_MAP.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
+			]);
+		}
+
 		$(o._image).css("border-radius", o.options.rounded ? "50%" : "0");
 		//$(o._image).css("transform", `rotate(${o.options.angle}deg)`);
 		$(o._image).css("border", `${o.options.borderThickness}px solid ${o.options.borderColor}`);
@@ -604,6 +616,7 @@ L.Map.include({
 			case "polyline":
 				oo = L.polyline(o.pos, {
 					label:		o.label,
+					dashArray:	o.dashed ? "5, 10" : "",
 					color:		o.color,
 					weight:		o.thickness,
 					opacity:	1 - o.transparency
@@ -613,6 +626,7 @@ L.Map.include({
 			case "polygon":
 				oo = L.polygon(o.pos, {
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -624,6 +638,7 @@ L.Map.include({
 			case "rectangle":
 				oo = L.rectangle(o.pos, {
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -636,6 +651,7 @@ L.Map.include({
 				oo = L.circle(o.pos, {
 					radius:			o.radius,
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -685,6 +701,7 @@ L.Map.include({
 				type:				o instanceof L.Rectangle ? "rectangle" : "polygon",
 				pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 				label:				o.options.label,
+				dashed:				!!o.options.dashArray,
 				lineColor:			o.options.color,
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,
@@ -702,6 +719,7 @@ L.Map.include({
 					else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
 				}),
 				label:			o.options.label,
+				dashed:			!!o.options.dashArray,
 				color:			o.options.color,
 				thickness:		o.options.weight,
 				transparency:	1 - o.options.opacity
@@ -716,6 +734,7 @@ L.Map.include({
 				pos:				[ p.lat, p.lng ],
 				radius:				o.getRadius(),
 				label:				o.options.label,
+				dashed:				!!o.options.dashArray,
 				lineColor:			o.options.color,
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,

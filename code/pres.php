@@ -26,7 +26,7 @@ if(!isset($_GET['id'])) {
 $id = $_GET['id'];
 
 
-$stmt = $PDO->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+$stmt = $PDO->prepare("SELECT title, description, preview FROM \"Map\" WHERE id = ?");
 $stmt->execute([$id]);
 $row = $stmt->fetch();
 
@@ -37,7 +37,7 @@ $row = $stmt->fetch();
 	<head>
 		<meta charset="utf-8" />
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
-		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
+		<meta name="viewport" content="minimal-ui, width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
 		<title>GeoTales – <?php echo $row['title']; ?></title>
 		<meta name="title" content="GeoTales – <?php echo $row['title']; ?>" />
@@ -49,8 +49,8 @@ $row = $stmt->fetch();
 		<meta property="og:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="og:description" content="<?php echo $row['description']; ?>" />
 		<meta property="og:site_name" content="GeoTales" />
-		<meta property="og:image" content="assets/logo.png" />
-		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image" content="<?php echo $row['preview']; ?>" />
+		<!--meta property="og:image:type" content="image/png" /-->
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
@@ -59,7 +59,7 @@ $row = $stmt->fetch();
 		<meta property="twitter:url" content="https://tellusmap.com/" />
 		<meta property="twitter:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
-		<meta property="twitter:image" content="assets/logo.png" />
+		<meta property="twitter:image" content="<?php echo $row['preview']; ?>" />
 
 		<link rel="icon" href="assets/logo.png" />
 

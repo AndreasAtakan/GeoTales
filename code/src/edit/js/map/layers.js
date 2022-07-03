@@ -194,6 +194,12 @@ function bind_setup(o) {
 		});
 	}else
 	if(o instanceof L.Path) {
+		$("#shapePopup input#dashed").change(function(ev) {
+			o.setStyle({ dashArray: this.checked ? "5, 10" : "" });
+			_MAP.updateObject(o);
+		});
+		$("#shapePopup input#dashed").prop("checked", !!o.options.dashArray);
+
 		$("#shapePopup input#lineColor").change(function(ev) {
 			o.setStyle({ color: $(this).val() });
 			_MAP.updateObject(o);

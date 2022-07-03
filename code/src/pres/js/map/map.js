@@ -84,15 +84,42 @@ L.Map.include({
 
 		$("#mapNav #panLock").click(ev => {
 			let c = "";
-			if(this.panLock) { c = "🔓"; }
-			else{ c = "🔒"; }
+			if(this.panLock) {
+				c = "🔓"; this.enable();
+			}else{
+				c = "🔒"; this.disable();
+				this.fitBounds( _SCENES.get( _SCENES.active ).bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true } );
+			}
 
 			$(ev.target).html(c);
 			this.panLock = !this.panLock;
+			$(`#mapNav #zoomIn,
+			   #mapNav #zoomOut`).prop("disabled", this.panLock);
 		});
+
+		this.disable();
 	},
 	reset: function() {
 		this.clearLayers();
+	},
+
+	enable: function() {
+		this.boxZoom.enable();
+		this.doubleClickZoom.enable();
+		this.dragging.enable();
+		this.keyboard.enable();
+		this.scrollWheelZoom.enable();
+		this.touchZoom.enable();
+		if(this.tapHold) { this.tapHold.enable(); }
+	},
+	disable: function() {
+		this.boxZoom.disable();
+		this.doubleClickZoom.disable();
+		this.dragging.disable();
+		this.keyboard.disable();
+		this.scrollWheelZoom.disable();
+		this.touchZoom.disable();
+		if(this.tapHold) { this.tapHold.disable(); }
 	},
 
 	setAspectRatio: function() {
@@ -301,6 +328,7 @@ L.Map.include({
 				oo = L.polyline(o.pos, {
 					interactive:	false,
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.color,
 					weight:			o.thickness,
 					opacity:		1 - o.transparency
@@ -311,6 +339,7 @@ L.Map.include({
 				oo = L.polygon(o.pos, {
 					interactive:	false,
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -323,6 +352,7 @@ L.Map.include({
 				oo = L.rectangle(o.pos, {
 					interactive:	false,
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -336,6 +366,7 @@ L.Map.include({
 					interactive:	false,
 					radius:			o.radius,
 					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
 					color:			o.lineColor,
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
@@ -385,6 +416,7 @@ L.Map.include({
 				type:				o instanceof L.Rectangle ? "rectangle" : "polygon",
 				pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
 				label:				o.options.label,
+				dashed:				!!o.options.dashArray,
 				lineColor:			o.options.color,
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,
@@ -402,6 +434,7 @@ L.Map.include({
 					else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
 				}),
 				label:			o.options.label,
+				dashed:			!!o.options.dashArray,
 				color:			o.options.color,
 				thickness:		o.options.weight,
 				transparency:	1 - o.options.opacity
@@ -416,6 +449,7 @@ L.Map.include({
 				pos:				[ p.lat, p.lng ],
 				radius:				o.getRadius(),
 				label:				o.options.label,
+				dashed:				!!o.options.dashArray,
 				lineColor:			o.options.color,
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,

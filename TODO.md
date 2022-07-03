@@ -22,7 +22,6 @@
 		- Create a map-drawing-object for each feature in the file
 		- Give user choices to set color, fill, tooltip name, etc. as import options
 - Pres-mode:
-	* When transitioning from on scene to the next, map-textboxes should be faded out when the scene is "exited", and faded in when the next scene is "entered"
 	* There should be an option to not auto-pan to the next scenes map-position. Lock/Unlock. When unlocked, the map will go to next scene as usual, but not automatically move the map
 	* Alle knapper er "fadet ut" når brukeren ikke beveger musen, og kommer til syne når brukeren beveger eller trykker på skjermen
 - Forum-integration:

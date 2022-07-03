@@ -465,7 +465,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.fullscreen/Leaflet.fullscreen.min.js"></script-->
-		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.js"></script>
 		<!--script type="text/javascript" src="lib/leaflet.locatecontrol/L.Control.Locate.min.js"></script-->
 		<!--script type="text/javascript" src="lib/leaflet.draw/leaflet.draw.js"></script-->
 		<script type="text/javascript" src="lib/leaflet.geoman/leaflet-geoman.min.js"></script>

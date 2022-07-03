@@ -136,6 +136,10 @@ function polyline_popup() {
 						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
 						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
 					</div>
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="checkbox" value="" id="dashed">
+						<label class="form-check-label" for="dashed">Dashed</label>
+					</div>
 				</div>
 			</div>
 
@@ -172,6 +176,10 @@ function polygon_popup() {
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
 						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
+					</div>
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="checkbox" value="" id="dashed">
+						<label class="form-check-label" for="dashed">Dashed</label>
 					</div>
 				</div>
 			</div>
