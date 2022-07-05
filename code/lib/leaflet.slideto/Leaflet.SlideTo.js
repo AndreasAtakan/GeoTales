@@ -126,7 +126,52 @@ L.Polyline.include({
 		if(remaining < 0) {
 			this.setLatLngs(this._slideToLatLngs);
 			this.fire("moveend");
-			if (this._slideDraggingWasAllowed ) {
+			if (this._slideDraggingWasAllowed) {
+				this._map.dragging.enable();
+				this._map.doubleClickZoom.enable();
+				this._map.options.touchZoom = true;
+				this._map.options.scrollWheelZoom = true;
+			}
+			this._slideDraggingWasAllowed = undefined;
+			return this;
+		}
+
+		let percentDone = (this._slideToDuration - remaining) / this._slideToDuration;
+
+		let currLatLngs = [];
+		for(let i = 0; i < Math.min(this._slideFromLatLngs.length, this._slideToLatLngs.length); i++) {
+			let curr = this._map.latLngToContainerPoint( this._slideToLatLngs[i] )
+				.multiplyBy(percentDone)
+				.add(
+					this._map.latLngToContainerPoint( this._slideFromLatLngs[i] )
+						.multiplyBy(1 - percentDone)
+				);
+			currLatLngs.push( this._map.containerPointToLatLng(curr) );
+		}
+		this.setLatLngs(currLatLngs);
+
+		this._slideFrame = L.Util.requestAnimFrame(this._slideTo, this);
+	}
+
+});
+
+L.Polyline.addInitHook(function() {
+	this.on("move", this.slideCancel, this);
+});
+
+
+
+L.Polygon.include({
+
+	_slideTo: function _slideTo() {
+		if(!this._map) { return; }
+
+		let remaining = this._slideToUntil - performance.now();
+
+		if(remaining < 0) {
+			this.setLatLngs(this._slideToLatLngs);
+			this.fire("moveend");
+			if (this._slideDraggingWasAllowed) {
 				this._map.dragging.enable();
 				this._map.doubleClickZoom.enable();
 				this._map.options.touchZoom = true;
@@ -157,10 +202,6 @@ L.Polyline.include({
 		this._slideFrame = L.Util.requestAnimFrame(this._slideTo, this);
 	}
 
-});
-
-L.Polyline.addInitHook(function() {
-	this.on("move", this.slideCancel, this);
 });
 
 

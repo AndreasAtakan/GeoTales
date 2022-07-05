@@ -98,6 +98,10 @@ L.Map.addInitHook(function() {
 			icon: L.icon({ iconUrl: "assets/user-circle-solid.svg", iconSize: [30, 30], popupAnchor: [0, -15], tooltipAnchor: [0, 15] })
 		}
 	});
+	this.pm.setLang("customLang", {
+		tooltips: { placeMarker: "Click to place avatar" },
+		buttonTitles: { drawMarkerButton: "Draw avatar" }
+	}, "en");
 	this.disableDraw();
 
 
@@ -149,7 +153,12 @@ L.Map.addInitHook(function() {
 		let o = ev.layer;
 
 		let label = o.options.label;
-		if(label) { o.bindTooltip(label, { direction: "center", permanent: true }); }
+		if(label) {
+			o.bindTooltip(label, {
+				direction: o instanceof L.ImageOverlay ? "bottom" : "center",
+				permanent: true
+			});
+		}
 
 		o.on("pm:edit", ev => {
 			let o = ev.layer;
@@ -409,7 +418,9 @@ L.Map.include({
 
 		object.pos = [[nw.lat, nw.lng], [se.lat, se.lng]];
 
-		this.addLayer( this.createObject(object) );
+		let o = this.createObject(object);
+		this.addLayer(o);
+		this.fire("_addedlayer", { layer: o });
 		this.objects.push(object);
 	},
 
@@ -495,9 +506,18 @@ L.Map.include({
 
 
 	getCenterBasemapTile: function() {
+		if(this.basemap instanceof L.ImageOverlay) {
+			return this.basemap._url;
+		}
+
 		let s = this.basemap.getTileSize(),
-			c = this.project( this.getCenter(), this.getZoom() );
-		return this.basemap.getTileUrl({ x: Math.floor(c.x / s.x), y: Math.floor(c.y / s.y) });
+			c = this.project( this.getCenter(), this.getZoom() ),
+			r = "";
+
+		try { r = this.basemap.getTileUrl({ x: Math.floor(c.x / s.x), y: Math.floor(c.y / s.y) }); }
+		catch(e) { console.error(e); }
+
+		return r;
 	},
 
 	getBasemap: function() {

@@ -22,7 +22,6 @@
 		- Create a map-drawing-object for each feature in the file
 		- Give user choices to set color, fill, tooltip name, etc. as import options
 - Pres-mode:
-	* There should be an option to not auto-pan to the next scenes map-position. Lock/Unlock. When unlocked, the map will go to next scene as usual, but not automatically move the map
 	* Alle knapper er "fadet ut" når brukeren ikke beveger musen, og kommer til syne når brukeren beveger eller trykker på skjermen
 - Forum-integration:
 	* X Set up file and image upload to Amazon S3
@@ -32,7 +31,6 @@
 
 
 - Working TODO:
-	* *map.js* linje 264; når jeg prøver å klone en avatar som i seg selv allerede er en klone av en annen avatar, produserer dette en feil
 	* Tekstboks "Create link" knapp; når en tekst er markert bør man få en modal hvor man kan legge inn lenke også blir det `<a href="[Lenke]">[Den markerte teksten]</a>`
 	* Generelt; legg til støtte for WebP bilder
 	* Lenker i tekstboks; hvis teksten allerede var stor (header 1,2,..), så blir hyperlenke teksten automatisk liten; feil
@@ -47,8 +45,5 @@
 
 
 
-
-
 - Teksten i boken skal være skalert basert på skjermstørrelse (bruk % eller rem)
-- Pres-modus
 - My Maps; legg til knapp for å "unpublish", dvs. slette kartets post på forumet

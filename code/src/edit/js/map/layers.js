@@ -64,7 +64,6 @@ function bind_setup(o) {
 
 	$(".objectPopup input#label").change(function(ev) {
 		let val = $(this).val();
-		/* temp */ if(o instanceof L.ImageOverlay) { return; }
 
 		if(val) {
 			if(!o.getTooltip()) {

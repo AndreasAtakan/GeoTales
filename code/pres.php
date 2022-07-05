@@ -194,13 +194,13 @@ $row = $stmt->fetch();
 					</div>
 
 					<div role="group" class="btn-group-vertical btn-group-sm" id="mapNav" aria-label="Map navigation">
-						<button type="button" class="btn btn-outline-light" id="zoomIn">
+						<button type="button" class="btn btn-outline-light" id="zoomIn" disabled>
 							<i class="fas fa-plus"></i>
 						</button>
 						<button type="button" class="btn btn-outline-light" id="panLock">
 							🔒
 						</button>
-						<button type="button" class="btn btn-outline-light" id="zoomOut">
+						<button type="button" class="btn btn-outline-light" id="zoomOut" disabled>
 							<i class="fas fa-minus"></i>
 						</button>
 					</div>

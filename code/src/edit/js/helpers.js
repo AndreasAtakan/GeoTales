@@ -90,7 +90,6 @@ function get_basemap(url) {
 	for(let b of _BASEMAPS) {
 		if(b.tiles._url == url) { return b; }
 	}
-
 	return null;
 }
 

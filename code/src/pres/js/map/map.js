@@ -50,7 +50,12 @@ L.Map.addInitHook(function() {
 		let o = ev.layer;
 
 		let label = o.options.label;
-		if(label) { o.bindTooltip(label, { direction: "center", permanent: true }); }
+		if(label) {
+			o.bindTooltip(label, {
+				direction: o instanceof L.ImageOverlay ? "bottom" : "center",
+				permanent: true
+			});
+		}
 
 		if(o instanceof L.ImageOverlay) { this.setIcon(o); }
 	});
