@@ -58,7 +58,7 @@ END;
 --
 
 BEGIN;
-CREATE TABLE IF NOT EXISTS "Icon"(
+CREATE TABLE IF NOT EXISTS "Upload"(
 	id uuid DEFAULT uuid_generate_v4(),
 	ref text,
 
@@ -69,18 +69,19 @@ END;
 --
 
 BEGIN;
-CREATE TABLE IF NOT EXISTS "User_Icon"(
+CREATE TABLE IF NOT EXISTS "User_Upload"(
 	id uuid DEFAULT uuid_generate_v4(),
 	user_id int NOT NULL,
-	icon_id uuid NOT NULL,
+	upload_id uuid NOT NULL,
+	type text NOT NULL,
 
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id)
 		REFERENCES "User" (uid)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
-	FOREIGN KEY (icon_id)
-		REFERENCES "Icon" (id)
+	FOREIGN KEY (upload_id)
+		REFERENCES "Upload" (id)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE
 );

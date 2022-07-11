@@ -101,7 +101,10 @@ function bind_setup(o) {
 					o.options.rounded = false;
 					o.options.angle = 0;
 
-					let data = new FormData(); data.append("image", file);
+					let data = new FormData();
+					data.append("op", "create");
+					data.append("type", "icon");
+					data.append("image", file);
 
 					$.ajax({
 						type: "POST",

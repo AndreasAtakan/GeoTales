@@ -107,7 +107,10 @@ window.onload = function(ev) {
 			let img = new Image();
 			img.onload = function() {
 				let width = this.width, height = this.height;
-				let data = new FormData(); data.append("image", file);
+				let data = new FormData();
+				data.append("op", "create");
+				data.append("type", "basemap");
+				data.append("image", file);
 
 				$.ajax({
 					type: "POST",

@@ -9,6 +9,8 @@
 	* (How?) Implement Stripe payment
 	* Reklamespalte i pres-modus for ubetalte brukere
 	* Password-beskyttede kart
+- My-Maps:
+	* Legg til knapp for å "unpublish", dvs. slette kartets post på forumet
 - Edit-mode:
 	* Library of avilable avatar icons (this will save a lot of storage space and cost)
 	* Library of uploaded basemaps under "Avilable basemaps"
@@ -40,10 +42,4 @@
 
 
 
-
-
-
-
-
 - Teksten i boken skal være skalert basert på skjermstørrelse (bruk % eller rem)
-- My Maps; legg til knapp for å "unpublish", dvs. slette kartets post på forumet

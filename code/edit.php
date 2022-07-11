@@ -181,7 +181,7 @@ $row = $stmt->fetch();
 							<div class="row my-4">
 								<div class="col col-md-10">
 									<label for="basemapFile"><small>Or use custom basemap</small></label>
-									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/gif, image/jpeg, image/png" />
+									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/gif, image/jpeg, image/png, image/webp" />
 									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
 								</div>
 							</div>

@@ -28,13 +28,13 @@ END;
 --
 
 BEGIN;
-INSERT INTO "Icon" (ref)
+INSERT INTO "Upload" (ref)
 VALUES ('main');
 END;
 
 --
 
 BEGIN;
-INSERT INTO "User_Icon" (user_id, icon_id)
-VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Icon" LIMIT 1) );
+INSERT INTO "User_Upload" (user_id, upload_id)
+VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Upload" LIMIT 1) );
 END;

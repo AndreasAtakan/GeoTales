@@ -17,7 +17,10 @@ function Textboxes() {
 		if(!file) { return; }
 
 		$("#loadingModal").modal("show");
-		let data = new FormData(); data.append("image", file);
+		let data = new FormData();
+		data.append("op", "create");
+		data.append("type", "image");
+		data.append("image", file);
 		$.ajax({
 			type: "POST",
 			url: "api/upload.php",

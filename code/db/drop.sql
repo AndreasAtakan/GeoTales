@@ -8,8 +8,8 @@
 
 BEGIN;
 
-DROP TABLE "User_Icon";
-DROP TABLE "Icon";
+DROP TABLE "User_Upload";
+DROP TABLE "Upload";
 DROP TABLE "User_Map";
 DROP TABLE "Map";
 DROP TABLE "User";
