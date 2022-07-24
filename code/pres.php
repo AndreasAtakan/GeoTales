@@ -4,7 +4,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
 *******************************************************************************/
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
@@ -45,7 +45,7 @@ $row = $stmt->fetch();
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://tellusmap.com/" />
+		<meta property="og:url" content="https://geotales.io/" />
 		<meta property="og:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="og:description" content="<?php echo $row['description']; ?>" />
 		<meta property="og:site_name" content="GeoTales" />
@@ -56,7 +56,7 @@ $row = $stmt->fetch();
 		<meta property="twitter:card" content="summary_large_image" />
 		<meta name="twitter:site" content="@TellusMap" />
 		<meta name="twitter:creator" content="@TellusMap" />
-		<meta property="twitter:url" content="https://tellusmap.com/" />
+		<meta property="twitter:url" content="https://geotales.io/" />
 		<meta property="twitter:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
 		<meta property="twitter:image" content="<?php echo $row['preview']; ?>" />

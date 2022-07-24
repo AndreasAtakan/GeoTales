@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -51,11 +51,11 @@ L.Map.addInitHook(function() {
 
 		let label = o.options.label;
 		if(label) {
-			o.bindTooltip(label, {
-				direction: o instanceof L.ImageOverlay ? "bottom" : "center",
-				permanent: true
-			});
+			o.bindTooltip(label, { direction: "center", permanent: true });
+			if(o instanceof L.ImageOverlay) { this.updateTooltip(o); }
 		}
+
+		o.on("moveend", ev => { this.updateTooltip(ev.target); });
 
 		if(o instanceof L.ImageOverlay) { this.setIcon(o); }
 	});
@@ -65,6 +65,10 @@ L.Map.addInitHook(function() {
 
 		o.closeTooltip(); o.unbindTooltip();
 		o.slideCancel();
+	});
+
+	this.on("zoomend", ev => {
+		for(let o of this.getLayers()) { this.updateTooltip(o); }
 	});
 
 
@@ -190,7 +194,8 @@ L.Map.include({
 	},
 
 	setIcon: function(o, size, icon) {
-		if(icon) { o.setUrl(icon); }
+		if(!(o instanceof L.ImageOverlay)) { return; }
+
 		if(size) {
 			let zoom = this.getZoom();
 			let c = this.project(o.getBounds().getCenter(), zoom);
@@ -199,6 +204,7 @@ L.Map.include({
 				this.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
 			]);
 		}
+		if(icon) { o.setUrl(icon); }
 
 		$(o._image).css("border-radius", o.options.rounded ? "50%" : "0");
 		//$(o._image).css("transform", `rotate(${o.options.angle}deg)`);
@@ -210,7 +216,18 @@ L.Map.include({
 			opacity(${(1 - o.options.overlayTransparency)*100}%)
 		`);
 
-		if(o.options.label) { o.closeTooltip(); o.openTooltip(); }
+		if(o.options.label) { this.updateTooltip(o); }
+	},
+
+	updateTooltip: function(o) {
+		if(o.getTooltip()) {
+			o.closeTooltip();
+			if(o instanceof L.ImageOverlay) {
+				let d = this.latLngToContainerPoint( o.getBounds().getNorthWest() ).distanceTo( this.latLngToContainerPoint( o.getBounds().getSouthWest() ) );
+				o.getTooltip().options.offset = [0, d / 2 - 10];
+			}
+			o.openTooltip();
+		}
 	},
 
 
@@ -228,15 +245,13 @@ L.Map.include({
 		if(this.basemap instanceof L.ImageOverlay) {
 			return {
 				type: "image",
-				img: this.basemap._url,
-				width: this.basemap.options.width,
-				height: this.basemap.options.height
+				img: this.basemap._url
 			};
 		}
 		return null;
 	},
 
-	setBasemap: function(source) {
+	setBasemap: async function(source) {
 		let basemap;
 
 		if(source instanceof L.TileLayer) {
@@ -259,11 +274,15 @@ L.Map.include({
 			if(this.basemap instanceof L.ImageOverlay
 			&& source.img == this.basemap._url) { return; }
 
+			let img = new Image();
+			img.src = source.img;
+			await img.decode();
+
 			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
 			let zoom, bl, tr;
 			for(let i = 0; i < 18; i++) {
 				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
-				tr = L.CRS.EPSG3857.pointToLatLng(L.point(source.width, source.height), i);
+				tr = L.CRS.EPSG3857.pointToLatLng(L.point(img.width, img.height), i);
 				if(bl.lat >= -85.06 && bl.lng >= -180
 				&& tr.lat <=  85.06 && tr.lng <=  180) {
 					zoom = i;
@@ -276,7 +295,6 @@ L.Map.include({
 			basemap = L.imageOverlay(source.img, bounds, {
 				zIndex: 0,
 				minZoom: 0, maxZoom: 22,
-				width: source.width, height: source.height,
 				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 			});
 		}
@@ -297,12 +315,10 @@ L.Map.include({
 
 	presetZoom: function(min, max) {
 		let zoom = this.getZoom();
-
 		if(zoom < min || zoom > max) {
 			if(zoom < min) { this.setZoom(min); }
 			if(zoom > max) { this.setZoom(max); }
 		}
-
 		this.setMinZoom(min);
 		this.setMaxZoom(max);
 	},
@@ -316,6 +332,7 @@ L.Map.include({
 			case "avatar":
 				oo = L.imageOverlay(o.icon, o.pos, {
 					interactive:			false,
+					zIndex:					200,
 					label:					o.label,
 					ratio:					o.ratio,
 					rounded:				o.rounded,

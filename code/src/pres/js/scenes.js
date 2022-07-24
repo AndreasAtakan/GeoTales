@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -17,20 +17,6 @@ function Scenes() {
 	this.setup = function() {
 		$("#sceneNav #prev").click(ev => { _SCENES.prev(); });
 		$("#sceneNav #next").click(ev => { _SCENES.next(); });
-		let isFullscreen = false;
-		$("#sceneNav #fullscreen").click(ev => {
-			if(isFullscreen) {
-				if(document.exitFullscreen) { document.exitFullscreen(); }
-				else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
-				else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
-			}else{
-				let el = document.body;
-				if(el.requestFullscreen) { el.requestFullscreen(); }
-				else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
-				else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
-			}
-			isFullscreen = !isFullscreen;
-		});
 
 		$("#bookmarks").css("display", "block");
 
@@ -115,14 +101,15 @@ function Scenes() {
 			this.active = data[0].id;
 		}
 
-		for(let o of data) {
+		for(let i = 0; i < data.length; i++) {
+			let o = data[i];
 			let s = new Scene(o.id);
 			s.bounds = o.bounds; s.basemap = o.basemap;
 			s.bookmark = o.bookmark; s.title = o.title;
 
 			if(s.bookmark) {
 				$("#bookmarks ul").append(`
-					<li><button type="button" class="dropdown-item" id="bookmark" data-id="${s.id}">${s.title}</button></li>
+					<li><button type="button" class="dropdown-item" id="bookmark" data-id="${s.id}">${s.title || `Scene ${i+1}`}</button></li>
 				`);
 			}
 

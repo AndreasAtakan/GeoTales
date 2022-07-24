@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -128,6 +128,7 @@ L.Map.addInitHook(function() {
 				this.unproject([ p.x + size[0] / 2, p.y + size[1] / 2 ], zoom)
 			], {
 				interactive:			true,
+				zIndex:					200,
 				ratio:					496 / 512, // NOTE: this is hard-coded from the pixel-width of 'user-circle-solid.svg'
 				rounded:				false,
 				angle:					0,
@@ -158,6 +159,7 @@ L.Map.addInitHook(function() {
 			if(o instanceof L.ImageOverlay) { this.updateTooltip(o); }
 		}
 
+		o.on("moveend", ev => { this.updateTooltip(ev.target); });
 		o.on("pm:edit", ev => {
 			let o = ev.layer;
 			this.updateObject(o);
@@ -210,7 +212,7 @@ L.Map.addInitHook(function() {
 
 	this.on("zoomend", ev => {
 		for(let o of this.getLayers()) { this.updateTooltip(o); }
-	})
+	});
 
 
 	this.on("movestart", ev => { /**/ });
@@ -486,11 +488,11 @@ L.Map.include({
 		if(!(o instanceof L.ImageOverlay)) { return; }
 
 		if(size) {
-			let zoom = _MAP.getZoom();
-			let c = _MAP.project(o.getBounds().getCenter(), zoom);
+			let zoom = this.getZoom();
+			let c = this.project(o.getBounds().getCenter(), zoom);
 			o.setBounds([
-				_MAP.unproject([ c.x - size[0] / 2, c.y - size[1] / 2 ], zoom),
-				_MAP.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
+				this.unproject([ c.x - size[0] / 2, c.y - size[1] / 2 ], zoom),
+				this.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
 			]);
 		}
 		if(icon) { o.setUrl(icon); }

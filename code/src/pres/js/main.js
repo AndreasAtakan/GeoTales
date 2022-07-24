@@ -3,7 +3,7 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@tellusmap.com>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
 *******************************************************************************/
 
 "use strict";
@@ -31,6 +31,21 @@ window.onload = function(ev) {
 
 	_SCENES = new Scenes();
 
+	let isFullscreen = false;
+	$("#sceneNav #fullscreen").click(ev => {
+		if(isFullscreen) {
+			if(document.exitFullscreen) { document.exitFullscreen(); }
+			else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
+			else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
+		}else{
+			let el = document.body;
+			if(el.requestFullscreen) { el.requestFullscreen(); }
+			else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
+			else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
+		}
+		isFullscreen = !isFullscreen;
+		_MAP.setAspectRatio();
+	});
 	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
 	$(document).keyup(ev => {
 		let keycode = ev.code;
