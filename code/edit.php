@@ -399,9 +399,10 @@ $row = $stmt->fetch();
 												<li><button type="button" class="dropdown-item" onclick="_SCENES.add();">Add new scene</button></li>
 												<li><button type="button" class="dropdown-item" onclick="_SCENES.capture();">Recapture</button></li>
 												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sceneWarningModal">Delete</button></li>
-												<li><button type="button" class="dropdown-item" onclick="_SCENES.bookmark();">Bookmark scene</button></li>
-												<li><button type="button" class="dropdown-item" onclick="">Copy scene position</button></li>
-												<li><button type="button" class="dropdown-item" onclick="">Paste scene position</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.setBookmark(true);">Bookmark scene</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.setBookmark(false);">Unbookmark scene</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.copyBounds();">Copy scene position</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.pasteBounds();">Paste scene position</button></li>
 											</ul>
 										</li>
 										<li class="dropend">

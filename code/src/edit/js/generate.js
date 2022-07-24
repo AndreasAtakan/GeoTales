@@ -14,9 +14,6 @@ function new_scene(id, prevId) {
 	let cont = `
 		<li class="list-group-item p-1 my-1" id="${id}" data-id="${id}">
 			<div class="input-group input-group-sm">
-				<!--div class="input-group-text px-1" style="border-radius: 0; background-color: initial; border: none;">
-					<input type="checkbox" class="form-check-input mt-0" id="bookmark" value="" title="Bookmark scene" aria-label="Bookmark scene" />
-				</div-->
 				<button type="button" class="btn btn-outline-light" id="reorder" title="Change ordering">
 					<i class="fas fa-bars"></i>
 				</button>

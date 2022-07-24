@@ -12,6 +12,7 @@
 function Scenes() {
 	this.store = [];
 	this.active = "";
+	this.copiedBounds = null;
 
 
 	this.setup = function() {
@@ -97,14 +98,6 @@ function Scenes() {
 		save_data();
 	};
 
-	this.bookmark = function() {
-		if(!this.active) { return; }
-
-		let s = this.store[ this.get(this.active).index ];
-		s.bookmark();
-		save_data();
-	};
-
 	this.delete = function() {
 		if(!this.active) { return; }
 
@@ -177,7 +170,7 @@ function Scenes() {
 		let s = this.get(id);
 		s.enable();
 
-		$(`li[data-id="${s.id}"]`)[0].scrollIntoView({ behavior: "smooth", block: "center" });
+		$(`li[data-id="${s.id}"]`)[0].scrollIntoView({ behavior: "smooth", inline: "center" });
 
 		_TEXTBOXES.set(s.id);
 
@@ -192,11 +185,32 @@ function Scenes() {
 		this.store[ this.get(this.active).index ].setBasemap();
 	};
 
+	this.setBookmark = function(b) {
+		if(!this.active) { return; }
+
+		let s = this.store[ this.get(this.active).index ];
+		s.setBookmark(b);
+		save_data();
+	};
+
 	this.setNumbering = function() {
 		let i = 1;
 		for(let n of $("#scenes li span#num")) {
 			$(n).html(i++);
 		}
+	};
+
+	this.copyBounds = function() {
+		if(!this.active) { return; }
+
+		this.copiedBounds = this.get(this.active).bounds;
+	};
+
+	this.pasteBounds = function() {
+		if(!this.active) { return; }
+
+		let s = this.store[ this.get(this.active).index ];
+		s.setBounds(this.copiedBounds);
 	};
 
 	this.importData = function(data) {
@@ -209,10 +223,9 @@ function Scenes() {
 		for(let o of data) {
 			let s = new Scene(o.id);
 			s.bounds = o.bounds; s.basemap = o.basemap;
-			s.bookmark = o.bookmark; s.title = o.title;
 
-			//$(`li[data-id="${s.id}"] input#bookmark`).prop("checked", s.bookmark);
-			$(`li[data-id="${s.id}"] input#title`).val(s.title);
+			s.setBookmark(o.bookmark);
+			s.setTitle(o.title);
 
 			s.disable();
 
@@ -241,48 +254,45 @@ function Scene(id, prevId) {
 	new_scene(this.id, prevId);
 
 	$(`li[data-id="${this.id}"]`).on("keydown keyup", ev => { ev.stopPropagation(); });
-	//$(`li[data-id="${this.id}"] input#bookmark`).change(ev => { this.bookmark = ev.target.checked; });
 	$(`li[data-id="${this.id}"] input#title`).change(ev => { this.title = ev.target.value; });
-	$(`li[data-id="${this.id}"] button, li[data-id="${this.id}"] input`).click(ev => { ev.stopPropagation(); });
 
-
-	/*this.active = function() {
-		this.enable();
-		$(`li[data-id="${this.id}"]`).removeClass("inactive active");
-		$(`li[data-id="${this.id}"]`).addClass("active");
-		$(`button#recapture`).prop("disabled", true);
-	};*/
-
-	/*this.inactive = function() {
-		this.enable();
-		$(`li[data-id="${this.id}"]`).removeClass("inactive active");
-		$(`li[data-id="${this.id}"]`).addClass("inactive");
-		$(`li[data-id="${this.id}"] button#delete`).prop("disabled", true);
-		$(`button#recapture`).prop("disabled", false);
-	};*/
 
 	this.enable = function() {
 		$(`li[data-id="${this.id}"]`).addClass("active");
-		$(`li[data-id="${this.id}"] input,
-		   li[data-id="${this.id}"] button`).prop("disabled", false);
+		$(`li[data-id="${this.id}"] input, li[data-id="${this.id}"] button`).prop("disabled", false);
+		$(`li[data-id="${this.id}"] input, li[data-id="${this.id}"] button`).click(ev => { ev.stopPropagation(); });
 	};
 
 	this.disable = function() {
 		$(`li[data-id="${this.id}"]`).removeClass("active");
 		$(`li[data-id="${this.id}"] input`).prop("disabled", true);
+		$(`li[data-id="${this.id}"] input, li[data-id="${this.id}"] button`).off("click");
+	};
+
+	this.setBounds = function(bounds) {
+		this.bounds = bounds;
+		_MAP.setHomeBounds( this.bounds );
 	};
 
 	this.setBasemap = function() {
 		this.basemap = _MAP.getBasemap();
 	};
 
+	this.setBookmark = function(b) {
+		this.bookmark = b;
+		if(b) { $(`li[data-id="${this.id}"]`).addClass("bookmark"); }
+		else{ $(`li[data-id="${this.id}"]`).removeClass("bookmark"); }
+	};
+
+	this.setTitle = function(t) {
+		this.title = t;
+		$(`li[data-id="${this.id}"] input#title`).val(this.title);
+	};
+
 	this.capture = function() {
 		let nw = _MAP.getBounds().getNorthWest(),
 			se = _MAP.getBounds().getSouthEast();
-		this.bounds = [[nw.lat, nw.lng], [se.lat, se.lng]];
-
-		_MAP.setHomeBounds( this.bounds );
-
+		this.setBounds( [[nw.lat, nw.lng], [se.lat, se.lng]] );
 		this.setBasemap();
 	};
 
