@@ -113,22 +113,20 @@ L.Map.include({
 	},
 
 	enable: function() {
-		this.boxZoom.enable();
-		this.doubleClickZoom.enable();
 		this.dragging.enable();
-		this.keyboard.enable();
 		this.scrollWheelZoom.enable();
 		this.touchZoom.enable();
 		if(this.tapHold) { this.tapHold.enable(); }
+
+		this.doubleClickZoom.disable();
 	},
 	disable: function() {
-		this.boxZoom.disable();
-		this.doubleClickZoom.disable();
 		this.dragging.disable();
-		this.keyboard.disable();
 		this.scrollWheelZoom.disable();
 		this.touchZoom.disable();
 		if(this.tapHold) { this.tapHold.disable(); }
+
+		this.doubleClickZoom.disable();
 	},
 
 	setAspectRatio: function() {

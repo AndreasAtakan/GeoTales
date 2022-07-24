@@ -67,6 +67,7 @@ window.onload = function(ev) {
 		wheelPxPerZoomLevel: 1500,
 		keyboard: false,
 		tap: false,
+		boxZoom: false,
 		//touchZoom: false,
 		//worldCopyJump: true
 
