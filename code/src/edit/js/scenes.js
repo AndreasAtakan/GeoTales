@@ -97,6 +97,14 @@ function Scenes() {
 		save_data();
 	};
 
+	this.bookmark = function() {
+		if(!this.active) { return; }
+
+		let s = this.store[ this.get(this.active).index ];
+		s.bookmark();
+		save_data();
+	};
+
 	this.delete = function() {
 		if(!this.active) { return; }
 

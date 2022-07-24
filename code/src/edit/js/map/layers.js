@@ -54,6 +54,94 @@ L.FadeLayer = L.FeatureGroup.extend({
 L.fadeLayer = function(options) { return new L.FadeLayer(options); };
 
 
+L.ImageOverlay.include({
+	__toGeoJSON: function() {
+		if(!this._map) { return; }
+
+		let nw = this.getBounds().getNorthWest(),
+			se = this.getBounds().getSouthEast();
+		let r = {
+			"type": "Feature",
+			"properties": {
+				"type":				"avatar",
+				"label":			this.options.label,
+				"icon":				this._url,
+				"ratio":			this.options.ratio,
+				"rounded":			this.options.rounded,
+				"angle":			0,
+				"borderColor":		this.options.borderColor,
+				"borderThickness":	this.options.borderThickness,
+				"blur":				this.options.overlayBlur,
+				"grayscale":		this.options.overlayGrayscale,
+				"brightness":		this.options.overlayBrightness,
+				"transparency":		this.options.overlayTransparency
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [ [nw.lat, nw.lng], [se.lat, se.lng] ]
+			}
+		};
+		return r;
+	}
+});
+
+L.Polyline.include({
+	__toGeoJSON: function() {
+		if(!this._map) { return; }
+
+		let r = L.Polyline.prototype.toGeoJSON.call(this);
+		r.properties = {
+			"type":			"polyline",
+			"label":		this.options.label,
+			"dashed":		!!this.options.dashArray,
+			"color":		this.options.color,
+			"thickness":	this.options.weight,
+			"transparency":	1 - this.options.opacity
+		};
+		return r;
+	}
+});
+
+L.Polygon.include({
+	__toGeoJSON: function() {
+		if(!this._map) { return; }
+
+		let r = L.Polygon.prototype.toGeoJSON.call(this);
+		r.properties = {
+			type:				this instanceof L.Rectangle ? "rectangle" : "polygon",
+			label:				this.options.label,
+			dashed:				!!this.options.dashArray,
+			lineColor:			this.options.color,
+			lineThickness:		this.options.weight,
+			lineTransparency:	1 - this.options.opacity,
+			fillColor:			this.options.fillColor,
+			fillTransparency:	1 - this.options.fillOpacity
+		};
+		return r;
+	}
+});
+
+L.Circle.include({
+	__toGeoJSON: function() {
+		if(!this._map) { return; }
+
+		let r = L.Circle.prototype.toGeoJSON.call(this);
+		r.properties = {
+			"type":				"circle",
+			"radius":			this.getRadius(),
+			"label":			this.options.label,
+			"dashed":			!!this.options.dashArray,
+			"lineColor":		this.options.color,
+			"lineThickness":	this.options.weight,
+			"lineTransparency":	1 - this.options.opacity,
+			"fillColor":		this.options.fillColor,
+			"fillTransparency":	1 - this.options.fillOpacity
+		};
+		return r;
+	}
+});
+
+
 
 
 
@@ -67,10 +155,8 @@ function bind_setup(o) {
 
 		if(val) {
 			if(!o.getTooltip()) {
-				o.bindTooltip( L.tooltip({
-					direction: o instanceof L.ImageOverlay ? "bottom" : "center",
-					permanent: true
-				}, o) );
+				o.bindTooltip( L.tooltip({ direction: "center", permanent: true }, o) );
+				if(o instanceof L.ImageOverlay) { _MAP.updateTooltip(o); }
 			}
 			o.setTooltipContent(val);
 		}
@@ -82,53 +168,65 @@ function bind_setup(o) {
 	$(".objectPopup input#label").val(o.options.label || "");
 
 	if(o instanceof L.ImageOverlay) {
-		$("#avatarPopup input#icon").change(function(ev) {
+		$("input#_img_icon").off("change");
+		$("input#_img_icon").change(function(ev) {
 			let file = $(this)[0].files[0];
 			if(!file) { return; }
 
 			$("#loadingModal").modal("show");
 
 			let fr = new FileReader();
-			fr.onload = function() {
-				let res = fr.result;
-
+			fr.onload = async function() {
 				let img = new Image();
-				img.onload = function() {
-					$("#avatarPopup input#rounded").prop("checked", false);
-					// TODO: Also set rotation-angle input to 0
+				img.src = fr.result;
+				await img.decode();
 
-					o.options.ratio = this.width / this.height;
-					o.options.rounded = false;
-					o.options.angle = 0;
+				$("#avatarPopup input#rounded").prop("checked", false);
+				// TODO: Also set rotation-angle input to 0
 
-					let data = new FormData();
-					data.append("op", "create");
-					data.append("type", "icon");
-					data.append("image", file);
+				o.options.ratio = img.width / img.height || 1;
+				o.options.rounded = false;
+				o.options.angle = 0;
 
-					$.ajax({
-						type: "POST",
-						url: "api/upload.php",
-						data: data,
-						contentType: false,
-						processData: false,
-						success: function(result, status, xhr) {
-							_MAP.setIcon(o, [ 35, 35 / o.options.ratio ], result);
-							_MAP.updateObject(o);
+				let data = new FormData();
+				data.append("op", "create");
+				data.append("type", "icon");
+				data.append("image", file);
 
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-						},
-						error: function(xhr, status, error) {
-							console.error(xhr.status, error);
-							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-						}
-					});
+				$.ajax({
+					type: "POST",
+					url: "api/upload.php",
+					data: data,
+					contentType: false,
+					processData: false,
+					success: function(result, status, xhr) {
+						_ICONS.unshift(result);
+						_MAP.setPopup(o);
+						_MAP.setIcon(o, [ 35, 35 / o.options.ratio ], result);
+						_MAP.updateObject(o);
 
-					return true;
-				};
-				img.src = res;
+						setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+					},
+					error: function(xhr, status, error) {
+						console.error(xhr.status, error);
+						setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+					}
+				});
 			};
 			fr.readAsDataURL(file);
+		});
+		$("#avatarPopup #iconChoose #iconAdd").click(ev => { $("input#_img_icon").click(); });
+
+		$("#avatarPopup #iconChoose #icons").click(async function(ev) {
+			let val = $(this).prop("src");
+
+			let img = new Image();
+			img.src = val;
+			await img.decode();
+
+			o.options.ratio = img.width / img.height || 1;
+			_MAP.setIcon(o, [ 35, 35 / o.options.ratio ], val);
+			_MAP.updateObject(o);
 		});
 
 		$("#avatarPopup input#size").change(function(ev) {
@@ -238,14 +336,7 @@ function bind_setup(o) {
 				_MAP.updateObject(o);
 			});
 		}
-	}else
-	if(o instanceof Object) {
-		//
 	}else{ console.error("object type invalid"); }
-
-	$(".objectPopup #bringToFront").click(function(ev) {
-		o.bringToFront();
-	});
 
 	$(".objectPopup #makeGlobal").click(function(ev) {
 		_MAP.globalObjectOptions(o);

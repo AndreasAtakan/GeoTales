@@ -33,7 +33,7 @@ function new_scene(id, prevId) {
 
 
 
-function init_basemaps() {
+function generate_basemaps() {
 
 	let html = ``;
 
@@ -59,6 +59,15 @@ function init_basemaps() {
 
 function avatar_popup() {
 
+	let icons = ``;
+	for(let i of _ICONS) {
+		icons += `
+			<div class="col">
+				<img class="img-fluid rounded" id="icons" src="${i}" alt="&nbsp;" />
+			</div>
+		`;
+	}
+
 	return `
 		<form class="container-fluid objectPopup" id="avatarPopup">
 			<div class="row">
@@ -70,12 +79,34 @@ function avatar_popup() {
 			<div class="row my-3">
 				<div class="col">
 					<div class="input-group input-group-sm">
-						<input type="file" class="form-control form-control-sm" id="icon" accept="image/gif, image/jpeg, image/png" />
-						<input type="number" min="10" max="60" step="1" class="form-control" id="size" placeholder="Size" />
+						<div class="input-group-text">
+							<input type="checkbox" class="form-check-input mt-0" id="rounded" value="" aria-label="Rounded" title="Rounded" />
+						</div>
+						<input type="number" min="10" max="500" step="1" class="form-control" id="size" placeholder="Size" />
 					</div>
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="checkbox" value="" id="rounded">
-						<label class="form-check-label" for="rounded">Rounded</label>
+				</div>
+			</div>
+
+			<div class="row my-3">
+				<div class="col">
+					<div class="accordion" id="iconAccordion">
+						<div class="accordion-item">
+							<h2 class="accordion-header" id="iconAccordionHeading">
+								<button class="accordion-button collapsed py-1 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#iconAccordionCollapse" aria-expanded="false" aria-controls="iconAccordionCollapse">
+									Available icons
+								</button>
+							</h2>
+							<div id="iconAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="iconAccordionHeading" data-bs-parent="#iconAccordion">
+								<div class="accordion-body">
+									<div class="row row-cols-4" id="iconChoose">
+										${icons}
+										<div class="col">
+											<button type="button" class="btn btn-sm btn-outline-secondary" id="iconAdd">+</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						  </div>
 					</div>
 				</div>
 			</div>
@@ -89,7 +120,7 @@ function avatar_popup() {
 				</div>
 			</div>
 
-			<div class="row my-3">
+			<div class="row mt-3 mb-2">
 				<div class="col">
 					<div class="input-group input-group-sm">
 						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
@@ -103,13 +134,8 @@ function avatar_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-9">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
-						<i class="fas fa-share"></i>
-					</button>
-				</div>
-				<div class="col-3">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
+				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary py-0" id="makeGlobal" title="Save options globally">
 						<i class="fas fa-save"></i> <strong>*</strong>
 					</button>
 				</div>
@@ -129,7 +155,7 @@ function polyline_popup() {
 				</div>
 			</div>
 
-			<div class="row my-3">
+			<div class="row mt-3 mb-2">
 				<div class="col">
 					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
@@ -144,13 +170,8 @@ function polyline_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-9">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
-						<i class="fas fa-share"></i>
-					</button>
-				</div>
-				<div class="col-3">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
+				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary py-0" id="makeGlobal" title="Save options globally">
 						<i class="fas fa-save"></i> <strong>*</strong>
 					</button>
 				</div>
@@ -184,7 +205,7 @@ function polygon_popup() {
 				</div>
 			</div>
 
-			<div class="row my-3">
+			<div class="row mt-3 mb-2">
 				<div class="col">
 					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
@@ -194,13 +215,8 @@ function polygon_popup() {
 			</div>
 
 			<div class="row">
-				<div class="col-9">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="bringToFront" title="Bring to front">
-						<i class="fas fa-share"></i>
-					</button>
-				</div>
-				<div class="col-3">
-					<button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="makeGlobal" title="Save options globally">
+				<div class="col">
+					<button type="button" class="btn btn-sm btn-outline-secondary py-0" id="makeGlobal" title="Save options globally">
 						<i class="fas fa-save"></i> <strong>*</strong>
 					</button>
 				</div>

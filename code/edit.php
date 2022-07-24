@@ -74,19 +74,66 @@ $row = $stmt->fetch();
 	</head>
 	<body>
 
-		<!-- Import modal -->
-		<div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+		<!-- Project import -->
+		<input type="file" class="form-control" id="projectFileInput" style="display: none;" />
+
+		<!-- GeoJSON import modal -->
+		<div class="modal fade" id="geojsonImportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="geojsonImportModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="importModalLabel">Import data</h5>
+						<h5 class="modal-title" id="geojsonImportModalLabel">Import GeoJSON</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col col-md-10">
+									<label for="fileInput" class="form-label">Choose GeoJSON-file</label>
+									<input type="file" class="form-control form-control-sm" id="fileInput" accept="application/json,.json,application/geo+json,.geojson" />
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col col-md-10">
+									<label for="lineThickness" class="form-label">Line options</label>
+									<div class="input-group input-group-sm">
+										<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
+										<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
+										<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
+									</div>
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col col-md-10">
+									<label for="fillTransparency" class="form-label">Fill options</label>
+									<div class="input-group input-group-sm">
+										<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
+										<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-secondary" id="import">Import</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- GEDCOM import modal -->
+		<div class="modal fade" id="gedcomImportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="gedcomImportModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="gedcomImportModalLabel">Import GEDCOM</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
 						<div class="mb-3">
-							<label for="fileInput" class="form-label">Choose a data-file</label>
-							<input type="file" class="form-control" id="fileInput" aria-describedby="fileHelp" />
-							<div id="fileHelp" class="form-text">Supported formats: GEDCOM, CSV, Excel, GeoTales-file</div>
+							<label for="fileInput" class="form-label">Choose GEDCOM-file</label>
+							<input type="file" class="form-control form-control-sm" id="fileInput" />
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -299,8 +346,8 @@ $row = $stmt->fetch();
 			<div class="row g-0" style="height: 39px;">
 				<div class="col">
 					<nav class="navbar navbar-expand-sm navbar-dark fixed-top px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
-						<a class="navbar-brand py-0" href="maps.php" style="line-height: 0;">
-							<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
+						<a class="navbar-brand py-0 mx-2" href="maps.php" style="line-height: 0;">
+							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
 						</a>
 
 						<button class="navbar-toggler py-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -310,12 +357,29 @@ $row = $stmt->fetch();
 						<div class="collapse navbar-collapse" id="navbarContent">
 							<ul class="navbar-nav mb-0 px-0 w-100">
 								<li class="nav-item dropdown">
-									<a class="nav-link dropdown-toggle py-0" href="#" id="navbarFileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<a class="nav-link dropdown-toggle py-0" href="#" id="navbarFileDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
 										File
 									</a>
-									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown">
-										<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">Import</a></li>
-										<li><a class="dropdown-item" href="#" id="export">Export</a></li>
+									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown" style="max-height: calc(100vh - 39px); overflow-y: visible;">
+										<li class="dropend">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+												Import
+											</button>
+											<ul class="dropdown-menu">
+												<li><button type="button" class="dropdown-item" onclick="$('#projectFileInput').click();">Project file</button></li>
+												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#geojsonImportModal">GeoJSON</button></li>
+												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#gedcomImportModal">GEDCOM</button></li>
+											</ul>
+										</li>
+										<li class="dropend">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+												Export as
+											</button>
+											<ul class="dropdown-menu">
+												<li><button type="button" class="dropdown-item" onclick="export_data('project');">Project file</button></li>
+												<li><button type="button" class="dropdown-item" onclick="export_data('geojson');">GeoJSON</button></li>
+											</ul>
+										</li>
 										<li><hr class="dropdown-divider" /></li>
 										<li><a class="dropdown-item" href="#" id="save">Save</a></li>
 										<li><hr class="dropdown-divider" /></li>
@@ -335,7 +399,7 @@ $row = $stmt->fetch();
 												<li><button type="button" class="dropdown-item" onclick="_SCENES.add();">Add new scene</button></li>
 												<li><button type="button" class="dropdown-item" onclick="_SCENES.capture();">Recapture</button></li>
 												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sceneWarningModal">Delete</button></li>
-												<li><button type="button" class="dropdown-item" onclick="">Bookmark scene</button></li>
+												<li><button type="button" class="dropdown-item" onclick="_SCENES.bookmark();">Bookmark scene</button></li>
 												<li><button type="button" class="dropdown-item" onclick="">Copy scene position</button></li>
 												<li><button type="button" class="dropdown-item" onclick="">Paste scene position</button></li>
 											</ul>
@@ -452,8 +516,9 @@ $row = $stmt->fetch();
 			</div>
 		</div>
 
-		<!-- NOTE: Used as placeholder input for trumbowyg image upload -->
-		<input type="file" id="_img" accept="image/gif, image/jpeg, image/png" style="display: none;" />
+		<!-- NOTE: placeholders for trumbowyg image upload and avatar icon upload -->
+		<input type="file" id="_img_textbox" accept="image/gif, image/jpeg, image/png, image/webp" style="display: none;" />
+		<input type="file" id="_img_icon" accept="image/gif, image/jpeg, image/png, image/webp" style="display: none;" />
 
 		<!-- Load lib/ JS -->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>

@@ -270,7 +270,7 @@ $count = $stmt->rowCount();
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="GeoTales" width="30" height="30" />
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -428,7 +428,7 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-4 mt-2">
 						<center>
-							<img class="d-none d-sm-block" src="assets/logo.png" alt="GeoTales" width="40" height="40" />
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="GeoTales" width="auto" height="40" />
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">

@@ -12,7 +12,7 @@
 function Textboxes() {
 	this.store = [];
 
-	$("input#_img").change(function(ev) {
+	$("input#_img_textbox").change(function(ev) {
 		let file = $(this)[0].files[0];
 		if(!file) { return; }
 
@@ -75,7 +75,7 @@ function Textboxes() {
 					ico: "justifyLeft"
 				},
 				uploadImg: {
-					fn: ev => { $("input#_img").click(); },
+					fn: ev => { $("input#_img_textbox").click(); },
 					title: "Add image", ico: "insertImage"
 				},
 				makeLink: {

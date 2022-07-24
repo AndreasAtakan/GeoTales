@@ -68,13 +68,8 @@ if($op == "create") {
 else
 if($op == "get") {
 
-	if(!isset($_POST['type'])) {
-		http_response_code(422); exit;
-	}
-	$type = $_POST['type'];
-
-	$stmt = $PDO->prepare("SELECT U.ref FROM \"User_Upload\" AS UU INNER JOIN \"Upload\" AS U ON UU.upload_id = U.id WHERE UU.user_id = ? AND UU.type = ?");
-	$stmt->execute([$uid, $type]);
+	$stmt = $PDO->prepare("SELECT U.ref, UU.type FROM \"User_Upload\" AS UU INNER JOIN \"Upload\" AS U ON UU.upload_id = U.id WHERE UU.user_id = ?");
+	$stmt->execute([$uid]);
 	$rows = $stmt->fetchAll();
 
 	echo json_encode($rows);

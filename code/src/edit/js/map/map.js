@@ -54,7 +54,7 @@ L.Map.addInitHook(function() {
 			{
 				stateName: "main",
 				onClick: function(button, map) { _TEXTBOXES.add(); },
-				title: "Add a book",
+				title: "Add book",
 				icon: "fa-comment-alt"
 			}
 		]
@@ -149,15 +149,13 @@ L.Map.addInitHook(function() {
 		this.objects.push( this.extractObject(o) );
 	});
 
-	this.on("_addedlayer", ev => {
+	this.on("_addedlayer", async ev => {
 		let o = ev.layer;
 
 		let label = o.options.label;
 		if(label) {
-			o.bindTooltip(label, {
-				direction: o instanceof L.ImageOverlay ? "bottom" : "center",
-				permanent: true
-			});
+			o.bindTooltip(label, { direction: "center", permanent: true });
+			if(o instanceof L.ImageOverlay) { this.updateTooltip(o); }
 		}
 
 		o.on("pm:edit", ev => {
@@ -187,14 +185,32 @@ L.Map.addInitHook(function() {
 		o.on("mouseover", ev => { this.highlightObject(o.options.id); });
 		o.on("mouseout", ev => { this.unhighlightObject(o.options.id); });
 
+		let contextmenu = [
+			{ text: "Move to front", callback: ev => { o.bringToFront(); }, index: 0 },
+			{ text: "Move to back", callback: ev => { o.bringToBack(); }, index: 1 }
+		];
+
 		if(o instanceof L.ImageOverlay) {
-			o.bindContextMenu({
-				contextmenu: true,
-				contextmenuItems: [ { text: "Clone avatar", callback: ev => { this.cloneAvatar(o.options.id, o.options.sceneId); }, index: 0 } ]
-			});
+			contextmenu.push( { text: "Clone avatar", callback: ev => { this.cloneAvatar(o.options.id, o.options.sceneId); }, index: 2 } );
 			this.setIcon(o);
 		}
+
+		o.bindContextMenu({ contextmenu: true, contextmenuItems: contextmenu });
 	});
+
+	this.on("layeradd", ev => {
+		let o = ev.layer;
+		//let opacity = o.options.opacity;
+
+		/* TODO: fade in layer when added
+			Alternatively this can be implemented in each prototypes
+			onAdd method (in layers.js), instead of here.
+		*/
+	});
+
+	this.on("zoomend", ev => {
+		for(let o of this.getLayers()) { this.updateTooltip(o); }
+	})
 
 
 	this.on("movestart", ev => { /**/ });
@@ -469,7 +485,6 @@ L.Map.include({
 	setIcon: function(o, size, icon) {
 		if(!(o instanceof L.ImageOverlay)) { return; }
 
-		if(icon) { o.setUrl(icon); }
 		if(size) {
 			let zoom = _MAP.getZoom();
 			let c = _MAP.project(o.getBounds().getCenter(), zoom);
@@ -478,6 +493,7 @@ L.Map.include({
 				_MAP.unproject([ c.x + size[0] / 2, c.y + size[1] / 2 ], zoom)
 			]);
 		}
+		if(icon) { o.setUrl(icon); }
 
 		$(o._image).css("border-radius", o.options.rounded ? "50%" : "0");
 		//$(o._image).css("transform", `rotate(${o.options.angle}deg)`);
@@ -489,10 +505,11 @@ L.Map.include({
 			opacity(${(1 - o.options.overlayTransparency)*100}%)
 		`);
 
-		if(o.options.label) { o.closeTooltip(); o.openTooltip(); }
+		if(o.options.label) { this.updateTooltip(o); }
 	},
 
 	setPopup: function(o) {
+		o.unbindPopup();
 		let popup =
 			o instanceof L.ImageOverlay ? avatar_popup() :
 			o instanceof L.Rectangle
@@ -501,6 +518,17 @@ L.Map.include({
 			o instanceof L.Polyline ? polyline_popup() : "";
 		if(!popup) { return; }
 		o.bindPopup(popup, { keepInView: true, closeOnEscapeKey: false, maxWidth: 350, maxHeight: 450 });
+	},
+
+	updateTooltip: function(o) {
+		if(o.getTooltip()) {
+			o.closeTooltip();
+			if(o instanceof L.ImageOverlay) {
+				let d = this.latLngToContainerPoint( o.getBounds().getNorthWest() ).distanceTo( this.latLngToContainerPoint( o.getBounds().getSouthWest() ) );
+				o.getTooltip().options.offset = [0, d / 2 - 10];
+			}
+			o.openTooltip();
+		}
 	},
 
 
@@ -533,15 +561,13 @@ L.Map.include({
 		if(this.basemap instanceof L.ImageOverlay) {
 			return {
 				type: "image",
-				img: this.basemap._url,
-				width: this.basemap.options.width,
-				height: this.basemap.options.height
+				img: this.basemap._url
 			};
 		}
 		return null;
 	},
 
-	setBasemap: function(source) {
+	setBasemap: async function(source) {
 		let basemap;
 
 		if(source instanceof L.TileLayer) {
@@ -564,11 +590,15 @@ L.Map.include({
 			if(this.basemap instanceof L.ImageOverlay
 			&& source.img == this.basemap._url) { return; }
 
+			let img = new Image();
+			img.src = source.img;
+			await img.decode();
+
 			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
 			let zoom, bl, tr;
 			for(let i = 0; i < 18; i++) {
 				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
-				tr = L.CRS.EPSG3857.pointToLatLng(L.point(source.width, source.height), i);
+				tr = L.CRS.EPSG3857.pointToLatLng(L.point(img.width, img.height), i);
 				if(bl.lat >= -85.06 && bl.lng >= -180
 				&& tr.lat <=  85.06 && tr.lng <=  180) {
 					zoom = i;
@@ -579,9 +609,9 @@ L.Map.include({
 			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
 
 			basemap = L.imageOverlay(source.img, bounds, {
+				pmIgnore: true,
 				zIndex: 0,
 				minZoom: 0, maxZoom: 22,
-				width: source.width, height: source.height,
 				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 			});
 		}
@@ -620,6 +650,7 @@ L.Map.include({
 			case "avatar":
 				oo = L.imageOverlay(o.icon, o.pos, {
 					interactive:			true,
+					zIndex:					200,
 					label:					o.label,
 					ratio:					o.ratio,
 					rounded:				o.rounded,

@@ -15,7 +15,7 @@ function uuid(a) {
 
 
 
-function import_data(data) {
+function import_project(data) {
 	_OPTIONS = data.options;
 
 	if(data.scenes.length <= 0) { return; }
@@ -28,14 +28,151 @@ function import_data(data) {
 
 	_SCENES.current();
 }
+function import_geojson(data, options) {
+	for(let f of data.features) {
+		let o;
+		let t = a => {
+			if(Array.isArray(a[0])) { for(let v of a) { t(v); } }
+			else{ a.reverse(); }
+		};
+		let pos = f.geometry.coordinates; t(pos);
 
-function export_data() {
+		if(f.properties.type == "avatar") {
+			o = {
+				id:					uuid(),
+				sceneId:			_SCENES.active,
+				type:				"avatar",
+				pos:				pos,
+				label:				f.properties.label,
+				icon:				f.properties.icon,
+				ratio:				f.properties.ratio,
+				rounded:			f.properties.rounded,
+				angle:				f.properties.angle,
+				borderColor:		f.properties.borderColor,
+				borderThickness:	f.properties.borderThickness,
+				blur:				f.properties.overlayBlur,
+				grayscale:			f.properties.overlayGrayscale,
+				brightness:			f.properties.overlayBrightness,
+				transparency:		f.properties.overlayTransparency
+			};
+		}else
+		if(f.properties.type == "polyline"
+		|| f.geometry.type == "LineString") {
+			o = {
+				id:				uuid(),
+				sceneId:		_SCENES.active,
+				type:			"polyline",
+				pos:			pos,
+				label:			f.properties.label,
+				dashed:			f.properties.dashed,
+				color:			f.properties.color || options.lineColor,
+				thickness:		f.properties.thickness || options.lineThickness,
+				transparency:	f.properties.transparency || options.lineTransparency
+			};
+		}else
+		if(f.properties.type == "polygon"
+		|| f.properties.type == "rectangle"
+		|| f.geometry.type == "Polygon") {
+			o = {
+				id:					uuid(),
+				sceneId:			_SCENES.active,
+				type:				"polygon",
+				pos:				pos,
+				label:				f.properties.label,
+				dashed:				f.properties.dashed,
+				lineColor:			f.properties.lineColor || options.lineColor,
+				lineThickness:		f.properties.lineThickness || options.lineThickness,
+				lineTransparency:	f.properties.lineTransparency || options.lineTransparency,
+				fillColor:			f.properties.fillColor || options.fillColor,
+				fillTransparency:	f.properties.fillTransparency || options.fillTransparency
+			};
+		}else
+		if(f.properties.type == "circle"
+		|| f.geometry.type == "Point") {
+			o = {
+				id:					uuid(),
+				sceneId:			_SCENES.active,
+				type:				"circle",
+				pos:				pos,
+				radius:				f.properties.radius || 4000 * (_MAP.getMaxZoom() - _MAP.getZoom()),
+				label:				f.properties.label,
+				dashed:				f.properties.dashed,
+				lineColor:			f.properties.lineColor || options.lineColor,
+				lineThickness:		f.properties.lineThickness || options.lineThickness,
+				lineTransparency:	f.properties.lineTransparency || options.lineTransparency,
+				fillColor:			f.properties.fillColor || options.fillColor,
+				fillTransparency:	f.properties.fillTransparency || options.fillTransparency
+			};
+		}
+		else{ continue; }
+
+		let object = _MAP.createObject(o);
+		_MAP.addLayer( object );
+		_MAP.fire("_addedlayer", { layer: object });
+		_MAP.objects.push( _MAP.extractObject(object) );
+	}
+}
+function import_gedcom(data, options) {
+	//
+}
+function import_data(type, data, options) {
+	switch(type) {
+		case "project": import_project(data); break;
+		case "geojson": import_geojson(data, options); break;
+		case "gedcom": import_gedcom(data, options); break;
+		default: console.error("data-import type invalid"); break;
+	}
+}
+
+
+function export_project() {
 	return JSON.stringify({
 		options: _OPTIONS,
 		scenes: _SCENES.exportData(),
 		textboxes: _TEXTBOXES.exportData(),
 		objects: _MAP.exportData()
 	});
+}
+function export_geojson() {
+	let r = [];
+	for(let o of _MAP.getLayers()) { r.push( o.__toGeoJSON() ); }
+	return JSON.stringify({
+		"type": "FeatureCollection",
+		"features": r
+	});
+}
+let running = false;
+function export_data(type) {
+	if(running) { return; } running = true;
+
+	let el = document.createElement("a");
+
+	let f = v => v < 10 && v >= 0 ? `0${v}` : `${v}`;
+	let date = new Date();
+	let y = date.getFullYear(), m = f(date.getMonth() + 1), d = f(date.getDate()), H = f(date.getHours()), M = f(date.getMinutes()), S = f(date.getSeconds());
+	let filename = `${_TITLE} - ${y}.${m}.${d} - ${H}.${M}.${S}`;
+
+	let data;
+	switch(type) {
+		case "project":
+			filename += ".geotales";
+			data = "data:application/json;charset=utf-8," + encodeURIComponent( export_project() );
+			break;
+
+		case "geojson":
+			filename += ".geojson";
+			data = "data:application/geo+json;charset=utf-8," + encodeURIComponent( export_geojson() );
+			break;
+
+		default: return;
+	}
+
+	el.setAttribute("href", data);
+	el.setAttribute("download", filename);
+	el.style.display = "none";
+
+	document.body.appendChild(el);
+	$(el).ready(() => { el.click(); document.body.removeChild(el); running = false; });
 }
 
 function save_data(callback) {
@@ -45,7 +182,7 @@ function save_data(callback) {
 		data: {
 			"op": "write",
 			"id": _ID,
-			"data": export_data(),
+			"data": export_project(),
 			"preview": _MAP.getCenterBasemapTile()
 		},
 		dataType: "json",
@@ -91,6 +228,19 @@ function get_basemap(url) {
 		if(b.tiles._url == url) { return b; }
 	}
 	return null;
+}
+
+function init_basemaps() {
+	generate_basemaps();
+
+	$("#basemapModal #basemaps").off("click");
+	$("#basemapModal #basemaps").click(async function(ev) {
+		let index = $(ev.target).data("basemap");
+		if(!index && index !== 0) { return; }
+
+		await _MAP.setBasemap( _BASEMAPS[index].tiles );
+		_SCENES.setBasemap();
+	});
 }
 
 

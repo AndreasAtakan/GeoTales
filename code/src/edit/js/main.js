@@ -86,13 +86,6 @@ window.onload = function(ev) {
 
 
 	init_basemaps();
-	$("#basemapModal #basemaps").click(ev => {
-		let index = $(ev.target).data("basemap");
-		if(!index && index != 0) { return; }
-
-		_MAP.setBasemap( _BASEMAPS[index].tiles );
-		_SCENES.setBasemap();
-	});
 
 	$("#basemapModal input#basemapFile").change(ev => {
 		let file = $(ev.target)[0].files[0];
@@ -100,39 +93,33 @@ window.onload = function(ev) {
 
 		$("#loadingModal").modal("show");
 
-		let fr = new FileReader();
-		fr.onload = function() {
-			let res = fr.result;
+		let data = new FormData();
+		data.append("op", "create");
+		data.append("type", "basemap");
+		data.append("image", file);
 
-			let img = new Image();
-			img.onload = function() {
-				let width = this.width, height = this.height;
-				let data = new FormData();
-				data.append("op", "create");
-				data.append("type", "basemap");
-				data.append("image", file);
-
-				$.ajax({
-					type: "POST",
-					url: "api/upload.php",
-					data: data,
-					contentType: false,
-					processData: false,
-					success: function(result, status, xhr) {
-						_MAP.setBasemap({ type: "image", img: result, width: width, height: height });
-						_SCENES.setBasemap();
-						setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-					},
-					error: function(xhr, status, error) {
-						console.error(xhr.status, error);
-						setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-					}
+		$.ajax({
+			type: "POST",
+			url: "api/upload.php",
+			data: data,
+			contentType: false,
+			processData: false,
+			success: async function(result, status, xhr) {
+				await _MAP.setBasemap({ type: "image", img: result });
+				_SCENES.setBasemap();
+				_BASEMAPS.unshift({
+					name: "",
+					tiles: { type: "image", img: result },
+					preview: result
 				});
-				return true;
-			};
-			img.src = res;
-		};
-		fr.readAsDataURL(file);
+				init_basemaps();
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+			},
+			error: function(xhr, status, error) {
+				console.error(xhr.status, error);
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+			}
+		});
 	});
 
 	$("#basemapModal button#basemapFetch").click(ev => {
@@ -154,42 +141,51 @@ window.onload = function(ev) {
 
 
 
-	$("#importModal button#import").click(ev => {
-		$("#importModal").modal("hide");
-
-		let file = $("#importModal input#fileInput")[0].files[0];
+	$("#projectFileInput").change(ev => {
+		let file = $(ev.target)[0].files[0];
 		if(!file) { return; }
 
 		let fr = new FileReader();
-		fr.onload = function() { import_data( JSON.parse( fr.result ) ); };
+		fr.onload = function() { import_data( "project", JSON.parse( fr.result ) ); };
+		fr.readAsText(file);
+	});
+	$("#geojsonImportModal button#import").click(ev => {
+		$("#geojsonImportModal").modal("hide");
+
+		let file = $("#geojsonImportModal input#fileInput")[0].files[0];
+		if(!file) { return; }
+
+		let options = {
+			lineColor: $("#geojsonImportModal #lineColor").val(),
+			lineThickness: $("#geojsonImportModal #lineThickness").val() || 3,
+			lineTransparency: $("#geojsonImportModal #lineTransparency").val(),
+			fillColor: $("#geojsonImportModal #fillColor").val(),
+			fillTransparency: $("#geojsonImportModal #fillTransparency").val() || 0.8
+		};
+
+		let fr = new FileReader();
+		fr.onload = function() { import_data( "geojson", JSON.parse( fr.result ), options ); };
+		fr.readAsText(file);
+	});
+	$("#gedcomImportModal button#import").click(ev => {
+		$("#gedcomImportModal").modal("hide");
+
+		let file = $("#gedcomImportModal input#fileInput")[0].files[0];
+		if(!file) { return; }
+
+		let options = {};
+
+		let fr = new FileReader();
+		fr.onload = function() { import_data( "gedcom", fr.result, options ); };
 		fr.readAsText(file);
 	});
 
-	$("a#export").click(function exportEv(ev) {
-		$("a#export").off("click");
-
-		let el = document.createElement("a");
-
-		let f = v => v < 10 && v >= 0 ? `0${v}` : `${v}`;
-		let date = new Date();
-		let y = date.getFullYear(), m = f(date.getMonth() + 1), d = f(date.getDate()), H = f(date.getHours()), M = f(date.getMinutes()), S = f(date.getSeconds());
-		let filename = `${_TITLE} - ${y}.${m}.${d} - ${H}.${M}.${S}.tellus`,
-			data = export_data();
-
-		el.setAttribute("href", "data:application/json;charset=utf-8," + encodeURIComponent(data));
-		el.setAttribute("download", filename);
-		el.style.display = "none";
-
-		document.body.appendChild(el);
-		$(el).ready(() => {
-			el.click(); document.body.removeChild(el);
-			$("a#export").click(exportEv);
-		});
-	});
 	$("a#save").click(ev => {
 		$("#loadingModal").modal("show");
 		save_data(function() { $("#loadingModal").modal("hide"); });
 	});
+	setInterval(save_data, 5 * 60 * 1000);
+
 
 	$("#loadingModal").modal("show");
 	$.ajax({
@@ -201,7 +197,7 @@ window.onload = function(ev) {
 		},
 		dataType: "json",
 		success: function(result, status, xhr) {
-			if(result.data) { import_data( JSON.parse(result.data) ); }
+			if(result.data) { import_data( "project", JSON.parse(result.data) ); }
 			$(`div#sceneRow,
 			   div#mapRow,
 			   .navbar .navbarContent li`).click(ev => { unsaved_changes(); });
@@ -214,16 +210,29 @@ window.onload = function(ev) {
 		}
 	});
 
-	/*$.ajax({
+	$.ajax({
 		type: "GET",
-		url: "api/icon.php",
+		url: "api/upload.php",
+		data: { "op": "get" },
 		dataType: "json",
 		success: function(result, status, xhr) {
-			//
+			for(let r of result) {
+				if(r.type == "icon") { _ICONS.unshift(r.ref); }
+				else
+				if(r.type == "basemap") {
+					_BASEMAPS.unshift({
+						name: "",
+						tiles: { type: "image", img: r.ref },
+						preview: r.ref
+					});
+				}
+			}
+
+			init_basemaps();
 		},
 		error: function(xhr, status, error) {
 			console.error(xhr.status, error);
 		}
-	});*/
+	});
 
 };

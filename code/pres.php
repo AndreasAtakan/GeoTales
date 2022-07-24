@@ -176,7 +176,7 @@ $row = $stmt->fetch();
 
 					<div class="dropdown" id="extraNav">
 						<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-							<img src="assets/logo.png" alt="GeoTales" width="20" height="20" />
+							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
 						</button>
 						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
 							<li><a class="dropdown-item" href="index.php">Gallery</a></li>
