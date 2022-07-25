@@ -190,6 +190,34 @@ Created by: @{$username}",
 		exit;
 
 	}
+	else
+	if($op == "unpublish") {
+
+		$stmt = $PDO->prepare("SELECT post FROM \"Map\" WHERE id = ?");
+		$stmt->execute([$id]);
+		$row = $stmt->fetch();
+		$post_id = end( explode("/", $row['post']) );
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/posts/{$post_id}.json");
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			//"Content-Type: application/json",
+			"Api-Key: {$CONFIG['apikey']}",
+			"Api-Username: {$username}"
+		));
+		$res = curl_exec($ch);
+		curl_close($ch);
+		$res = json_decode($res, true);
+
+		$stmt = $PDO->prepare("UPDATE \"Map\" SET post = null WHERE id = ?");
+		$stmt->execute([$id]);
+
+		echo json_encode(array("status" => "success"));
+		exit;
+
+	}
 	else{
 		http_response_code(501); exit;
 	}

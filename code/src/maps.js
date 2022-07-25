@@ -31,16 +31,14 @@ window.onload = function(ev) {
 				window.location.assign(`edit.php?id=${result.id}`);
 			},
 			error: function(xhr, status, error) {
-				console.log(xhr.status);
-				console.log(error);
-
+				console.log(xhr.status, error);
 				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
 
 	$("button#edit").click(ev => {
-		let id = $(ev.target).data("id");
+		let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
 		$("#editModal").modal("show");
 
 		$.ajax({
@@ -59,9 +57,7 @@ window.onload = function(ev) {
 				$("#editModal button#save").data("id", id);
 			},
 			error: function(xhr, status, error) {
-				console.log(xhr.status);
-				console.log(error);
-
+				console.log(xhr.status, error);
 				setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
@@ -88,17 +84,15 @@ window.onload = function(ev) {
 				window.location.reload();
 			},
 			error: function(xhr, status, error) {
-				console.log(xhr.status);
-				console.log(error);
-
+				console.log(xhr.status, error);
 				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
 
 	$("button#share").click(ev => {
-		let id = $(ev.target).data("id"),
-			post = $(ev.target).data("post");
+		let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id"),
+			post = $(ev.target).data("post") || $(ev.target).parents("button").data("post");
 		const host = window.location.host;
 
 		$("#shareModal").modal("show");
@@ -106,16 +100,17 @@ window.onload = function(ev) {
 		$("#shareModal input#linkInput").val(`https://${host}/pres.php?id=${id}`);
 		$("#shareModal input#embedInput").val(`<iframe src="https://${host}/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
 
+		$("#shareModal a#publish").data("id", id);
 		if(post) {
-			$("#shareModal a#publish").data("id", "");
-			$("#shareModal a#publish").prop("href", post);
-			$("#shareModal a#publish").html("View map in gallery");
-			$("#shareModal p#publishText").html("Map has been published");
+			$("#shareModal a#publish").data("published", true);
+			$("#shareModal a#publish").html("Unpublish");
+			$("#shareModal a#publishText").html("View map in gallery");
+			$("#shareModal a#publishText").prop("href", post);
 		}else{
-			$("#shareModal a#publish").data("id", id);
-			$("#shareModal a#publish").prop("href", "#");
+			$("#shareModal a#publish").data("published", false);
 			$("#shareModal a#publish").html("Publish map");
-			$("#shareModal p#publishText").html("This will post your map to the public gallery");
+			$("#shareModal a#publishText").html("This will post your map to the public gallery");
+			$("#shareModal a#publishText").prop("href", "#");
 		}
 
 		$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${host}/pres.php?id=${id}`);
@@ -127,42 +122,52 @@ window.onload = function(ev) {
 	$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
 	$("#shareModal button#copyEmbed").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#embedInput").val() ); });
 	$("#shareModal a#publish").click(ev => {
-		let id = $(ev.target).data("id");
-		if(!id) { return; }
+		let id = $(ev.target).data("id"),
+			published = $(ev.target).data("published"), callback;
 
 		$("#loadingModal").modal("show");
+
+		if(published) {
+			callback = (result) => { // unpublish
+				$(ev.target).data("published", false);
+				$(ev.target).html("Publish map");
+				$("#shareModal a#publishText").html("This will post your map to the public gallery");
+				$("#shareModal a#publishText").prop("href", "#");
+			};
+		}else{
+			callback = (result) => { // publish
+				$(ev.target).data("published", true);
+				$(ev.target).html("Unpublish");
+				$("#shareModal a#publishText").html("View map in gallery");
+				$("#shareModal a#publishText").prop("href", result.url);
+			};
+		}
 
 		$.ajax({
 			type: "POST",
 			url: "api/map.php",
 			data: {
-				"op": "publish",
+				"op": published ? "unpublish" : "publish",
 				"id": id
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {
-				$(ev.target).data("id", "");
-				$(ev.target).prop("href", result.url);
-				$(ev.target).html("View map in gallery");
-				$("#shareModal p#publishText").html("Map has been published");
-
+				callback(result);
 				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 			},
 			error: function(xhr, status, error) {
-				console.log(xhr.status);
-				console.log(error);
-
+				console.log(xhr.status, error);
 				setTimeout(function() { $("#loadingModal").modal("hide"); $("#shareModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});
 	});
 
 	$("button#delete").click(ev => {
-		let id = $(ev.target).data("id");
+		let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
 		$("#deleteModal").modal("show");
 		$("#deleteModal button#deleteConfirm").data("id", id);
 	});
-	$("button#deleteConfirm").click(ev => {
+	$("#deleteModal button#deleteConfirm").click(ev => {
 		let id = $(ev.target).data("id");
 		$("#deleteModal").modal("hide");
 		$("#loadingModal").modal("show");
@@ -179,9 +184,7 @@ window.onload = function(ev) {
 				window.location.reload();
 			},
 			error: function(xhr, status, error) {
-				console.log(xhr.status);
-				console.log(error);
-
+				console.log(xhr.status, error);
 				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 			}
 		});

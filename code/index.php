@@ -124,14 +124,17 @@ $count = $stmt->rowCount();
 
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
-							<li class="nav-item<?php if(!$logged_in) { echo " me-auto"; } ?>">
+							<li class="nav-item">
 								<a class="nav-link active" aria-current="page" href="index.php">Gallery</a>
+							</li>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
 
 					<?php
 						if($logged_in) {
 					?>
-							<li class="nav-item me-auto">
+							<li class="nav-item me-sm-4">
 								<a class="nav-link" href="maps.php">My maps</a>
 							</li>
 							<li class="nav-item dropdown">
@@ -149,7 +152,7 @@ $count = $stmt->rowCount();
 						}else{
 					?>
 							<li class="nav-item">
-								<a role="button" class="btn btn-sm btn-light mt-1" href="login.php">Login</a>
+								<a role="button" class="btn btn-sm btn-light mt-1" href="login.php">Sign in</a>
 							</li>
 					<?php
 						}
@@ -288,9 +291,6 @@ $count = $stmt->rowCount();
 								</a>
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
-								</a>
-								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
-									<i class="fab fa-linkedin" style="color: #0072b1;"></i>
 								</a>
 							</div>
 						</center>

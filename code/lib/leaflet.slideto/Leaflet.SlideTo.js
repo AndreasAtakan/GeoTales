@@ -11,11 +11,10 @@
 
 L.ImageOverlay.include({
 
-	_slideToUntil:    undefined,
-	_slideToDuration: undefined,
-	_slideToBounds:   undefined,
-	_slideFromBounds: undefined,
-	_slideDraggingWasAllowed: undefined,
+	_slideToUntil:		undefined,
+	_slideToDuration:	undefined,
+	_slideToBounds:		undefined,
+	_slideFromBounds:	undefined,
 
 	slideTo: function slideTo(bounds, options) {
 		if(!this._map) { return; }
@@ -24,10 +23,6 @@ L.ImageOverlay.include({
 		this._slideToUntil    = performance.now() + options.duration;
 		this._slideFromBounds = this.getBounds();
 		this._slideToBounds   = L.latLngBounds(bounds);
-		this._slideDraggingWasAllowed =
-			this._slideDraggingWasAllowed !== undefined ?
-				this._slideDraggingWasAllowed :
-				this._map.dragging.enabled();
 
 		this.fire("movestart");
 		this._slideTo();
@@ -47,13 +42,6 @@ L.ImageOverlay.include({
 		if(remaining < 0) {
 			this.setBounds(this._slideToBounds);
 			this.fire("moveend");
-			if(this._slideDraggingWasAllowed) {
-				this._map.dragging.enable();
-				this._map.doubleClickZoom.enable();
-				this._map.options.touchZoom = true;
-				this._map.options.scrollWheelZoom = true;
-			}
-			this._slideDraggingWasAllowed = undefined;
 			return this;
 		}
 
@@ -90,11 +78,10 @@ L.ImageOverlay.addInitHook(function() {
 
 L.Polyline.include({
 
-	_slideToUntil:     undefined,
-	_slideToDuration:  undefined,
-	_slideToLatLngs:   undefined,
-	_slideFromLatLngs: undefined,
-	_slideDraggingWasAllowed: undefined,
+	_slideToUntil:		undefined,
+	_slideToDuration:	undefined,
+	_slideToLatLngs:	undefined,
+	_slideFromLatLngs:	undefined,
 
 	slideTo: function slideTo(latlngs, options) {
 		if(!this._map) { return; }
@@ -103,10 +90,6 @@ L.Polyline.include({
 		this._slideToUntil     = performance.now() + options.duration;
 		this._slideFromLatLngs = this.getLatLngs();
 		this._slideToLatLngs   = latlngs;
-		this._slideDraggingWasAllowed =
-			this._slideDraggingWasAllowed !== undefined ?
-				this._slideDraggingWasAllowed :
-				this._map.dragging.enabled();
 
 		this.fire("movestart");
 		this._slideTo();
@@ -126,13 +109,6 @@ L.Polyline.include({
 		if(remaining < 0) {
 			this.setLatLngs(this._slideToLatLngs);
 			this.fire("moveend");
-			if (this._slideDraggingWasAllowed) {
-				this._map.dragging.enable();
-				this._map.doubleClickZoom.enable();
-				this._map.options.touchZoom = true;
-				this._map.options.scrollWheelZoom = true;
-			}
-			this._slideDraggingWasAllowed = undefined;
 			return this;
 		}
 
@@ -171,13 +147,6 @@ L.Polygon.include({
 		if(remaining < 0) {
 			this.setLatLngs(this._slideToLatLngs);
 			this.fire("moveend");
-			if (this._slideDraggingWasAllowed) {
-				this._map.dragging.enable();
-				this._map.doubleClickZoom.enable();
-				this._map.options.touchZoom = true;
-				this._map.options.scrollWheelZoom = true;
-			}
-			this._slideDraggingWasAllowed = undefined;
 			return this;
 		}
 
@@ -208,13 +177,12 @@ L.Polygon.include({
 
 L.Circle.include({
 
-	_slideToUntil:    undefined,
-	_slideToDuration: undefined,
-	_slideToLatLng:   undefined,
-	_slideFromLatLng: undefined,
-	_slideToRadius:   undefined,
-	_slideFromRadius: undefined,
-	_slideDraggingWasAllowed: undefined,
+	_slideToUntil:		undefined,
+	_slideToDuration:	undefined,
+	_slideToLatLng:		undefined,
+	_slideFromLatLng:	undefined,
+	_slideToRadius:		undefined,
+	_slideFromRadius:	undefined,
 
 	slideTo: function slideTo(latlng, options) {
 		if(!this._map) { return; }
@@ -225,10 +193,6 @@ L.Circle.include({
 		this._slideToLatLng   = latlng;
 		this._slideFromRadius = this.getRadius();
 		this._slideToRadius   = options.radius;
-		this._slideDraggingWasAllowed =
-			this._slideDraggingWasAllowed !== undefined ?
-				this._slideDraggingWasAllowed :
-				this._map.dragging.enabled();
 
 		this.fire("movestart");
 		this._slideTo();
@@ -249,13 +213,6 @@ L.Circle.include({
 			this.setLatLng(this._slideToLatLng);
 			this.setRadius(this._slideToRadius);
 			this.fire("moveend");
-			if (this._slideDraggingWasAllowed ) {
-				this._map.dragging.enable();
-				this._map.doubleClickZoom.enable();
-				this._map.options.touchZoom = true;
-				this._map.options.scrollWheelZoom = true;
-			}
-			this._slideDraggingWasAllowed = undefined;
 			return this;
 		}
 

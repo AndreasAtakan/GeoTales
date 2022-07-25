@@ -9,8 +9,6 @@
 	* (How?) Implement Stripe payment
 	* Reklamespalte i pres-modus for ubetalte brukere
 	* Password-beskyttede kart
-- My-Maps:
-	* Legg til knapp for å "unpublish", dvs. slette kartets post på forumet
 - Edit-mode:
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 	* Posibility to make hyperlink to other scenes in the textboxes
@@ -19,7 +17,7 @@
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
 		- Somehow mark relation between avatars (line between?, color-coding?, ect.)
 - Pres-mode:
-	* Alle knapper er "fadet ut" når brukeren ikke beveger musen, og kommer til syne når brukeren beveger eller trykker på skjermen
+	* \~
 - Forum-integration:
 	* X File and image upload to Amazon S3 (edit-mode and forum)
 	* Implement *webhooks.php* for reciving webhook calls from Discourse when user logs in and out; then log user in or out

@@ -105,8 +105,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="descriptionInput" class="form-label">Description</label>
-									<textarea class="form-control" id="descriptionInput" rows="5" aria-describedby="descriptionHelp"></textarea>
-									<div id="descriptionHelp" class="form-text">Arbitrary length</div>
+									<textarea class="form-control" id="descriptionInput" rows="5"></textarea>
 								</div>
 							</div>
 						</div>
@@ -124,7 +123,7 @@ $count = $stmt->rowCount();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="editModalLabel">Change attributes</h5>
+						<h5 class="modal-title" id="editModalLabel">Options</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -140,8 +139,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="descriptionInput" class="form-label">Description</label>
-									<textarea class="form-control" id="descriptionInput" rows="5" aria-describedby="descriptionHelp" placeholder="Loading..." disabled></textarea>
-									<div id="descriptionHelp" class="form-text">Arbitrary length</div>
+									<textarea class="form-control" id="descriptionInput" rows="5" placeholder="Loading..." disabled></textarea>
 								</div>
 							</div>
 						</div>
@@ -159,7 +157,7 @@ $count = $stmt->rowCount();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="shareModalLabel">Share map</h5>
+						<h5 class="modal-title" id="shareModalLabel">Share</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -188,8 +186,8 @@ $count = $stmt->rowCount();
 
 							<div class="row">
 								<div class="col-7">
-									<a role="button" class="btn btn-sm btn-outline-secondary mb-2" href="#" id="publish" data-id=""></a>
-									<p class="small text-muted" id="publishText"></p>
+									<a role="button" class="btn btn-sm btn-outline-secondary mb-2" href="#" id="publish" data-id="" data-published=""></a> <br />
+									<a class="small text-muted text-decoration-none" href="" id="publishText"></a>
 								</div>
 								<div class="col-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
@@ -282,10 +280,13 @@ $count = $stmt->rowCount();
 							<li class="nav-item">
 								<a class="nav-link" href="index.php">Gallery</a>
 							</li>
-							<li class="nav-item me-auto">
-								<a class="nav-link active" aria-current="page" href="maps.php">My maps</a>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
 
+							<li class="nav-item me-sm-4">
+								<a class="nav-link active" aria-current="page" href="maps.php">My maps</a>
+							</li>
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
@@ -375,11 +376,11 @@ $count = $stmt->rowCount();
 												<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="optionsDropdown<?php echo $row['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
 													<i class="fas fa-ellipsis-v"></i>
 												</button>
-												<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown<?php echo $row['id']; ?>">
-													<li><button type="button" class="dropdown-item" id="edit" data-id="<?php echo $row['id']; ?>">Change</button></li>
-													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>" data-post="<?php echo $row['post']; ?>">Share</button></li>
+												<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown<?php echo $row['id']; ?>" style="min-width: 0;">
+													<li><button type="button" class="dropdown-item" id="edit" data-id="<?php echo $row['id']; ?>"><i class="fas fa-pen"></i></button></li>
+													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>" data-post="<?php echo $row['post']; ?>"><i class="fas fa-share-alt"></i></button></li>
 													<li><hr class="dropdown-divider"></li>
-													<li><button type="button" class="dropdown-item" id="delete" data-id="<?php echo $row['id']; ?>">Delete</button></li>
+													<li><button type="button" class="dropdown-item" id="delete" data-id="<?php echo $row['id']; ?>"><i class="fas fa-trash"></i></button></li>
 												</ul>
 											</div>
 										</td>
@@ -419,9 +420,6 @@ $count = $stmt->rowCount();
 								</a>
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
-								</a>
-								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
-									<i class="fab fa-linkedin" style="color: #0072b1;"></i>
 								</a>
 							</div>
 						</center>

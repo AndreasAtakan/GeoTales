@@ -73,10 +73,13 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 							<li class="nav-item">
 								<a class="nav-link" href="index.php">Gallery</a>
 							</li>
-							<li class="nav-item me-auto">
-								<a class="nav-link" href="maps.php">My maps</a>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
 
+							<li class="nav-item me-sm-4">
+								<a class="nav-link" href="maps.php">My maps</a>
+							</li>
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
@@ -159,9 +162,6 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 								</a>
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
-								</a>
-								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
-									<i class="fab fa-linkedin" style="color: #0072b1;"></i>
 								</a>
 							</div>
 						</center>

@@ -70,6 +70,7 @@ L.Map.addInitHook(function() {
 	this.on("zoomend", ev => {
 		for(let o of this.getLayers()) { this.updateTooltip(o); }
 	});
+	this.on("zoom", ev => { if(this._renderer) { this._renderer._reset(); } });
 
 
 
