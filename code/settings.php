@@ -60,9 +60,9 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
-					<a class="navbar-brand" href="index.php">
+					<span class="navbar-brand">
 						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-					</a>
+					</span>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
@@ -71,18 +71,22 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link" href="index.php">Gallery</a>
+								<a class="nav-link" href="index.php">Home</a>
 							</li>
-							<li class="nav-item me-sm-auto">
+							<li class="nav-item">
 								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
-
-							<li class="nav-item me-sm-4">
+							<li class="nav-item me-sm-auto">
 								<a class="nav-link" href="maps.php">My maps</a>
 							</li>
+
+							<li class="nav-item me-sm-2">
+								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+							</li>
+
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
+									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
@@ -173,7 +177,10 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 					</div>
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo "https://{$CONFIG['host']}"; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
-						<p class="text-muted text-center"><a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a></p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
+							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+						</p>
 					</div>
 				</div>
 			</div>

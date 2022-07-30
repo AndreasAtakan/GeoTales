@@ -17,6 +17,9 @@ function uuid(a) {
 
 function import_project(data) {
 	_OPTIONS = data.options;
+	$("#optionsModal input#animationSpeed").val(_OPTIONS.animationspeed);
+	$("#optionsModal input#panningSpeed").val(_OPTIONS.panningspeed);
+	$("#optionsModal input#objectsOptIn").prop("checked", _OPTIONS.objectOptIn);
 
 	if(data.scenes.length <= 0) { return; }
 

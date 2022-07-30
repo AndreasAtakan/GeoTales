@@ -158,33 +158,35 @@ $row = $stmt->fetch();
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col">
-									<label for="animationSpeed" class="form-label">Default animation speed</label>
-									<input type="number" class="form-control" id="animationSpeed" min="200" max="3000" value="2000" />
+									<label for="animationSpeed" class="form-label">Default animation speed (sec.)</label>
+									<input type="number" class="form-control" id="animationSpeed" min="0.2" max="6" step="0.1" value="2" title="Default speed of map-object animations" />
 								</div>
 								<div class="col">
-									<label for="panningSpeed" class="form-label">Map panning speed</label>
-									<input type="number" class="form-control" id="panningSpeed" min="500" max="4000" placeholder="auto" />
+									<label for="panningSpeed" class="form-label">Map panning speed (sec.)</label>
+									<input type="number" class="form-control" id="panningSpeed" min="0.5" max="8" step="0.1" placeholder="auto" title="Speed of map-panning between scenes. Auto means the speed will depend on distance" />
 								</div>
 							</div>
 							<div class="row">
 								<div class="col col-md-10 mt-4">
 									<label for="aspectRatio" class="form-label">Map aspect ratio</label>
 									<select class="form-select" id="aspectRatio" aria-label="Map aspect ratio">
-										<option value="16/9" selected>16/9</option>
+										<option value="" selected disabled></option>
+										<option value="16/9">16/9</option>
 										<option value="4/3">4/3</option>
 										<option value="9/16">9/16</option>
 									</select>
 								</div>
 							</div>
-							<!--div class="row">
-								<div class="col col-md-10 mt-4">
-									<label for="bookOrientation" class="form-label">Book orientation</label>
-									<select class="form-select" id="bookOrientation" aria-label="Book orientation">
-										<option value="left" selected>Left</option>
-										<option value="right">Right</option>
-									</select>
+							<div class="row">
+								<div class="col mt-4">
+									<div class="form-check">
+										<input type="checkbox" class="form-check-input" value="" id="objectsOptIn">
+										<label for="objectsOptIn" class="form-check-label">
+											Keep map-objects when creating new scene
+										</label>
+									</div>
 								</div>
-							</div-->
+							</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -346,9 +348,9 @@ $row = $stmt->fetch();
 			<div class="row g-0" style="height: 39px;">
 				<div class="col">
 					<nav class="navbar navbar-expand-sm navbar-dark fixed-top px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
-						<a class="navbar-brand py-0 mx-2" href="maps.php" style="line-height: 0;">
+						<span class="navbar-brand py-0 mx-2" style="line-height: 0;">
 							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
-						</a>
+						</span>
 
 						<button class="navbar-toggler py-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 							<span class="navbar-toggler-icon"></span>
@@ -362,7 +364,7 @@ $row = $stmt->fetch();
 									</a>
 									<ul class="dropdown-menu" aria-labelledby="navbarFileDropdown" style="max-height: calc(100vh - 39px); overflow-y: visible;">
 										<li class="dropend">
-											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
 												Import
 											</button>
 											<ul class="dropdown-menu">
@@ -372,7 +374,7 @@ $row = $stmt->fetch();
 											</ul>
 										</li>
 										<li class="dropend">
-											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
 												Export as
 											</button>
 											<ul class="dropdown-menu">
@@ -392,7 +394,7 @@ $row = $stmt->fetch();
 									</a>
 									<ul class="dropdown-menu" aria-labelledby="navbarEditDropdown" style="max-height: calc(100vh - 39px); overflow-y: visible;">
 										<li class="dropend">
-											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+											<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
 												Scene
 											</button>
 											<ul class="dropdown-menu">
@@ -415,7 +417,7 @@ $row = $stmt->fetch();
 												<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.setLock(false);">Unlock</button></li>
 												<li><button type="button" class="dropdown-item" onclick="_TEXTBOXES.delete(_SCENES.active);">Remove</button></li>
 												<li class="dropend">
-													<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+													<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
 														Set orientation
 													</button>
 													<ul class="dropdown-menu">
@@ -432,7 +434,7 @@ $row = $stmt->fetch();
 											<ul class="dropdown-menu">
 												<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#basemapModal">Change basemap</button></li>
 												<li class="dropend">
-													<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+													<button type="button" class="dropdown-toggle dropdown-item" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
 														Set aspect ratio
 													</button>
 													<ul class="dropdown-menu">
@@ -482,7 +484,7 @@ $row = $stmt->fetch();
 								<i class="fas fa-trash"></i>
 							</button>
 
-							<button type="button" class="btn btn-sm btn-light" id="recapture" title="Recapture map-extent" disabled>
+							<button type="button" class="btn btn-sm btn-light" id="recapture" title="Recapture scene" disabled>
 								<i class="fas fa-camera"></i>
 							</button>
 

@@ -56,15 +56,6 @@ function generate_basemaps() {
 
 function avatar_popup() {
 
-	let icons = ``;
-	for(let i of _ICONS) {
-		icons += `
-			<div class="col">
-				<img class="img-fluid rounded" id="icons" src="${i}" alt="&nbsp;" />
-			</div>
-		`;
-	}
-
 	return `
 		<form class="container-fluid objectPopup" id="avatarPopup">
 			<div class="row">
@@ -90,15 +81,14 @@ function avatar_popup() {
 						<div class="accordion-item">
 							<h2 class="accordion-header" id="iconAccordionHeading">
 								<button class="accordion-button collapsed py-1 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#iconAccordionCollapse" aria-expanded="false" aria-controls="iconAccordionCollapse">
-									Available icons
+									Icon
 								</button>
 							</h2>
 							<div id="iconAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="iconAccordionHeading" data-bs-parent="#iconAccordion">
-								<div class="accordion-body">
-									<div class="row row-cols-4" id="iconChoose">
-										${icons}
+								<div class="accordion-body py-1" style="max-height: 80px; overflow-y: auto;">
+									<div class="row row-cols-5" id="iconChoose">
 										<div class="col">
-											<button type="button" class="btn btn-sm btn-outline-secondary" id="iconAdd">+</button>
+											<button type="button" class="btn btn-sm btn-outline-secondary" id="iconAdd" title="Add icon">+</button>
 										</div>
 									</div>
 								</div>
@@ -117,7 +107,7 @@ function avatar_popup() {
 				</div>
 			</div>
 
-			<div class="row mt-3 mb-2">
+			<div class="row my-3">
 				<div class="col">
 					<div class="input-group input-group-sm">
 						<input type="number" min="0" max="3" step="0.1" class="form-control" id="blur" placeholder="Blur" />
@@ -127,6 +117,12 @@ function avatar_popup() {
 						<input type="number" min="0" max="6" step="1" class="form-control" id="brightness" placeholder="Brightness" />
 						<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="transparency" placeholder="Transparency" />
 					</div>
+				</div>
+			</div>
+
+			<div class="row mb-2">
+				<div class="col">
+					<input type="number" class="form-control form-control-sm" id="animationSpeed" min="0.1" max="10" step="0.1" aria-label="Animation speed" placeholder="Animation speed (sec.)" title="This objects animation speed to next scene" />
 				</div>
 			</div>
 
@@ -152,7 +148,7 @@ function polyline_popup() {
 				</div>
 			</div>
 
-			<div class="row mt-3 mb-2">
+			<div class="row my-3">
 				<div class="col">
 					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
@@ -163,6 +159,12 @@ function polyline_popup() {
 						<input class="form-check-input" type="checkbox" value="" id="dashed">
 						<label class="form-check-label" for="dashed">Dashed</label>
 					</div>
+				</div>
+			</div>
+
+			<div class="row mb-2">
+				<div class="col">
+					<input type="number" class="form-control form-control-sm" id="animationSpeed" min="0.1" max="10" step="0.1" aria-label="Animation speed" placeholder="Animation speed (sec.)" title="This objects animation speed to next scene" />
 				</div>
 			</div>
 
@@ -202,12 +204,18 @@ function polygon_popup() {
 				</div>
 			</div>
 
-			<div class="row mt-3 mb-2">
+			<div class="row my-3">
 				<div class="col">
 					<div class="input-group input-group-sm">
 						<input type="color" class="form-control form-control-color" id="fillColor" value="#563d7c" title="Choose color" />
 						<input type="number" min="0" max="1" step="0.1" class="form-control" id="fillTransparency" placeholder="Transparency" />
 					</div>
+				</div>
+			</div>
+
+			<div class="row mb-2">
+				<div class="col">
+					<input type="number" class="form-control form-control-sm" id="animationSpeed" min="0.1" max="10" step="0.1" aria-label="Animation speed" placeholder="Animation speed (sec.)" title="This objects animation speed to next scene" />
 				</div>
 			</div>
 

@@ -271,7 +271,7 @@ function Scene(id, prevId) {
 
 	this.setBounds = function(bounds) {
 		this.bounds = bounds;
-		_MAP.setHomeBounds( this.bounds );
+		_MAP.setFlyTo( this.bounds );
 	};
 
 	this.setBasemap = function() {

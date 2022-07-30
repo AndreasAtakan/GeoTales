@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS "Map"(
 	post text,
 	preview text,
 	data json,
+	password varchar(64),
 
 	PRIMARY KEY (id)
 );

@@ -52,8 +52,9 @@ window.onload = function(ev) {
 			success: function(result, status, xhr) {
 				$("#editModal input#titleInput").val(result.title);
 				$("#editModal textarea#descriptionInput").val(result.description);
+				$("#editModal input#passwordInput").val(null);
 
-				$("#editModal input#titleInput, #editModal textarea#descriptionInput, #editModal button#save").prop("disabled", false);
+				$("#editModal input#titleInput, #editModal textarea#descriptionInput, #editModal input#passwordInput, #editModal button#save").prop("disabled", false);
 				$("#editModal button#save").data("id", id);
 			},
 			error: function(xhr, status, error) {
@@ -65,7 +66,9 @@ window.onload = function(ev) {
 	$("#editModal button#save").click(ev => {
 		let id = $(ev.target).data("id"),
 			title = $("#editModal input#titleInput").val().substring(0, 65),
-			description = $("#editModal textarea#descriptionInput").val();
+			description = $("#editModal textarea#descriptionInput").val(),
+			password = $("#editModal input#passwordInput").val();
+		password = password === "" ? password : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
 
 		$("#editModal").modal("hide");
 		$("#loadingModal").modal("show");
@@ -77,7 +80,8 @@ window.onload = function(ev) {
 				"op": "edit",
 				"id": id,
 				"title": title,
-				"description": description
+				"description": description,
+				"password": password
 			},
 			dataType: "json",
 			success: function(result, status, xhr) {

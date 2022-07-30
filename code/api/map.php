@@ -23,10 +23,28 @@ $op = $_REQUEST['op'];
 
 if($op == "read") {
 
-	if(!isset($_GET['id'])) {
+	if(!isset($_GET['id'])
+	|| !isset($_GET['password'])) {
 		http_response_code(422); exit;
 	}
 	$id = $_GET['id'];
+	$password = $_GET['password'];
+
+	$status_flag = false;
+	if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
+		$uid = $_SESSION['uid'];
+		$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
+		$stmt->execute([$uid, $id]);
+		$row = $stmt->fetch();
+		$status_flag = $row['st'] == "t";
+	}
+
+	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
+	if($row['pw'] == "t"
+	&& $row['password'] != $password
+	&& $status_flag == true) { http_response_code(401); exit; }
 
 	$stmt = $PDO->prepare("SELECT data FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
@@ -90,6 +108,42 @@ if($op == "get") {
 	exit;
 
 }
+else
+if($op == "clone") {
+
+	if(!isset($_POST['id'])
+	|| !isset($_GET['password'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+	$password = $_GET['password'];
+
+	$status_flag = false;
+	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
+	$stmt->execute([$uid, $id]);
+	$row = $stmt->fetch();
+	$status_flag = $row['st'] == "t";
+
+	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
+	if($row['pw'] == "t"
+	&& $row['password'] != $password
+	&& $status_flag == true) { http_response_code(401); exit; }
+
+	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description, preview, data) VALUES ( SELECT title, description, preview, data FROM \"Map\" WHERE id = ? ) RETURNING id");
+	$stmt->execute([$id]);
+	$new_id = $stmt->fetchColumn();
+
+	$stmt = $PDO->prepare("INSERT INTO \"User_Map\" (user_id, map_id, status) VALUES (?, ?, ?)");
+	$stmt->execute([$uid, $new_id, "owner"]);
+
+	echo json_encode(array(
+		"id" => $new_id
+	));
+	exit;
+
+}
 else{
 
 	if(!isset($_POST['id'])) {
@@ -97,14 +151,11 @@ else{
 	}
 	$id = $_POST['id'];
 
-	$stmt = $PDO->prepare("SELECT status FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
+	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
 	$stmt->execute([$uid, $id]);
 	$row = $stmt->fetch();
 
-	if($row['status'] != "owner"
-	&& $row['status'] != "editor") {
-		http_response_code(401); exit;
-	}
+	if($row['st'] == "t") { http_response_code(401); exit; }
 
 	if($op == "edit") {
 
@@ -114,9 +165,11 @@ else{
 		}
 		$title = $_POST['title'];
 		$description = $_POST['description'];
+		$password = isset($_POST['password']) ? $_POST['password'] : null;
+		if(!is_null($password)) { mb_substr($password, 0, 64); }
 
-		$stmt = $PDO->prepare("UPDATE \"Map\" SET title = ?, description = ? WHERE id = ?");
-		$stmt->execute([$title, $description, $id]);
+		$stmt = $PDO->prepare("UPDATE \"Map\" SET title = ?, description = ?, password = ? WHERE id = ?");
+		$stmt->execute([$title, $description, $password, $id]);
 
 		echo json_encode(array("status" => "success"));
 		exit;

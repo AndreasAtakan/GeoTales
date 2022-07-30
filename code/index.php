@@ -35,9 +35,8 @@ $res = $res['topic_list']['topics'];
 function s($a, $b) { return $b['views'] - $a['views']; }
 uasort($res, "s");
 
-$posts = array(); $i = 0;
+$posts = array();
 foreach($res as $r) {
-	if($i > 15) { break; } $i++;
 	$url = "https://{$CONFIG['forum_host']}/t/{$r['slug']}/{$r['id']}";
 	$posts[ $url ] = array( "views" => $r['views'], "likes" => $r['like_count'] );
 }
@@ -60,6 +59,7 @@ $stmt = $PDO->prepare("
 		M.post IN ({$urls})
 	ORDER BY
 		M.created DESC
+	LIMIT 15
 ");
 $stmt->execute();
 $rows = $stmt->fetchAll();
@@ -94,12 +94,13 @@ $count = $stmt->rowCount();
 			}
 
 			main {
-				background-image: url('assets/jumbotron.png');
-				background-size: contain;
+				background-image: url('assets/background.png');
+				background-size: cover;
 				background-repeat: no-repeat;
+				background-position: center;
 			}
 
-			#header-text {
+			.text-shadow {
 				text-shadow: #fff -1px 1px 3px;
 				-webkit-font-smoothing: antialiased;
 			}
@@ -114,9 +115,9 @@ $count = $stmt->rowCount();
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
-					<a class="navbar-brand" href="index.php">
+					<span class="navbar-brand">
 						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-					</a>
+					</span>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
@@ -125,38 +126,39 @@ $count = $stmt->rowCount();
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link active" aria-current="page" href="index.php">Gallery</a>
+								<a class="nav-link active" aria-current="page" href="index.php">Home</a>
 							</li>
-							<li class="nav-item me-sm-auto">
+							<li class="nav-item <?php if(!$logged_in) { echo "me-sm-auto"; } ?>">
 								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
 
-					<?php
-						if($logged_in) {
-					?>
-							<li class="nav-item me-sm-4">
+					<?php if($logged_in) { ?>
+							<li class="nav-item me-sm-auto">
 								<a class="nav-link" href="maps.php">My maps</a>
 							</li>
+					<?php } ?>
+
+							<li class="nav-item me-sm-2">
+								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+							</li>
+
+					<?php if($logged_in) { ?>
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
+									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
-									<li><hr class="dropdown-divider"></li>
+									<li><hr class="dropdown-divider" /></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
 								</ul>
 							</li>
-					<?php
-						}else{
-					?>
+					<?php }else{ ?>
 							<li class="nav-item">
-								<a role="button" class="btn btn-sm btn-light mt-1" href="login.php">Sign in</a>
+								<a role="button" class="btn btn-sm btn-light" href="login.php" style="margin-top: 0.35rem;">Sign in</a>
 							</li>
-					<?php
-						}
-					?>
+					<?php } ?>
 						</ul>
 					</div>
 				</div>
@@ -169,24 +171,8 @@ $count = $stmt->rowCount();
 					<div class="col"></div>
 				</div>
 
-				<div class="row" id="header-text">
-					<div class="col-sm-9">
-						<h2 class="text-muted">GeoTales – Map stories</h2>
-					</div>
-					<div class="col-sm-3 mt-3">
-						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" href="login.php?return_url=stage.php" class="btn btn-lg btn-info" style="color: white;">Create map</a>
-						</div>
-						<p class="text-muted text-center mt-2">Create your own map for <strong>free</strong></p>
-					</div>
-				</div>
-
-				<div class="row my-5">
-					<div class="col"></div>
-				</div>
-
 				<div class="row">
-					<div class="col">
+					<div class="col-sm-9">
 						<form method="get" action="<?php echo "https://{$CONFIG['forum_host']}/search"; ?>" id="search">
 							<input type="hidden" name="expanded" value="true" />
 							<input type="hidden" name="q" value="" />
@@ -196,15 +182,21 @@ $count = $stmt->rowCount();
 							</div>
 						</form>
 					</div>
+					<div class="col-sm-3 mt-sm-0 mt-4">
+						<div class="d-grid" style="text-shadow: none;">
+							<a role="button" class="btn btn-info" href="stage.php" style="color: white;">Create map</a>
+						</div>
+						<p class="text-muted text-center text-shadow mt-2">Create your own map for <strong>free</strong></p>
+					</div>
 				</div>
 
-				<div class="row my-5">
+				<div class="row mt-3 mb-5">
 					<div class="col"></div>
 				</div>
 
 				<div class="row my-2">
 					<div class="col">
-						<h5 class="text-muted">Top 15 most popular maps</h5>
+						<h5 class="text-muted text-shadow">Top 15 most popular maps</h5>
 					</div>
 				</div>
 
@@ -247,30 +239,11 @@ $count = $stmt->rowCount();
 			}else{
 		?>
 					<div class="col">
-						<p class="text-muted text-center">No maps found</p>
+						<p class="text-muted text-center text-shadow">No maps found</p>
 					</div>
 		<?php
 			}
 		?>
-				</div>
-
-				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col">
-						<p class="small text-muted">
-							For technical questions,
-							please contact us at <a href="mailto:contact@geotales.io">contact@geotales.io</a>
-						</p>
-						<p class="small text-muted">
-							Do you have feedback you want to share?
-							<a href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Let us know</a>!
-						</p>
-					</div>
 				</div>
 
 				<div class="row my-5">
@@ -302,7 +275,10 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo "https://{$CONFIG['host']}"; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
-						<p class="text-muted text-center"><a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a></p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
+							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+						</p>
 					</div>
 				</div>
 			</div>

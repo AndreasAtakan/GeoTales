@@ -228,6 +228,8 @@ L.Map.addInitHook(function() {
 L.Map.include({
 
 	setup: function() {
+		this.setAspectRatio();
+
 		this.enableDraw();
 		this.basemapButton.enable();
 		this.textboxButton.enable();
@@ -313,7 +315,7 @@ L.Map.include({
 		});
 
 		this.invalidateSize();
-		if(_SCENES.active) { this.setHomeBounds( _SCENES.get( _SCENES.active ).bounds ); }
+		if(_SCENES.active) { this.setFlyTo( _SCENES.get( _SCENES.active ).bounds ); }
 	},
 
 	setFlyTo: function(bounds) {
@@ -334,7 +336,17 @@ L.Map.include({
 	},
 
 	addScene: function(sceneId) {
-		//
+		let prev = _SCENES.getPrevScene(sceneId);
+		if(!prev || !_OPTIONS.objectOptIn) { return; }
+		let prevId = prev.id;
+
+		for(let object of this.objects) {
+			if(object.sceneId == prevId) {
+				let o = Object.assign({}, object);
+				o.sceneId = sceneId;
+				this.objects.push(o);
+			}
+		}
 	},
 	deleteScene: function(sceneId) {
 		this.objects = this.objects.filter(o => o.sceneId != sceneId);
@@ -367,7 +379,7 @@ L.Map.include({
 		}
 
 		let os = this.getLayers().map(o => {
-			let r = this.extractObject(o); return { id: r.id, pos: r.pos, radius: r.radius };
+			let r = this.extractObject(o); return { id: r.id, pos: r.pos, radius: r.radius, animationspeed: r.animationspeed };
 		});
 		this.clearLayers();
 		for(let i = 0; i < this.objects.length; i++) {
@@ -388,7 +400,7 @@ L.Map.include({
 
 				for(let oo of os) {
 					if(o.id == oo.id) {
-						object.slideTo( pos , { radius: rad, duration: _OPTIONS.animationspeed });
+						object.slideTo( pos , { radius: rad, duration: oo.animationspeed * 1000 || _OPTIONS.animationspeed * 1000 });
 						break;
 					}
 				}
@@ -598,7 +610,7 @@ L.Map.include({
 			await img.decode();
 
 			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
-			let zoom, bl, tr;
+			/*let zoom, bl, tr;
 			for(let i = 0; i < 18; i++) {
 				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
 				tr = L.CRS.EPSG3857.pointToLatLng(L.point(img.width, img.height), i);
@@ -609,12 +621,26 @@ L.Map.include({
 				}
 			}
 			if(!zoom && zoom != 0) { return; }
-			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
+			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];*/
+			let tl = this.getBounds().getNorthWest(),
+				br = this.getBounds().getSouthEast();
+			let bounds = [[tl.lat, tl.lng], []];
+			let tlp = this.latLngToContainerPoint(tl),
+				brp = this.latLngToContainerPoint(br);
+			let h = brp.y - tlp.y;
+
+			if(img.width >= img.height) {
+				bounds[1][0] = this.containerPointToLatLng([brp.x, tlp.y + img.height / h]);
+				bounds[1][1] = br.lng;
+			}else{
+				bounds[1][0] = br.lat;
+				bounds[1][1] = this.containerPointToLatLng([brp.x, tlp.y + img.height / h]);
+			}
 
 			basemap = L.imageOverlay(source.img, bounds, {
 				pmIgnore: true,
 				zIndex: 0,
-				minZoom: 0, maxZoom: 22,
+				minZoom: 0, maxZoom: 1000,
 				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 			});
 		}
@@ -663,17 +689,19 @@ L.Map.include({
 					overlayBlur:			o.blur,
 					overlayBrightness:		o.brightness,
 					overlayGrayscale:		o.grayscale,
-					overlayTransparency:	o.transparency
+					overlayTransparency:	o.transparency,
+					animationspeed:			o.animationspeed
 				});
 				break;
 
 			case "polyline":
 				oo = L.polyline(o.pos, {
-					label:		o.label,
-					dashArray:	o.dashed ? "5, 10" : "",
-					color:		o.color,
-					weight:		o.thickness,
-					opacity:	1 - o.transparency
+					label:			o.label,
+					dashArray:		o.dashed ? "5, 10" : "",
+					color:			o.color,
+					weight:			o.thickness,
+					opacity:		1 - o.transparency,
+					animationspeed:	o.animationspeed
 				});
 				break;
 
@@ -685,7 +713,8 @@ L.Map.include({
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
 					fillColor:		o.fillColor,
-					fillOpacity:	1 - o.fillTransparency
+					fillOpacity:	1 - o.fillTransparency,
+					animationspeed:	o.animationspeed
 				});
 				break;
 
@@ -697,7 +726,8 @@ L.Map.include({
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
 					fillColor:		o.fillColor,
-					fillOpacity:	1 - o.fillTransparency
+					fillOpacity:	1 - o.fillTransparency,
+					animationspeed:	o.animationspeed
 				});
 				break;
 
@@ -710,7 +740,8 @@ L.Map.include({
 					weight:			o.lineThickness,
 					opacity:		1 - o.lineTransparency,
 					fillColor:		o.fillColor,
-					fillOpacity:	1 - o.fillTransparency
+					fillOpacity:	1 - o.fillTransparency,
+					animationspeed:	o.animationspeed
 				});
 				break;
 
@@ -745,7 +776,8 @@ L.Map.include({
 				blur:				o.options.overlayBlur,
 				grayscale:			o.options.overlayGrayscale,
 				brightness:			o.options.overlayBrightness,
-				transparency:		o.options.overlayTransparency
+				transparency:		o.options.overlayTransparency,
+				animationspeed:		o.options.animationspeed
 			};
 		}else
 		if(o instanceof L.Polygon) {
@@ -760,7 +792,8 @@ L.Map.include({
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,
 				fillColor:			o.options.fillColor,
-				fillTransparency:	1 - o.options.fillOpacity
+				fillTransparency:	1 - o.options.fillOpacity,
+				animationspeed:		o.options.animationspeed
 			};
 		}else
 		if(o instanceof L.Polyline) {
@@ -776,7 +809,8 @@ L.Map.include({
 				dashed:			!!o.options.dashArray,
 				color:			o.options.color,
 				thickness:		o.options.weight,
-				transparency:	1 - o.options.opacity
+				transparency:	1 - o.options.opacity,
+				animationspeed:	o.options.animationspeed
 			};
 		}else
 		if(o instanceof L.Circle) {
@@ -793,7 +827,8 @@ L.Map.include({
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,
 				fillColor:			o.options.fillColor,
-				fillTransparency:	1 - o.options.fillOpacity
+				fillTransparency:	1 - o.options.fillOpacity,
+				animationspeed:		o.options.animationspeed
 			};
 		}else{ console.error("object type invalid"); }
 

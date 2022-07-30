@@ -142,6 +142,14 @@ $count = $stmt->rowCount();
 									<textarea class="form-control" id="descriptionInput" rows="5" placeholder="Loading..." disabled></textarea>
 								</div>
 							</div>
+
+							<div class="row mb-3">
+								<div class="col">
+									<label for="passwordInput" class="form-label">Password</label>
+									<input type="password" class="form-control" id="passwordInput" aria-describedby="passwordHelp" disabled />
+									<div id="passwordHelp" class="form-text">This password will be required when viewing the map</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -267,9 +275,9 @@ $count = $stmt->rowCount();
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
-					<a class="navbar-brand" href="index.php">
+					<span class="navbar-brand">
 						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-					</a>
+					</span>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
@@ -278,18 +286,22 @@ $count = $stmt->rowCount();
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link" href="index.php">Gallery</a>
+								<a class="nav-link" href="index.php">Home</a>
 							</li>
-							<li class="nav-item me-sm-auto">
+							<li class="nav-item">
 								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
-
-							<li class="nav-item me-sm-4">
+							<li class="nav-item me-sm-auto">
 								<a class="nav-link active" aria-current="page" href="maps.php">My maps</a>
 							</li>
+
+							<li class="nav-item me-sm-2">
+								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+							</li>
+
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="30" height="30" />
+									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
@@ -331,7 +343,7 @@ $count = $stmt->rowCount();
 					</div>
 				</div>
 
-				<div class="row my-5">
+				<div class="row my-4">
 					<div class="col"></div>
 				</div>
 
@@ -342,7 +354,7 @@ $count = $stmt->rowCount();
 						<?php
 							if($count > 0) {
 						?>
-								<caption>List of your maps</caption>
+								<caption>Your maps</caption>
 								<thead>
 									<tr>
 										<th scope="col">#</th>
@@ -431,7 +443,10 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo "https://{$CONFIG['host']}"; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
-						<p class="text-muted text-center"><a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a></p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
+							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+						</p>
 					</div>
 				</div>
 			</div>
@@ -444,6 +459,7 @@ $count = $stmt->rowCount();
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript" src="src/maps.js"></script>

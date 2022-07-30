@@ -104,6 +104,32 @@ $row = $stmt->fetch();
 
 
 
+		<!-- Password modal -->
+		<div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="passwordModalLabel">Enter password</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col">
+									<input type="password" class="form-control" id="passwordInput" />
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" id="enter">Enter</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
 		<!-- Loading modal -->
 		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
@@ -214,6 +240,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
 		<!--script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script-->
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
 		<script type="text/javascript" src="lib/leaflet.providers/leaflet-providers.js"></script>
 		<script type="text/javascript" src="lib/leaflet.zoomhome/leaflet.zoomhome.js"></script>
@@ -225,7 +252,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript">
 			const _ID = `<?php echo $id; ?>`,
 				  _TITLE = `<?php echo $row['title']; ?>`,
-				  _HOST = window.location.host;;
+				  _HOST = window.location.host;
 		</script>
 
 		<!-- Load src/ JS -->

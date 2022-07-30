@@ -80,9 +80,10 @@ window.onload = function(ev) {
 
 
 
-	$("#optionsModal input#animationSpeed").change(function(ev) { _OPTIONS.animationspeed = parseInt( $(this).val() ); });
-	$("#optionsModal input#panningSpeed").change(function(ev) { _OPTIONS.panningspeed = ( $(this).val() / 1000 ) || null; });
+	$("#optionsModal input#animationSpeed").change(function(ev) { _OPTIONS.animationspeed = $(this).val(); });
+	$("#optionsModal input#panningSpeed").change(function(ev) { _OPTIONS.panningspeed = $(this).val() || null; });
 	$("#optionsModal select#aspectRatio").change(function(ev) { _MAP.setAspectRatio( eval( this.value ) ); });
+	$("#optionsModal input#objectsOptIn").change(function(ev) { _OPTIONS.objectOptIn = this.checked; });
 
 
 
@@ -194,7 +195,8 @@ window.onload = function(ev) {
 		url: "api/map.php",
 		data: {
 			"op": "read",
-			"id": _ID
+			"id": _ID,
+			"password": ""
 		},
 		dataType: "json",
 		success: function(result, status, xhr) {

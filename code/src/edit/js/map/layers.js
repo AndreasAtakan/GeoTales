@@ -168,6 +168,15 @@ function bind_setup(o) {
 	$(".objectPopup input#label").val(o.options.label || "");
 
 	if(o instanceof L.ImageOverlay) {
+		$("#avatarPopup #iconChoose #iconCol").remove();
+		for(let i of _ICONS.slice().reverse()) {
+			$("#avatarPopup #iconChoose").prepend(`
+				<div class="col" id="iconCol">
+					<img class="img-fluid rounded" id="icons" src="${i}" alt="&nbsp;" />
+				</div>
+			`);
+		}
+
 		$("input#_img_icon").off("change");
 		$("input#_img_icon").change(function(ev) {
 			let file = $(this)[0].files[0];
@@ -201,7 +210,6 @@ function bind_setup(o) {
 					processData: false,
 					success: function(result, status, xhr) {
 						_ICONS.unshift(result);
-						_MAP.setPopup(o);
 						_MAP.setIcon(o, [ 35, 35 / o.options.ratio ], result);
 						_MAP.updateObject(o);
 
@@ -337,6 +345,11 @@ function bind_setup(o) {
 			});
 		}
 	}else{ console.error("object type invalid"); }
+
+	$(".objectPopup input#animationSpeed").change(function(ev) {
+		o.options.animationspeed = Math.min( Math.max( $(this).prop("min"), $(this).val() ), $(this).prop("max") );
+		_MAP.updateObject(o);
+	});
 
 	$(".objectPopup #makeGlobal").click(function(ev) {
 		_MAP.globalObjectOptions(o);

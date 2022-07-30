@@ -93,7 +93,8 @@ window.onload = function(ev) {
 		url: "api/map.php",
 		data: {
 			"op": "read",
-			"id": _ID
+			"id": _ID,
+			"password": ""
 		},
 		dataType: "json",
 		success: function(result, status, xhr) {
@@ -102,11 +103,39 @@ window.onload = function(ev) {
 			setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 		},
 		error: function(xhr, status, error) {
-			console.log(xhr.status);
-			console.log(error);
+			console.log(xhr.status, error);
 
-			setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+			if(xhr.status == 401) { setTimeout(function() { $("#loadingModal").modal("hide"); $("#passwordModal").modal("show"); }, 750); }
+			else{ setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750); }
 		}
+	});
+
+	$("#passwordModal button#enter").click(ev => {
+		let password = $("#passwordModal input#passwordInput").val();
+		password = password === "" ? password : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
+
+		$("#passwordModal").modal("hide");
+		$("#loadingModal").modal("show");
+
+		$.ajax({
+			type: "GET",
+			url: "api/map.php",
+			data: {
+				"op": "read",
+				"id": _ID,
+				"password": password
+			},
+			dataType: "json",
+			success: function(result, status, xhr) {
+				if(result.data) { import_data( JSON.parse(result.data) ); }
+
+				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+			},
+			error: function(xhr, status, error) {
+				console.log(xhr.status, error);
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+			}
+		});
 	});
 
 };
