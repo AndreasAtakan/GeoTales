@@ -30,12 +30,12 @@ function new_scene(id, prevId) {
 
 
 
-function generate_basemaps() {
-
+function generate_basemaps(isUpload) {
 	let html = ``;
 
 	for(let i = 0; i < _BASEMAPS.length; i++) {
 		let b = _BASEMAPS[i];
+		if(b.name !== "" && isUpload) { continue; }
 		html += `
 			<div class="col">
 				<div class="card mt-2">
@@ -47,9 +47,23 @@ function generate_basemaps() {
 			</div>
 		`;
 	}
+	if(isUpload) {
+		html += `
+			<div class="col">
+				<div class="card mt-2">
+					<div class="card-body">
+						<div class="d-grid">
+							<button type="button" class="btn btn-outline-secondary" id="uploadBasemap">+</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
 
-	$("#basemapModal #basemapChoose").html(html);
-
+	$(isUpload ?
+		"#basemapModal #imgBasemapChoose" :
+		"#basemapModal #basemapChoose").html(html);
 }
 
 

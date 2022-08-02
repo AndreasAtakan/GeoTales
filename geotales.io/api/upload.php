@@ -43,7 +43,7 @@ if($op == "create") {
 	$name = $_FILES["image"]["name"];
 
 	if(getimagesize($path) === false
-	|| filesize($path) > 1000000000) {
+	|| filesize($path) > 50000000) {
 		http_response_code(422); exit;
 	}
 	$res = uploadToS3($path, $name);

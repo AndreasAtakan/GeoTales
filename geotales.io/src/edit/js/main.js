@@ -109,12 +109,11 @@ window.onload = function(ev) {
 			success: async function(result, status, xhr) {
 				await _MAP.setBasemap({ type: "image", img: result });
 				_SCENES.setBasemap();
-				_BASEMAPS.unshift({
+				_BASEMAPS.push({
 					name: "",
 					tiles: { type: "image", img: result },
 					preview: result
 				});
-				init_basemaps();
 				setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 			},
 			error: function(xhr, status, error) {
@@ -139,6 +138,28 @@ window.onload = function(ev) {
 
 		_MAP.setBasemap({ type: "tiles", url: url });
 		_SCENES.setBasemap();
+	});
+
+	$("#basemapModal button#wmsAdd").click(ev => {
+		let url = $("#basemapModal input#wmsLink").val(),
+			layers = $("#basemapModal input#wmsLayer").val(),
+			format = $("#basemapModal select#wmsFormat").val(),
+			version = $("#basemapModal select#wmsVersion").val();
+		if(!url || !layers) { return; }
+
+		_MAP.setWMS({
+			type: "wms",
+			url: url,
+			layers: layers,
+			format: format,
+			version: version,
+			transparent: format == "image/png"
+		});
+		_SCENES.setWMS();
+	});
+	$("#basemapModal button#wmsRemove").click(ev => {
+		_MAP.setWMS(null);
+		_SCENES.setWMS();
 	});
 
 
@@ -223,15 +244,13 @@ window.onload = function(ev) {
 				if(r.type == "icon") { _ICONS.unshift(r.ref); }
 				else
 				if(r.type == "basemap") {
-					_BASEMAPS.unshift({
+					_BASEMAPS.push({
 						name: "",
 						tiles: { type: "image", img: r.ref },
 						preview: r.ref
 					});
 				}
 			}
-
-			init_basemaps();
 		},
 		error: function(xhr, status, error) {
 			console.error(xhr.status, error);

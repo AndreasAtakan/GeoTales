@@ -98,7 +98,7 @@ $row = $stmt->fetch();
 									<label for="lineThickness" class="form-label">Line options</label>
 									<div class="input-group input-group-sm">
 										<input type="color" class="form-control form-control-color" id="lineColor" value="#563d7c" title="Choose color" />
-										<input type="number" min="2" max="10" class="form-control" id="lineThickness" placeholder="Thickness" />
+										<input type="number" min="1" max="8" class="form-control" id="lineThickness" placeholder="Thickness" />
 										<input type="number" min="0" max="0.9" step="0.1" class="form-control" id="lineTransparency" placeholder="Transparency" />
 									</div>
 								</div>
@@ -203,39 +203,45 @@ $row = $stmt->fetch();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="basemapModalLabel">Change basemap</h5>
+						<h5 class="modal-title" id="basemapModalLabel">Basemap</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
 						<div class="container-fluid">
-							<div class="row my-2">
+							<input type="file" class="form-control form-control-sm" id="basemapFile" accept="image/gif, image/jpeg, image/png, image/webp" style="display: none;" />
+
+							<div class="row mt-2">
 								<div class="col">
 									<div class="accordion" id="basemapAccordion">
 										<div class="accordion-item">
-											<h2 class="accordion-header" id="basemapAccordionHeading">
-												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#basemapAccordionCollapse" aria-expanded="false" aria-controls="basemapAccordionCollapse">
-													Available basemaps
+											<h2 class="accordion-header" id="availBasemapAccordionHeading">
+												<button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#availBasemapAccordionCollapse" aria-expanded="false" aria-controls="availBasemapAccordionCollapse">
+													Available
 												</button>
 											</h2>
-											<div id="basemapAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="basemapAccordionHeading" data-bs-parent="#basemapAccordion">
+											<div id="availBasemapAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="availBasemapAccordionHeading" data-bs-parent="#basemapAccordion">
 												<div class="accordion-body">
 													<div class="row row-cols-2 row-cols-md-3" id="basemapChoose"></div>
 												</div>
 											</div>
-										  </div>
+										</div>
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="imgBasemapAccordionHeading">
+												<button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#imgBasemapAccordionCollapse" aria-expanded="false" aria-controls="imgBasemapAccordionCollapse">
+													Uploaded
+												</button>
+											</h2>
+											<div id="imgBasemapAccordionCollapse" class="accordion-collapse collapse" aria-labelledby="imgBasemapAccordionHeading" data-bs-parent="#basemapAccordion">
+												<div class="accordion-body">
+													<div class="row row-cols-2 row-cols-md-3" id="imgBasemapChoose"></div>
+												</div>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
 
-							<div class="row my-4">
-								<div class="col col-md-10">
-									<label for="basemapFile"><small>Or use custom basemap</small></label>
-									<input type="file" class="form-control form-control-sm" id="basemapFile" aria-describedby="basemapFileHelp" accept="image/gif, image/jpeg, image/png, image/webp" />
-									<div id="basemapFileHelp" class="form-text">This can be any image file</div>
-								</div>
-							</div>
-
-							<div class="row my-2">
+							<div class="row mt-4 mb-2">
 								<div class="col">
 									<label for="basemapLink"><small>Or link to an online basemap</small></label>
 									<div class="input-group input-group-sm">
@@ -244,6 +250,33 @@ $row = $stmt->fetch();
 										<button type="button" class="btn btn-outline-secondary" id="basemapFetch">Apply</button>
 									</div>
 									<div id="keyText" class="form-text">XYZ-tiles or Mapbox style. Access key is required with Mapbox style</div>
+								</div>
+							</div>
+
+							<div class="row my-2">
+								<div class="col">
+									<hr />
+								</div>
+							</div>
+
+							<div class="row my-2">
+								<div class="col">
+									<label for="wmsLink"><small>Add a WMS layer</small></label>
+									<div class="input-group input-group-sm">
+										<button type="button" class="btn btn-outline-secondary" id="wmsRemove" title="Remove current WMS layer"><i class="fas fa-minus"></i></button>
+										<input type="text" class="form-control" id="wmsLink" aria-label="Url" aria-describedby="wmsText" placeholder="URL" />
+										<input type="text" class="form-control" id="wmsLayer" aria-label="Layer" aria-describedby="wmsText" placeholder="Layer" />
+										<select class="form-select" id="wmsFormat" aria-label="Format" style="max-width: 150px;">
+											<option value="image/png" selected>image/png</option>
+											<option value="image/jpeg">image/jpeg</option>
+										</select>
+										<select class="form-select" id="wmsVersion" aria-label="Version" style="max-width: 100px;">
+											<option value="1.3.0" selected>1.3.0</option>
+											<option value="1.1.1">1.1.1</option>
+										</select>
+										<button type="button" class="btn btn-outline-secondary" id="wmsAdd">Add</button>
+									</div>
+									<div id="wmsText" class="form-text">WMS layer will be added on top of the basemap. Only support for one WMS layer per scene</div>
 								</div>
 							</div>
 						</div>

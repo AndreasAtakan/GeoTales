@@ -16,8 +16,15 @@ include "api/init.php";
 include_once("api/helper.php");
 
 $logged_in = false;
+$paid = false;
 if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
 	$logged_in = true;
+
+	$uid = $_SESSION['uid'];
+	$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
+	$stmt->execute([$uid]);
+	$row = $stmt->fetch();
+	$paid = $row['paid'] == "t";
 }
 
 if(!isset($_GET['id'])) {
@@ -73,16 +80,13 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
 		<link rel="stylesheet" href="lib/leaflet.select/leaflet.control.select.css" />
 
+		<!-- Google AdSense -->
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4056519983936625" crossorigin="anonymous"></script>
+
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/pres/css/main.css" />
 
-		<style type="text/css">
-			/*.leaflet-draw-toolbar a.leaflet-draw-draw-marker {
-				background-image: linear-gradient(transparent, transparent), url('assets/user-circle-solid.svg');
-				background-size: 14px 14px;
-				background-position: 8px 8px !important;
-			}*/
-		</style>
+		<style type="text/css"></style>
 	</head>
 	<body>
 
@@ -123,6 +127,63 @@ $row = $stmt->fetch();
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" id="enter">Enter</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<!-- Share modal -->
+		<div class="modal fade" id="shareModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="shareModalLabel">Share</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col">
+									<div class="input-group input-group-lg">
+										<input type="text" class="form-control" id="linkInput" aria-label="linkInput" aria-describedby="copyLink" readonly />
+										<button class="btn btn-outline-secondary" type="button" id="copyLink" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+									</div>
+								</div>
+							</div>
+
+							<div class="row my-3">
+								<hr />
+							</div>
+
+							<div class="row">
+								<div class="col-0 col-sm-7">
+							<?php
+								if($logged_in) {
+							?>
+									<button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="clone">Clone this map</button>
+							<?php
+								}
+							?>
+								</div>
+								<div class="col col-sm-1">
+									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
+								</div>
+								<div class="col col-sm-1">
+									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
+								</div>
+								<div class="col col-sm-1">
+									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
+								</div>
+								<div class="col col-sm-1">
+									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
+								</div>
+								<div class="col col-sm-1">
+									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -179,22 +240,21 @@ $row = $stmt->fetch();
 						</div>
 					</div>
 
-					<div class="dropdown" id="bookmarks">
-						<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-							<i class="fas fa-bookmark"></i>
-						</button>
-						<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
-							<li><h6 class="dropdown-header">Bookmarks</h6></li>
-						</ul>
-					</div>
-
 					<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
 						<button type="button" class="btn btn-outline-light" id="prev">
 							<i class="fas fa-chevron-left"></i>
 						</button>
-						<button type="button" class="btn btn-outline-light" id="fullscreen">
+						<button type="button" class="btn btn-outline-light px-3" id="fullscreen">
 							<i class="fas fa-expand"></i>
 						</button>
+						<div role="group" class="btn-group btn-group-sm dropup" id="bookmarks">
+							<button type="button" class="btn btn-outline-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="fas fa-bookmark"></i>
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
+								<li><h6 class="dropdown-header">Bookmarks</h6></li>
+							</ul>
+						</div>
 						<button type="button" class="btn btn-outline-light" id="next">
 							<i class="fas fa-chevron-right"></i>
 						</button>
@@ -204,18 +264,10 @@ $row = $stmt->fetch();
 						<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
 						</button>
-						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown">
-							<li><a class="dropdown-item" href="index.php">Gallery</a></li>
-					<?php
-						if($logged_in) {
-					?>
+						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown" style="min-width: 0;">
+							<li><a class="dropdown-item" href="<?php echo $logged_in ? "maps.php" : "index.php"; ?>"><i class="fas fa-home"></i></a></li>
 							<li><hr class="dropdown-divider" /></li>
-							<li><a class="dropdown-item" href="maps.php">My maps</a></li>
-							<li><hr class="dropdown-divider" /></li>
-							<li><a class="dropdown-item" href="#">Clone this map</a></li>
-					<?php
-						}
-					?>
+							<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="fas fa-share-alt"></i></a></li>
 						</ul>
 					</div>
 
@@ -230,6 +282,30 @@ $row = $stmt->fetch();
 							<i class="fas fa-minus"></i>
 						</button>
 					</div>
+
+					<?php
+						if((!$logged_in || !$paid) && !$TESTING) {
+					?>
+							<div class="card" id="adsense">
+								<div class="card-header">
+									Advertisement
+									<button type="button" class="btn-close float-end" id="closeAd" aria-label="Close" style="display: none;"></button>
+								</div>
+								<div class="card-body">
+									<ins class="adsbygoogle"
+										style="display:block"
+										data-ad-client="ca-pub-4056519983936625"
+										data-ad-slot="9235179738"
+										data-ad-format="auto"
+										data-full-width-responsive="true"></ins>
+									<script>
+										(adsbygoogle = window.adsbygoogle || []).push({});
+									</script>
+								</div>
+							</div>
+					<?php
+						}
+					?>
 				</div>
 			</div>
 		</div>
@@ -252,7 +328,8 @@ $row = $stmt->fetch();
 		<script type="text/javascript">
 			const _ID = `<?php echo $id; ?>`,
 				  _TITLE = `<?php echo $row['title']; ?>`,
-				  _HOST = window.location.host;
+				  _HOST = window.location.host,
+				  _PASSWORD = "";
 		</script>
 
 		<!-- Load src/ JS -->

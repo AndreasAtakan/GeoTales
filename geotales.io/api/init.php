@@ -31,7 +31,7 @@ try {
 
 // config
 
-$TESTING = true;
+$TESTING = false;
 $CONFIG = array(
 	"host" => $_SERVER['SERVER_NAME'],
 	"forum_host" => "forum.geotales.io",

@@ -7,8 +7,8 @@
 
 - Overall:
 	* (How?) Implement Stripe payment
-	* Reklamespalte i pres-modus for ubetalte brukere
-	* Password-beskyttede kart
+	* (Fixed?) Reklamespalte i pres-modus for ubetalte brukere
+	* (WIP, needs bugfixing) Password-beskyttede kart
 - Edit-mode:
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 	* Posibility to make hyperlink to other scenes in the textboxes

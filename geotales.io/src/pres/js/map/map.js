@@ -36,6 +36,10 @@ L.Map.addInitHook(function() {
 	this.basemap = _BASEMAPS[10].tiles;
 	this.addLayer( this.basemap );
 
+	// WMS
+
+	this.wms = {};
+
 
 
 
@@ -144,6 +148,7 @@ L.Map.include({
 		});
 
 		this.invalidateSize();
+		if(_SCENES.active) { this.setFlyTo( _SCENES.get( _SCENES.active ).bounds ); }
 	},
 
 	setFlyTo: function(bounds) {
@@ -164,7 +169,7 @@ L.Map.include({
 
 	setObjects: function(sceneId) {
 		let os = this.getLayers().map(o => {
-			let r = this.extractObject(o); return { id: r.id, pos: r.pos, radius: r.radius };
+			let r = this.extractObject(o); return { id: r.id, pos: r.pos, radius: r.radius, animationspeed: r.animationspeed };
 		});
 		this.clearLayers();
 		for(let i = 0; i < this.objects.length; i++) {
@@ -184,12 +189,20 @@ L.Map.include({
 
 				for(let oo of os) {
 					if(o.id == oo.id) {
-						object.slideTo( pos , { radius: rad, duration: _OPTIONS.animationspeed });
+						object.slideTo( pos , { radius: rad, duration: oo.animationspeed * 1000 || _OPTIONS.animationspeed * 1000 });
 						break;
 					}
 				}
 			}
 		}
+	},
+
+	set: function(sceneId) {
+		let s = _SCENES.get(sceneId);
+		this.setBasemap(s.basemap);
+		this.setWMS(s.wms);
+		this.setObjects(sceneId);
+		this.setFlyTo(s.bounds);
 	},
 
 	setIcon: function(o, size, icon) {
@@ -230,6 +243,55 @@ L.Map.include({
 	},
 
 
+
+	getWMS: function() {
+		return this.wms ? {
+			type: "wms",
+			url: this.wms._url,
+			layers: this.wms.options.layers,
+			format: this.wms.options.format,
+			version: this.wms.options.version,
+			transparent: this.wms.options.transparent
+		} : null;
+	},
+
+	setWMS: function(source) {
+		if(!source) {
+			this.wms = this.wms ?
+				this.removeLayer( this.wms ) :
+				null;
+			return;
+		}
+		if(this.wms
+		&& (source._url || source.url) == this.wms._url) {
+			return;
+		}
+
+		let layer;
+
+		if(source instanceof L.TileLayer.WMS) {
+			layer = source;
+		}else
+		if(source.type == "wms") {
+			layer = L.tileLayer.wms(source.url, {
+				layers: source.layers,
+				format: source.format,
+				transparent: source.transparent,
+				version: source.version,
+				minZoom: source.minZoom || 0,
+				maxZoom: source.maxZoom || 22,
+				attribution: source.attribution || ""
+			});
+		}
+		else{ return; }
+
+		if(this.wms) { this.removeLayer( this.wms ); }
+
+		this.wms = layer;
+
+		this.addLayer( this.wms );
+		this.wms.bringToFront();
+	},
 
 	getBasemap: function() {
 		if(this.basemap instanceof L.TileLayer) {
@@ -277,23 +339,27 @@ L.Map.include({
 			img.src = source.img;
 			await img.decode();
 
-			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
-			let zoom, bl, tr;
-			for(let i = 0; i < 18; i++) {
-				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
-				tr = L.CRS.EPSG3857.pointToLatLng(L.point(img.width, img.height), i);
-				if(bl.lat >= -85.06 && bl.lng >= -180
-				&& tr.lat <=  85.06 && tr.lng <=  180) {
-					zoom = i;
-					break;
-				}
+			let r = img.width / img.height;
+			let b = _SCENES.get( _SCENES.active ).bounds;
+			let bounds = [b[0], []];
+			let tlp = this.latLngToContainerPoint(b[0]),
+				brp = this.latLngToContainerPoint(b[1]);
+			let h = brp.y - tlp.y,
+				w = brp.x - tlp.x;
+
+			if(r >= 1) { // width >= height
+				let p = this.containerPointToLatLng([brp.x, tlp.y + w / r]);
+				bounds[1][0] = p.lat;
+				bounds[1][1] = p.lng;
+			}else{ // height > width
+				let p = this.containerPointToLatLng([tlp.x + r * h, brp.y]);
+				bounds[1][0] = p.lat;
+				bounds[1][1] = p.lng;
 			}
-			if(!zoom && zoom != 0) { return; }
-			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];
 
 			basemap = L.imageOverlay(source.img, bounds, {
 				zIndex: 0,
-				minZoom: 0, maxZoom: 22,
+				minZoom: 0, maxZoom: 1000,
 				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
 			});
 		}
@@ -306,6 +372,7 @@ L.Map.include({
 		this.presetZoom(this.basemap.options.minZoom, this.basemap.options.maxZoom);
 
 		this.addLayer( this.basemap );
+		this.basemap.bringToBack();
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 	},
@@ -427,7 +494,8 @@ L.Map.include({
 				blur:				o.options.overlayBlur,
 				grayscale:			o.options.overlayGrayscale,
 				brightness:			o.options.overlayBrightness,
-				transparency:		o.options.overlayTransparency
+				transparency:		o.options.overlayTransparency,
+				animationspeed:		o.options.animationspeed
 			};
 		}else
 		if(o instanceof L.Polygon) {
@@ -435,14 +503,15 @@ L.Map.include({
 				id:					o.options.id,
 				sceneId:			o.options.sceneId,
 				type:				o instanceof L.Rectangle ? "rectangle" : "polygon",
-				pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+				pos:				o.getLatLngs(),
 				label:				o.options.label,
 				dashed:				!!o.options.dashArray,
 				lineColor:			o.options.color,
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,
 				fillColor:			o.options.fillColor,
-				fillTransparency:	1 - o.options.fillOpacity
+				fillTransparency:	1 - o.options.fillOpacity,
+				animationspeed:		o.options.animationspeed
 			};
 		}else
 		if(o instanceof L.Polyline) {
@@ -450,15 +519,13 @@ L.Map.include({
 				id:				o.options.id,
 				sceneId:		o.options.sceneId,
 				type:			"polyline",
-				pos:			o.getLatLngs().map(e => {
-					if(!e.length) { return { lat: e.lat, lng: e.lng }; }
-					else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
-				}),
+				pos:			o.getLatLngs(),
 				label:			o.options.label,
 				dashed:			!!o.options.dashArray,
 				color:			o.options.color,
 				thickness:		o.options.weight,
-				transparency:	1 - o.options.opacity
+				transparency:	1 - o.options.opacity,
+				animationspeed:	o.options.animationspeed
 			};
 		}else
 		if(o instanceof L.Circle) {
@@ -475,7 +542,8 @@ L.Map.include({
 				lineThickness:		o.options.weight,
 				lineTransparency:	1 - o.options.opacity,
 				fillColor:			o.options.fillColor,
-				fillTransparency:	1 - o.options.fillOpacity
+				fillTransparency:	1 - o.options.fillOpacity,
+				animationspeed:		o.options.animationspeed
 			};
 		}else{ console.error("object type invalid"); }
 

@@ -10,7 +10,7 @@
 
 let _OPTIONS = {
 	aspectratio: 16/9,
-	animationspeed: 2000,
+	animationspeed: 2,
 	panningspeed: null
 };
 

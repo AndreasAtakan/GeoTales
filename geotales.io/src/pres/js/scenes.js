@@ -18,13 +18,11 @@ function Scenes() {
 		$("#sceneNav #prev").click(ev => { _SCENES.prev(); });
 		$("#sceneNav #next").click(ev => { _SCENES.next(); });
 
-		$("#bookmarks").css("display", "block");
-
 		this.bind();
 	};
 
 	this.reset = function() {
-		$("#bookmarks").css("display", "none");
+		//
 	};
 
 	this.get = function(id) {
@@ -86,10 +84,7 @@ function Scenes() {
 		this.active = id;
 
 		_TEXTBOXES.set(s.id);
-
-		_MAP.setBasemap(s.basemap);
-		_MAP.setObjects(s.id);
-		_MAP.setFlyTo(s.bounds);
+		_MAP.set(s.id);
 
 		setTimeout(() => { this.bind(); }, 151);
 	};
@@ -104,8 +99,11 @@ function Scenes() {
 		for(let i = 0; i < data.length; i++) {
 			let o = data[i];
 			let s = new Scene(o.id);
-			s.bounds = o.bounds; s.basemap = o.basemap;
-			s.bookmark = o.bookmark; s.title = o.title;
+			s.bounds = o.bounds;
+			s.wms = o.wms;
+			s.basemap = o.basemap;
+			s.bookmark = o.bookmark;
+			s.title = o.title;
 
 			if(s.bookmark) {
 				$("#bookmarks ul").append(`
@@ -124,6 +122,7 @@ function Scene(id) {
 	this.id = id || uuid();
 
 	this.bounds = null;
+	this.wms = null;
 	this.basemap = null;
 
 	this.bookmark = false;

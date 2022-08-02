@@ -55,6 +55,35 @@ window.onload = function(ev) {
 		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
 	});
 
+	$("#shareModal input#linkInput").val(`https://${_HOST}/pres.php?id=${_ID}`);
+	$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${_HOST}/pres.php?id=${_ID}`);
+	$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${_HOST}/pres.php?id=${_ID}&text=`);
+	$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${_HOST}/pres.php?id=${_ID}`);
+	$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${_HOST}/pres.php?id=${_ID}&media=&description=`);
+	$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${_HOST}/pres.php?id=${_ID}%0A`);
+	$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
+	$("#shareModal button#clone").click(ev => {
+		$("#loadingModal").modal("show");
+
+		$.ajax({
+			type: "POST",
+			url: "api/map.php",
+			data: {
+				"op": "clone",
+				"id": _ID,
+				"password": _PASSWORD
+			},
+			dataType: "json",
+			success: function(result, status, xhr) {
+				window.location.assign(`edit.php?id=${result.id}`);
+			},
+			error: function(xhr, status, error) {
+				console.log(xhr.status, error);
+				setTimeout(function() { $("#loadingModal").modal("hide"); $("#shareModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+			}
+		});
+	});
+
 	_TEXTBOXES = new Textboxes();
 
 	_MAP = L.map("map", {
@@ -83,6 +112,13 @@ window.onload = function(ev) {
 
 	document.addEventListener("_setup", ev => { init(); _MAP.setup(); _TEXTBOXES.setup(); _SCENES.setup(); });
 	document.addEventListener("_reset", ev => { _SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset(); reset(); });
+
+	setTimeout(function() {
+		$("button#closeAd").css("display", "block");
+	}, 5000);
+	$("button#closeAd").click(ev => {
+		$("#adsense").css("display", "none");
+	});
 
 
 
@@ -113,6 +149,7 @@ window.onload = function(ev) {
 	$("#passwordModal button#enter").click(ev => {
 		let password = $("#passwordModal input#passwordInput").val();
 		password = password === "" ? password : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
+		_PASSWORD = password;
 
 		$("#passwordModal").modal("hide");
 		$("#loadingModal").modal("show");

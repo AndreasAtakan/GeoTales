@@ -112,11 +112,11 @@ else
 if($op == "clone") {
 
 	if(!isset($_POST['id'])
-	|| !isset($_GET['password'])) {
+	|| !isset($_POST['password'])) {
 		http_response_code(422); exit;
 	}
 	$id = $_POST['id'];
-	$password = $_GET['password'];
+	$password = $_POST['password'];
 
 	$status_flag = false;
 	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");

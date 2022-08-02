@@ -173,14 +173,14 @@ function Scenes() {
 		$(`li[data-id="${s.id}"]`)[0].scrollIntoView({ behavior: "smooth", inline: "center" });
 
 		_TEXTBOXES.set(s.id);
-
-		_MAP.setBasemap(s.basemap);
-		_MAP.setObjects(s.id);
-		_MAP.setFlyTo(s.bounds);
+		_MAP.set(s.id);
 
 		this.setNumbering();
 	};
 
+	this.setWMS = function() {
+		this.store[ this.get(this.active).index ].setWMS();
+	};
 	this.setBasemap = function() {
 		this.store[ this.get(this.active).index ].setBasemap();
 	};
@@ -222,7 +222,9 @@ function Scenes() {
 
 		for(let o of data) {
 			let s = new Scene(o.id);
-			s.bounds = o.bounds; s.basemap = o.basemap;
+			s.bounds = o.bounds;
+			s.wms = o.wms;
+			s.basemap = o.basemap;
 
 			s.setBookmark(o.bookmark);
 			s.setTitle(o.title);
@@ -246,6 +248,7 @@ function Scene(id, prevId) {
 	this.id = id || uuid();
 
 	this.bounds = null;
+	this.wms = null;
 	this.basemap = null;
 
 	this.bookmark = false;
@@ -274,9 +277,8 @@ function Scene(id, prevId) {
 		_MAP.setFlyTo( this.bounds );
 	};
 
-	this.setBasemap = function() {
-		this.basemap = _MAP.getBasemap();
-	};
+	this.setWMS = function() { this.wms = _MAP.getWMS(); };
+	this.setBasemap = function() { this.basemap = _MAP.getBasemap(); };
 
 	this.setBookmark = function(b) {
 		this.bookmark = b;
@@ -300,6 +302,7 @@ function Scene(id, prevId) {
 		return {
 			id: this.id,
 			bounds: this.bounds,
+			wms: this.wms,
 			basemap: this.basemap,
 			bookmark: this.bookmark,
 			title: this.title

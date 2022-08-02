@@ -37,7 +37,7 @@ L.Map.addInitHook(function() {
 		states: [
 			{
 				stateName: "main",
-				onClick: function(button, map) { $("#basemapModal").modal("show"); },
+				onClick: function(button, map) { $("#basemapModal").modal("show"); init_img_basemaps(); },
 				title: "Change basemap",
 				icon: "fa-layer-group"
 			}
@@ -72,6 +72,10 @@ L.Map.addInitHook(function() {
 
 	this.basemap = _BASEMAPS[10].tiles;
 	this.addLayer( this.basemap );
+
+	// WMS
+
+	this.wms = {};
 
 
 
@@ -347,6 +351,8 @@ L.Map.include({
 				this.objects.push(o);
 			}
 		}
+
+		_SCENES.store[ _SCENES.get(sceneId).index ].setWMS();
 	},
 	deleteScene: function(sceneId) {
 		this.objects = this.objects.filter(o => o.sceneId != sceneId);
@@ -406,6 +412,14 @@ L.Map.include({
 				}
 			}
 		}
+	},
+
+	set: function(sceneId) {
+		let s = _SCENES.get(sceneId);
+		this.setBasemap(s.basemap);
+		this.setWMS(s.wms);
+		this.setObjects(sceneId);
+		this.setFlyTo(s.bounds);
 	},
 
 	insertObject: function(o) {
@@ -548,6 +562,55 @@ L.Map.include({
 
 
 
+	getWMS: function() {
+		return this.wms ? {
+			type: "wms",
+			url: this.wms._url,
+			layers: this.wms.options.layers,
+			format: this.wms.options.format,
+			version: this.wms.options.version,
+			transparent: this.wms.options.transparent
+		} : null;
+	},
+
+	setWMS: function(source) {
+		if(!source) {
+			this.wms = this.wms ?
+				this.removeLayer( this.wms ) :
+				null;
+			return;
+		}
+		if(this.wms
+		&& (source._url || source.url) == this.wms._url) {
+			return;
+		}
+
+		let layer;
+
+		if(source instanceof L.TileLayer.WMS) {
+			layer = source;
+		}else
+		if(source.type == "wms") {
+			layer = L.tileLayer.wms(source.url, {
+				layers: source.layers,
+				format: source.format,
+				transparent: source.transparent,
+				version: source.version,
+				minZoom: source.minZoom || 0,
+				maxZoom: source.maxZoom || 22,
+				attribution: source.attribution || ""
+			});
+		}
+		else{ return; }
+
+		if(this.wms) { this.removeLayer( this.wms ); }
+
+		this.wms = layer;
+
+		this.addLayer( this.wms );
+		this.wms.bringToFront();
+	},
+
 	getCenterBasemapTile: function() {
 		if(this.basemap instanceof L.ImageOverlay) {
 			return this.basemap._url;
@@ -609,32 +672,22 @@ L.Map.include({
 			img.src = source.img;
 			await img.decode();
 
-			// NOTE: finds the maximum zoom-level where the image extent does not exceed the map-projection extent
-			/*let zoom, bl, tr;
-			for(let i = 0; i < 18; i++) {
-				bl = L.CRS.EPSG3857.pointToLatLng(L.point(0, 0), i);
-				tr = L.CRS.EPSG3857.pointToLatLng(L.point(img.width, img.height), i);
-				if(bl.lat >= -85.06 && bl.lng >= -180
-				&& tr.lat <=  85.06 && tr.lng <=  180) {
-					zoom = i;
-					break;
-				}
-			}
-			if(!zoom && zoom != 0) { return; }
-			let bounds = [[bl.lat, bl.lng], [tr.lat, tr.lng]];*/
-			let tl = this.getBounds().getNorthWest(),
-				br = this.getBounds().getSouthEast();
-			let bounds = [[tl.lat, tl.lng], []];
-			let tlp = this.latLngToContainerPoint(tl),
-				brp = this.latLngToContainerPoint(br);
-			let h = brp.y - tlp.y;
+			let r = img.width / img.height;
+			let b = _SCENES.get( _SCENES.active ).bounds;
+			let bounds = [b[0], []];
+			let tlp = this.latLngToContainerPoint(b[0]),
+				brp = this.latLngToContainerPoint(b[1]);
+			let h = brp.y - tlp.y,
+				w = brp.x - tlp.x;
 
-			if(img.width >= img.height) {
-				bounds[1][0] = this.containerPointToLatLng([brp.x, tlp.y + img.height / h]);
-				bounds[1][1] = br.lng;
-			}else{
-				bounds[1][0] = br.lat;
-				bounds[1][1] = this.containerPointToLatLng([brp.x, tlp.y + img.height / h]);
+			if(r >= 1) { // width >= height
+				let p = this.containerPointToLatLng([brp.x, tlp.y + w / r]);
+				bounds[1][0] = p.lat;
+				bounds[1][1] = p.lng;
+			}else{ // height > width
+				let p = this.containerPointToLatLng([tlp.x + r * h, brp.y]);
+				bounds[1][0] = p.lat;
+				bounds[1][1] = p.lng;
 			}
 
 			basemap = L.imageOverlay(source.img, bounds, {
@@ -653,6 +706,7 @@ L.Map.include({
 		this.presetZoom(this.basemap.options.minZoom, this.basemap.options.maxZoom);
 
 		this.addLayer( this.basemap );
+		this.basemap.bringToBack();
 
 		$("div.leaflet-control-attribution a").prop("target", "_blank");
 		save_data();
@@ -785,7 +839,7 @@ L.Map.include({
 				id:					o.options.id,
 				sceneId:			o.options.sceneId,
 				type:				o instanceof L.Rectangle ? "rectangle" : "polygon",
-				pos:				o.getLatLngs().map(e => e.map(f => { return { lat: f.lat, lng: f.lng }; })),
+				pos:				o.getLatLngs(),
 				label:				o.options.label,
 				dashed:				!!o.options.dashArray,
 				lineColor:			o.options.color,
@@ -801,10 +855,7 @@ L.Map.include({
 				id:				o.options.id,
 				sceneId:		o.options.sceneId,
 				type:			"polyline",
-				pos:			o.getLatLngs().map(e => {
-					if(!e.length) { return { lat: e.lat, lng: e.lng }; }
-					else{ return e.map(f => { return { lat: f.lat, lng: f.lng }; }); }
-				}),
+				pos:			o.getLatLngs(),
 				label:			o.options.label,
 				dashed:			!!o.options.dashArray,
 				color:			o.options.color,

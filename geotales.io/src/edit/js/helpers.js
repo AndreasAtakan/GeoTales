@@ -60,7 +60,8 @@ function import_geojson(data, options) {
 			};
 		}else
 		if(f.properties.type == "polyline"
-		|| f.geometry.type == "LineString") {
+		|| f.geometry.type == "LineString"
+		|| f.geometry.type == "MultiLineString") {
 			o = {
 				id:				uuid(),
 				sceneId:		_SCENES.active,
@@ -75,7 +76,8 @@ function import_geojson(data, options) {
 		}else
 		if(f.properties.type == "polygon"
 		|| f.properties.type == "rectangle"
-		|| f.geometry.type == "Polygon") {
+		|| f.geometry.type == "Polygon"
+		|| f.geometry.type == "MultiPolygon") {
 			o = {
 				id:					uuid(),
 				sceneId:			_SCENES.active,
@@ -233,9 +235,7 @@ function get_basemap(url) {
 	return null;
 }
 
-function init_basemaps() {
-	generate_basemaps();
-
+function bind_basemaps() {
 	$("#basemapModal #basemaps").off("click");
 	$("#basemapModal #basemaps").click(async function(ev) {
 		let index = $(ev.target).data("basemap");
@@ -244,6 +244,16 @@ function init_basemaps() {
 		await _MAP.setBasemap( _BASEMAPS[index].tiles );
 		_SCENES.setBasemap();
 	});
+
+	$("#basemapModal button#uploadBasemap").click(function(ev) {
+		$("#basemapModal input#basemapFile").click();
+	});
+}
+function init_basemaps() {
+	generate_basemaps(false); bind_basemaps();
+}
+function init_img_basemaps() {
+	generate_basemaps(true); bind_basemaps();
 }
 
 

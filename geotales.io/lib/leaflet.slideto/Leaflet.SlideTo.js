@@ -24,6 +24,7 @@ L.ImageOverlay.include({
 		this._slideFromBounds = this.getBounds();
 		this._slideToBounds   = L.latLngBounds(bounds);
 
+		if(this._slideFromBounds.equals(this._slideToBounds)) { return; }
 		this.fire("movestart");
 		this._slideTo();
 
@@ -91,6 +92,41 @@ L.Polyline.include({
 		this._slideFromLatLngs = this.getLatLngs();
 		this._slideToLatLngs   = latlngs;
 
+		if(this.getBounds().equals(L.polyline(latlngs).getBounds())) {
+			let c = true;
+			let check = (a,b) => {
+				let l = Math.min(a.length, b.length);
+				if(l < 200) {
+					for(let i of a) {
+						for(let j of b) {
+							if(!L.latLng(i).equals(L.latLng(j))) {
+								c = false; return;
+							}
+						}
+					}
+				}else{
+					for(let i = 0; i < l*0.02; i++) {
+						let r = Math.floor(Math.random() * l);
+						if(!L.latLng(a[r]).equals(L.latLng(b[r]))) {
+							c = false; return;
+						}
+					}
+				}
+			};
+			let reduce = (a,b) => {
+				if(Array.isArray(a[0]) && Array.isArray(b[0])) {
+					for(let i of a) { for(let j of b) { reduce(i, j); } }
+				}else if(Array.isArray(a[0])) {
+					for(let i of a) { reduce(i, b); }
+				}else if(Array.isArray(b[0])) {
+					for(let j of b) { reduce(a, j); }
+				}else{ check(a, b); }
+			};
+			reduce(this._slideToLatLngs, this._slideFromLatLngs);
+
+			if(c) { return; }
+		}
+
 		this.fire("movestart");
 		this._slideTo();
 
@@ -114,17 +150,31 @@ L.Polyline.include({
 
 		let percentDone = (this._slideToDuration - remaining) / this._slideToDuration;
 
-		let currLatLngs = [];
-		for(let i = 0; i < Math.min(this._slideFromLatLngs.length, this._slideToLatLngs.length); i++) {
-			let curr = this._map.latLngToContainerPoint( this._slideToLatLngs[i] )
-				.multiplyBy(percentDone)
-				.add(
-					this._map.latLngToContainerPoint( this._slideFromLatLngs[i] )
-						.multiplyBy(1 - percentDone)
-				);
-			currLatLngs.push( this._map.containerPointToLatLng(curr) );
-		}
-		this.setLatLngs(currLatLngs);
+		let f = (a,b) => {
+			if(Array.isArray(a[0]) && Array.isArray(b[0])) {
+				let r = [];
+				for(let i = 0; i < Math.min(a.length, b.length); i++) {
+					r.push( f(a[i], b[i]) );
+				}
+				return r;
+			}else{
+				let r = [];
+				for(let i = 0; i < Math.min(a.length, b.length); i++) {
+					r.push(
+						this._map.containerPointToLatLng(
+							this._map.latLngToContainerPoint( b[i] )
+							.multiplyBy(percentDone)
+							.add(
+								this._map.latLngToContainerPoint( a[i] )
+								.multiplyBy(1 - percentDone)
+							)
+						)
+					);
+				}
+				return r;
+			}
+		};
+		this.setLatLngs( f(this._slideFromLatLngs, this._slideToLatLngs) );
 
 		this._slideFrame = L.Util.requestAnimFrame(this._slideTo, this);
 	}
@@ -137,7 +187,7 @@ L.Polyline.addInitHook(function() {
 
 
 
-L.Polygon.include({
+/*L.Polygon.include({
 
 	_slideTo: function _slideTo() {
 		if(!this._map) { return; }
@@ -171,7 +221,7 @@ L.Polygon.include({
 		this._slideFrame = L.Util.requestAnimFrame(this._slideTo, this);
 	}
 
-});
+});*/
 
 
 
@@ -193,6 +243,9 @@ L.Circle.include({
 		this._slideToLatLng   = latlng;
 		this._slideFromRadius = this.getRadius();
 		this._slideToRadius   = options.radius;
+
+		if(this._slideFromLatLng.equals(this._slideToLatLng)
+		&& this._slideFromRadius == this._slideToRadius) { return; }
 
 		this.fire("movestart");
 		this._slideTo();
