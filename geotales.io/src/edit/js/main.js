@@ -80,7 +80,7 @@ window.onload = function(ev) {
 
 
 
-	$("#optionsModal input#animationSpeed").change(function(ev) { _OPTIONS.animationspeed = $(this).val(); });
+	$("#optionsModal input#animationSpeed").change(function(ev) { _OPTIONS.animationspeed = $(this).val() * 1000; });
 	$("#optionsModal input#panningSpeed").change(function(ev) { _OPTIONS.panningspeed = $(this).val() || null; });
 	$("#optionsModal select#aspectRatio").change(function(ev) { _MAP.setAspectRatio( eval( this.value ) ); });
 	$("#optionsModal input#objectsOptIn").change(function(ev) { _OPTIONS.objectOptIn = this.checked; });

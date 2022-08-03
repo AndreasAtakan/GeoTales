@@ -347,7 +347,7 @@ function bind_setup(o) {
 	}else{ console.error("object type invalid"); }
 
 	$(".objectPopup input#animationSpeed").change(function(ev) {
-		o.options.animationspeed = Math.min( Math.max( $(this).prop("min"), $(this).val() ), $(this).prop("max") );
+		o.options.animationspeed = Math.min( Math.max( $(this).prop("min"), $(this).val() ), $(this).prop("max") ) * 1000;
 		_MAP.updateObject(o);
 	});
 

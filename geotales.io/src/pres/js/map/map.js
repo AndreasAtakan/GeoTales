@@ -189,7 +189,7 @@ L.Map.include({
 
 				for(let oo of os) {
 					if(o.id == oo.id) {
-						object.slideTo( pos , { radius: rad, duration: oo.animationspeed * 1000 || _OPTIONS.animationspeed * 1000 });
+						object.slideTo( pos , { radius: rad, duration: oo.animationspeed || _OPTIONS.animationspeed });
 						break;
 					}
 				}

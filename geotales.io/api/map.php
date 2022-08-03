@@ -30,21 +30,21 @@ if($op == "read") {
 	$id = $_GET['id'];
 	$password = $_GET['password'];
 
-	$status_flag = false;
+	$status_flag = true;
 	if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
 		$uid = $_SESSION['uid'];
 		$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
 		$stmt->execute([$uid, $id]);
 		$row = $stmt->fetch();
-		$status_flag = $row['st'] == "t";
+		$status_flag = $row['st'] ?? false;
 	}
 
 	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
 	$row = $stmt->fetch();
-	if($row['pw'] == "t"
+	if($row['pw']
 	&& $row['password'] != $password
-	&& $status_flag == true) { http_response_code(401); exit; }
+	&& $status_flag) { http_response_code(401); exit; }
 
 	$stmt = $PDO->prepare("SELECT data FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
@@ -118,20 +118,20 @@ if($op == "clone") {
 	$id = $_POST['id'];
 	$password = $_POST['password'];
 
-	$status_flag = false;
+	$status_flag = true;
 	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
 	$stmt->execute([$uid, $id]);
 	$row = $stmt->fetch();
-	$status_flag = $row['st'] == "t";
+	$status_flag = $row['st'] ?? false;
 
 	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
 	$row = $stmt->fetch();
-	if($row['pw'] == "t"
+	if($row['pw']
 	&& $row['password'] != $password
-	&& $status_flag == true) { http_response_code(401); exit; }
+	&& $status_flag) { http_response_code(401); exit; }
 
-	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description, preview, data) VALUES ( SELECT title, description, preview, data FROM \"Map\" WHERE id = ? ) RETURNING id");
+	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description, preview, data) SELECT CONCAT('Copy of ', title) AS title, description, preview, data FROM \"Map\" WHERE id = ? RETURNING id");
 	$stmt->execute([$id]);
 	$new_id = $stmt->fetchColumn();
 
@@ -155,7 +155,7 @@ else{
 	$stmt->execute([$uid, $id]);
 	$row = $stmt->fetch();
 
-	if($row['st'] == "t") { http_response_code(401); exit; }
+	if( $row['st'] ) { http_response_code(401); exit; }
 
 	if($op == "edit") {
 

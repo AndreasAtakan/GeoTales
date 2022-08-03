@@ -284,7 +284,7 @@ $row = $stmt->fetch();
 					</div>
 
 					<?php
-						if((!$logged_in || !$paid) && !$TESTING) {
+						if((!$logged_in || !$paid) && !$TESTING && false) {
 					?>
 							<div class="card" id="adsense">
 								<div class="card-header">
@@ -328,8 +328,8 @@ $row = $stmt->fetch();
 		<script type="text/javascript">
 			const _ID = `<?php echo $id; ?>`,
 				  _TITLE = `<?php echo $row['title']; ?>`,
-				  _HOST = window.location.host,
-				  _PASSWORD = "";
+				  _HOST = window.location.host;
+			let _PASSWORD = "";
 		</script>
 
 		<!-- Load src/ JS -->

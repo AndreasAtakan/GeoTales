@@ -82,7 +82,7 @@ function Textbox(id) {
 				break;
 
 			case "right":
-				$("#textbox").css({ left: "auto", right: "65px" });
+				$("#textbox").css({ left: "auto", right: "85px" });
 				break;
 
 			default: break;

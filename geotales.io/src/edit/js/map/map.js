@@ -406,7 +406,7 @@ L.Map.include({
 
 				for(let oo of os) {
 					if(o.id == oo.id) {
-						object.slideTo( pos , { radius: rad, duration: oo.animationspeed * 1000 || _OPTIONS.animationspeed * 1000 });
+						object.slideTo( pos , { radius: rad, duration: oo.animationspeed || _OPTIONS.animationspeed });
 						break;
 					}
 				}
@@ -494,15 +494,16 @@ L.Map.include({
 	globalObjectOptions: function(object) {
 		let o = this.extractObject(object);
 		delete o.id; delete o.sceneId; delete o.type; delete o.pos;
+		if(object instanceof L.Circle) { delete o.radius; }
 
 		for(let i = 0; i < this.objects.length; i++) {
 			let oo = this.objects[i];
-			if(oo.id == id && oo.sceneId != object.options.sceneId) {
+			if(oo.id == object.options.id && oo.sceneId != object.options.sceneId) {
 				this.objects[i] = Object.assign({}, oo, o);
 			}
 		}
 
-		object = this.fadeLayer.getObject(id);
+		var object = this.fadeLayer.getObject(object.options.id);
 		if(object) {
 			this.fadeLayer.removeLayer(object);
 
