@@ -576,13 +576,14 @@ L.Map.include({
 
 	setWMS: function(source) {
 		if(!source) {
-			this.wms = this.wms ?
-				this.removeLayer( this.wms ) :
-				null;
+			this.wms = this.wms ? this.removeLayer( this.wms ) : null;
 			return;
 		}
 		if(this.wms
-		&& (source._url || source.url) == this.wms._url) {
+		&& (source.url || source._url) == this.wms._url
+		&& (source.layers || source.options.layers) == this.wms.options.layers
+		&& (source.format || source.options.format) == this.wms.options.format
+		&& (source.version || source.options.version) == this.wms.options.version) {
 			return;
 		}
 

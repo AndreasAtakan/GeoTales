@@ -241,27 +241,27 @@ $row = $stmt->fetch();
 					</div>
 
 					<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
-						<button type="button" class="btn btn-outline-light" id="prev">
+						<button type="button" class="btn btn-light" id="prev">
 							<i class="fas fa-chevron-left"></i>
 						</button>
-						<button type="button" class="btn btn-outline-light px-3" id="fullscreen">
+						<button type="button" class="btn btn-light px-3" id="fullscreen">
 							<i class="fas fa-expand"></i>
 						</button>
 						<div role="group" class="btn-group btn-group-sm dropup" id="bookmarks">
-							<button type="button" class="btn btn-outline-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+							<button type="button" class="btn btn-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 								<i class="fas fa-bookmark"></i>
 							</button>
 							<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
 								<li><h6 class="dropdown-header">Bookmarks</h6></li>
 							</ul>
 						</div>
-						<button type="button" class="btn btn-outline-light" id="next">
+						<button type="button" class="btn btn-light" id="next">
 							<i class="fas fa-chevron-right"></i>
 						</button>
 					</div>
 
 					<div class="dropdown" id="extraNav">
-						<button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+						<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
 						</button>
 						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown" style="min-width: 0;">
@@ -272,13 +272,13 @@ $row = $stmt->fetch();
 					</div>
 
 					<div role="group" class="btn-group-vertical btn-group-sm" id="mapNav" aria-label="Map navigation">
-						<button type="button" class="btn btn-outline-light" id="zoomIn" disabled>
+						<button type="button" class="btn btn-light" id="zoomIn" disabled>
 							<i class="fas fa-plus"></i>
 						</button>
-						<button type="button" class="btn btn-outline-light" id="panLock">
+						<button type="button" class="btn btn-light" id="panLock">
 							🔒
 						</button>
-						<button type="button" class="btn btn-outline-light" id="zoomOut" disabled>
+						<button type="button" class="btn btn-light" id="zoomOut" disabled>
 							<i class="fas fa-minus"></i>
 						</button>
 					</div>

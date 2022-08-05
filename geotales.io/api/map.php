@@ -249,7 +249,8 @@ Created by: @{$username}",
 		$stmt = $PDO->prepare("SELECT post FROM \"Map\" WHERE id = ?");
 		$stmt->execute([$id]);
 		$row = $stmt->fetch();
-		$post_id = end( explode("/", $row['post']) );
+		$p = explode("/", $row['post']);
+		$post_id = end($p);
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
