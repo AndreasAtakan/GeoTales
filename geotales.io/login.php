@@ -79,7 +79,7 @@ else{ // redirect to SSO
 		$nonce = hash('sha512', mt_rand());
 		$_SESSION['nonce'] = $nonce;
 
-		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "https://{$CONFIG['host']}/login.php?return_url=$loc")));
+		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "{$CONFIG['host']}/login.php?return_url=$loc")));
 		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['sso_secret'])));
 		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
 

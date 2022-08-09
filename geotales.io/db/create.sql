@@ -12,7 +12,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS "User"(
 	uid int NOT NULL,
 	paid bool DEFAULT false,
-	payment text,
+	stripe_id text,
 
 	PRIMARY KEY (uid)
 );

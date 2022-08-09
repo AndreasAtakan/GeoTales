@@ -1,7 +1,7 @@
 ## TODO
 
 - Biz:
-	* Registrere AS hos Stripe for nettbetaling
+	* (WIP) Registrere AS hos Stripe for nettbetaling
 	* IN markedsavklaring
 
 

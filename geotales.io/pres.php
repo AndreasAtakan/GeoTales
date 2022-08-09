@@ -24,7 +24,7 @@ if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
 	$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
 	$stmt->execute([$uid]);
 	$row = $stmt->fetch();
-	$paid = $row['paid'] == "t";
+	$paid = $row['paid'];
 }
 
 if(!isset($_GET['id'])) {

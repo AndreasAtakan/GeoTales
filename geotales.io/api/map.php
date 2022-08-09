@@ -220,8 +220,8 @@ else{
 		));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
 			"title" => $row['title'],
-			"raw" => "<iframe src=\"https://{$CONFIG['host']}/pres.php?id=$id\" width=\"100%\" height=\"550\" allowfullscreen=\"true\" style=\"border:none !important;\"></iframe>
-<a href=\"https://{$CONFIG['host']}/pres.php?id=$id\" target=\"_blank\">Open in separate window</a>
+			"raw" => "<iframe src=\"{$CONFIG['host']}/pres.php?id=$id\" width=\"100%\" height=\"550\" allowfullscreen=\"true\" style=\"border:none !important;\"></iframe>
+<a href=\"{$CONFIG['host']}/pres.php?id=$id\" target=\"_blank\">Open in separate window</a>
 
 {$row['description']}
 

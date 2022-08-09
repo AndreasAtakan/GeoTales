@@ -28,7 +28,7 @@ window.onload = function(ev) {
 	}).on("resizeend", function() { _MAP.setAspectRatio(); });
 
 	// Set up nav-btn-fade-out
-	let btnTimer = null, btnFadeTime = 3000,
+	let btnTimer = null, btnFadeTime = 5000,
 		btnToggle = v => { $("#mapNav, #sceneNav, #extraNav").css("opacity", v || 0); };
 	$(window).on("mousemove", function() {
 		btnToggle(1); clearTimeout(btnTimer);

@@ -33,7 +33,7 @@ try {
 
 $TESTING = true;
 $CONFIG = array(
-	"host" => $_SERVER['SERVER_NAME'],
+	"host" => $TESTING ? "http://localhost/geotales" : "https://{$_SERVER['SERVER_NAME']}",
 	"forum_host" => "forum.geotales.io",
 	"email" => "contact@geotales.io",
 
@@ -45,5 +45,11 @@ $CONFIG = array(
 	"aws_access_key_id" => "AKIA5RSTXAFR7IU7J467", // secret
 	"aws_secret_access_key" => "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", // secret
 	"aws_bucket_name" => "geotales", // secret
-	"aws_region" => "eu-north-1" // secret
+	"aws_region" => "eu-north-1", // secret
+
+	"stripe_publishable_key_live" => "pk_live_51LUu5CHd8g1LTf9TjhRd9vfUpk5sctMg2HpeyNRHxU14IWuqavOOlSXYdOfx2GF3Bl6QQ9N7KRswdITm40S0NeYj00Oqfxraht",
+	"stripe_secret_key_live" => "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", // secret
+	"stripe_publishable_key_test" => "pk_test_51LUu5CHd8g1LTf9T1EmnnA4u8pEN9KrUuF2LJOQBMt9u22sCUaTBw43L6dhKYyG2daCrMNeHFEyBNjigxlmhQpRf00u2N9fFaQ",
+	"stripe_secret_key_test" => "sk_test_51LUu5CHd8g1LTf9TmgT5T4M5QeBi7RRtFCGv5rlfMX2gwRuQ0Go5hGUqwmkBXpVdOt959kBD9ylhDyhq9ZbMU3gq00zr9sNaVS", // secret
+	"stripe_price_id" => $TESTING ? "price_1LUv2YHd8g1LTf9TTDZSSXLW" : "price_1LUvHNHd8g1LTf9TE4dPmf5g" // secret
 );

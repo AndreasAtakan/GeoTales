@@ -19,8 +19,14 @@ include_once("api/helper.php");
 if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
 	header("location: login.php?return_url=settings.php"); exit;
 }
+$uid = $_SESSION['uid'];
 $username = $_SESSION['username'];
 $avatar = getAvatar($CONFIG['forum_host'], $username);
+
+$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
+$stmt->execute([$uid]);
+$row = $stmt->fetch();
+$paid = $row['paid'];
 
 ?>
 
@@ -56,6 +62,40 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 		</style>
 	</head>
 	<body>
+
+		<!-- Loading modal -->
+		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadingModalLabel">Loading</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Error modal -->
+		<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="errorModalLabel">Error</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Something went wrong. Please try again.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
 
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
@@ -109,40 +149,26 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 					</div>
 				</div>
 
-				<div class="row mx-auto" style="max-width: 950px;">
+				<div class="row mx-auto mb-5" style="max-width: 950px;">
 					<div class="col">
-						<h3>Add payment method</h3>
-						<p>
-							For <strong>$5 / month</strong>, you get unlimited maps.
-						</p>
+						<h2>Settings</h2>
+						<p>Your account settings</p>
 					</div>
 				</div>
 
-				<div class="row mx-auto" style="max-width: 950px;">
+				<div class="row">
 					<div class="col">
-						<form>
-							<div class="row my-3">
-								<div class="col">
-									<label for="cardInput" class="form-label">Card number</label>
-									<input type="number" class="form-control" id="cardInput" aria-describedby="cardHelp" />
-									<div id="cardHelp" class="form-text">12-digit number</div>
-								</div>
-							</div>
-							<div class="row my-3">
-								<div class="col-6">
-									<label for="expiryInput" class="form-label">Expiry date</label>
-									<div class="input-group">
-										<input type="number" class="form-control" id="expiryMonthInput" placeholder="Month" aria-label="Month" aria-describedby="expiryInput" min="1" max="12" />
-										<input type="number" class="form-control" id="expiryYearInput" placeholder="Year" aria-label="Year" aria-describedby="expiryInput" min="2010" />
-									</div>
-								</div>
-								<div class="col-6">
-									<label for="cvvInput" class="form-label">CVV</label>
-									<input type="number" class="form-control" id="cvvInput" />
-								</div>
-							</div>
-							<button type="button" class="btn btn-primary">Save</button> <!-- type="submit" -->
-						</form>
+
+				<?php if($paid) { ?>
+						<button type="button" class="btn btn-outline-secondary" id="managePayment">Manage your subscription</button>
+				<?php }else{ ?>
+						<button type="button" class="btn btn-outline-secondary" id="addPayment">Add subscription</button>
+				<?php } ?>
+
+						<p class="text-muted mt-4">
+							With a free account you can only create 5 maps. <br />
+							By adding a subscription, you will get <strong>unlimited maps</strong>.
+						</p>
 					</div>
 				</div>
 
@@ -176,7 +202,7 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 						</center>
 					</div>
 					<div class="col-sm-4 mt-2">
-						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo "https://{$CONFIG['host']}"; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
+						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
 							<a class="text-decoration-none" href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
 							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
@@ -195,7 +221,7 @@ $avatar = getAvatar($CONFIG['forum_host'], $username);
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<!--script type="text/javascript" src="src/settings.js"></script-->
+		<script type="text/javascript" src="src/settings.js"></script>
 
 	</body>
 </html>
