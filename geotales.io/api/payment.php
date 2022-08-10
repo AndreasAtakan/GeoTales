@@ -39,13 +39,15 @@ if($op == "create_checkout_session") {
 
 	if($row['paid']) { http_response_code(500); exit; }
 	if(is_null($stripe_id)) {
+		$email = getEmail($CONFIG['forum_host'], $username);
+
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/customers");
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
 		curl_setopt($ch, CURLOPT_USERPWD, $TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, "name={$username}");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, "name={$username}&email={$email}");
 		$res = curl_exec($ch);
 		curl_close($ch);
 		$res = json_decode($res, true);

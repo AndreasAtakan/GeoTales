@@ -42,6 +42,18 @@ function getAvatar($host, $username) {
 	return "https://{$host}{$res}";
 }
 
+//
+function getEmail($host, $username) {
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_URL, "https://$host/u/$username/emails.json");
+	$res = curl_exec($ch);
+	curl_close($ch);
+	$res = json_decode($res, true);
+
+	return isset($res['email']) ? $res['email'] : null;
+}
+
 
 
 //
