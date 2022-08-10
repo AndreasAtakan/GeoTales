@@ -19,7 +19,8 @@ $payload = file_get_contents("php://input");
 $data = json_decode($payload, true);
 
 
-if($_SERVER['X-Discourse-Event'] == "user_destroyed") {
+if(isset($_SERVER['X-Discourse-Event'])
+&& $_SERVER['X-Discourse-Event'] == "user_destroyed") {
 
 	$sha = hash_hmac("sha256", $payload, $CONFIG['discourse_webhooks_secret']);
 	if($_SERVER['X-Discourse-Event-Signature'] != $sha) {
@@ -50,32 +51,35 @@ if($_SERVER['X-Discourse-Event'] == "user_destroyed") {
 
 }
 else
-if($data['type'] == "customer.subscription.created"
-|| $data['type'] == "customer.subscription.deleted") {
+if(isset($data['type'])) {
 
-	$prod = $data['data']['object']['items']['data'][0]['price']['product'];
-	$cust = $data['data']['object']['customer'];
-	$paid = $data['type'] == "customer.subscription.created";
+	if($data['type'] == "customer.subscription.created"
+	|| $data['type'] == "customer.subscription.deleted") {
 
-	if($prod == $CONFIG['stripe_product_id']) {
-		$stmt = $PDO->prepare("UPDATE \"User\" SET paid = ? WHERE stripe_id = ?");
-		$stmt->execute([$paid, $cust]);
+		$prod = $data['data']['object']['items']['data'][0]['price']['product'];
+		$cust = $data['data']['object']['customer'];
+		$paid = $data['type'] == "customer.subscription.created";
+
+		if($prod == $CONFIG['stripe_product_id']) {
+			$stmt = $PDO->prepare("UPDATE \"User\" SET paid = ? WHERE stripe_id = ?");
+			$stmt->execute([$paid, $cust]);
+		}
+		else{ http_response_code(500); exit; }
+
+		http_response_code(200); exit;
+
 	}
-	else{ http_response_code(500); exit; }
+	else
+	if($data['type'] == "customer.deleted") {
 
-	http_response_code(200); exit;
+		$stripe_id = $data['data']['object']['id'];
+		$stmt = $PDO->prepare("UPDATE \"User\" SET paid = false, stripe_id = null WHERE stripe_id = ?");
+		$stmt->execute([$stripe_id]);
 
-}
-else
-if($data['type'] == "customer.deleted") {
+		http_response_code(200); exit;
 
-	$stripe_id = $data['data']['object']['id'];
-	$stmt = $PDO->prepare("UPDATE \"User\" SET paid = false, stripe_id = null WHERE stripe_id = ?");
-	$stmt->execute([$stripe_id]);
-
-	http_response_code(200); exit;
+	}
+	else{ exit; }
 
 }
-else{
-	http_response_code(501); exit;
-}
+else{ exit; }

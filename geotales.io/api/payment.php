@@ -90,9 +90,7 @@ if($op == "create_portal_session") {
 	curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/billing_portal/sessions");
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
-	curl_setopt($ch, CURLOPT_USERPWD,
-		$TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']
-	);
+	curl_setopt($ch, CURLOPT_USERPWD, $TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, "customer={$row['stripe_id']}&
 										  return_url={$CONFIG['host']}/settings.php");
 	$res = curl_exec($ch);
