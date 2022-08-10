@@ -30,7 +30,7 @@ if(isset($_GET['sso']) && isset($_GET['sig'])) { // arriving from SSO
 	$sig = $_GET['sig'];
 
 	// validate sso
-	if(hash_hmac('sha256', urldecode($sso), $CONFIG['sso_secret']) !== $sig) {
+	if(hash_hmac('sha256', urldecode($sso), $CONFIG['discourse_sso_secret']) !== $sig) {
 		http_response_code(404); exit;
 	}
 
@@ -80,7 +80,7 @@ else{ // redirect to SSO
 		$_SESSION['nonce'] = $nonce;
 
 		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "{$CONFIG['host']}/login.php?return_url=$loc")));
-		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['sso_secret'])));
+		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['discourse_sso_secret'])));
 		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
 
 		header("location: $url");

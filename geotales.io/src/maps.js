@@ -32,7 +32,9 @@ window.onload = function(ev) {
 			},
 			error: function(xhr, status, error) {
 				console.log(xhr.status, error);
-				setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+
+				if(xhr.status == 401) { window.location.assign("settings.php"); }
+				else{ setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750); }
 			}
 		});
 	});

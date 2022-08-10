@@ -6,7 +6,7 @@
 
 
 - Overall:
-	* (How?) Implement Stripe payment
+	* (WIP) Implement Stripe payment
 	* (Fixed?) Reklamespalte i pres-modus for ubetalte brukere
 - Edit-mode:
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform

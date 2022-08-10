@@ -65,6 +65,15 @@ if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
 $uid = $_SESSION['uid'];
 $username = $_SESSION['username'];
 
+$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
+$stmt->execute([$uid]);
+$row = $stmt->fetch();
+$paid = $row['paid'];
+$stmt = $PDO->prepare("SELECT COUNT(id) <= 5 AS is_within FROM \"User_Map\" WHERE user_id = ? AND status = 'owner'");
+$stmt->execute([$uid]);
+$row = $stmt->fetch();
+$map_count_ok = $row['is_within'];
+
 
 
 if($op == "create") {
@@ -75,6 +84,8 @@ if($op == "create") {
 	}
 	$title = $_POST['title'];
 	$description = $_POST['description'];
+
+	if(!$paid && !$map_count_ok) { http_response_code(401); exit; }
 
 	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description) VALUES (?, ?) RETURNING id");
 	$stmt->execute([$title, $description]);
@@ -117,6 +128,8 @@ if($op == "clone") {
 	}
 	$id = $_POST['id'];
 	$password = $_POST['password'];
+
+	if(!$paid && !$map_count_ok) { http_response_code(401); exit; }
 
 	$status_flag = true;
 	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
@@ -215,7 +228,7 @@ else{
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			"Content-Type: application/json",
-			"Api-Key: {$CONFIG['apikey']}",
+			"Api-Key: {$CONFIG['discourse_apikey']}",
 			"Api-Username: {$username}"
 		));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
@@ -258,7 +271,7 @@ Created by: @{$username}",
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			//"Content-Type: application/json",
-			"Api-Key: {$CONFIG['apikey']}",
+			"Api-Key: {$CONFIG['discourse_apikey']}",
 			"Api-Username: {$username}"
 		));
 		$res = curl_exec($ch);

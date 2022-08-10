@@ -28,7 +28,7 @@ if(!$TESTING) {
 	curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/admin/users/$uid/log_out.json");
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		"Api-Key: {$CONFIG['apikey']}",
+		"Api-Key: {$CONFIG['discourse_apikey']}",
 		"Api-Username: system"
 	));
 	$res = curl_exec($ch);
