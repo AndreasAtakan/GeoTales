@@ -31,10 +31,10 @@ try {
 
 // config
 
-$TESTING = true;
+$TESTING = false;
 $CONFIG = array(
 	"host" => $TESTING ? "http://localhost/geotales" : "https://{$_SERVER['SERVER_NAME']}",
-	"forum_host" => "forum.geotales.io",
+	"forum_host" => "https://forum.geotales.io",
 	"email" => "contact@geotales.io",
 
 	//"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017", // old
@@ -47,10 +47,9 @@ $CONFIG = array(
 	"aws_bucket_name" => "geotales", // secret
 	"aws_region" => "eu-north-1", // secret
 
-	"stripe_publishable_key_live" => "pk_live_51LUu5CHd8g1LTf9TjhRd9vfUpk5sctMg2HpeyNRHxU14IWuqavOOlSXYdOfx2GF3Bl6QQ9N7KRswdITm40S0NeYj00Oqfxraht",
-	"stripe_secret_key_live" => "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", // secret
-	"stripe_publishable_key_test" => "pk_test_51LUu5CHd8g1LTf9T1EmnnA4u8pEN9KrUuF2LJOQBMt9u22sCUaTBw43L6dhKYyG2daCrMNeHFEyBNjigxlmhQpRf00u2N9fFaQ",
-	"stripe_secret_key_test" => "sk_test_51LUu5CHd8g1LTf9TmgT5T4M5QeBi7RRtFCGv5rlfMX2gwRuQ0Go5hGUqwmkBXpVdOt959kBD9ylhDyhq9ZbMU3gq00zr9sNaVS", // secret
+	"stripe_publishable_key" => $TESTING ? "pk_test_51LUu5CHd8g1LTf9T1EmnnA4u8pEN9KrUuF2LJOQBMt9u22sCUaTBw43L6dhKYyG2daCrMNeHFEyBNjigxlmhQpRf00u2N9fFaQ" : "pk_live_51LUu5CHd8g1LTf9TjhRd9vfUpk5sctMg2HpeyNRHxU14IWuqavOOlSXYdOfx2GF3Bl6QQ9N7KRswdITm40S0NeYj00Oqfxraht",
+	"stripe_secret_key" => $TESTING ? "sk_test_51LUu5CHd8g1LTf9TmgT5T4M5QeBi7RRtFCGv5rlfMX2gwRuQ0Go5hGUqwmkBXpVdOt959kBD9ylhDyhq9ZbMU3gq00zr9sNaVS" : "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", // secret
 	"stripe_price_id" => $TESTING ? "price_1LUv2YHd8g1LTf9TTDZSSXLW" : "price_1LUvHNHd8g1LTf9TE4dPmf5g", // secret
-	"stripe_product_id" => $TESTING ? "prod_MDLkgjpY91RExH" : "prod_MDLzrJl69Fqrib" // secret
+	"stripe_product_id" => $TESTING ? "prod_MDLkgjpY91RExH" : "prod_MDLzrJl69Fqrib", // secret
+	"stripe_webhooks_secret" => $TESTING ? "whsec_0a9feccdf1e3844afe6da0f40ff518a17dc0a9618f23da9ca9640373219ba637" : "whsec_XHrlB7hYjlMX3vNbFhPdJgM4UyQjLRTu" // secret
 );

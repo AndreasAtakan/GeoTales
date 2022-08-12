@@ -26,7 +26,7 @@ if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
 // Get top posts
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/c/public-maps/5.json");
+curl_setopt($ch, CURLOPT_URL, "{$CONFIG['forum_host']}/c/public-maps/5.json");
 $res = curl_exec($ch);
 curl_close($ch);
 $res = json_decode($res, true);
@@ -37,7 +37,7 @@ uasort($res, "s");
 
 $posts = array();
 foreach($res as $r) {
-	$url = "https://{$CONFIG['forum_host']}/t/{$r['slug']}/{$r['id']}";
+	$url = "{$CONFIG['forum_host']}/t/{$r['slug']}/{$r['id']}";
 	$posts[ $url ] = array( "views" => $r['views'], "likes" => $r['like_count'] );
 }
 
@@ -129,7 +129,7 @@ $count = $stmt->rowCount();
 								<a class="nav-link active" aria-current="page" href="index.php">Home</a>
 							</li>
 							<li class="nav-item <?php if(!$logged_in) { echo "me-sm-auto"; } ?>">
-								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
+								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
 
 					<?php if($logged_in) { ?>
@@ -139,7 +139,7 @@ $count = $stmt->rowCount();
 					<?php } ?>
 
 							<li class="nav-item me-sm-2">
-								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
 							</li>
 
 					<?php if($logged_in) { ?>
@@ -148,7 +148,7 @@ $count = $stmt->rowCount();
 									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
+									<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider" /></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -173,7 +173,7 @@ $count = $stmt->rowCount();
 
 				<div class="row">
 					<div class="col-sm-9">
-						<form method="get" action="<?php echo "https://{$CONFIG['forum_host']}/search"; ?>" id="search">
+						<form method="get" action="<?php echo "{$CONFIG['forum_host']}/search"; ?>" id="search">
 							<input type="hidden" name="expanded" value="true" />
 							<input type="hidden" name="q" value="" />
 							<div class="input-group" style="max-width: 650px;">
@@ -228,7 +228,7 @@ $count = $stmt->rowCount();
 						<div class="card">
 							<div class="card-body">
 								<div class="d-grid">
-									<a role="button" class="btn btn-lg btn-outline-secondary" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">
+									<a role="button" class="btn btn-lg btn-outline-secondary" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">
 										Browse more maps
 									</a>
 								</div>
@@ -276,7 +276,7 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
+							<a class="text-decoration-none" href="<?php echo "{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
 							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>

@@ -30,7 +30,7 @@ function validUID($PDO, $uid) {
 function getAvatar($host, $username) {
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "https://$host/u/$username.json");
+	curl_setopt($ch, CURLOPT_URL, "{$host}/u/{$username}.json");
 	$res = curl_exec($ch);
 	curl_close($ch);
 	$res = json_decode($res, true);
@@ -39,14 +39,14 @@ function getAvatar($host, $username) {
 
 	$res = str_replace('{size}', '30', $res['user']['avatar_template']);
 
-	return "https://{$host}{$res}";
+	return "{$host}{$res}";
 }
 
 //
 function getEmail($host, $username) {
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "https://$host/u/$username/emails.json");
+	curl_setopt($ch, CURLOPT_URL, "{$host}/u/{$username}/emails.json");
 	$res = curl_exec($ch);
 	curl_close($ch);
 	$res = json_decode($res, true);

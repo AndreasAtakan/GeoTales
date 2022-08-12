@@ -1,7 +1,6 @@
 ## TODO
 
 - Biz:
-	* (WIP) Registrere AS hos Stripe for nettbetaling
 	* IN markedsavklaring
 
 
@@ -19,8 +18,7 @@
 	* \~
 - Forum-integration:
 	* X File and image upload to Amazon S3 (edit-mode and forum)
-	* Implement *webhooks.php* for reciving webhook calls from Discourse when user logs in and out; then log user in or out
-		- (? maybe obsolete) Cron-job for checking if a user is deleted from the forum; `https://forum.geotales.io/u/by-external/{external_id}.json`
+	* (WIP) Implement webhooks for reciving webhook calls from Discourse when user is deleted
 
 
 - Working TODO:

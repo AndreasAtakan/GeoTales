@@ -497,7 +497,7 @@ $row = $stmt->fetch();
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 										<li><a class="dropdown-item" href="maps.php">My maps</a></li>
-										<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
+										<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 										<li><hr class="dropdown-divider" /></li>
 										<li><a class="dropdown-item" href="logout.php">Log out</a></li>

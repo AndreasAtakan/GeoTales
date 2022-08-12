@@ -18,6 +18,8 @@ include_once("helper.php");
 $payload = file_get_contents("php://input");
 $data = json_decode($payload, true);
 
+print_r($_SERVER);
+
 
 if(isset($_SERVER['X-Discourse-Event'])
 && $_SERVER['X-Discourse-Event'] == "user_destroyed") {
@@ -37,7 +39,7 @@ if(isset($_SERVER['X-Discourse-Event'])
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/customers/{$stripe_id}");
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-	curl_setopt($ch, CURLOPT_USERPWD, $TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']);
+	curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
 	$res = curl_exec($ch);
 	curl_close($ch);
 	$res = json_decode($res, true);
@@ -51,18 +53,32 @@ if(isset($_SERVER['X-Discourse-Event'])
 
 }
 else
-if(isset($data['type'])) {
+if(isset($_SERVER['Stripe-Signature'])
+&& isset($data['type'])) {
+
+	$sig = explode(",", $_SERVER['Stripe-Signature']);
+	$t = null; $v1 = null;
+	foreach($sig as $v) {
+		$r = explode("=", $v);
+		if($r[0] == "t") { $t = $r[1]; }
+		if($r[0] == "v1") { $v1 = $r[1]; }
+	}
+
+	$sha = hash_hmac("sha256", "{$t}.{$payload}", $CONFIG['stripe_webhooks_secret']);
+	if($v1 != $sha) {
+		http_response_code(401); exit;
+	}
 
 	if($data['type'] == "customer.subscription.created"
 	|| $data['type'] == "customer.subscription.deleted") {
 
 		$prod = $data['data']['object']['items']['data'][0]['price']['product'];
-		$cust = $data['data']['object']['customer'];
-		$paid = $data['type'] == "customer.subscription.created";
+		$stripe_id = $data['data']['object']['customer'];
+		$paid = $data['type'] == "customer.subscription.created" ? "1" : "0";
 
 		if($prod == $CONFIG['stripe_product_id']) {
 			$stmt = $PDO->prepare("UPDATE \"User\" SET paid = ? WHERE stripe_id = ?");
-			$stmt->execute([$paid, $cust]);
+			$stmt->execute([$paid, $stripe_id]);
 		}
 		else{ http_response_code(500); exit; }
 

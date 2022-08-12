@@ -46,7 +46,7 @@ if($op == "create_checkout_session") {
 		curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/customers");
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
-		curl_setopt($ch, CURLOPT_USERPWD, $TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']);
+		curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, "name={$username}&email={$email}");
 		$res = curl_exec($ch);
 		curl_close($ch);
@@ -62,10 +62,11 @@ if($op == "create_checkout_session") {
 	curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/checkout/sessions");
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
-	curl_setopt($ch, CURLOPT_USERPWD, $TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']);
+	curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, "success_url={$CONFIG['host']}/settings.php&
 										  cancel_url={$CONFIG['host']}/settings.php&
-										  mode=subscription&customer={$stripe_id}&
+										  mode=subscription&
+										  customer={$stripe_id}&
 										  line_items[0][price]={$CONFIG['stripe_price_id']}&
 										  line_items[0][quantity]=1");
 	$res = curl_exec($ch);
@@ -92,7 +93,7 @@ if($op == "create_portal_session") {
 	curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/billing_portal/sessions");
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
-	curl_setopt($ch, CURLOPT_USERPWD, $TESTING ? $CONFIG['stripe_secret_key_test'] : $CONFIG['stripe_secret_key_live']);
+	curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, "customer={$row['stripe_id']}&
 										  return_url={$CONFIG['host']}/settings.php");
 	$res = curl_exec($ch);

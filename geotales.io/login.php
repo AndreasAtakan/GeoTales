@@ -81,7 +81,7 @@ else{ // redirect to SSO
 
 		$payload = base64_encode(http_build_query(array('nonce' => $nonce, 'return_sso_url' => "{$CONFIG['host']}/login.php?return_url=$loc")));
 		$query = http_build_query(array('sso' => $payload, 'sig' => hash_hmac('sha256', $payload, $CONFIG['discourse_sso_secret'])));
-		$url = "https://{$CONFIG['forum_host']}/session/sso_provider?$query";
+		$url = "{$CONFIG['forum_host']}/session/sso_provider?$query";
 
 		header("location: $url");
 		exit;

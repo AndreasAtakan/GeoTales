@@ -224,7 +224,7 @@ else{
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/posts.json");
+		curl_setopt($ch, CURLOPT_URL, "{$CONFIG['forum_host']}/posts.json");
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			"Content-Type: application/json",
@@ -245,7 +245,7 @@ Created by: @{$username}",
 		curl_close($ch);
 		$res = json_decode($res, true);
 
-		$url = "https://{$CONFIG['forum_host']}/t/{$res['topic_slug']}/{$res['topic_id']}";
+		$url = "{$CONFIG['forum_host']}/t/{$res['topic_slug']}/{$res['topic_id']}";
 
 		$stmt = $PDO->prepare("UPDATE \"Map\" SET post = ? WHERE id = ?");
 		$stmt->execute([$url, $id]);
@@ -267,7 +267,7 @@ Created by: @{$username}",
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_URL, "https://{$CONFIG['forum_host']}/posts/{$post_id}.json");
+		curl_setopt($ch, CURLOPT_URL, "{$CONFIG['forum_host']}/posts/{$post_id}.json");
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			//"Content-Type: application/json",

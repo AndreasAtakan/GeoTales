@@ -289,14 +289,14 @@ $count = $stmt->rowCount();
 								<a class="nav-link" href="index.php">Home</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
+								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
 							</li>
 							<li class="nav-item me-sm-auto">
 								<a class="nav-link active" aria-current="page" href="maps.php">My maps</a>
 							</li>
 
 							<li class="nav-item me-sm-2">
-								<a class="nav-link" href="<?php echo "https://{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
 							</li>
 
 							<li class="nav-item dropdown">
@@ -304,7 +304,7 @@ $count = $stmt->rowCount();
 									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="<?php echo "https://{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
+									<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
 									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
 									<li><hr class="dropdown-divider"></li>
 									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
@@ -444,7 +444,7 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "https://{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
+							<a class="text-decoration-none" href="<?php echo "{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
 							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
