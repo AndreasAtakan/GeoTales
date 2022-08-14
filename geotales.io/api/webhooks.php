@@ -18,14 +18,12 @@ include_once("helper.php");
 $payload = file_get_contents("php://input");
 $data = json_decode($payload, true);
 
-print_r($_SERVER);
 
-
-if(isset($_SERVER['X-Discourse-Event'])
-&& $_SERVER['X-Discourse-Event'] == "user_destroyed") {
+if(isset($_SERVER['HTTP_X_DISCOURSE_EVENT'])
+&& $_SERVER['HTTP_X_DISCOURSE_EVENT'] == "user_destroyed") {
 
 	$sha = hash_hmac("sha256", $payload, $CONFIG['discourse_webhooks_secret']);
-	if($_SERVER['X-Discourse-Event-Signature'] != $sha) {
+	if($_SERVER['HTTP_X_DISCOURSE_EVENT_SIGNATURE'] != $sha) {
 		http_response_code(401); exit;
 	}
 	$uid = $data['user']['id'];
@@ -53,10 +51,10 @@ if(isset($_SERVER['X-Discourse-Event'])
 
 }
 else
-if(isset($_SERVER['Stripe-Signature'])
+if(isset($_SERVER['HTTP_STRIPE_SIGNATURE'])
 && isset($data['type'])) {
 
-	$sig = explode(",", $_SERVER['Stripe-Signature']);
+	$sig = explode(",", $_SERVER['HTTP_STRIPE_SIGNATURE']);
 	$t = null; $v1 = null;
 	foreach($sig as $v) {
 		$r = explode("=", $v);
