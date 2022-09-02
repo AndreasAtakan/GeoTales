@@ -19,38 +19,6 @@ $payload = file_get_contents("php://input");
 $data = json_decode($payload, true);
 
 
-if(isset($_SERVER['HTTP_X_DISCOURSE_EVENT'])
-&& $_SERVER['HTTP_X_DISCOURSE_EVENT'] == "user_destroyed") {
-
-	$sha = hash_hmac("sha256", $payload, $CONFIG['discourse_webhooks_secret']);
-	if($_SERVER['HTTP_X_DISCOURSE_EVENT_SIGNATURE'] != $sha) {
-		http_response_code(401); exit;
-	}
-	$uid = $data['user']['id'];
-
-	$stmt = $PDO->prepare("SELECT stripe_id FROM \"User\" WHERE uid = ?");
-	$stmt->execute([$uid]);
-	$row = $stmt->fetch();
-	$stripe_id = $row['stripe_id'];
-
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "https://api.stripe.com/v1/customers/{$stripe_id}");
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-	curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
-	$res = curl_exec($ch);
-	curl_close($ch);
-	$res = json_decode($res, true);
-
-	if(!$res['deleted']) { http_response_code(500); exit; }
-
-	$stmt = $PDO->prepare("DELETE FROM \"User\" WHERE uid = ?");
-	$stmt->execute([$uid]);
-
-	http_response_code(200); exit;
-
-}
-else
 if(isset($_SERVER['HTTP_STRIPE_SIGNATURE'])
 && isset($data['type'])) {
 

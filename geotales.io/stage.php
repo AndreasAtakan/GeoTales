@@ -16,13 +16,13 @@ include "api/init.php";
 include_once("api/helper.php");
 
 // Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: login.php?return_url=stage.php"); exit;
+if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+	header("location: signin.php?return_url=stage.php"); exit;
 }
-$uid = $_SESSION['uid'];
+$user_id = $_SESSION['user_id'];
 
 //
-// Onboarding users; "Try now" button on landing-page links here throught login.php's return_url parameter
+// Onboarding users; "Try now" button on landing-page links here throught signin.php return_url parameter
 
 $title = "First map";
 $description = "My first map";
@@ -32,8 +32,8 @@ $stmt->execute([$title, $description]);
 $id = $stmt->fetchColumn();
 
 $stmt = $PDO->prepare("INSERT INTO \"User_Map\" (user_id, map_id, status) VALUES (?, ?, ?)");
-$stmt->execute([$uid, $id, "owner"]);
+$stmt->execute([$user_id, $id, "owner"]);
 
-header("location: edit.php?id=$id");
+header("location: edit.php?id={$id}");
 
 exit;

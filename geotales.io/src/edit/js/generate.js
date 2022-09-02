@@ -9,7 +9,7 @@
 "use strict";
 
 
-function new_scene(id, prevId) {
+export function new_scene(id, prevId) {
 
 	let cont = `
 		<li class="list-group-item p-1 my-1" id="${id}" data-id="${id}">
@@ -30,7 +30,7 @@ function new_scene(id, prevId) {
 
 
 
-function generate_basemaps(isUpload) {
+export function generate_basemaps(isUpload) {
 	let html = ``;
 
 	for(let i = 0; i < _BASEMAPS.length; i++) {
@@ -68,7 +68,7 @@ function generate_basemaps(isUpload) {
 
 
 
-function avatar_popup() {
+export function avatar_popup() {
 
 	return `
 		<form class="container-fluid objectPopup" id="avatarPopup">
@@ -152,7 +152,7 @@ function avatar_popup() {
 
 }
 
-function polyline_popup() {
+export function polyline_popup() {
 
 	return `
 		<form class="container-fluid objectPopup" id="shapePopup">
@@ -194,7 +194,7 @@ function polyline_popup() {
 
 }
 
-function polygon_popup() {
+export function polygon_popup() {
 
 	return `
 		<form class="container-fluid objectPopup" id="shapePopup">

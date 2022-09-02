@@ -16,42 +16,124 @@ include "init.php";
 
 
 //
-function validUID($PDO, $uid) {
-	$stmt = $PDO->prepare("SELECT count(uid) AS c FROM \"User\" WHERE uid = ?");
-	$stmt->execute([$uid]);
-	$row = $stmt->fetch();
+function sanitize($str) {
+	return htmlspecialchars($str);
+}
 
+//
+function sane_is_null($v) {
+	return is_null($v) || $v == "";
+}
+
+
+
+//
+function validUserID($PDO, $id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
 	return $row['c'] == 1;
 }
 
-
-
 //
-function getAvatar($host, $username) {
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "{$host}/u/{$username}.json");
-	$res = curl_exec($ch);
-	curl_close($ch);
-	$res = json_decode($res, true);
-
-	if(!isset($res['user'])) { return "assets/user-circle-solid.svg"; }
-
-	$res = str_replace('{size}', '30', $res['user']['avatar_template']);
-
-	return "{$host}{$res}";
+function validSignIn($PDO, $username, $password) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE username = ? AND password = ?");
+	$stmt->execute([$username, $password]);
+	$row = $stmt->fetch();
+	return $row['c'] <= 1 ? $row['c'] : false;
 }
 
 //
-function getEmail($host, $username) {
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_URL, "{$host}/u/{$username}/emails.json");
-	$res = curl_exec($ch);
-	curl_close($ch);
-	$res = json_decode($res, true);
+function registerUser($PDO, $username, $password, $email) {
+	$stmt = $PDO->prepare("INSERT INTO \"User\" (username, password, email) VALUES (?, ?, ?) RETURNING id");
+	$stmt->execute([$username, $password, $email]);
+	$row = $stmt->fetch();
+	return $row['id'];
+}
 
-	return isset($res['email']) ? $res['email'] : null;
+
+
+//
+function getUsername($PDO, $id) {
+	$stmt = $PDO->prepare("SELECT username FROM \"User\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
+	return $row['username'];
+}
+
+//
+function getUserEmail($PDO, $id) {
+	$stmt = $PDO->prepare("SELECT email FROM \"User\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
+	return $row['email'];
+}
+
+//
+function getUserPhoto($PDO, $id) {
+	$stmt = $PDO->prepare("SELECT photo FROM \"User\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
+	$photo = sane_is_null($row['photo']) ? "assets/user-circle-solid.svg" : $row['photo'];
+	return $photo;
+}
+
+//
+function getUserPaid($PDO, $id) {
+	$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE id = ?");
+	$stmt->execute([$id]);
+	$row = $stmt->fetch();
+	return $row['paid'] ?? false;
+}
+
+//
+function isUsernameRegistered($PDO, $username) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE username = ?");
+	$stmt->execute([$username]);
+	$row = $stmt->fetch();
+	return $row['c'] >= 1;
+}
+
+
+
+//
+function getMapThumbnail($PDO, $map_id) {
+	$stmt = $PDO->prepare("SELECT thumbnail FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$map_id]);
+	$row = $stmt->fetch();
+	return $row['thumbnail'];
+}
+
+//
+function hasMapThumbnail($PDO, $map_id) {
+	return sane_is_null( getMapThumbnail($PDO, $map_id) );
+}
+
+
+
+//
+function userMapWithinLimit($PDO, $user_id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) <= 5 AS is_within FROM \"User_Map\" WHERE user_id = ? AND status = 'owner'");
+	$stmt->execute([$user_id]);
+	$row = $stmt->fetch();
+	return $row['is_within'] ?? false;
+}
+
+//
+function userMapCanWrite($PDO, $user_id, $map_id) {
+	$stmt = $PDO->prepare("SELECT status IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
+	$stmt->execute([$user_id, $map_id]);
+	$row = $stmt->fetch();
+	return $row['st'] ?? false;
+}
+
+//
+function userMapCheckPw($PDO, $map_id, $password) {
+	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$map_id]);
+	$row = $stmt->fetch();
+	$has_pw = $row['pw'] ?? false;
+	return $has_pw && $row['password'] == $password;
 }
 
 

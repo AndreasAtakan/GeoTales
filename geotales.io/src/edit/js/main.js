@@ -8,6 +8,19 @@
 
 "use strict";
 
+import {
+	import_data,
+	export_data,
+	save_data,
+	unsaved_changes,
+	init_basemaps
+} from "./helpers.js";
+
+import { Scenes } from "./scenes.js";
+import { Textboxes } from "./textboxes.js";
+
+import "./map/map.js";
+
 
 window.onload = function(ev) {
 
@@ -201,6 +214,11 @@ window.onload = function(ev) {
 		let fr = new FileReader();
 		fr.onload = function() { import_data( "gedcom", fr.result, options ); };
 		fr.readAsText(file);
+	});
+
+
+	$("button#export").click(ev => {
+		export_data( $(ev.target).data("type") || null );
 	});
 
 	$("a#save").click(ev => {

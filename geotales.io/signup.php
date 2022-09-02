@@ -9,24 +9,39 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
 include "api/init.php";
 include_once("api/helper.php");
 
-// Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: login.php?return_url=settings.php"); exit;
+$loc = "maps.php";
+if(isset($_GET['return_url'])) {
+	$loc = $_GET['return_url'];
 }
-$uid = $_SESSION['uid'];
-$username = $_SESSION['username'];
-$avatar = getAvatar($CONFIG['forum_host'], $username);
 
-$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
-$stmt->execute([$uid]);
-$row = $stmt->fetch();
-$paid = $row['paid'];
+// user is already logged in
+if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
+	header("location: $loc"); exit;
+}
+
+if(isset($_POST['username'])
+&& isset($_POST['email'])
+&& isset($_POST['password'])) { // arriving from signup
+
+	$username = sanitize($_POST['username']);
+	$email = sanitize($_POST['email']);
+	$password = sanitize($_POST['password']);
+
+	if(isUsernameRegistered($PDO, $username)) { http_response_code(500); exit; }
+
+	$user_id = registerUser($PDO, $username, $password, $email); // register user
+	$_SESSION['user_id'] = $user_id; // log user in
+
+	header("Access-Control-Allow-Origin: *");
+	header("location: $loc");
+	exit;
+
+}
 
 ?>
 
@@ -49,7 +64,7 @@ $paid = $row['paid'];
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/main.css" />
+		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
 			html, body {
@@ -57,7 +72,10 @@ $paid = $row['paid'];
 			}
 
 			main {
-				margin-top: calc(3rem + 50px);
+				background-image: url('assets/background.png');
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: center;
 			}
 		</style>
 	</head>
@@ -100,43 +118,9 @@ $paid = $row['paid'];
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
-					<span class="navbar-brand">
+					<a class="navbar-brand" href="index.php">
 						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-					</span>
-
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-
-					<div class="collapse navbar-collapse" id="navbarContent">
-						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
-							<li class="nav-item">
-								<a class="nav-link" href="index.php">Home</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
-							</li>
-							<li class="nav-item me-sm-auto">
-								<a class="nav-link" href="maps.php">My maps</a>
-							</li>
-
-							<li class="nav-item me-sm-2">
-								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
-							</li>
-
-							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
-								</a>
-								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
-									<li><a class="dropdown-item active" href="settings.php">Settings</a></li>
-									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
-								</ul>
-							</li>
-						</ul>
-					</div>
+					</a>
 				</div>
 			</nav>
 		</header>
@@ -144,37 +128,38 @@ $paid = $row['paid'];
 		<main role="main">
 			<div class="container" id="main">
 				<div class="row my-5">
-					<div class="col">
-						<hr />
-					</div>
+					<div class="col"></div>
 				</div>
 
-				<div class="row mx-auto mb-5" style="max-width: 950px;">
+				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-						<h2>Settings</h2>
-						<p>Your account settings</p>
-					</div>
-				</div>
+						<form method="post" autocomplete="on" id="signup">
+							<div class="mb-3">
+								<label for="username" class="form-label">Username</label>
+								<input type="text" name="username" class="form-control" id="username" required />
+							</div>
+							<div class="mb-3">
+								<label for="email" class="form-label">E-Mail</label>
+								<input type="email" name="email" class="form-control" id="email" required />
+							</div>
+							<div class="mb-1">
+								<label for="pw1" class="form-label">Password</label>
+								<div class="input-group">
+									<input type="password" name="pw1" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
+									<button type="button" class="btn btn-outline-light" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
+								</div>
+							</div>
+							<div class="mb-3">
+								<input type="password" name="pw2" class="form-control" id="pw2" aria-label="Confirm password" required />
+								<label for="pw2" class="form-label small text-muted">Confirm password</label>
+							</div>
+							<input type="hidden" name="password" />
+							<button type="submit" class="btn btn-primary">Sign up</button>
+						</form>
 
-				<div class="row">
-					<div class="col">
-
-				<?php if($paid) { ?>
-						<button type="button" class="btn btn-outline-secondary" id="managePayment">Manage your subscription</button>
-				<?php }else{ ?>
-						<button type="button" class="btn btn-outline-secondary" id="addPayment">Add subscription</button>
-				<?php } ?>
-
-						<p class="text-muted mt-4">
-							With a free account you can only create 5 maps. <br />
-							By adding a subscription, you will get <strong>unlimited maps</strong>.
+						<p class="text-muted my-3">
+							Or <strong><a href="signin.php">sign in</a></strong>
 						</p>
-					</div>
-				</div>
-
-				<div class="row my-5">
-					<div class="col">
-						<hr />
 					</div>
 				</div>
 
@@ -187,10 +172,10 @@ $paid = $row['paid'];
 					<div class="col-sm-4 mt-2">
 						<center>
 							<div class="btn-group btn-group-lg" role="group" aria-label="Socials">
-								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+								<a role="button" class="btn btn-outline-light" href="https://www.facebook.com/Geotales-107125105285825" target="_blank">
 									<i class="fab fa-facebook" style="color: #4267b2;"></i>
 								</a>
-								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
+								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
 								</a>
 							</div>
@@ -204,7 +189,6 @@ $paid = $row['paid'];
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
 							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
@@ -219,9 +203,76 @@ $paid = $row['paid'];
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/settings.js"></script>
+		<script type="text/javascript">
+			"use strict";
+
+			window.onload = function(ev) {
+
+				$("form#signup input#username").change(ev => {
+					let el = document.forms.signup.elements;
+					let username = $(ev.target).val();
+
+					$.ajax({
+						type: "GET",
+						url: "api/user.php",
+						data: {
+							"op": "unique",
+							"username": username
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							if(result.isUnique) {
+								$(ev.target).removeClass("is-invalid");
+								el.username.setCustomValidity("");
+							}else{
+								$(ev.target).addClass("is-invalid");
+								el.username.setCustomValidity("Username taken");
+							}
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							$("#errorModal").modal("show");
+						}
+					});
+				});
+
+				let pwShow = false;
+				$("button#pwShow").click(ev => {
+					pwShow = !pwShow;
+					$("form#signup input#pw1, form#signup input#pw2").prop("type", pwShow ? "text" : "password");
+				});
+
+				$("form#signup input#pw1, form#signup input#pw2").change(ev => {
+					let el = document.forms.signup.elements;
+					let pw1 = $("form#signup input#pw1").val(),
+						pw2 = $("form#signup input#pw2").val();
+
+					if(pw1 !== pw2) {
+						$("form#signup input#pw1, form#signup input#pw2").addClass("is-invalid");
+						el.pw1.setCustomValidity("Passwords unequal");
+						el.pw2.setCustomValidity("Passwords unequal");
+					}else{
+						$("form#signup input#pw1, form#signup input#pw2").removeClass("is-invalid");
+						el.pw1.setCustomValidity("");
+						el.pw2.setCustomValidity("");
+					}
+				});
+
+				document.forms.signup.onsubmit = function(ev) { ev.preventDefault();
+					let form = ev.target;
+					let el = form.elements;
+
+					if(el.pw1.value !== el.pw2.value) { $("#errorModal").modal("show"); return; }
+					$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) );
+
+					form.submit();
+				};
+
+			};
+		</script>
 
 	</body>
 </html>

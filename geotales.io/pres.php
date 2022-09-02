@@ -17,12 +17,12 @@ include_once("api/helper.php");
 
 $logged_in = false;
 $paid = false;
-if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
+if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 	$logged_in = true;
 
-	$uid = $_SESSION['uid'];
-	$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
-	$stmt->execute([$uid]);
+	$user_id = $_SESSION['user_id'];
+	$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE id = ?");
+	$stmt->execute([$user_id]);
 	$row = $stmt->fetch();
 	$paid = $row['paid'];
 }
@@ -33,7 +33,7 @@ if(!isset($_GET['id'])) {
 $id = $_GET['id'];
 
 
-$stmt = $PDO->prepare("SELECT title, description, preview FROM \"Map\" WHERE id = ?");
+$stmt = $PDO->prepare("SELECT title, description, thumbnail FROM \"Map\" WHERE id = ?");
 $stmt->execute([$id]);
 $row = $stmt->fetch();
 
@@ -56,7 +56,7 @@ $row = $stmt->fetch();
 		<meta property="og:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="og:description" content="<?php echo $row['description']; ?>" />
 		<meta property="og:site_name" content="GeoTales" />
-		<meta property="og:image" content="<?php echo $row['preview']; ?>" />
+		<meta property="og:image" content="<?php echo $row['thumbnail']; ?>" />
 		<!--meta property="og:image:type" content="image/png" /-->
 
 		<!-- Twitter -->
@@ -66,7 +66,7 @@ $row = $stmt->fetch();
 		<meta property="twitter:url" content="https://geotales.io/" />
 		<meta property="twitter:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
-		<meta property="twitter:image" content="<?php echo $row['preview']; ?>" />
+		<meta property="twitter:image" content="<?php echo $row['thumbnail']; ?>" />
 
 		<link rel="icon" href="assets/logo.png" />
 
@@ -159,13 +159,9 @@ $row = $stmt->fetch();
 
 							<div class="row">
 								<div class="col-0 col-sm-7">
-							<?php
-								if($logged_in) {
-							?>
+							<?php if($logged_in) { ?>
 									<button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="clone">Clone this map</button>
-							<?php
-								}
-							?>
+							<?php } ?>
 								</div>
 								<div class="col col-sm-1">
 									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
@@ -238,26 +234,24 @@ $row = $stmt->fetch();
 						<div class="card-body">
 							<div id="content"></div>
 						</div>
-					</div>
-
-					<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
-						<button type="button" class="btn btn-light" id="prev">
-							<i class="fas fa-chevron-left"></i>
-						</button>
-						<button type="button" class="btn btn-light px-3" id="fullscreen">
-							<i class="fas fa-expand"></i>
-						</button>
-						<div role="group" class="btn-group btn-group-sm dropup" id="bookmarks">
-							<button type="button" class="btn btn-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fas fa-bookmark"></i>
-							</button>
-							<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
-								<li><h6 class="dropdown-header">Bookmarks</h6></li>
-							</ul>
+						<div class="card-footer text-muted">
+							<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
+								<button type="button" class="btn btn-light" id="prev">
+									<i class="fas fa-chevron-left"></i>
+								</button>
+								<div role="group" class="btn-group btn-group-sm dropup" id="bookmarks">
+									<button type="button" class="btn btn-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fas fa-bookmark"></i>
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
+										<li><h6 class="dropdown-header">Bookmarks</h6></li>
+									</ul>
+								</div>
+								<button type="button" class="btn btn-light" id="next">
+									<i class="fas fa-chevron-right"></i>
+								</button>
+							</div>
 						</div>
-						<button type="button" class="btn btn-light" id="next">
-							<i class="fas fa-chevron-right"></i>
-						</button>
 					</div>
 
 					<div class="dropdown" id="extraNav">
@@ -277,6 +271,9 @@ $row = $stmt->fetch();
 						</button>
 						<button type="button" class="btn btn-light" id="panLock">
 							🔒
+						</button>
+						<button type="button" class="btn btn-light" id="fullscreen">
+							<i class="fas fa-expand"></i>
 						</button>
 						<button type="button" class="btn btn-light" id="zoomOut" disabled>
 							<i class="fas fa-minus"></i>
@@ -333,23 +330,10 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load src/ JS -->
-		<!--script type="text/javascript" src="src/edit/js/map/L.GridLayer.js"></script-->
+		<!--script type="text/javascript" src="src/pres/js/map/L.GridLayer.js"></script-->
 		<script type="text/javascript" src="src/pres/js/map/L.TileLayer.Mars.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/globals.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/helpers.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/generate.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/scenes.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/textboxes.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/map/layers.js"></script>
-		<script type="text/javascript" src="src/pres/js/map/map.js"></script>
-
-		<script type="text/javascript" src="src/pres/js/main.js"></script>
+		<script type="text/javascript" src="src/pres/globals.js"></script>
+		<script type="text/javascript" src="src/pres/main.js"></script>
 
 	</body>
 </html>

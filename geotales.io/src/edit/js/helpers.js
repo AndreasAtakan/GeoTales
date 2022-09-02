@@ -8,9 +8,26 @@
 
 "use strict";
 
+import { generate_basemaps } from "./generate.js";
 
-function uuid(a) {
+
+export function uuid(a) {
 	return a ? (a^Math.random()*16>>a/4).toString(16) : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, uuid);
+}
+
+
+
+export function sanitize(str) {
+	let map = {
+		"\&": "&amp;",
+		"\<": "&lt;",
+		"\>": "&gt;",
+		"\"": "&quot;",
+		"\'": "&#x27;",
+		"\/": "&#x2F;"
+	};
+	let reg = /[&<>"'/]/ig;
+	return str.replace(reg, match => (map[match]));
 }
 
 
@@ -120,7 +137,7 @@ function import_geojson(data, options) {
 function import_gedcom(data, options) {
 	//
 }
-function import_data(type, data, options) {
+export function import_data(type, data, options) {
 	switch(type) {
 		case "project": import_project(data); break;
 		case "geojson": import_geojson(data, options); break;
@@ -147,7 +164,7 @@ function export_geojson() {
 	});
 }
 let running = false;
-function export_data(type) {
+export function export_data(type) {
 	if(running) { return; } running = true;
 
 	let el = document.createElement("a");
@@ -180,7 +197,7 @@ function export_data(type) {
 	$(el).ready(() => { el.click(); document.body.removeChild(el); running = false; });
 }
 
-function save_data(callback) {
+export function save_data(callback) {
 	$.ajax({
 		type: "POST",
 		url: "api/map.php",
@@ -204,7 +221,7 @@ function save_data(callback) {
 
 
 
-function unsaved_changes() {
+export function unsaved_changes() {
 	$(window).off("beforeunload");
 	$(window).on("beforeunload", ev => {
 		ev.preventDefault();
@@ -215,20 +232,20 @@ function unsaved_changes() {
 	});
 }
 
-function saved_changes() {
+export function saved_changes() {
 	$(window).off("beforeunload");
 }
 
 
 
-function flash_map() {
+export function flash_map() {
 	$("div#map").addClass("snapshot");
 	setTimeout(function() { $("div#map").removeClass("snapshot"); }, 240);
 }
 
 
 
-function get_basemap(url) {
+export function get_basemap(url) {
 	for(let b of _BASEMAPS) {
 		if(b.tiles._url == url) { return b; }
 	}
@@ -249,16 +266,16 @@ function bind_basemaps() {
 		$("#basemapModal input#basemapFile").click();
 	});
 }
-function init_basemaps() {
+export function init_basemaps() {
 	generate_basemaps(false); bind_basemaps();
 }
-function init_img_basemaps() {
+export function init_img_basemaps() {
 	generate_basemaps(true); bind_basemaps();
 }
 
 
 
-function get_aspect_ratio_dimentions(w, h, r) {
+export function get_aspect_ratio_dimentions(w, h, r) {
 	let _w = r * h;
 	if(_w <= w) {
 		return [_w, h];

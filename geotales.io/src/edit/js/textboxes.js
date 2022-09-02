@@ -8,8 +8,10 @@
 
 "use strict";
 
+import { uuid, save_data } from "./helpers.js";
 
-function Textboxes() {
+
+export function Textboxes() {
 	this.store = [];
 
 	$("input#_img_textbox").change(function(ev) {

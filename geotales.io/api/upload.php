@@ -24,11 +24,10 @@ $op = $_REQUEST['op'];
 
 
 // Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
+if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
 	http_response_code(401); exit;
 }
-$uid = $_SESSION['uid'];
-$username = $_SESSION['username'];
+$user_id = $_SESSION['user_id'];
 
 
 
@@ -37,7 +36,7 @@ if($op == "create") {
 	if(!isset($_POST['type'])) {
 		http_response_code(422); exit;
 	}
-	$type = $_POST['type'];
+	$type = sanitize($_POST['type']);
 
 	$path = $_FILES["image"]["tmp_name"];
 	$name = $_FILES["image"]["name"];
@@ -59,7 +58,7 @@ if($op == "create") {
 	$id = $stmt->fetchColumn();
 
 	$stmt = $PDO->prepare("INSERT INTO \"User_Upload\" (user_id, upload_id, type) VALUES (?, ?, ?)");
-	$stmt->execute([$uid, $id, $type]);
+	$stmt->execute([$user_id, $id, $type]);
 
 	echo $ref;
 	exit;
@@ -69,7 +68,7 @@ else
 if($op == "get") {
 
 	$stmt = $PDO->prepare("SELECT U.ref, UU.type FROM \"User_Upload\" AS UU INNER JOIN \"Upload\" AS U ON UU.upload_id = U.id WHERE UU.user_id = ?");
-	$stmt->execute([$uid]);
+	$stmt->execute([$user_id]);
 	$rows = $stmt->fetchAll();
 
 	echo json_encode($rows);
@@ -85,7 +84,7 @@ if($op == "delete") {
 	$id = $_POST['id'];
 
 	$stmt = $PDO->prepare("DELETE FROM \"User_Upload\" WHERE user_id = ? AND upload_id = ?");
-	$stmt->execute([$uid, $id]);
+	$stmt->execute([$user_id, $id]);
 
 	echo json_encode(array("status" => "success"));
 	exit;

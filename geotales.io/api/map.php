@@ -30,21 +30,12 @@ if($op == "read") {
 	$id = $_GET['id'];
 	$password = $_GET['password'];
 
-	$status_flag = true;
-	if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
-		$uid = $_SESSION['uid'];
-		$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
-		$stmt->execute([$uid, $id]);
-		$row = $stmt->fetch();
-		$status_flag = $row['st'] ?? false;
+	$user_can_write = false;
+	if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
+		$user_can_write = userMapCanWrite($PDO, $_SESSION['user_id'], $id);
 	}
-
-	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
-	$stmt->execute([$id]);
-	$row = $stmt->fetch();
-	if($row['pw']
-	&& $row['password'] != $password
-	&& $status_flag) { http_response_code(401); exit; }
+	if(!$user_can_write
+	&& !userMapCheckPw($PDO, $id, $password)) { http_response_code(401); exit; }
 
 	$stmt = $PDO->prepare("SELECT data FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
@@ -56,23 +47,30 @@ if($op == "read") {
 	exit;
 
 }
+else
+if($op == "view") {
+
+	if(!isset($_POST['id'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+
+	$stmt = $PDO->prepare("UPDATE \"Map\" SET views = views + 1 WHERE id = ?");
+	$stmt->execute([$id]);
+
+	echo json_encode(array("status" => "success"));
+	exit;
+
+}
 
 
 // Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
+if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
 	http_response_code(401); exit;
 }
-$uid = $_SESSION['uid'];
-$username = $_SESSION['username'];
-
-$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE uid = ?");
-$stmt->execute([$uid]);
-$row = $stmt->fetch();
-$paid = $row['paid'];
-$stmt = $PDO->prepare("SELECT COUNT(id) <= 5 AS is_within FROM \"User_Map\" WHERE user_id = ? AND status = 'owner'");
-$stmt->execute([$uid]);
-$row = $stmt->fetch();
-$map_count_ok = $row['is_within'];
+$user_id = $_SESSION['user_id'];
+$paid = getUserPaid($PDO, $user_id);
+$map_count_ok = userMapWithinLimit($PDO, $user_id);
 
 
 
@@ -82,8 +80,8 @@ if($op == "create") {
 	|| !isset($_POST['description'])) {
 		http_response_code(422); exit;
 	}
-	$title = $_POST['title'];
-	$description = $_POST['description'];
+	$title = sanitize($_POST['title']);
+	$description = sanitize($_POST['description']);
 
 	if(!$paid && !$map_count_ok) { http_response_code(401); exit; }
 
@@ -92,7 +90,21 @@ if($op == "create") {
 	$id = $stmt->fetchColumn();
 
 	$stmt = $PDO->prepare("INSERT INTO \"User_Map\" (user_id, map_id, status) VALUES (?, ?, ?)");
-	$stmt->execute([$uid, $id, "owner"]);
+	$stmt->execute([$user_id, $id, "owner"]);
+
+	if(isset($_POST['thumbnail'])
+	&& $_POST['thumbnail'] != "") {
+		$thumbnail = $_POST['thumbnail'];
+		$stmt = $PDO->prepare("UPDATE \"Map\" SET thumbnail = ? WHERE id = ?");
+		$stmt->execute([$thumbnail, $id]);
+	}
+	if(isset($_POST['password'])
+	&& $_POST['password'] != "") {
+		$password = $_POST['password'];
+		mb_substr($password, 0, 64);
+		$stmt = $PDO->prepare("UPDATE \"Map\" SET password = ? WHERE id = ?");
+		$stmt->execute([$password, $id]);
+	}
 
 	echo json_encode(array(
 		"id" => $id
@@ -108,13 +120,15 @@ if($op == "get") {
 	}
 	$id = $_GET['id'];
 
-	$stmt = $PDO->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+	$stmt = $PDO->prepare("SELECT title, description, thumbnail, published_date IS NOT NULL AS published FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
 	$row = $stmt->fetch();
 
 	echo json_encode(array(
 		"title" => $row['title'],
-		"description" => $row['description']
+		"description" => $row['description'],
+		"thumbnail" => $row['thumbnail'],
+		"published" => $row['published']
 	));
 	exit;
 
@@ -131,29 +145,39 @@ if($op == "clone") {
 
 	if(!$paid && !$map_count_ok) { http_response_code(401); exit; }
 
-	$status_flag = true;
-	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
-	$stmt->execute([$uid, $id]);
-	$row = $stmt->fetch();
-	$status_flag = $row['st'] ?? false;
+	if(!userMapCanWrite($PDO, $user_id, $id)
+	&& !userMapCheckPw($PDO, $id, $password)) { http_response_code(401); exit; }
 
-	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
-	$stmt->execute([$id]);
-	$row = $stmt->fetch();
-	if($row['pw']
-	&& $row['password'] != $password
-	&& $status_flag) { http_response_code(401); exit; }
-
-	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description, preview, data) SELECT CONCAT('Copy of ', title) AS title, description, preview, data FROM \"Map\" WHERE id = ? RETURNING id");
+	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description, thumbnail, data) SELECT CONCAT('Copy of ', title) AS title, description, thumbnail, data FROM \"Map\" WHERE id = ? RETURNING id");
 	$stmt->execute([$id]);
 	$new_id = $stmt->fetchColumn();
 
 	$stmt = $PDO->prepare("INSERT INTO \"User_Map\" (user_id, map_id, status) VALUES (?, ?, ?)");
-	$stmt->execute([$uid, $new_id, "owner"]);
+	$stmt->execute([$user_id, $new_id, "owner"]);
 
 	echo json_encode(array(
 		"id" => $new_id
 	));
+	exit;
+
+}
+else
+if($op == "like"
+|| $op == "flag") {
+
+	if(!isset($_POST['id'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+
+	$sql = "";
+	if($op == "like") { $sql = "UPDATE \"Map\" SET likes = likes + 1 WHERE id = ?"; }
+	elseif($op == "flag") { $sql = "UPDATE \"Map\" SET flags = flags + 1 WHERE id = ?"; }
+
+	$stmt = $PDO->prepare($sql);
+	$stmt->execute([$id]);
+
+	echo json_encode(array("status" => "success"));
 	exit;
 
 }
@@ -164,25 +188,40 @@ else{
 	}
 	$id = $_POST['id'];
 
-	$stmt = $PDO->prepare("SELECT status NOT IN ('owner', 'editor') AS st FROM \"User_Map\" WHERE user_id = ? AND map_id = ?");
-	$stmt->execute([$uid, $id]);
-	$row = $stmt->fetch();
+	if(!userMapCanWrite($PDO, $user_id, $id)) { http_response_code(401); exit; }
 
-	if( $row['st'] ) { http_response_code(401); exit; }
-
-	if($op == "edit") {
+	if($op == "update") {
 
 		if(!isset($_POST['title'])
-		|| !isset($_POST['description'])) {
+		&& !isset($_POST['description'])
+		&& !isset($_POST['thumbnail'])
+		&& !isset($_POST['password'])) {
 			http_response_code(422); exit;
 		}
-		$title = $_POST['title'];
-		$description = $_POST['description'];
-		$password = isset($_POST['password']) ? $_POST['password'] : null;
-		if(!is_null($password)) { mb_substr($password, 0, 64); }
 
-		$stmt = $PDO->prepare("UPDATE \"Map\" SET title = ?, description = ?, password = ? WHERE id = ?");
-		$stmt->execute([$title, $description, $password, $id]);
+		if(isset($_POST['title'])) {
+			$title = sanitize($_POST['title']);
+			$stmt = $PDO->prepare("UPDATE \"Map\" SET title = ? WHERE id = ?");
+			$stmt->execute([$title, $id]);
+		}
+		if(isset($_POST['description'])) {
+			$description = sanitize($_POST['description']);
+			$stmt = $PDO->prepare("UPDATE \"Map\" SET description = ? WHERE id = ?");
+			$stmt->execute([$description, $id]);
+		}
+		if(isset($_POST['thumbnail'])
+		&& $_POST['thumbnail'] != "") {
+			$thumbnail = $_POST['thumbnail'];
+			$stmt = $PDO->prepare("UPDATE \"Map\" SET thumbnail = ? WHERE id = ?");
+			$stmt->execute([$thumbnail, $id]);
+		}
+		if(isset($_POST['password'])
+		&& $_POST['password'] != "") {
+			$password = $_POST['password'];
+			mb_substr($password, 0, 64);
+			$stmt = $PDO->prepare("UPDATE \"Map\" SET password = ? WHERE id = ?");
+			$stmt->execute([$password, $id]);
+		}
 
 		echo json_encode(array("status" => "success"));
 		exit;
@@ -201,89 +240,41 @@ else{
 	else
 	if($op == "write") {
 
-		if(!isset($_POST['data'])
-		|| !isset($_POST['preview'])) {
+		if(!isset($_POST['data'])) {
 			http_response_code(422); exit;
 		}
 		$data = $_POST['data'];
-		$preview = $_POST['preview'];
 
-		$stmt = $PDO->prepare("UPDATE \"Map\" SET data = ?, preview = ? WHERE id = ?");
-		$stmt->execute([$data, $preview, $id]);
+		$stmt = $PDO->prepare("UPDATE \"Map\" SET data = ? WHERE id = ?");
+		$stmt->execute([$data, $id]);
+
+		if(isset($_POST['thumbnail'])
+		&& !hasMapThumbnail($PDO, $id)) {
+			$stmt = $PDO->prepare("UPDATE \"Map\" SET thumbnail = ? WHERE id = ?");
+			$stmt->execute([$_POST['thumbnail'], $id]);
+		}
 
 		echo json_encode(array("status" => "success"));
 		exit;
 
 	}
 	else
-	if($op == "publish") {
-
-		$stmt = $PDO->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
+	if($op == "republish") {
+		$stmt = $PDO->prepare("SELECT published_date IS NOT NULL AS published FROM \"Map\" WHERE id = ?");
 		$stmt->execute([$id]);
 		$row = $stmt->fetch();
+		$published = $row['published'] ?? false;
 
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_URL, "{$CONFIG['forum_host']}/posts.json");
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			"Content-Type: application/json",
-			"Api-Key: {$CONFIG['discourse_apikey']}",
-			"Api-Username: {$username}"
-		));
-		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
-			"title" => $row['title'],
-			"raw" => "<iframe src=\"{$CONFIG['host']}/pres.php?id=$id\" width=\"100%\" height=\"550\" allowfullscreen=\"true\" style=\"border:none !important;\"></iframe>
-<a href=\"{$CONFIG['host']}/pres.php?id=$id\" target=\"_blank\">Open in separate window</a>
-
-{$row['description']}
-
-Created by: @{$username}",
-			"category" => 5
-		)));
-		$res = curl_exec($ch);
-		curl_close($ch);
-		$res = json_decode($res, true);
-
-		$url = "{$CONFIG['forum_host']}/t/{$res['topic_slug']}/{$res['topic_id']}";
-
-		$stmt = $PDO->prepare("UPDATE \"Map\" SET post = ? WHERE id = ?");
-		$stmt->execute([$url, $id]);
+		$sql = "";
+		if($published) { $sql = "UPDATE \"Map\" SET published = NULL WHERE id = ?"; }
+		else{ $sql = "UPDATE \"Map\" SET published = NOW() WHERE id = ?"; }
+		$stmt = $PDO->prepare($sql);
+		$stmt->execute([$id]);
 
 		echo json_encode(array(
-			"url" => $url
+			"published" => !$published
 		));
 		exit;
-
-	}
-	else
-	if($op == "unpublish") {
-
-		$stmt = $PDO->prepare("SELECT post FROM \"Map\" WHERE id = ?");
-		$stmt->execute([$id]);
-		$row = $stmt->fetch();
-		$p = explode("/", $row['post']);
-		$post_id = end($p);
-
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_URL, "{$CONFIG['forum_host']}/posts/{$post_id}.json");
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			//"Content-Type: application/json",
-			"Api-Key: {$CONFIG['discourse_apikey']}",
-			"Api-Username: {$username}"
-		));
-		$res = curl_exec($ch);
-		curl_close($ch);
-		$res = json_decode($res, true);
-
-		$stmt = $PDO->prepare("UPDATE \"Map\" SET post = null WHERE id = ?");
-		$stmt->execute([$id]);
-
-		echo json_encode(array("status" => "success"));
-		exit;
-
 	}
 	else{
 		http_response_code(501); exit;

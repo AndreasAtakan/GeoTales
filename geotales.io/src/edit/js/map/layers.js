@@ -148,7 +148,7 @@ L.Circle.include({
 
 
 
-function bind_setup(o) {
+export function bind_setup(o) {
 
 	$(".objectPopup input#label").change(function(ev) {
 		let val = $(this).val();

@@ -8,6 +8,9 @@
 
 "use strict";
 
+import { get_aspect_ratio_dimentions } from "../helpers.js";
+import "./layers.js";
+
 
 L.Map.addInitHook(function() {
 
@@ -26,6 +29,7 @@ L.Map.addInitHook(function() {
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
 	this.panLock = true;
+	this.isFullscreen = false;
 
 
 
@@ -138,14 +142,25 @@ L.Map.include({
 		let w = $("#main").outerWidth(),
 			h = $("#main").outerHeight(),
 			r = _OPTIONS.aspectratio;
-
 		let dim = get_aspect_ratio_dimentions(w, h, r);
+
+		let width = (dim[0]/w) * 100,
+			height = (dim[1]/h) * 100,
+			left = (((w - dim[0]) / 2) / w) * 100,
+			top = (((h - dim[1]) / 2)/ h) * 100;
+
+		if(this.isFullscreen) {
+			width = 100; height = 100;
+			left = 0; top = 0;
+		}
+
 		$("#map").css({
-			width: `${(dim[0]/w) * 100}%`,
-			height: `${(dim[1]/h) * 100}%`,
-			left: `${(((w - dim[0]) / 2) / w) * 100}%`,
-			top: `${(((h - dim[1]) / 2)/ h) * 100}%`
+			width: `${width}%`,
+			height: `${height}%`,
+			left: `${left}%`,
+			top: `${top}%`
 		});
+		$("#textbox").css({ maxHeight: $(window).width() <= 560 ? `calc(100% - ${height}% - 60px)` : "" });
 
 		this.invalidateSize();
 		if(_SCENES.active) { this.setFlyTo( _SCENES.get( _SCENES.active ).bounds ); }

@@ -3,6 +3,9 @@
 # dependencies
 node_modules
 .cache
+.parcel-cache
+package.json
+package-lock.json
 
 # testing
 */coverage

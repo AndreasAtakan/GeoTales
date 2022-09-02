@@ -10,11 +10,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 BEGIN;
 CREATE TABLE IF NOT EXISTS "User"(
-	uid int NOT NULL,
+	id uuid DEFAULT uuid_generate_v4(),
+	username text NOT NULL,
+	password varchar(64) NOT NULL,
+	email text,
+	photo text,
 	paid bool DEFAULT false,
 	stripe_id text,
-
-	PRIMARY KEY (uid)
+	PRIMARY KEY (id)
 );
 END;
 
@@ -23,14 +26,16 @@ END;
 BEGIN;
 CREATE TABLE IF NOT EXISTS "Map"(
 	id uuid DEFAULT uuid_generate_v4(),
-	title varchar(65) NOT NULL,
+	title text NOT NULL,
 	description text,
-	created timestamp DEFAULT NOW(),
-	post text,
-	preview text,
+	thumbnail text,
 	data json,
 	password varchar(64),
-
+	created_date timestamp DEFAULT NOW(),
+	published_date timestamp,
+	views int DEFAULT 0,
+	likes int DEFAULT 0,
+	flags int DEFAULT 0,
 	PRIMARY KEY (id)
 );
 END;
@@ -40,19 +45,29 @@ END;
 BEGIN;
 CREATE TABLE IF NOT EXISTS "User_Map"(
 	id uuid DEFAULT uuid_generate_v4(),
-	user_id int NOT NULL,
+	user_id uuid NOT NULL,
 	map_id uuid NOT NULL,
-	status varchar(100) NOT NULL,
-
+	status text NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id)
-		REFERENCES "User" (uid)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	FOREIGN KEY (map_id)
-		REFERENCES "Map" (id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+END;
+
+--
+
+BEGIN;
+CREATE TABLE IF NOT EXISTS "Comment"(
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id uuid NOT NULL,
+	map_id uuid NOT NULL,
+	ref uuid,
+	content text,
+	created_date timestamp DEFAULT NOW(),
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (ref) REFERENCES "Comment" (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 END;
 
@@ -62,7 +77,6 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS "Upload"(
 	id uuid DEFAULT uuid_generate_v4(),
 	ref text,
-
 	PRIMARY KEY (id)
 );
 END;
@@ -72,18 +86,11 @@ END;
 BEGIN;
 CREATE TABLE IF NOT EXISTS "User_Upload"(
 	id uuid DEFAULT uuid_generate_v4(),
-	user_id int NOT NULL,
+	user_id uuid NOT NULL,
 	upload_id uuid NOT NULL,
 	type text NOT NULL,
-
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id)
-		REFERENCES "User" (uid)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	FOREIGN KEY (upload_id)
-		REFERENCES "Upload" (id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (upload_id) REFERENCES "Upload" (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 END;

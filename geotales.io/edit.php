@@ -16,11 +16,12 @@ include "api/init.php";
 include_once("api/helper.php");
 
 // Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: login.php?return_url=maps.php"); exit;
+if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+	header("location: signin.php?return_url=maps.php"); exit;
 }
-$username = $_SESSION['username'];
-$avatar = getAvatar($CONFIG['forum_host'], $username);
+$user_id = $_SESSION['user_id'];
+$username = getUsername($PDO, $user_id);
+$photo = getUserPhoto($PDO, $user_id);
 
 
 if(!isset($_GET['id'])) {
@@ -381,9 +382,9 @@ $row = $stmt->fetch();
 			<div class="row g-0" style="height: 39px;">
 				<div class="col">
 					<nav class="navbar navbar-expand-sm navbar-dark fixed-top px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
-						<span class="navbar-brand py-0 mx-2" style="line-height: 0;">
+						<a class="navbar-brand py-0 mx-2" href="maps.php" style="line-height: 0;">
 							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
-						</span>
+						</a>
 
 						<button class="navbar-toggler py-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 							<span class="navbar-toggler-icon"></span>
@@ -411,8 +412,8 @@ $row = $stmt->fetch();
 												Export as
 											</button>
 											<ul class="dropdown-menu">
-												<li><button type="button" class="dropdown-item" onclick="export_data('project');">Project file</button></li>
-												<li><button type="button" class="dropdown-item" onclick="export_data('geojson');">GeoJSON</button></li>
+												<li><button type="button" class="dropdown-item" id="export" data-type="project">Project file</button></li>
+												<li><button type="button" class="dropdown-item" id="export" data-type="geojson">GeoJSON</button></li>
 											</ul>
 										</li>
 										<li><hr class="dropdown-divider" /></li>
@@ -493,14 +494,13 @@ $row = $stmt->fetch();
 
 								<li class="nav-item dropdown">
 									<a class="nav-link dropdown-toggle py-1 py-sm-0" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-										<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="25" height="25" />
+										<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="25" />
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-										<li><a class="dropdown-item" href="maps.php">My maps</a></li>
-										<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
-										<li><a class="dropdown-item" href="settings.php">Settings</a></li>
+										<li><a class="dropdown-item" href="maps.php">My GeoTales</a></li>
+										<li><a class="dropdown-item" href="profile.php">Profile</a></li>
 										<li><hr class="dropdown-divider" /></li>
-										<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+										<li><a class="dropdown-item" href="signout.php">Sign out</a></li>
 									</ul>
 								</li>
 							</ul>
@@ -605,21 +605,8 @@ $row = $stmt->fetch();
 		<!-- Load src/ JS -->
 		<!--script type="text/javascript" src="src/edit/js/map/L.GridLayer.js"></script-->
 		<script type="text/javascript" src="src/edit/js/map/L.TileLayer.Mars.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/globals.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/helpers.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/generate.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/scenes.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/textboxes.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/map/layers.js"></script>
-		<script type="text/javascript" src="src/edit/js/map/map.js"></script>
-
-		<script type="text/javascript" src="src/edit/js/main.js"></script>
+		<script type="text/javascript" src="src/edit/globals.js"></script>
+		<script type="text/javascript" src="src/edit/main.js"></script>
 
 	</body>
 </html>

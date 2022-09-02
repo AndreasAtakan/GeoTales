@@ -8,8 +8,10 @@
 
 "use strict";
 
+import { uuid } from "./helpers.js";
 
-function Textboxes() {
+
+export function Textboxes() {
 	this.store = [];
 
 

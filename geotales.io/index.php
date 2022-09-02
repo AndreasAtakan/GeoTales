@@ -16,52 +16,50 @@ include "api/init.php";
 include_once("api/helper.php");
 
 $logged_in = false;
-if(isset($_SESSION['uid']) && validUID($PDO, $_SESSION['uid'])) {
+if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 	$logged_in = true;
-	$username = $_SESSION['username'];
-	$avatar = getAvatar($CONFIG['forum_host'], $username);
+	$user_id = $_SESSION['user_id'];
+	$username = getUsername($PDO, $user_id);
+	$photo = getUserPhoto($PDO, $user_id);
 }
 
 
 // Get top posts
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_URL, "{$CONFIG['forum_host']}/c/public-maps/5.json");
-$res = curl_exec($ch);
-curl_close($ch);
-$res = json_decode($res, true);
-$res = $res['topic_list']['topics'];
-
-function s($a, $b) { return $b['views'] - $a['views']; }
-uasort($res, "s");
-
-$posts = array();
-foreach($res as $r) {
-	$url = "{$CONFIG['forum_host']}/t/{$r['slug']}/{$r['id']}";
-	$posts[ $url ] = array( "views" => $r['views'], "likes" => $r['like_count'] );
+$search = "%";
+if(isset($_GET['search'])) { $search .= "{$_GET['search']}%"; }
+$order = "views";
+if(isset($_GET['order'])) {
+	if($_GET['order'] == "likes") { $order = "likes"; }
+	elseif($_GET['order'] == "date") { $order = "published_date"; }
 }
-
-$urls = array();
-foreach($posts as $url => $val) { array_push($urls, "'{$url}'"); }
-$urls = implode(', ', $urls);
 
 $stmt = $PDO->prepare("
 	SELECT
 		M.id AS id,
 		M.title AS title,
 		M.description AS description,
-		M.created AS created,
-		M.post AS post,
-		M.preview AS preview
+		M.published_date AS published_date,
+		M.thumbnail AS thumbnail,
+		M.views AS views,
+		M.likes AS likes,
+		U.id AS user_id,
+		U.photo AS user_photo
 	FROM
-		\"Map\" AS M
+		\"Map\" AS M INNER JOIN
+		\"User_Map\" AS UM
+			ON UM.map_id = M.id INNER JOIN
+		\"User\" AS U
+			ON UM.user_id = U.id
 	WHERE
-		M.post IN ({$urls})
+		M.published_date IS NOT NULL AND
+		UM.status = 'owner' AND
+		LOWER(M.title) LIKE LOWER(?) OR
+		true
 	ORDER BY
-		M.created DESC
-	LIMIT 15
+		M.{$order} DESC
+	LIMIT 50
 ");
-$stmt->execute();
+$stmt->execute([$search]);
 $rows = $stmt->fetchAll();
 $count = $stmt->rowCount();
 
@@ -86,7 +84,7 @@ $count = $stmt->rowCount();
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/main.css" />
+		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
 			html, body {
@@ -115,9 +113,10 @@ $count = $stmt->rowCount();
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
-					<span class="navbar-brand">
+					<a class="navbar-brand" href="index.php">
 						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-					</span>
+						GeoTales
+					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
@@ -126,37 +125,36 @@ $count = $stmt->rowCount();
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link active" aria-current="page" href="index.php">Home</a>
+								<a class="nav-link active" aria-current="page" href="index.php">
+									<i class="fas fa-home"></i> Home
+								</a>
 							</li>
-							<li class="nav-item <?php if(!$logged_in) { echo "me-sm-auto"; } ?>">
-								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
-							</li>
-
-					<?php if($logged_in) { ?>
 							<li class="nav-item me-sm-auto">
-								<a class="nav-link" href="maps.php">My maps</a>
-							</li>
-					<?php } ?>
-
-							<li class="nav-item me-sm-2">
-								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+								<a class="nav-link" href="pricing.php">
+									<i class="fas fa-tag"></i> Pricing
+								</a>
 							</li>
 
 					<?php if($logged_in) { ?>
+							<li class="nav-item me-sm-2">
+								<a class="nav-link" href="maps.php">
+									<i class="fas fa-map"></i> My GeoTales
+								</a>
+							</li>
+
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
+									<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
-									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
-									<li><hr class="dropdown-divider" /></li>
-									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="profile.php">Profile</a></li>
+									<li><hr class="dropdown-divider"></li>
+									<li><a class="dropdown-item" href="signout.php">Sign out</a></li>
 								</ul>
 							</li>
 					<?php }else{ ?>
 							<li class="nav-item">
-								<a role="button" class="btn btn-sm btn-light" href="login.php" style="margin-top: 0.35rem;">Sign in</a>
+								<a role="button" class="btn btn-sm btn-light" href="signin.php" style="margin-top: 0.35rem;">Sign in</a>
 							</li>
 					<?php } ?>
 						</ul>
@@ -173,30 +171,37 @@ $count = $stmt->rowCount();
 
 				<div class="row">
 					<div class="col-sm-9">
-						<form method="get" action="<?php echo "{$CONFIG['forum_host']}/search"; ?>" id="search">
-							<input type="hidden" name="expanded" value="true" />
-							<input type="hidden" name="q" value="" />
-							<div class="input-group" style="max-width: 650px;">
-								<input type="text" class="form-control" name="none" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
-								<button type="submit" class="btn btn-outline-secondary" id="search-button">Search</button>
+						<form method="get">
+							<div class="input-group mb-1" style="max-width: 650px;">
+								<a role="button" class="btn btn-outline-secondary" href="index.php" title="Clear search"><i class="fas fa-minus"></i></a>
+								<input type="text" class="form-control" name="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" value="<?php echo $_GET['search'] ?? ""; ?>" />
+								<button type="submit" class="btn btn-outline-light" id="search-button">Search</button>
+							</div>
+							<div class="input-group" style="max-width: 150px; margin-left: 40px;">
+								<select class="form-select form-select-sm" name="order" aria-label="Sort by">
+									<option value="" selected disabled>Sort by</option>
+									<option value="views">Views</option>
+									<option value="likes">Likes</option>
+									<option value="date">Date</option>
+								</select>
 							</div>
 						</form>
 					</div>
 					<div class="col-sm-3 mt-sm-0 mt-4">
 						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" class="btn btn-info" href="stage.php" style="color: white;">Create map</a>
+							<a role="button" class="btn btn-info" href="stage.php" style="color: white;">Create</a>
 						</div>
-						<p class="text-muted text-center text-shadow mt-2">Create your own map for <strong>free</strong></p>
+						<p class="text-muted text-center text-shadow mt-2">Create your own GeoTale for <strong>free</strong></p>
 					</div>
 				</div>
 
-				<div class="row mt-3 mb-5">
+				<div class="row my-4">
 					<div class="col"></div>
 				</div>
 
-				<div class="row my-2">
+				<div class="row mb-2">
 					<div class="col">
-						<h5 class="text-muted text-shadow">Top 15 most popular maps</h5>
+						<h5 class="text-muted text-shadow">Most popular GeoTales</h5>
 					</div>
 				</div>
 
@@ -204,42 +209,31 @@ $count = $stmt->rowCount();
 		<?php
 			if($count > 0) {
 				foreach($rows as $row) {
-					$created = date_format(date_create($row['created']), "d.M Y, H:i");
-					$views = $posts[ $row['post'] ]['views'];
-					$likes = $posts[ $row['post'] ]['likes'];
+					$href = "pres.php?id={$row['id']}";
+					$published_date = date_format(date_create($row['published_date']), "d.M Y, H:i");
 		?>
 					<div class="col">
 						<div class="card">
-							<a class="text-decoration-none" href="<?php echo $row['post']; ?>">
-								<img src="<?php echo $row['preview']; ?>" class="card-img-top" alt="&nbsp;">
+							<a class="text-decoration-none" href="<?php echo $href; ?>">
+								<img src="<?php echo $row['thumbnail']; ?>" class="card-img-top" alt="&nbsp;" />
 								<div class="card-body">
 									<h5 class="card-title" style="color: black;"><?php echo $row['title']; ?></h5>
-									<h6 class="card-subtitle mb-2 text-muted"><?php echo $created; ?></h6>
-									<span class="badge bg-primary">Views: <?php echo $views; ?></span>
-									<span class="badge bg-secondary">Likes: <?php echo $likes; ?></span>
+									<h6 class="card-subtitle mb-2 text-muted"><?php echo $published_date; ?></h6>
+									<span class="badge rounded-pill bg-primary">Views: <?php echo $row['views']; ?></span>
+									<span class="badge rounded-pill bg-secondary">Likes: <?php echo $row['likes']; ?></span>
+							<?php if(!sane_is_null($row['user_photo'])) { ?>
+									<img class="rounded ms-2 float-end" src="<?php echo $row['user_photo']; ?>" width="30" height="auto" alt="&nbsp" />
+							<?php } ?>
 								</div>
 							</a>
 						</div>
 					</div>
 		<?php
 				}
-		?>
-					<div class="col">
-						<div class="card">
-							<div class="card-body">
-								<div class="d-grid">
-									<a role="button" class="btn btn-lg btn-outline-secondary" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">
-										Browse more maps
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-		<?php
 			}else{
 		?>
 					<div class="col">
-						<p class="text-muted text-center text-shadow">No maps found</p>
+						<p class="text-muted text-center text-shadow">None found</p>
 					</div>
 		<?php
 			}
@@ -259,10 +253,10 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<center>
 							<div class="btn-group btn-group-lg" role="group" aria-label="Socials">
-								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+								<a role="button" class="btn btn-outline-light" href="https://www.facebook.com/Geotales-107125105285825" target="_blank">
 									<i class="fab fa-facebook" style="color: #4267b2;"></i>
 								</a>
-								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
+								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
 								</a>
 							</div>
@@ -276,7 +270,6 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
 							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
@@ -293,7 +286,15 @@ $count = $stmt->rowCount();
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/index.js"></script>
+		<script type="text/javascript">
+			"use strict";
+
+			window.onload = function(ev) {
+
+				//
+
+			};
+		</script>
 
 	</body>
 </html>

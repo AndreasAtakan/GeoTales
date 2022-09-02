@@ -31,16 +31,16 @@ try {
 
 // config
 
-$TESTING = false;
+$TESTING = true;
 $CONFIG = array(
 	"host" => $TESTING ? "http://localhost/geotales" : "https://{$_SERVER['SERVER_NAME']}",
-	"forum_host" => "https://forum.geotales.io",
+	//"forum_host" => "https://forum.geotales.io",
 	"email" => "contact@geotales.io",
 
 	//"apikey" => "4b90e8c0d5778d0fa06a5ba399cccf2c3c01fdcc2c5178b028a29b6075fec017", // old
-	"discourse_apikey" => "15f3af9ac9fed3435fbabdbecabbdc614cd7dd670dbf540adf6649846161c1ef", // secret
-	"discourse_sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
-	"discourse_webhooks_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
+	//"discourse_apikey" => "15f3af9ac9fed3435fbabdbecabbdc614cd7dd670dbf540adf6649846161c1ef", // secret
+	//"discourse_sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
+	//"discourse_webhooks_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
 
 	"aws_access_key_id" => "AKIA5RSTXAFR7IU7J467", // secret
 	"aws_secret_access_key" => "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", // secret

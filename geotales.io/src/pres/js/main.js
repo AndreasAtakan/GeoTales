@@ -8,6 +8,14 @@
 
 "use strict";
 
+import { import_data } from "./helpers.js";
+import { init, reset } from "./generate.js";
+
+import { Scenes } from "./scenes.js";
+import { Textboxes } from "./textboxes.js";
+
+import "./map/map.js";
+
 
 window.onload = function(ev) {
 
@@ -29,7 +37,7 @@ window.onload = function(ev) {
 
 	// Set up nav-btn-fade-out
 	let btnTimer = null, btnFadeTime = 5000,
-		btnToggle = v => { $("#mapNav, #sceneNav, #extraNav").css("opacity", v || 0); };
+		btnToggle = v => { $("#mapNav, #extraNav").css("opacity", v || 0); };
 	$(window).on("mousemove", function() {
 		btnToggle(1); clearTimeout(btnTimer);
 		btnTimer = setTimeout(btnToggle, btnFadeTime);
@@ -40,9 +48,8 @@ window.onload = function(ev) {
 
 	_SCENES = new Scenes();
 
-	let isFullscreen = false;
-	$("#sceneNav #fullscreen").click(ev => {
-		if(isFullscreen) {
+	$("#mapNav #fullscreen").click(ev => {
+		if(_MAP.isFullscreen) {
 			if(document.exitFullscreen) { document.exitFullscreen(); }
 			else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
 			else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
@@ -52,7 +59,7 @@ window.onload = function(ev) {
 			else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
 			else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
 		}
-		isFullscreen = !isFullscreen;
+		_MAP.isFullscreen = !_MAP.isFullscreen;
 		_MAP.setAspectRatio();
 	});
 	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });

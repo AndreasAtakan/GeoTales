@@ -8,8 +8,10 @@
 
 "use strict";
 
+import { uuid } from "./helpers.js";
 
-function Scenes() {
+
+export function Scenes() {
 	this.store = [];
 	this.active = "";
 

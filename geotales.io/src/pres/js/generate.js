@@ -9,10 +9,10 @@
 "use strict";
 
 
-function init() {
+export function init() {
 	//
 }
 
-function reset() {
+export function reset() {
 	//
 }

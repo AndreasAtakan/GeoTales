@@ -16,24 +16,23 @@ include "api/init.php";
 include_once("api/helper.php");
 
 // Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
-	header("location: login.php?return_url=maps.php"); exit;
+if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+	header("location: signin.php?return_url=maps.php"); exit;
 }
-$uid = $_SESSION['uid'];
-$username = $_SESSION['username'];
-$avatar = getAvatar($CONFIG['forum_host'], $username);
+$user_id = $_SESSION['user_id'];
+$username = getUsername($PDO, $user_id);
+$photo = getUserPhoto($PDO, $user_id);
 
-$title = "%";
-if(isset($_GET['title'])) { $title .= "{$_GET['title']}%"; }
+$search = "%";
+if(isset($_GET['search'])) { $search .= "{$_GET['search']}%"; }
 
 $stmt = $PDO->prepare("
 	SELECT
 		M.id AS id,
 		M.title AS title,
 		M.description AS description,
-		M.created AS created,
-		M.post AS post,
-		M.preview AS preview
+		M.created_date AS created_date,
+		M.thumbnail AS thumbnail
 	FROM
 		\"User_Map\" AS UM INNER JOIN
 		\"Map\" AS M
@@ -41,11 +40,11 @@ $stmt = $PDO->prepare("
 	WHERE
 		UM.status IN ('owner', 'editor') AND
 		UM.user_id = ? AND
-		lower(M.title) LIKE lower(?)
+		LOWER(M.title) LIKE LOWER(?)
 	ORDER BY
-		M.created DESC
+		M.created_date DESC
 ");
-$stmt->execute([$uid, $title]);
+$stmt->execute([$user_id, $search]);
 $rows = $stmt->fetchAll();
 $count = $stmt->rowCount();
 
@@ -70,7 +69,7 @@ $count = $stmt->rowCount();
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/main.css" />
+		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
 			html, body {
@@ -89,7 +88,7 @@ $count = $stmt->rowCount();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="newModalLabel">New map</h5>
+						<h5 class="modal-title" id="newModalLabel">New</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -108,11 +107,23 @@ $count = $stmt->rowCount();
 									<textarea class="form-control" id="descriptionInput" rows="5"></textarea>
 								</div>
 							</div>
+
+							<div class="row mb-3">
+								<div class="col">
+									<label for="passwordInput" class="form-label">Password</label>
+									<input type="text" class="form-control" id="passwordInput" aria-describedby="passwordHelp" />
+									<div id="passwordHelp" class="form-text">Will be required when viewing the GeoTale</div>
+								</div>
+								<div class="col">
+									<label for="thumbnailInput" class="form-label">Thumbnail</label>
+									<input type="file" class="form-control form-control-sm" id="thumbnailInput" accept="image/gif, image/jpeg, image/png, image/webp" />
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" id="create">Create map</button>
+						<button type="button" class="btn btn-primary" id="create">Create</button>
 					</div>
 				</div>
 			</div>
@@ -131,7 +142,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="titleInput" class="form-label">Title</label>
-									<input type="text" class="form-control" id="titleInput" aria-describedby="titleHelp" placeholder="Loading..." disabled />
+									<input type="text" class="form-control" id="titleInput" aria-describedby="titleHelp" maxlength="65" placeholder="Loading..." disabled />
 									<div id="titleHelp" class="form-text">Max 65 characters</div>
 								</div>
 							</div>
@@ -146,8 +157,12 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="passwordInput" class="form-label">Password</label>
-									<input type="password" class="form-control" id="passwordInput" aria-describedby="passwordHelp" disabled />
-									<div id="passwordHelp" class="form-text">This password will be required when viewing the map</div>
+									<input type="text" class="form-control" id="passwordInput" aria-describedby="passwordHelp" disabled />
+									<div id="passwordHelp" class="form-text">Will be required when viewing the GeoTale</div>
+								</div>
+								<div class="col">
+									<label for="thumbnailInput" class="form-label">Thumbnail</label>
+									<input type="file" class="form-control form-control-sm" id="thumbnailInput" accept="image/gif, image/jpeg, image/png, image/webp" disabled />
 								</div>
 							</div>
 						</div>
@@ -193,23 +208,22 @@ $count = $stmt->rowCount();
 							</div>
 
 							<div class="row">
-								<div class="col-7">
-									<a role="button" class="btn btn-sm btn-outline-secondary mb-2" href="#" id="publish" data-id="" data-published=""></a> <br />
-									<a class="small text-muted text-decoration-none" href="" id="publishText"></a>
+								<div class="col-sm-7">
+									<button type="button" class="btn btn-sm btn-outline-secondary" id="publish" title="Will make your GeoTale visible to other users" data-id="">Publish</button>
 								</div>
-								<div class="col-1">
+								<div class="col-sm-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
 								</div>
-								<div class="col-1">
+								<div class="col-sm-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
 								</div>
-								<div class="col-1">
+								<div class="col-sm-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
 								</div>
-								<div class="col-1">
+								<div class="col-sm-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
 								</div>
-								<div class="col-1">
+								<div class="col-sm-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
 								</div>
 							</div>
@@ -224,7 +238,7 @@ $count = $stmt->rowCount();
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="deleteModalLabel">Delete map</h5>
+						<h5 class="modal-title" id="deleteModalLabel">Delete GeoTale</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
@@ -275,9 +289,10 @@ $count = $stmt->rowCount();
 		<header>
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
-					<span class="navbar-brand">
+					<a class="navbar-brand" href="index.php">
 						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-					</span>
+						GeoTales
+					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
@@ -286,28 +301,30 @@ $count = $stmt->rowCount();
 					<div class="collapse navbar-collapse" id="navbarContent">
 						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
 							<li class="nav-item">
-								<a class="nav-link" href="index.php">Home</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/public-maps/5"; ?>">All maps</a>
+								<a class="nav-link" href="index.php">
+									<i class="fas fa-home"></i> Home
+								</a>
 							</li>
 							<li class="nav-item me-sm-auto">
-								<a class="nav-link active" aria-current="page" href="maps.php">My maps</a>
+								<a class="nav-link" href="pricing.php">
+									<i class="fas fa-tag"></i> Pricing
+								</a>
 							</li>
 
 							<li class="nav-item me-sm-2">
-								<a class="nav-link" href="<?php echo "{$CONFIG['forum_host']}/c/announcements/6"; ?>">Blog</a>
+								<a class="nav-link active" aria-current="page" href="maps.php">
+									<i class="fas fa-map"></i> My GeoTales
+								</a>
 							</li>
 
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img class="rounded" src="<?php echo $avatar; ?>" alt="&nbsp;" width="auto" height="25" />
+									<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="25" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
-									<li><a class="dropdown-item" href="<?php echo "{$CONFIG['forum_host']}/u/{$username}/preferences/account"; ?>">Profile</a></li>
-									<li><a class="dropdown-item" href="settings.php">Settings</a></li>
+									<li><a class="dropdown-item" href="profile.php">Profile</a></li>
 									<li><hr class="dropdown-divider"></li>
-									<li><a class="dropdown-item" href="logout.php">Log out</a></li>
+									<li><a class="dropdown-item" href="signout.php">Sign out</a></li>
 								</ul>
 							</li>
 						</ul>
@@ -329,12 +346,12 @@ $count = $stmt->rowCount();
 						<form method="get">
 							<div class="row mb-2">
 								<div class="col-sm-3 order-sm-2 mb-4 mb-sm-0">
-									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New map</button>
+									<button type="button" class="btn btn-primary float-sm-end mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#newModal">New GeoTale</button>
 								</div>
 								<div class="col-sm-9 order-sm-1">
 									<div class="input-group d-inline-flex" style="max-width: 650px;">
 										<a role="button" class="btn btn-outline-secondary" href="maps.php" title="Clear search"><i class="fas fa-minus"></i></a>
-										<input type="text" class="form-control" name="title" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
+										<input type="text" class="form-control" name="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
 										<button type="submit" class="btn btn-secondary" id="search-button">Search</button>
 									</div>
 								</div>
@@ -354,7 +371,7 @@ $count = $stmt->rowCount();
 						<?php
 							if($count > 0) {
 						?>
-								<caption>Your maps</caption>
+								<caption>Your GeoTales</caption>
 								<thead>
 									<tr>
 										<th scope="col">#</th>
@@ -368,15 +385,15 @@ $count = $stmt->rowCount();
 								<tbody>
 						<?php
 								foreach($rows as $row) {
-									$created = date_format(date_create($row['created']), "d.M Y, H:i");
+									$created_date = date_format(date_create($row['created_date']), "d.M Y, H:i");
 						?>
 									<tr>
 										<th style="width: 8.33%;" scope="row">
-											<img class="img-fluid" src="<?php echo $row['preview']; ?>" alt="#" />
+											<img class="img-fluid" src="<?php echo $row['thumbnail']; ?>" alt="#" />
 										</th>
 										<td style="width: 16.66%;"><?php echo $row['title']; ?></td>
 										<td style="width: 25%; max-width: 65px;" class="text-truncate"><?php echo $row['description']; ?></td>
-										<td style="width: 16.66%;"><?php echo $created; ?></td>
+										<td style="width: 16.66%;"><?php echo $created_date; ?></td>
 										<td style="width: 8.33%;">
 											<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
 												<a role="button" class="btn btn-outline-secondary" href="edit.php?id=<?php echo $row['id']; ?>">Edit</a>
@@ -390,24 +407,18 @@ $count = $stmt->rowCount();
 												</button>
 												<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown<?php echo $row['id']; ?>" style="min-width: 0;">
 													<li><button type="button" class="dropdown-item" id="edit" data-id="<?php echo $row['id']; ?>"><i class="fas fa-pen"></i></button></li>
-													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>" data-post="<?php echo $row['post']; ?>"><i class="fas fa-share-alt"></i></button></li>
+													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>"><i class="fas fa-share-alt"></i></button></li>
 													<li><hr class="dropdown-divider"></li>
 													<li><button type="button" class="dropdown-item" id="delete" data-id="<?php echo $row['id']; ?>"><i class="fas fa-trash"></i></button></li>
 												</ul>
 											</div>
 										</td>
 									</tr>
-						<?php
-								}
-						?>
+						<?php } ?>
 								</tbody>
-						<?php
-							}else{
-						?>
-								<caption>No maps found</caption>
-						<?php
-							}
-						?>
+						<?php }else{ ?>
+								<caption>No GeoTales found</caption>
+						<?php } ?>
 							</table>
 						</div>
 					</div>
@@ -427,10 +438,10 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<center>
 							<div class="btn-group btn-group-lg" role="group" aria-label="Socials">
-								<a role="button" class="btn btn-outline-light" href="#" target="_blank">
+								<a role="button" class="btn btn-outline-light" href="https://www.facebook.com/Geotales-107125105285825" target="_blank">
 									<i class="fab fa-facebook" style="color: #4267b2;"></i>
 								</a>
-								<a role="button" class="btn btn-outline-light" href="https://twitter.com/tellusmap" target="_blank">
+								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
 								</a>
 							</div>
@@ -444,7 +455,6 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "{$CONFIG['forum_host']}/c/feedback/2"; ?>">Feedback</a> – 
 							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
@@ -462,7 +472,244 @@ $count = $stmt->rowCount();
 		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/maps.js"></script>
+		<script type="text/javascript">
+			"use strict";
+
+			window.onload = function(ev) {
+
+				$("#newModal input#titleInput, #editModal input#titleInput").change(ev => {
+					let v = $(ev.target).val();
+					if(v.length > 65) { $(ev.target).val(v.substring(0, 65)); }
+				});
+
+				$("#newModal button#create").click(ev => {
+					let title = $("#newModal input#titleInput").val().substring(0, 65),
+						description = $("#newModal textarea#descriptionInput").val(),
+						password = $("#newModal input#passwordInput").val(),
+						thumbnail = $("#newModal input#thumbnailInput").prop("files")[0];
+					password = password === "" ? null : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
+
+					$("#newModal").modal("hide");
+					$("#loadingModal").modal("show");
+
+					let callback = ref => {
+						$.ajax({
+							type: "POST",
+							url: "api/map.php",
+							data: {
+								"op": "create",
+								"title": title,
+								"description": description,
+								"thumbnail": ref,
+								"password": password
+							},
+							dataType: "json",
+							success: function(result, status, xhr) {
+								window.location.assign(`edit.php?id=${result.id}`);
+							},
+							error: function(xhr, status, error) {
+								console.log(xhr.status, error);
+
+								if(xhr.status == 401) { window.location.assign("profile.php"); }
+								else{ setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750); }
+							}
+						});
+					};
+
+					if(thumbnail) {
+						let data = new FormData();
+						data.append("op", "create");
+						data.append("type", "thumbnail");
+						data.append("image", thumbnail);
+
+						$.ajax({
+							type: "POST",
+							url: "api/upload.php",
+							data: data,
+							contentType: false,
+							processData: false,
+							success: function(result, status, xhr) {
+								callback(result);
+								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							},
+							error: function(xhr, status, error) {
+								console.error(xhr.status, error);
+								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+							}
+						});
+					}else{ callback(null); }
+				});
+
+				$("button#edit").click(ev => {
+					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
+					$("#editModal").modal("show");
+
+					$.ajax({
+						type: "GET",
+						url: "api/map.php",
+						data: {
+							"op": "get",
+							"id": id
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							$("#editModal input#titleInput").val(result.title);
+							$("#editModal textarea#descriptionInput").val(result.description);
+							$("#editModal input#passwordInput").val(null);
+
+							$("#editModal input#titleInput, #editModal textarea#descriptionInput, #editModal input#thumbnailInput, #editModal input#passwordInput, #editModal button#save").prop("disabled", false);
+							$("#editModal button#save").data("id", id);
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				});
+				$("#editModal button#save").click(ev => {
+					let id = $(ev.target).data("id"),
+						title = $("#editModal input#titleInput").val().substring(0, 65),
+						description = $("#editModal textarea#descriptionInput").val(),
+						password = $("#editModal input#passwordInput").val(),
+						thumbnail = $("#editModal input#thumbnailInput").prop("files")[0];
+					password = password === "" ? null : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
+
+					$("#editModal").modal("hide");
+					$("#loadingModal").modal("show");
+
+					let callback = ref => {
+						$.ajax({
+							type: "POST",
+							url: "api/map.php",
+							data: {
+								"op": "update",
+								"id": id,
+								"title": title,
+								"description": description,
+								"thumbnail": ref,
+								"password": password
+							},
+							dataType: "json",
+							success: function(result, status, xhr) {
+								window.location.reload();
+							},
+							error: function(xhr, status, error) {
+								console.log(xhr.status, error);
+								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+							}
+						});
+					};
+
+					if(thumbnail) {
+						let data = new FormData();
+						data.append("op", "create");
+						data.append("type", "thumbnail");
+						data.append("image", thumbnail);
+
+						$.ajax({
+							type: "POST",
+							url: "api/upload.php",
+							data: data,
+							contentType: false,
+							processData: false,
+							success: function(result, status, xhr) {
+								callback(result);
+								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							},
+							error: function(xhr, status, error) {
+								console.error(xhr.status, error);
+								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+							}
+						});
+					}else{ callback(null); }
+				});
+
+				$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
+				$("#shareModal button#copyEmbed").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#embedInput").val() ); });
+				$("button#share").click(ev => {
+					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
+					const host = window.location.host;
+
+					$("#shareModal").modal("show");
+
+					$("#shareModal input#linkInput").val(`https://${host}/pres.php?id=${id}`);
+					$("#shareModal input#embedInput").val(`<iframe src="https://${host}/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
+					$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${host}/pres.php?id=${id}`);
+					$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${host}/pres.php?id=${id}&text=`);
+					$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${host}/pres.php?id=${id}`);
+					$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${host}/pres.php?id=${id}&media=&description=`);
+					$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${host}/pres.php?id=${id}%0A`);
+					$("#shareModal button#publish").data("id", id);
+
+					$.ajax({
+						type: "GET",
+						url: "api/map.php",
+						data: {
+							"op": "get",
+							"id": id
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish");
+							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible to other users" : "Will make your GeoTale visible to other users");
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				});
+				$("#shareModal button#publish").click(ev => {
+					let id = $(ev.target).data("id");
+					$.ajax({
+						type: "POST",
+						url: "api/map.php",
+						data: {
+							"op": "republish",
+							"id": id
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish");
+							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible to other users" : "Will make your GeoTale visible to other users");
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				});
+
+				$("button#delete").click(ev => {
+					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
+					$("#deleteModal").modal("show");
+					$("#deleteModal button#deleteConfirm").data("id", id);
+				});
+				$("#deleteModal button#deleteConfirm").click(ev => {
+					let id = $(ev.target).data("id");
+					$("#deleteModal").modal("hide");
+					$("#loadingModal").modal("show");
+
+					$.ajax({
+						type: "POST",
+						url: "api/map.php",
+						data: {
+							"op": "delete",
+							"id": id
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							window.location.reload();
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				});
+
+			};
+		</script>
 
 	</body>
 </html>

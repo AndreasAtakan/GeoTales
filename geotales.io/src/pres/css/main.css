@@ -40,12 +40,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	right: 15px;
 }
 
-#sceneNav {
-	position: absolute;
-	z-index: 1003;
-	bottom: 10px;
-	left: calc(50% - 70px);
-}
+#sceneNav { width: 100%; }
 #sceneNav button#bookmarksDropdown::after {
 	display: none;
 }
@@ -67,7 +62,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 	width: auto;
 	height: auto;
-	max-height: calc(100% - 60px);
+	max-height: calc(100% - 30px);
 
 	overflow-y: auto;
 	opacity: 0;
@@ -86,7 +81,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 #main {
 	height: 100vh;
-	background-color: #999999;
+	background-color: #333333;
 }
 #map {
 	position: absolute;
@@ -109,4 +104,17 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 @media (max-width: 575.98px) {
 	/**/
+}
+
+@media (max-width: 560px) {
+	#textbox {
+		left: 10px !important;
+		right: 85px !important;
+		top: auto !important;
+		bottom: 30px !important;
+		max-width: none !important;
+		min-height: 30%;
+	}
+
+	#map { top: 0 !important; }
 }

@@ -22,24 +22,24 @@ $op = $_REQUEST['op'];
 
 
 // Not logged in
-if(!isset($_SESSION['uid']) || !validUID($PDO, $_SESSION['uid'])) {
+if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
 	http_response_code(401); exit;
 }
-$uid = $_SESSION['uid'];
-$username = $_SESSION['username'];
+$user_id = $_SESSION['user_id'];
 
 
 
 if($op == "create_checkout_session") {
 
-	$stmt = $PDO->prepare("SELECT paid, stripe_id FROM \"User\" WHERE uid = ?");
-	$stmt->execute([$uid]);
+	$stmt = $PDO->prepare("SELECT paid, stripe_id FROM \"User\" WHERE id = ?");
+	$stmt->execute([$user_id]);
 	$row = $stmt->fetch();
 	$stripe_id = $row['stripe_id'];
 
 	if($row['paid']) { http_response_code(500); exit; }
-	if(is_null($stripe_id)) {
-		$email = getEmail($CONFIG['forum_host'], $username);
+	if(sane_is_null($stripe_id)) {
+		$username = getUsername($PDO, $user_id);
+		$email = getUserEmail($PDO, $user_id);
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -54,7 +54,7 @@ if($op == "create_checkout_session") {
 
 		$stripe_id = $res['id'];
 		$stmt = $PDO->prepare("UPDATE \"User\" SET stripe_id = ? WHERE id = ?");
-		$stmt->execute([$stripe_id, $uid]);
+		$stmt->execute([$stripe_id, $user_id]);
 	}
 
 	$ch = curl_init();
@@ -63,8 +63,8 @@ if($op == "create_checkout_session") {
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
 	curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, "success_url={$CONFIG['host']}/settings.php&
-										  cancel_url={$CONFIG['host']}/settings.php&
+	curl_setopt($ch, CURLOPT_POSTFIELDS, "success_url={$CONFIG['host']}/profile.php&
+										  cancel_url={$CONFIG['host']}/profile.php&
 										  mode=subscription&
 										  customer={$stripe_id}&
 										  line_items[0][price]={$CONFIG['stripe_price_id']}&
@@ -82,11 +82,11 @@ if($op == "create_checkout_session") {
 else
 if($op == "create_portal_session") {
 
-	$stmt = $PDO->prepare("SELECT paid, stripe_id FROM \"User\" WHERE uid = ?");
-	$stmt->execute([$uid]);
+	$stmt = $PDO->prepare("SELECT paid, stripe_id FROM \"User\" WHERE id = ?");
+	$stmt->execute([$user_id]);
 	$row = $stmt->fetch();
 
-	if(!$row['paid'] || is_null($row['stripe_id'])) { http_response_code(500); exit; }
+	if(!$row['paid'] || sane_is_null($row['stripe_id'])) { http_response_code(500); exit; }
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -95,7 +95,7 @@ if($op == "create_portal_session") {
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Content-Type: application/x-www-form-urlencoded" ));
 	curl_setopt($ch, CURLOPT_USERPWD, $CONFIG['stripe_secret_key']);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, "customer={$row['stripe_id']}&
-										  return_url={$CONFIG['host']}/settings.php");
+										  return_url={$CONFIG['host']}/profile.php");
 	$res = curl_exec($ch);
 	curl_close($ch);
 	$res = json_decode($res, true);

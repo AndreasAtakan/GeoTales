@@ -10,6 +10,7 @@ BEGIN;
 
 DELETE FROM "User_Upload";
 DELETE FROM "Upload";
+DELETE FROM "Comment";
 DELETE FROM "User_Map";
 DELETE FROM "Map";
 DELETE FROM "User";

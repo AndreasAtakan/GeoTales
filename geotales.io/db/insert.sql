@@ -7,34 +7,12 @@
 *******************************************************************************/
 
 BEGIN;
-INSERT INTO "User" (uid, paid)
-VALUES (1, true);
-END;
-
---
-
-BEGIN;
-INSERT INTO "Map" (title, description)
-VALUES ('main', 'main project');
-END;
-
---
-
-BEGIN;
-INSERT INTO "User_Map" (user_id, map_id, status)
-VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Map" LIMIT 1), 'owner' );
-END;
-
---
-
-BEGIN;
-INSERT INTO "Upload" (ref)
-VALUES ('main');
-END;
-
---
-
-BEGIN;
-INSERT INTO "User_Upload" (user_id, upload_id)
-VALUES ( (SELECT uid FROM "User" LIMIT 1), (SELECT id FROM "Upload" LIMIT 1) );
+INSERT INTO "User" (username, password, email, paid, stripe_id)
+VALUES (
+	'andreas',
+	'240f2ec6918381f9e7393b18539f8a2c8bc60b3224004a37ee7057a62abc2efa',
+	'andreascan.98@gmail.com',
+	true,
+	'cus_MDNgbrSN5IErCT'
+);
 END;

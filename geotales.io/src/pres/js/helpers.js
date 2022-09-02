@@ -9,13 +9,28 @@
 "use strict";
 
 
-function uuid(a) {
+export function uuid(a) {
 	return a ? (a^Math.random()*16>>a/4).toString(16) : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, uuid);
 }
 
 
 
-function import_data(data) {
+export function sanitize(str) {
+	let map = {
+		"\&": "&amp;",
+		"\<": "&lt;",
+		"\>": "&gt;",
+		"\"": "&quot;",
+		"\'": "&#x27;",
+		"\/": "&#x2F;"
+	};
+	let reg = /[&<>"'/]/ig;
+	return str.replace(reg, match => (map[match]));
+}
+
+
+
+export function import_data(data) {
 	_OPTIONS = data.options;
 
 	if(data.scenes.length <= 0) { return; }
@@ -31,7 +46,7 @@ function import_data(data) {
 
 
 
-function get_basemap(url) {
+export function get_basemap(url) {
 	for(let b of _BASEMAPS) {
 		if(b.tiles._url == url) { return b; }
 	}
@@ -40,7 +55,7 @@ function get_basemap(url) {
 
 
 
-function get_aspect_ratio_dimentions(w, h, r) {
+export function get_aspect_ratio_dimentions(w, h, r) {
 	let _w = r * h;
 	if(_w <= w) {
 		return [_w, h];

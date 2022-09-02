@@ -8,8 +8,11 @@
 
 "use strict";
 
+import { uuid, save_data, flash_map } from "./helpers.js";
+import { new_scene } from "./generate.js";
 
-function Scenes() {
+
+export function Scenes() {
 	this.store = [];
 	this.active = "";
 	this.copiedBounds = null;
