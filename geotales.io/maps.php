@@ -477,6 +477,15 @@ $count = $stmt->rowCount();
 
 			window.onload = function(ev) {
 
+				$.ajax({
+					type: "POST",
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					dataType: "json",
+					success: function(result, status, xhr) { console.log("Analytics registered"); },
+					error: function(xhr, status, error) { console.log(xhr.status, error); }
+				});
+
 				$("#newModal input#titleInput, #editModal input#titleInput").change(ev => {
 					let v = $(ev.target).val();
 					if(v.length > 65) { $(ev.target).val(v.substring(0, 65)); }

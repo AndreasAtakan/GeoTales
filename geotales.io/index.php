@@ -27,12 +27,9 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 // Get top posts
 $search = "%";
 if(isset($_GET['search'])) { $search .= "{$_GET['search']}%"; }
-$order = "views";
-if(isset($_GET['order'])) {
-	if($_GET['order'] == "likes") { $order = "likes"; }
-	elseif($_GET['order'] == "date") { $order = "published_date"; }
-}
+$order = $_GET['order'] ?? "views";
 
+$likes = getAllLikes($PDO); $views = getAllViews($PDO);
 $stmt = $PDO->prepare("
 	SELECT
 		M.id AS id,
@@ -40,8 +37,6 @@ $stmt = $PDO->prepare("
 		M.description AS description,
 		M.published_date AS published_date,
 		M.thumbnail AS thumbnail,
-		M.views AS views,
-		M.likes AS likes,
 		U.id AS user_id,
 		U.photo AS user_photo
 	FROM
@@ -55,13 +50,23 @@ $stmt = $PDO->prepare("
 		UM.status = 'owner' AND
 		LOWER(M.title) LIKE LOWER(?) OR
 		true
-	ORDER BY
-		M.{$order} DESC
-	LIMIT 50
+	LIMIT 150
 ");
 $stmt->execute([$search]);
 $rows = $stmt->fetchAll();
 $count = $stmt->rowCount();
+
+$res = array();
+foreach($rows as $row) {
+	$r = $row;
+	$r['likes'] = $likes[ $row['id'] ] ?? 0;
+	$r['views'] = $views[ $row['id'] ] ?? 0;
+	array_push($res, $r);
+}
+
+if($order == "views") { usort($res, function($a, $b) { return $a['views'] - $b['views']; }); }
+if($order == "likes") { usort($res, function($a, $b) { return $a['likes'] - $b['likes']; }); }
+if($order == "date") { usort($res, function($a, $b) { return date_format(date_create($a['published_date']), "U") - date_format(date_create($b['published_date']), "U"); }); }
 
 ?>
 
@@ -208,7 +213,7 @@ $count = $stmt->rowCount();
 				<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
 		<?php
 			if($count > 0) {
-				foreach($rows as $row) {
+				foreach($res as $row) {
 					$href = "pres.php?id={$row['id']}";
 					$published_date = date_format(date_create($row['published_date']), "d.M Y, H:i");
 		?>
@@ -291,7 +296,14 @@ $count = $stmt->rowCount();
 
 			window.onload = function(ev) {
 
-				//
+				$.ajax({
+					type: "POST",
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					dataType: "json",
+					success: function(result, status, xhr) { console.log("Analytics registered"); },
+					error: function(xhr, status, error) { console.log(xhr.status, error); }
+				});
 
 			};
 		</script>

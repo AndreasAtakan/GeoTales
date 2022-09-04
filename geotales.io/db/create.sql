@@ -6,9 +6,14 @@
 * Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
 *******************************************************************************/
 
+BEGIN;
+
+--
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-BEGIN;
+--
+
 CREATE TABLE IF NOT EXISTS "User"(
 	id uuid DEFAULT uuid_generate_v4(),
 	username text NOT NULL,
@@ -17,13 +22,13 @@ CREATE TABLE IF NOT EXISTS "User"(
 	photo text,
 	paid bool DEFAULT false,
 	stripe_id text,
+	created_date timestamp DEFAULT NOW(),
+	last_signin_date timestamp,
 	PRIMARY KEY (id)
 );
-END;
 
 --
 
-BEGIN;
 CREATE TABLE IF NOT EXISTS "Map"(
 	id uuid DEFAULT uuid_generate_v4(),
 	title text NOT NULL,
@@ -33,16 +38,11 @@ CREATE TABLE IF NOT EXISTS "Map"(
 	password varchar(64),
 	created_date timestamp DEFAULT NOW(),
 	published_date timestamp,
-	views int DEFAULT 0,
-	likes int DEFAULT 0,
-	flags int DEFAULT 0,
 	PRIMARY KEY (id)
 );
-END;
 
 --
 
-BEGIN;
 CREATE TABLE IF NOT EXISTS "User_Map"(
 	id uuid DEFAULT uuid_generate_v4(),
 	user_id uuid NOT NULL,
@@ -52,11 +52,9 @@ CREATE TABLE IF NOT EXISTS "User_Map"(
 	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-END;
 
 --
 
-BEGIN;
 CREATE TABLE IF NOT EXISTS "Comment"(
 	id uuid DEFAULT uuid_generate_v4(),
 	user_id uuid NOT NULL,
@@ -69,21 +67,45 @@ CREATE TABLE IF NOT EXISTS "Comment"(
 	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (ref) REFERENCES "Comment" (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-END;
+
+CREATE TABLE IF NOT EXISTS "Reaction"(
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id uuid NOT NULL,
+	map_id uuid NOT NULL,
+	type text,
+	created_date timestamp DEFAULT NOW(),
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "View"(
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id uuid,
+	map_id uuid NOT NULL,
+	created_date timestamp DEFAULT NOW(),
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "Flag"(
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id uuid NOT NULL,
+	map_id uuid NOT NULL,
+	type text,
+	created_date timestamp DEFAULT NOW(),
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 --
 
-BEGIN;
 CREATE TABLE IF NOT EXISTS "Upload"(
 	id uuid DEFAULT uuid_generate_v4(),
 	ref text,
 	PRIMARY KEY (id)
 );
-END;
 
---
-
-BEGIN;
 CREATE TABLE IF NOT EXISTS "User_Upload"(
 	id uuid DEFAULT uuid_generate_v4(),
 	user_id uuid NOT NULL,
@@ -93,4 +115,20 @@ CREATE TABLE IF NOT EXISTS "User_Upload"(
 	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (upload_id) REFERENCES "Upload" (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+--
+
+CREATE TABLE IF NOT EXISTS "Analytics"(
+	id uuid DEFAULT uuid_generate_v4(),
+	user_id uuid,
+	location text,
+	ip text,
+	agent text,
+	created_date timestamp DEFAULT NOW(),
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+--
+
 END;

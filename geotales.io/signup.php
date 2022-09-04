@@ -211,6 +211,15 @@ if(isset($_POST['username'])
 
 			window.onload = function(ev) {
 
+				$.ajax({
+					type: "POST",
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					dataType: "json",
+					success: function(result, status, xhr) { console.log("Analytics registered"); },
+					error: function(xhr, status, error) { console.log(xhr.status, error); }
+				});
+
 				$("form#signup input#username").change(ev => {
 					let el = document.forms.signup.elements;
 					let username = $(ev.target).val();

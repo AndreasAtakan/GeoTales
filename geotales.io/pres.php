@@ -321,8 +321,17 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
 
-		<!-- Set ID, TITLE and HOST -->
+		<!-- Set superglobals and init -->
 		<script type="text/javascript">
+			$.ajax({
+				type: "POST",
+				url: "api/analytics.php",
+				data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+				dataType: "json",
+				success: function(result, status, xhr) { console.log("Analytics registered"); },
+				error: function(xhr, status, error) { console.log(xhr.status, error); }
+			});
+
 			const _ID = `<?php echo $id; ?>`,
 				  _TITLE = `<?php echo $row['title']; ?>`,
 				  _HOST = window.location.host;

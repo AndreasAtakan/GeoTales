@@ -55,8 +55,8 @@ if($op == "view") {
 	}
 	$id = $_POST['id'];
 
-	$stmt = $PDO->prepare("UPDATE \"Map\" SET views = views + 1 WHERE id = ?");
-	$stmt->execute([$id]);
+	$stmt = $PDO->prepare("INSERT INTO \"View\" (user_id, map_id) VALUES (?, ?)");
+	$stmt->execute([$user_id, $id]);
 
 	echo json_encode(array("status" => "success"));
 	exit;
@@ -162,20 +162,30 @@ if($op == "clone") {
 
 }
 else
-if($op == "like"
-|| $op == "flag") {
+if($op == "like") {
 
 	if(!isset($_POST['id'])) {
 		http_response_code(422); exit;
 	}
 	$id = $_POST['id'];
 
-	$sql = "";
-	if($op == "like") { $sql = "UPDATE \"Map\" SET likes = likes + 1 WHERE id = ?"; }
-	elseif($op == "flag") { $sql = "UPDATE \"Map\" SET flags = flags + 1 WHERE id = ?"; }
+	$stmt = $PDO->prepare("INSERT INTO \"Reaction\" (user_id, map_id, type) VALUES (?, ?, 'like')");
+	$stmt->execute([$user_id, $id]);
 
-	$stmt = $PDO->prepare($sql);
-	$stmt->execute([$id]);
+	echo json_encode(array("status" => "success"));
+	exit;
+
+}
+else
+if($op == "flag") {
+
+	if(!isset($_POST['id'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+
+	$stmt = $PDO->prepare("INSERT INTO \"Flag\" (user_id, map_id, type) VALUES (?, ?, 'flag')");
+	$stmt->execute([$user_id, $id]);
 
 	echo json_encode(array("status" => "success"));
 	exit;

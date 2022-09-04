@@ -139,6 +139,52 @@ function userMapCheckPw($PDO, $map_id, $password) {
 
 
 //
+function getAllLikes($PDO) {
+	$likes = array();
+	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"Reaction\" WHERE type = 'like' GROUP BY map_id");
+	$stmt->execute();
+	$rows = $stmt->fetchAll();
+	foreach($rows as $row) { $likes[ $row['map_id'] ] = $row['c']; }
+	return $likes;
+}
+
+//
+function getAllViews($PDO) {
+	$views = array();
+	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"View\" GROUP BY map_id");
+	$stmt->execute();
+	$rows = $stmt->fetchAll();
+	foreach($rows as $row) { $views[ $row['map_id'] ] = $row['c']; }
+	return $views;
+}
+
+//
+function getLikes($PDO, $map_id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"Reaction\" WHERE type = 'like' AND map_id = ?");
+	$stmt->execute([$map_id]);
+	$rows = $stmt->fetchAll();
+	return $rows;
+}
+
+//
+function getViews($PDO, $map_id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"View\" WHERE map_id = ?");
+	$stmt->execute([$map_id]);
+	$rows = $stmt->fetchAll();
+	return $rows;
+}
+
+//
+function getFlags($PDO, $map_id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"Flag\" WHERE map_id = ?");
+	$stmt->execute([$map_id]);
+	$rows = $stmt->fetchAll();
+	return $rows;
+}
+
+
+
+//
 function getS3Hostname() {
 	global $CONFIG;
 	return $CONFIG['aws_bucket_name'] . ".s3.amazonaws.com";

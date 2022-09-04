@@ -8,9 +8,13 @@
 
 BEGIN;
 
+DROP TABLE "Analytics";
 DROP TABLE "User_Upload";
 DROP TABLE "Upload";
 DROP TABLE "Comment";
+DROP TABLE "Reaction";
+DROP TABLE "Flag";
+DROP TABLE "View";
 DROP TABLE "User_Map";
 DROP TABLE "Map";
 DROP TABLE "User";
