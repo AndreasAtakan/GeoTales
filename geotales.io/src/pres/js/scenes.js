@@ -54,12 +54,6 @@ export function Scenes() {
 		$("#bookmarks button#bookmark").click(ev => {
 			this.set( $(ev.target).data("id") );
 		});
-
-		$("#textbox #content img").off("click");
-		$("#textbox #content img").click(ev => { ev.stopPropagation();
-			$("#imageModal img#imgPreview").attr("src", ev.target.src);
-			$("#imageModal").modal("show");
-		});
 	};
 
 	this.prev = function() {
@@ -88,7 +82,26 @@ export function Scenes() {
 		_TEXTBOXES.set(s.id);
 		_MAP.set(s.id);
 
-		setTimeout(() => { this.bind(); }, 151);
+		this.bind();
+	};
+
+	this.setOrientation = function(pos) {
+		switch(pos) {
+			case "left":
+				$("#sceneNav").css({ left: "15px", right: "auto" });
+				break;
+
+			case "right":
+				$("#sceneNav").css({ left: "auto", right: "15px" });
+				break;
+
+			default: break;
+		}
+	};
+
+	this.resize = function() {
+		_MAP.setAspectRatio();
+		_TEXTBOXES.resize();
 	};
 
 	this.importData = function(data) {

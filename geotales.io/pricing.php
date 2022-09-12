@@ -98,8 +98,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-						GeoTales
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" /><small>eoTales</small>
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,6 +118,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 								</a>
 							</li>
 
+					<?php if($logged_in) { ?>
 							<li class="nav-item me-sm-2">
 								<a class="nav-link" href="maps.php">
 									<i class="fas fa-map"></i> My GeoTales
@@ -135,6 +135,11 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 									<li><a class="dropdown-item" href="signout.php">Sign out</a></li>
 								</ul>
 							</li>
+					<?php }else{ ?>
+							<li class="nav-item">
+								<a role="button" class="btn btn-sm btn-light" href="signin.php" style="margin-top: 0.35rem;">Sign in</a>
+							</li>
+					<?php } ?>
 						</ul>
 					</div>
 				</div>
@@ -152,17 +157,16 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 						<div class="card">
 							<div class="card-body">
 								<h4 class="card-title text-center">Basic</h4>
-								<h6 class="card-subtitle mb-2 text-center text-muted">$0 / month</h6>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Create your own GeoTales</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Share your GeoTales via link</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-minus" style="color: #ff9900;"></i> Only 5 GeoTales</p>
+								<h6 class="card-subtitle mb-2 text-center text-muted">Free</h6>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Create and publish your own GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> 5 GeoTales for free</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> 40+ free basemaps</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-times" style="color: #cc2900;"></i> Custom basemaps</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-times" style="color: #cc2900;"></i> WMS-layers</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-times" style="color: #cc2900;"></i> Import and export of data-files</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-times" style="color: #cc2900;"></i> Password-protected GeoTales</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-times" style="color: #cc2900;"></i> Publishing your GeoTales</p>
 								<div class="d-grid">
-									<a role="button" class="btn btn-primary" href="signup.php">Sign up for free</a>
+									<a role="button" class="btn btn-primary" href="<?php echo $logged_in ? "profile.php" : "signup.php" ?>">Sign up for free</a>
 								</div>
 							</div>
 						</div>
@@ -171,17 +175,17 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 						<div class="card">
 							<div class="card-body">
 								<h4 class="card-title text-center">Premium</h4>
-								<h6 class="card-subtitle mb-2 text-center text-muted">$5 / month</h6>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Create your own GeoTales</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Share your GeoTales via link</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Only 5 GeoTales</p>
+								<h6 class="card-subtitle mb-2 text-center text-muted">$5 / month per user</h6>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Create and publish your own GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Unlimited GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> 40+ free basemaps</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Custom basemaps</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> WMS-layers</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Import and export of data-files</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Password-protected GeoTales</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Publishing your GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Option to create organization-account</p>
 								<div class="d-grid">
-									<a role="button" class="btn btn-primary" href="signup.php?return_url=profile.php">Sign up <br /> <small>and add a subscription</small></a>
+									<a role="button" class="btn btn-primary" href="<?php echo $logged_in ? "profile.php" : "signup.php?return_url=profile.php" ?>">Sign up <br /> <small>and add a subscription</small></a>
 								</div>
 							</div>
 						</div>
@@ -191,17 +195,16 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 							<div class="card-body">
 								<h4 class="card-title text-center">Enterprise</h4>
 								<h6 class="card-subtitle mb-2 text-center text-muted">Contact us</h6>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Create your own GeoTales</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Share your GeoTales via link</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Only 5 GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Create and publish your own GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Unlimited GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> 40+ free basemaps</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Custom basemaps</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> WMS-layers</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Import and export of data-files</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Password-protected GeoTales</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Publishing your GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Organization-account</p>
 
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Dedicated customer-support</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Hot-line support</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Dedicated server for hosting</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Custom integrations <br /> (GPS-hardware, CMS, website-embedding, etc.)</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Much more</p>
@@ -243,7 +246,10 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
 				</div>

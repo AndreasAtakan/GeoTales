@@ -28,8 +28,89 @@ L.Map.addInitHook(function() {
 
 	/*this.addControl( L.control.locate({ position: "topright" }) );*/
 
-	this.panLock = true;
+	this.fullscreenControl = L.easyButton({
+		id: "fullscreen",
+		position: "bottomcenter",
+		states: [
+			{
+				stateName: "enter", title: "Enter fullscreen", icon: "fa-expand",
+				onClick: (button, map) => {
+					if(_IS_MOBILE) { window.parent.postMessage("fullscreenEnter", "*"); }
+					else{
+						let el = document.body;
+						if(el.requestFullscreen) { el.requestFullscreen(); }
+						else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
+						else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
+					}
+
+					this.isFullscreen = true;
+					this.setAspectRatio();
+					button.state("exit");
+				}
+			},
+			{
+				stateName: "exit", title: "Exit fullscreen", icon: "fa-compress",
+				onClick: (button, map) => {
+					if(_IS_MOBILE) { window.parent.postMessage("fullscreenExit", "*"); }
+					else{
+						if(document.exitFullscreen) { document.exitFullscreen(); }
+						else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
+						else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
+					}
+
+					this.isFullscreen = false;
+					this.setAspectRatio();
+					button.state("enter");
+				}
+			}
+		]
+	});
+	this.addControl(this.fullscreenControl);
+
+	this.zoomControl = L.easyBar([
+		L.easyButton({
+			id: "zoomIn",
+			states: [
+				{
+					stateName: "main", title: "Zoom in", icon: "fa-plus",
+					onClick: (button, map) => { this.zoomIn(); }
+				}
+			]
+		}),
+		L.easyButton({
+			id: "mapLock",
+			states: [
+				{
+					stateName: "locked", title: "Unlock map", icon: "fa-lock",
+					onClick: (button, map) => {
+						this.isLocked = false; this.enable();
+						button.state("unlocked");
+					}
+				},
+				{
+					stateName: "unlocked", title: "Lock map", icon: "fa-lock-open",
+					onClick: (button, map) => {
+						this.isLocked = true; this.disable();
+						this.fitBounds( _SCENES.get( _SCENES.active ).bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true } );
+						button.state("locked");
+					}
+				}
+			]
+		}),
+		L.easyButton({
+			id: "zoomOut",
+			states: [
+				{
+					stateName: "main", title: "Zoom out", icon: "fa-minus",
+					onClick: (button, map) => { this.zoomOut(); }
+				}
+			]
+		})
+	], { position: "bottomright" });
+	this.addControl(this.zoomControl);
+
 	this.isFullscreen = false;
+	this.isLocked = true;
 
 
 
@@ -95,25 +176,10 @@ L.Map.addInitHook(function() {
 L.Map.include({
 
 	setup: function() {
-		$("div.leaflet-control-attribution a").prop("target", "_blank");
+		$(".leaflet-control-attribution a").prop("target", "_blank");
 
 		$("#mapNav #zoomIn").click(ev => { this.zoomIn(); });
 		$("#mapNav #zoomOut").click(ev => { this.zoomOut(); });
-
-		$("#mapNav #panLock").click(ev => {
-			let c = "";
-			if(this.panLock) {
-				c = "🔓"; this.enable();
-			}else{
-				c = "🔒"; this.disable();
-				this.fitBounds( _SCENES.get( _SCENES.active ).bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true } );
-			}
-
-			$(ev.target).html(c);
-			this.panLock = !this.panLock;
-			$(`#mapNav #zoomIn,
-			   #mapNav #zoomOut`).prop("disabled", this.panLock);
-		});
 
 		this.disable();
 	},
@@ -127,7 +193,10 @@ L.Map.include({
 		this.touchZoom.enable();
 		if(this.tapHold) { this.tapHold.enable(); }
 
-		this.doubleClickZoom.disable();
+		//this.doubleClickZoom.disable();
+
+		this.zoomControl._buttons[0].enable();
+		this.zoomControl._buttons[2].enable();
 	},
 	disable: function() {
 		this.dragging.disable();
@@ -136,6 +205,23 @@ L.Map.include({
 		if(this.tapHold) { this.tapHold.disable(); }
 
 		this.doubleClickZoom.disable();
+
+		this.zoomControl._buttons[0].disable();
+		this.zoomControl._buttons[2].disable();
+	},
+
+	setOrientation: function(pos) {
+		switch(pos) {
+			case "left":
+				this.zoomControl.setPosition("bottomleft");
+				break;
+
+			case "right":
+				this.zoomControl.setPosition("bottomright");
+				break;
+
+			default: break;
+		}
 	},
 
 	setAspectRatio: function() {
@@ -144,8 +230,8 @@ L.Map.include({
 			r = _OPTIONS.aspectratio;
 		let dim = get_aspect_ratio_dimentions(w, h, r);
 
-		let width = (dim[0]/w) * 100,
-			height = (dim[1]/h) * 100,
+		let width = (dim[0] / w) * 100,
+			height = (dim[1] / h) * 100,
 			left = (((w - dim[0]) / 2) / w) * 100,
 			top = (((h - dim[1]) / 2)/ h) * 100;
 
@@ -160,14 +246,17 @@ L.Map.include({
 			left: `${left}%`,
 			top: `${top}%`
 		});
-		$("#textbox").css({ maxHeight: $(window).width() <= 560 ? `calc(100% - ${height}% - 60px)` : "" });
 
 		this.invalidateSize();
 		if(_SCENES.active) { this.setFlyTo( _SCENES.get( _SCENES.active ).bounds ); }
+
+		let mh = $("#map").height(), isSmall = w <= 575.98 && h > 450;
+		if(mh >= h && isSmall) { $(".leaflet-bottom.leaflet-center .leaflet-bar").addClass("marginBottom"); }
+		else { $(".leaflet-bottom.leaflet-center .leaflet-bar").removeClass("marginBottom"); }
 	},
 
 	setFlyTo: function(bounds) {
-		if(this.panLock) {
+		if(this.isLocked) {
 			this.flyToBounds(bounds, { maxZoom: this.getMaxZoom(), noMoveStart: true, duration: _OPTIONS.panningspeed || null });
 		}
 	},

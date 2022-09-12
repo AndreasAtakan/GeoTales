@@ -381,7 +381,7 @@ $row = $stmt->fetch();
 		<div class="container-fluid p-0">
 			<div class="row g-0" style="height: 39px;">
 				<div class="col">
-					<nav class="navbar navbar-expand-sm navbar-dark fixed-top px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
+					<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2" style="background-color: #eba937; padding-top: 0.25rem; padding-bottom: 0.25rem;">
 						<a class="navbar-brand py-0 mx-2" href="maps.php" style="line-height: 0;">
 							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
 						</a>
@@ -488,7 +488,7 @@ $row = $stmt->fetch();
 								<li class="nav-item mb-2 mb-sm-0 me-4">
 									<div class="btn-group btn-group-sm" role="group" aria-label="Save/Preview">
 										<a role="button" class="btn btn-light" href="#" id="save">Save</a>
-										<a role="button" class="btn btn-outline-light" href="pres.php?id=<?php echo $id; ?>" target="_blank">View</a>
+										<a role="button" class="btn btn-outline-light" href="view.php?id=<?php echo $id; ?>" target="_blank">View</a>
 									</div>
 								</li>
 
@@ -615,7 +615,7 @@ $row = $stmt->fetch();
 		<!--script type="text/javascript" src="src/edit/js/map/L.GridLayer.js"></script-->
 		<script type="text/javascript" src="src/edit/js/map/L.TileLayer.Mars.js"></script>
 		<script type="text/javascript" src="src/edit/globals.js"></script>
-		<script type="text/javascript" src="src/edit/main.js"></script>
+		<script type="text/javascript" src="src/edit/main_1663004642.js"></script>
 
 	</body>
 </html>

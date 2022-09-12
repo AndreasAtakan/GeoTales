@@ -158,7 +158,7 @@ if(isset($_POST['username'])
 						</form>
 
 						<p class="text-muted my-3">
-							Or <strong><a href="signin.php">sign in</a></strong>
+							Or <strong><a href="signin.php?return_url=<?php echo $loc; ?>">sign in</a></strong>
 						</p>
 					</div>
 				</div>
@@ -189,7 +189,10 @@ if(isset($_POST['username'])
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
 				</div>

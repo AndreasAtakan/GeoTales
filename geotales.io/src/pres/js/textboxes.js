@@ -37,14 +37,55 @@ export function Textboxes() {
 		this.store.splice(t.index, 1);
 	};
 
+	this.bind = function() {
+		$("#textbox #content img").off("click");
+		$("#textbox #content img").click(ev => { ev.stopPropagation();
+			$("#imageModal img#imgPreview").attr("src", ev.target.src);
+			$("#imageModal").modal("show");
+		});
+	};
+
 	this.set = function(sceneId) {
 		for(let t of this.store) {
-			if(t.sceneId == sceneId) {
-				setTimeout(() => { t.enable(); }, 150);
-				break;
-			}
+			if(t.sceneId == sceneId) { t.enable(); break; }
 			else{ t.disable(); }
 		}
+		setTimeout(() => { this.bind(); }, 150);
+	};
+
+	this.setOrientation = function(pos) {
+		switch(pos) {
+			case "left":
+				$("#textbox").css({ left: "15px", right: "auto" });
+				_SCENES.setOrientation("left");
+				_MAP.setOrientation("right");
+				break;
+
+			case "right":
+				$("#textbox").css({ left: "auto", right: "15px" });
+				_SCENES.setOrientation("right");
+				_MAP.setOrientation("left");
+				break;
+
+			default: break;
+		}
+	};
+
+	this.resize = function() {
+		let ww = $(window).width(),
+			wh = $(window).height(),
+			mh = $("#map").height(),
+			th = $("#textbox #content")[0].scrollHeight, top;
+		let isSmall = ww <= 575.98 && wh > 450;
+
+		if(mh >= wh && isSmall) { top = wh * 0.7; }
+		else if(isSmall) { top = mh + 10; }
+		else { top = 10; }
+		$("#textbox").css("top", `${top}px`);
+
+		$("#textbox").removeClass("noBottom");
+		if(th <= wh - 58
+		&& !(mh >= wh && isSmall)) { $("#textbox").addClass("noBottom"); }
 	};
 
 	this.importData = function(data) {
@@ -77,32 +118,20 @@ function Textbox(id) {
 	this.content = "";
 
 
-	this.setOrientation = function() {
-		switch(this.pos) {
-			case "left":
-				$("#textbox").css({ left: "10px", right: "auto" });
-				break;
-
-			case "right":
-				$("#textbox").css({ left: "auto", right: "85px" });
-				break;
-
-			default: break;
-		}
-	};
-
 	this.enable = function() {
 		if(this.content == "") { return; }
 
-		this.setOrientation();
+		_TEXTBOXES.setOrientation(this.pos);
 
 		$("#textbox #content").html(this.content);
+		$("#textbox").css("opacity", 0.8);
 
 		if(this.dim) {
-			$("#textbox").css({ maxWidth: `${this.dim[1] * 100}%` });
+			$("#textbox").css("max-width", `${this.dim[1] * 100}%`);
 		}
 
-		$("#textbox").css("opacity", 0.85);
+		// NOTE: this is to counteract the textbox being streched to the bottom of the screen if the textbox is smaller than the height of the screen
+		_TEXTBOXES.resize();
 	};
 
 	this.disable = function() {

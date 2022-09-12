@@ -33,13 +33,16 @@ window.onload = function(ev) {
 			resizeTimer = false;
 			$(window).trigger("resizeend");
 		}, 250);
-	}).on("resizeend", function() { _MAP.setAspectRatio(); });
+	}).on("resizeend", function() { _SCENES.resize(); });
 
 	// Set up nav-btn-fade-out
 	let btnTimer = null, btnFadeTime = 5000,
-		btnToggle = v => { $("#mapNav, #extraNav").css("opacity", v || 0); };
+		btnToggle = v => {
+			$(".leaflet-control.leaflet-bar, #sceneNav").css("opacity", v || 0);
+			$("#textbox").css("bottom", `${v ? "58" : "10"}px`);
+		};
 	$(window).on("mousemove", function() {
-		btnToggle(1); clearTimeout(btnTimer);
+		btnToggle(0.8); clearTimeout(btnTimer);
 		btnTimer = setTimeout(btnToggle, btnFadeTime);
 	});
 	setTimeout(btnToggle, btnFadeTime);
@@ -48,20 +51,6 @@ window.onload = function(ev) {
 
 	_SCENES = new Scenes();
 
-	$("#mapNav #fullscreen").click(ev => {
-		if(_MAP.isFullscreen) {
-			if(document.exitFullscreen) { document.exitFullscreen(); }
-			else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); } /* Safari */
-			else if(document.msExitFullscreen) { document.msExitFullscreen(); } /* IE11 */
-		}else{
-			let el = document.body;
-			if(el.requestFullscreen) { el.requestFullscreen(); }
-			else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); } /* Safari */
-			else if(el.msRequestFullscreen) { el.msRequestFullscreen(); } /* IE11 */
-		}
-		_MAP.isFullscreen = !_MAP.isFullscreen;
-		_MAP.setAspectRatio();
-	});
 	$(document).keydown(ev => { if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(ev.code) > -1) { ev.preventDefault(); } });
 	$(document).keyup(ev => {
 		let keycode = ev.code;
@@ -69,36 +58,6 @@ window.onload = function(ev) {
 		if(["ArrowUp","ArrowLeft"].indexOf(keycode) > -1) { ev.preventDefault(); _SCENES.prev(); }
 		if(["ArrowDown", "ArrowRight", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); _SCENES.next(); }
 		if(["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft", "Space"].indexOf(keycode) > -1) { ev.preventDefault(); }
-	});
-
-	$("#shareModal input#linkInput").val(`https://${_HOST}/pres.php?id=${_ID}`);
-	$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${_HOST}/pres.php?id=${_ID}`);
-	$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${_HOST}/pres.php?id=${_ID}&text=`);
-	$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${_HOST}/pres.php?id=${_ID}`);
-	$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${_HOST}/pres.php?id=${_ID}&media=&description=`);
-	$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${_HOST}/pres.php?id=${_ID}%0A`);
-	$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
-	$("#shareModal button#clone").click(ev => {
-		$("#loadingModal").modal("show");
-
-		$.ajax({
-			type: "POST",
-			url: "api/map.php",
-			data: {
-				"op": "clone",
-				"id": _ID,
-				"password": _PASSWORD
-			},
-			dataType: "json",
-			success: function(result, status, xhr) {
-				window.location.assign(`edit.php?id=${result.id}`);
-			},
-			error: function(xhr, status, error) {
-				console.log(xhr.status, error);
-				if(xhr.status == 401) { window.location.assign("settings.php"); }
-				else{ setTimeout(function() { $("#loadingModal").modal("hide"); $("#shareModal").modal("hide"); $("#errorModal").modal("show"); }, 750); }
-			}
-		});
 	});
 
 	_TEXTBOXES = new Textboxes();
@@ -129,13 +88,6 @@ window.onload = function(ev) {
 
 	document.addEventListener("_setup", ev => { init(); _MAP.setup(); _TEXTBOXES.setup(); _SCENES.setup(); });
 	document.addEventListener("_reset", ev => { _SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset(); reset(); });
-
-	setTimeout(function() {
-		$("button#closeAd").css("display", "block");
-	}, 5000);
-	$("button#closeAd").click(ev => {
-		$("#adsense").css("display", "none");
-	});
 
 
 

@@ -29,7 +29,6 @@ $search = "%";
 if(isset($_GET['search'])) { $search .= "{$_GET['search']}%"; }
 $order = $_GET['order'] ?? "views";
 
-$likes = getAllLikes($PDO); $views = getAllViews($PDO);
 $stmt = $PDO->prepare("
 	SELECT
 		M.id AS id,
@@ -48,13 +47,17 @@ $stmt = $PDO->prepare("
 	WHERE
 		M.published_date IS NOT NULL AND
 		UM.status = 'owner' AND
-		LOWER(M.title) LIKE LOWER(?) OR
-		true
+		LOWER(M.title) LIKE LOWER(?)
+		OR true
 	LIMIT 150
 ");
 $stmt->execute([$search]);
 $rows = $stmt->fetchAll();
 $count = $stmt->rowCount();
+
+$ids = array(); foreach($rows as $row) { array_push($ids, $row['id']); }
+$likes = getAllLikes($PDO, $ids);
+$views = getAllViews($PDO, $ids);
 
 $res = array();
 foreach($rows as $row) {
@@ -64,9 +67,9 @@ foreach($rows as $row) {
 	array_push($res, $r);
 }
 
-if($order == "views") { usort($res, function($a, $b) { return $a['views'] - $b['views']; }); }
-if($order == "likes") { usort($res, function($a, $b) { return $a['likes'] - $b['likes']; }); }
-if($order == "date") { usort($res, function($a, $b) { return date_format(date_create($a['published_date']), "U") - date_format(date_create($b['published_date']), "U"); }); }
+if($order == "views") { usort($res, function($a, $b) { return $b['views'] - $a['views']; }); }
+if($order == "likes") { usort($res, function($a, $b) { return $b['likes'] - $a['likes']; }); }
+if($order == "date") { usort($res, function($a, $b) { return date_format(date_create($b['published_date']), "U") - date_format(date_create($a['published_date']), "U"); }); }
 
 ?>
 
@@ -119,8 +122,7 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-						GeoTales
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" /><small>eoTales</small>
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -174,16 +176,22 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					<div class="col"></div>
 				</div>
 
+				<div class="row mb-3">
+					<div class="col">
+						<h2 class="text-muted text-shadow">GeoTales <span class="small">– Tales on a map</span></h2>
+					</div>
+				</div>
+
 				<div class="row">
 					<div class="col-sm-9">
-						<form method="get">
+						<form method="get" id="search">
 							<div class="input-group mb-1" style="max-width: 650px;">
 								<a role="button" class="btn btn-outline-secondary" href="index.php" title="Clear search"><i class="fas fa-minus"></i></a>
 								<input type="text" class="form-control" name="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" value="<?php echo $_GET['search'] ?? ""; ?>" />
 								<button type="submit" class="btn btn-outline-light" id="search-button">Search</button>
 							</div>
 							<div class="input-group" style="max-width: 150px; margin-left: 40px;">
-								<select class="form-select form-select-sm" name="order" aria-label="Sort by">
+								<select class="form-select form-select-sm" name="order" id="sortBy" aria-label="Sort by">
 									<option value="" selected disabled>Sort by</option>
 									<option value="views">Views</option>
 									<option value="likes">Likes</option>
@@ -214,7 +222,7 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 		<?php
 			if($count > 0) {
 				foreach($res as $row) {
-					$href = "pres.php?id={$row['id']}";
+					$href = "view.php?id={$row['id']}";
 					$published_date = date_format(date_create($row['published_date']), "d.M Y, H:i");
 		?>
 					<div class="col">
@@ -224,11 +232,11 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 								<div class="card-body">
 									<h5 class="card-title" style="color: black;"><?php echo $row['title']; ?></h5>
 									<h6 class="card-subtitle mb-2 text-muted"><?php echo $published_date; ?></h6>
-									<span class="badge rounded-pill bg-primary">Views: <?php echo $row['views']; ?></span>
-									<span class="badge rounded-pill bg-secondary">Likes: <?php echo $row['likes']; ?></span>
 							<?php if(!sane_is_null($row['user_photo'])) { ?>
-									<img class="rounded ms-2 float-end" src="<?php echo $row['user_photo']; ?>" width="30" height="auto" alt="&nbsp" />
+									<img class="rounded me-2" src="<?php echo $row['user_photo']; ?>" width="auto" height="30" alt="&nbsp" />
 							<?php } ?>
+									<span class="badge rounded-pill bg-primary"><i class="fas fa-eye"></i> <?php echo $row['views']; ?></span>
+									<span class="badge rounded-pill bg-secondary"><i class="fas fa-thumbs-up"></i> <?php echo $row['likes']; ?></span>
 								</div>
 							</a>
 						</div>
@@ -275,7 +283,10 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
 				</div>
@@ -304,6 +315,8 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
+
+				$("select#sortBy").change(ev => { document.forms.search.submit(); });
 
 			};
 		</script>

@@ -128,8 +128,7 @@ $photo = getUserPhoto($PDO, $user_id);
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-						GeoTales
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" /><small>eoTales</small>
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -180,11 +179,14 @@ $photo = getUserPhoto($PDO, $user_id);
 				</div>
 
 				<div class="row mb-3">
-					<div class="col">
+					<div class="col-sm-8">
 						<h2>Edit profile</h2>
 						<p class="text-muted">
 							Signed in as: <strong><?php echo $username; ?></strong>
 						</p>
+					</div>
+					<div class="col-sm-4">
+						<img class="rounded img-fluid" src="<?php echo $photo; ?>" alt="&nbsp;" style="max-height: 100px;" />
 					</div>
 				</div>
 
@@ -228,7 +230,7 @@ $photo = getUserPhoto($PDO, $user_id);
 				<div class="row">
 					<div class="col">
 				<?php if($paid) { ?>
-						<button type="button" class="btn btn-outline-secondary" id="managePayment">Manage your subscription</button>
+						<button type="button" class="btn btn-outline-secondary" id="managePayment">Manage my subscription</button>
 						<p class="text-muted mt-3">
 							You have a premium account. Change or cancel your subscription here.
 						</p>
@@ -273,7 +275,10 @@ $photo = getUserPhoto($PDO, $user_id);
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
 				</div>

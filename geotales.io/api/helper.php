@@ -97,6 +97,23 @@ function isUsernameRegistered($PDO, $username) {
 
 
 //
+function hasMapPw($PDO, $map_id) {
+	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$map_id]);
+	$row = $stmt->fetch();
+	return $row['pw'] ?? false;
+}
+
+//
+function mapCheckPw($PDO, $map_id, $password) {
+	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
+	$stmt->execute([$map_id]);
+	$row = $stmt->fetch();
+	$has_pw = $row['pw'] ?? false;
+	return $has_pw && $row['password'] == $password;
+}
+
+//
 function getMapThumbnail($PDO, $map_id) {
 	$stmt = $PDO->prepare("SELECT thumbnail FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$map_id]);
@@ -128,20 +145,31 @@ function userMapCanWrite($PDO, $user_id, $map_id) {
 }
 
 //
-function userMapCheckPw($PDO, $map_id, $password) {
-	$stmt = $PDO->prepare("SELECT password IS NOT NULL AS pw, password FROM \"Map\" WHERE id = ?");
-	$stmt->execute([$map_id]);
+function userMapHasLiked($PDO, $user_id, $map_id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) >= 1 AS c FROM \"Reaction\" WHERE type = 'like' AND user_id = ? AND map_id = ?");
+	$stmt->execute([$user_id, $map_id]);
 	$row = $stmt->fetch();
-	$has_pw = $row['pw'] ?? false;
-	return $has_pw && $row['password'] == $password;
+	return $row['c'] ?? false;
+}
+
+//
+function userMapHasFlagged($PDO, $user_id, $map_id) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) >= 1 AS c FROM \"Flag\" WHERE user_id = ? AND map_id = ?");
+	$stmt->execute([$user_id, $map_id]);
+	$row = $stmt->fetch();
+	return $row['c'] ?? false;
 }
 
 
 
 //
-function getAllLikes($PDO) {
+function getAllLikes($PDO, $map_ids) {
+	$ids = "";
+	foreach($map_ids as $id) { $ids .= "'{$id}',"; }
+	$ids = mb_substr($ids, 0, -1);
+
 	$likes = array();
-	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"Reaction\" WHERE type = 'like' GROUP BY map_id");
+	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"Reaction\" WHERE map_id IN ({$ids}) AND type = 'like' GROUP BY map_id");
 	$stmt->execute();
 	$rows = $stmt->fetchAll();
 	foreach($rows as $row) { $likes[ $row['map_id'] ] = $row['c']; }
@@ -149,9 +177,13 @@ function getAllLikes($PDO) {
 }
 
 //
-function getAllViews($PDO) {
+function getAllViews($PDO, $map_ids) {
+	$ids = "";
+	foreach($map_ids as $id) { $ids .= "'{$id}',"; }
+	$ids = mb_substr($ids, 0, -1);
+
 	$views = array();
-	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"View\" GROUP BY map_id");
+	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"View\" WHERE map_id IN ({$ids}) GROUP BY map_id");
 	$stmt->execute();
 	$rows = $stmt->fetchAll();
 	foreach($rows as $row) { $views[ $row['map_id'] ] = $row['c']; }
@@ -162,21 +194,41 @@ function getAllViews($PDO) {
 function getLikes($PDO, $map_id) {
 	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"Reaction\" WHERE type = 'like' AND map_id = ?");
 	$stmt->execute([$map_id]);
-	$rows = $stmt->fetchAll();
-	return $rows;
+	$row = $stmt->fetch();
+	return $row['c'];
 }
 
 //
 function getViews($PDO, $map_id) {
 	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"View\" WHERE map_id = ?");
 	$stmt->execute([$map_id]);
-	$rows = $stmt->fetchAll();
-	return $rows;
+	$row = $stmt->fetch();
+	return $row['c'];
 }
 
 //
 function getFlags($PDO, $map_id) {
 	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"Flag\" WHERE map_id = ?");
+	$stmt->execute([$map_id]);
+	$row = $stmt->fetch();
+	return $row['c'];
+}
+
+//
+function getAllComments($PDO, $map_id) {
+	$stmt = $PDO->prepare("
+		SELECT
+			U.username,
+			U.photo AS user_photo,
+			C.content,
+			C.created_date
+		FROM
+			\"Comment\" AS C INNER JOIN
+			\"User\" AS U
+				ON C.user_id = U.id
+		WHERE
+			C.map_id = ?
+	");
 	$stmt->execute([$map_id]);
 	$rows = $stmt->fetchAll();
 	return $rows;

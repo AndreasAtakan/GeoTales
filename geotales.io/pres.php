@@ -16,15 +16,9 @@ include "api/init.php";
 include_once("api/helper.php");
 
 $logged_in = false;
-$paid = false;
 if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 	$logged_in = true;
-
 	$user_id = $_SESSION['user_id'];
-	$stmt = $PDO->prepare("SELECT paid FROM \"User\" WHERE id = ?");
-	$stmt->execute([$user_id]);
-	$row = $stmt->fetch();
-	$paid = $row['paid'];
 }
 
 if(!isset($_GET['id'])) {
@@ -78,10 +72,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
-		<link rel="stylesheet" href="lib/leaflet.select/leaflet.control.select.css" />
-
-		<!-- Google AdSense -->
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4056519983936625" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" />
 
 		<!-- Load src/ CSS -->
 		<link rel="stylesheet" href="src/pres/css/main.css" />
@@ -134,59 +125,6 @@ $row = $stmt->fetch();
 
 
 
-		<!-- Share modal -->
-		<div class="modal fade" id="shareModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-dialog-scrollable modal-lg">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="shareModalLabel">Share</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<div class="container-fluid">
-							<div class="row">
-								<div class="col">
-									<div class="input-group input-group-lg">
-										<input type="text" class="form-control" id="linkInput" aria-label="linkInput" aria-describedby="copyLink" readonly />
-										<button class="btn btn-outline-secondary" type="button" id="copyLink" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
-									</div>
-								</div>
-							</div>
-
-							<div class="row my-3">
-								<hr />
-							</div>
-
-							<div class="row">
-								<div class="col-0 col-sm-7">
-							<?php if($logged_in) { ?>
-									<button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="clone">Clone this map</button>
-							<?php } ?>
-								</div>
-								<div class="col col-sm-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
-								</div>
-								<div class="col col-sm-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
-								</div>
-								<div class="col col-sm-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
-								</div>
-								<div class="col col-sm-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
-								</div>
-								<div class="col col-sm-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="#" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-
 		<!-- Loading modal -->
 		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
@@ -227,82 +165,31 @@ $row = $stmt->fetch();
 
 		<div class="container-fluid p-0">
 			<div class="row g-0" id="main">
-				<div class="col-12">
+				<div class="col">
 					<div class="shadow" id="map"></div>
 
 					<div class="card shadow" id="textbox">
 						<div class="card-body">
 							<div id="content"></div>
 						</div>
-						<div class="card-footer text-muted">
-							<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
-								<button type="button" class="btn btn-light" id="prev">
-									<i class="fas fa-chevron-left"></i>
-								</button>
-								<div role="group" class="btn-group btn-group-sm dropup" id="bookmarks">
-									<button type="button" class="btn btn-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-										<i class="fas fa-bookmark"></i>
-									</button>
-									<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
-										<li><h6 class="dropdown-header">Bookmarks</h6></li>
-									</ul>
-								</div>
-								<button type="button" class="btn btn-light" id="next">
-									<i class="fas fa-chevron-right"></i>
-								</button>
-							</div>
+					</div>
+
+					<div role="group" class="btn-group btn-group-sm" id="sceneNav" aria-label="Scene navigation">
+						<button type="button" class="btn btn-light" id="prev">
+							<i class="fas fa-chevron-left"></i>
+						</button>
+						<div role="group" class="btn-group dropup" id="bookmarks">
+							<button type="button" class="btn btn-light dropdown-toggle px-3" id="bookmarksDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="fas fa-bookmark"></i>
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="bookmarksDropdown">
+								<li><h6 class="dropdown-header">Bookmarks</h6></li>
+							</ul>
 						</div>
-					</div>
-
-					<div class="dropdown" id="extraNav">
-						<button class="btn btn-sm btn-light dropdown-toggle" type="button" id="navDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-							<img src="assets/logo.png" alt="GeoTales" width="auto" height="20" />
-						</button>
-						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDropdown" style="min-width: 0;">
-							<li><a class="dropdown-item" href="<?php echo $logged_in ? "maps.php" : "index.php"; ?>"><i class="fas fa-home"></i></a></li>
-							<li><hr class="dropdown-divider" /></li>
-							<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="fas fa-share-alt"></i></a></li>
-						</ul>
-					</div>
-
-					<div role="group" class="btn-group-vertical btn-group-sm" id="mapNav" aria-label="Map navigation">
-						<button type="button" class="btn btn-light" id="zoomIn" disabled>
-							<i class="fas fa-plus"></i>
-						</button>
-						<button type="button" class="btn btn-light" id="panLock">
-							🔒
-						</button>
-						<button type="button" class="btn btn-light" id="fullscreen">
-							<i class="fas fa-expand"></i>
-						</button>
-						<button type="button" class="btn btn-light" id="zoomOut" disabled>
-							<i class="fas fa-minus"></i>
+						<button type="button" class="btn btn-light" id="next">
+							<i class="fas fa-chevron-right"></i>
 						</button>
 					</div>
-
-					<?php
-						if((!$logged_in || !$paid) && !$TESTING && false) {
-					?>
-							<div class="card" id="adsense">
-								<div class="card-header">
-									Advertisement
-									<button type="button" class="btn-close float-end" id="closeAd" aria-label="Close" style="display: none;"></button>
-								</div>
-								<div class="card-body">
-									<ins class="adsbygoogle"
-										style="display:block"
-										data-ad-client="ca-pub-4056519983936625"
-										data-ad-slot="9235179738"
-										data-ad-format="auto"
-										data-full-width-responsive="true"></ins>
-									<script>
-										(adsbygoogle = window.adsbygoogle || []).push({});
-									</script>
-								</div>
-							</div>
-					<?php
-						}
-					?>
 				</div>
 			</div>
 		</div>
@@ -320,9 +207,16 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.slideto/Leaflet.SlideTo.js"></script>
 		<script type="text/javascript" src="lib/leaflet.easybutton/easy-button.js"></script>
 		<script type="text/javascript" src="lib/leaflet.contextmenu/leaflet.contextmenu.min.js"></script>
+		<script type="text/javascript" src="lib/leaflet.centercontrol/leaflet-control-topcenter.js"></script>
 
 		<!-- Set superglobals and init -->
 		<script type="text/javascript">
+			const _ID = `<?php echo $id; ?>`,
+				  _TITLE = `<?php echo $row['title']; ?>`,
+				  _HOST = window.location.host,
+				  _IS_MOBILE = window.navigator ? /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent) : false;
+			var _PASSWORD = "";
+
 			$.ajax({
 				type: "POST",
 				url: "api/analytics.php",
@@ -332,17 +226,21 @@ $row = $stmt->fetch();
 				error: function(xhr, status, error) { console.log(xhr.status, error); }
 			});
 
-			const _ID = `<?php echo $id; ?>`,
-				  _TITLE = `<?php echo $row['title']; ?>`,
-				  _HOST = window.location.host;
-			let _PASSWORD = "";
+			$.ajax({
+				type: "POST",
+				url: "api/map.php",
+				data: { "op": "view", "id": _ID },
+				dataType: "json",
+				success: function(result, status, xhr) { console.log("View registered"); },
+				error: function(xhr, status, error) { console.log(xhr.status, error); }
+			});
 		</script>
 
 		<!-- Load src/ JS -->
 		<!--script type="text/javascript" src="src/pres/js/map/L.GridLayer.js"></script-->
 		<script type="text/javascript" src="src/pres/js/map/L.TileLayer.Mars.js"></script>
 		<script type="text/javascript" src="src/pres/globals.js"></script>
-		<script type="text/javascript" src="src/pres/main.js"></script>
+		<script type="text/javascript" src="src/pres/main_1663004642.js"></script>
 
 	</body>
 </html>

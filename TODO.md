@@ -9,17 +9,21 @@
 			- EC2 linux VM: 550GB ssd, 16GB ram, 2 cpu
 			- [Pris](https://calculator.aws/#/estimate?id=fd96a5e49ea3c7799c3a7d82a54deb06a49dc553)
 		* ~~Omforme GeoTales syste server til backup-server~~
-			- Omgjøre kapasitet (mindre cpu og ram, mer hdd)
-			- Ikke hoste kildekode, bare backup av Postgres database og Discourse-backup
+			- ~~Omgjøre kapasitet (mindre cpu og ram, mer hdd)~~
+			- ~~Ikke hoste kildekode, bare backup av Postgres database og Discourse-backup~~
 
 
 - Overall:
-	* (WIP) Implement Stripe payment
 	* (Fixed?) Reklamespalte i pres-modus for ubetalte brukere
-	* Flytte alle pres-modus ting
+	* V Flytte alle pres-modus ting
 	* Geo-Blog, bruke GeoTales til å kommunisere ut til publikum
 		- Mulighet for admins til å pinne-kart til toppen av landings-siden
 	* (krever testing) Bugs with payment: kan lage ny bruker hos stripe, men får error når den prøver å gå til stripe-checkout
+
+	* Add ability to buy anually, create a new product in stripe with $5x12x0.8 price
+		* Add this info to Pricing page
+	* Pricing side; På premium signup gå rett til stripe side etter signup, ikke til Profile
+
 - Edit-mode:
 	* Option for å ha hengelås åpen by-defualt i pres-modus
 	* Alle betalte funksjoner er grået ut for gratis brukere
@@ -31,9 +35,6 @@
 		- Somehow mark relation between avatars (line between?, color-coding?, ect.)
 - Pres-mode:
 	* LEGGE INN LENKE TIL GEOTALES SAMMEN MED LEAFLET/BASEMAP LENKE NEDE TIL HØYRE I LEAFLET
-	* Views fra pres-modus må telle inn i views på landingssiden
-	* Hengelås mer tydelig ikon
-	* Navigasjons-piler er øverst i boken (låst)
 
 
 - Working TODO:

@@ -28,23 +28,16 @@ $signin_failed = false;
 if(isset($_POST['username'])
 && isset($_POST['password'])) { // arriving from signin
 
-	if($TESTING) {
-		$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = 'andreas'");
-		$stmt->execute();
-		$row = $stmt->fetch();
-		$_SESSION['user_id'] = $row['id']; // log user in
-
-		header("Access-Control-Allow-Origin: *");
-		header("location: $loc");
-	}
-
 	$username = $_POST['username'];
 	$password = $_POST['password'];
 
 	$check = validSignIn($PDO, $username, $password);
-	if($check == 1) {
-		$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = ? AND password = ?");
-		$stmt->execute([$username, $password]);
+	if($check == 1 || $TESTING) {
+		if($TESTING) { $stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = 'andreas'"); $stmt->execute(); }
+		else{
+			$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = ? AND password = ?");
+			$stmt->execute([$username, $password]);
+		}
 		$row = $stmt->fetch();
 		$_SESSION['user_id'] = $row['id']; // log user in
 
@@ -171,7 +164,7 @@ if(isset($_POST['username'])
 						</form>
 
 						<p class="text-muted my-3">
-							Don't have an account? <strong><a href="signup.php">Sign up here</a></strong>
+							Don't have an account? <strong><a href="signup.php?return_url=<?php echo $loc; ?>">Sign up here</a></strong>
 						</p>
 					</div>
 				</div>
@@ -202,7 +195,10 @@ if(isset($_POST['username'])
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
 				</div>

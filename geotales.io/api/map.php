@@ -34,8 +34,9 @@ if($op == "read") {
 	if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 		$user_can_write = userMapCanWrite($PDO, $_SESSION['user_id'], $id);
 	}
-	if(!$user_can_write
-	&& !userMapCheckPw($PDO, $id, $password)) { http_response_code(401); exit; }
+	if(hasMapPw($PDO, $id)
+	&& !$user_can_write
+	&& !mapCheckPw($PDO, $id, $password)) { http_response_code(401); exit; }
 
 	$stmt = $PDO->prepare("SELECT data FROM \"Map\" WHERE id = ?");
 	$stmt->execute([$id]);
@@ -54,6 +55,11 @@ if($op == "view") {
 		http_response_code(422); exit;
 	}
 	$id = $_POST['id'];
+
+	$user_id = null;
+	if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
+		$user_id = $_SESSION['user_id'];
+	}
 
 	$stmt = $PDO->prepare("INSERT INTO \"View\" (user_id, map_id) VALUES (?, ?)");
 	$stmt->execute([$user_id, $id]);
@@ -145,8 +151,9 @@ if($op == "clone") {
 
 	if(!$paid && !$map_count_ok) { http_response_code(401); exit; }
 
-	if(!userMapCanWrite($PDO, $user_id, $id)
-	&& !userMapCheckPw($PDO, $id, $password)) { http_response_code(401); exit; }
+	if(hasMapPw($PDO, $id)
+	&& !userMapCanWrite($PDO, $user_id, $id)
+	&& !mapCheckPw($PDO, $id, $password)) { http_response_code(401); exit; }
 
 	$stmt = $PDO->prepare("INSERT INTO \"Map\" (title, description, thumbnail, data) SELECT CONCAT('Copy of ', title) AS title, description, thumbnail, data FROM \"Map\" WHERE id = ? RETURNING id");
 	$stmt->execute([$id]);
@@ -177,6 +184,21 @@ if($op == "like") {
 
 }
 else
+if($op == "unlike") {
+
+	if(!isset($_POST['id'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+
+	$stmt = $PDO->prepare("DELETE FROM \"Reaction\" WHERE type = 'like' AND user_id = ? AND map_id = ?");
+	$stmt->execute([$user_id, $id]);
+
+	echo json_encode(array("status" => "success"));
+	exit;
+
+}
+else
 if($op == "flag") {
 
 	if(!isset($_POST['id'])) {
@@ -186,6 +208,40 @@ if($op == "flag") {
 
 	$stmt = $PDO->prepare("INSERT INTO \"Flag\" (user_id, map_id, type) VALUES (?, ?, 'flag')");
 	$stmt->execute([$user_id, $id]);
+
+	echo json_encode(array("status" => "success"));
+	exit;
+
+}
+else
+if($op == "unflag") {
+
+	if(!isset($_POST['id'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+
+	$stmt = $PDO->prepare("DELETE FROM \"Flag\" WHERE user_id = ? AND map_id = ?");
+	$stmt->execute([$user_id, $id]);
+
+	echo json_encode(array("status" => "success"));
+	exit;
+
+}
+else
+if($op == "comment") {
+
+	if(!isset($_POST['id'])
+	|| !isset($_POST['content'])
+	|| sane_is_null($_POST['content'])) {
+		http_response_code(422); exit;
+	}
+	$id = $_POST['id'];
+	$content = sanitize($_POST['content']);
+	$ref = $_POST['ref'] ?? null;
+
+	$stmt = $PDO->prepare("INSERT INTO \"Comment\" (user_id, map_id, ref, content) VALUES (?, ?, ?, ?)");
+	$stmt->execute([$user_id, $id, $ref, $content]);
 
 	echo json_encode(array("status" => "success"));
 	exit;

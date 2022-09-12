@@ -209,7 +209,7 @@ $count = $stmt->rowCount();
 
 							<div class="row">
 								<div class="col-sm-7">
-									<button type="button" class="btn btn-sm btn-outline-secondary" id="publish" title="Will make your GeoTale visible to other users" data-id="">Publish</button>
+									<button type="button" class="btn btn-sm btn-outline-secondary" id="publish" title="Will make your GeoTale visible on the home-page" data-id="">Publish to gallery</button>
 								</div>
 								<div class="col-sm-1">
 									<a role="button" class="btn btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
@@ -290,8 +290,7 @@ $count = $stmt->rowCount();
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
-						GeoTales
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" /><small>eoTales</small>
 					</a>
 
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -397,7 +396,7 @@ $count = $stmt->rowCount();
 										<td style="width: 8.33%;">
 											<div class="btn-group btn-group-sm" role="group" aria-label="view-edit">
 												<a role="button" class="btn btn-outline-secondary" href="edit.php?id=<?php echo $row['id']; ?>">Edit</a>
-												<a role="button" class="btn btn-outline-secondary" href="pres.php?id=<?php echo $row['id']; ?>" target="_blank">View</a>
+												<a role="button" class="btn btn-outline-secondary" href="view.php?id=<?php echo $row['id']; ?>">View</a>
 											</div>
 										</td>
 										<td style="width: 8.33%;">
@@ -455,7 +454,10 @@ $count = $stmt->rowCount();
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
 						<p class="text-muted text-center">
-							<a class="text-decoration-none" href="<?php echo "mailto:{$CONFIG['email']}"; ?>"><?php echo $CONFIG['email']; ?></a>
+							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 					</div>
 				</div>
@@ -641,13 +643,13 @@ $count = $stmt->rowCount();
 
 					$("#shareModal").modal("show");
 
-					$("#shareModal input#linkInput").val(`https://${host}/pres.php?id=${id}`);
+					$("#shareModal input#linkInput").val(`https://${host}/view.php?id=${id}`);
 					$("#shareModal input#embedInput").val(`<iframe src="https://${host}/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
-					$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${host}/pres.php?id=${id}`);
-					$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${host}/pres.php?id=${id}&text=`);
-					$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${host}/pres.php?id=${id}`);
-					$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${host}/pres.php?id=${id}&media=&description=`);
-					$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${host}/pres.php?id=${id}%0A`);
+					$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${host}/view.php?id=${id}`);
+					$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${host}/view.php?id=${id}&text=`);
+					$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${host}/view.php?id=${id}`);
+					$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${host}/view.php?id=${id}&media=&description=`);
+					$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${host}/view.php?id=${id}%0A`);
 					$("#shareModal button#publish").data("id", id);
 
 					$.ajax({
@@ -659,8 +661,8 @@ $count = $stmt->rowCount();
 						},
 						dataType: "json",
 						success: function(result, status, xhr) {
-							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish");
-							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible to other users" : "Will make your GeoTale visible to other users");
+							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish to gallery");
+							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible on the home-page" : "Will make your GeoTale visible on the home-page");
 						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status, error);
@@ -679,8 +681,8 @@ $count = $stmt->rowCount();
 						},
 						dataType: "json",
 						success: function(result, status, xhr) {
-							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish");
-							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible to other users" : "Will make your GeoTale visible to other users");
+							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish to gallery");
+							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible on the home-page" : "Will make your GeoTale visible on the home-page");
 						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status, error);
