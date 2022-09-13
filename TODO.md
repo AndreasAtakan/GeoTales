@@ -7,7 +7,7 @@
 			- Utvide kapasitet (hdd, ram og cpu)
 		* Sette opp ny GeoTales hoved-hosting server på Amazon
 			- EC2 linux VM: 550GB ssd, 16GB ram, 2 cpu
-			* [Pris](https://calculator.aws/#/estimate?id=a58b61ebdfa7889da4ac91c68cc76c20bc42f405)
+			- [Pris](https://calculator.aws/#/estimate?id=a58b61ebdfa7889da4ac91c68cc76c20bc42f405)
 			- ~~[Pris](https://calculator.aws/#/estimate?id=fd96a5e49ea3c7799c3a7d82a54deb06a49dc553)~~
 		* ~~Omforme GeoTales syste server til backup-server~~
 			- ~~Omgjøre kapasitet (mindre cpu og ram, mer hdd)~~

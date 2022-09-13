@@ -165,8 +165,10 @@ function userMapHasFlagged($PDO, $user_id, $map_id) {
 //
 function getAllLikes($PDO, $map_ids) {
 	$ids = "";
-	foreach($map_ids as $id) { $ids .= "'{$id}',"; }
-	$ids = mb_substr($ids, 0, -1);
+	if(count($map_ids) > 0) {
+		foreach($map_ids as $id) { $ids .= "'{$id}',"; }
+		$ids = mb_substr($ids, 0, -1);
+	}else{ $ids = "null"; }
 
 	$likes = array();
 	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"Reaction\" WHERE map_id IN ({$ids}) AND type = 'like' GROUP BY map_id");
@@ -179,8 +181,10 @@ function getAllLikes($PDO, $map_ids) {
 //
 function getAllViews($PDO, $map_ids) {
 	$ids = "";
-	foreach($map_ids as $id) { $ids .= "'{$id}',"; }
-	$ids = mb_substr($ids, 0, -1);
+	if(count($map_ids) > 0) {
+		foreach($map_ids as $id) { $ids .= "'{$id}',"; }
+		$ids = mb_substr($ids, 0, -1);
+	}else{ $ids = "null"; }
 
 	$views = array();
 	$stmt = $PDO->prepare("SELECT map_id, COUNT(id) AS c FROM \"View\" WHERE map_id IN ({$ids}) GROUP BY map_id");

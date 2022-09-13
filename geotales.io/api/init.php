@@ -7,28 +7,6 @@
 * Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
-// DB init
-
-$host = "localhost";
-$user = "www-data";
-$pass = "vleowemnxoyvq"; // secret
-$db   = "www-data";
-//$charset = "utf8mb4";
-
-$dsn = "pgsql:host=$host;dbname=$db;options='--client_encoding=UTF8'";
-$options = array(
-	PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-	PDO::ATTR_EMULATE_PREPARES   => false
-);
-try {
-	$PDO = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-	throw new \PDOException($e->getMessage(), (int)$e->getCode());
-}
-
-
-
 // config
 
 $TESTING = true;
@@ -53,3 +31,25 @@ $CONFIG = array(
 	"stripe_product_id" => $TESTING ? "prod_MDLkgjpY91RExH" : "prod_MDLzrJl69Fqrib", // secret
 	"stripe_webhooks_secret" => $TESTING ? "whsec_0a9feccdf1e3844afe6da0f40ff518a17dc0a9618f23da9ca9640373219ba637" : "whsec_XHrlB7hYjlMX3vNbFhPdJgM4UyQjLRTu" // secret
 );
+
+
+
+// DB init
+
+$host = $TESTING ? "localhost" : "geotales-database.cotdsywrzgyt.eu-north-1.rds.amazonaws.com";
+$user = $TESTING ? "www-data" : "postgres";
+$pass = "vleowemnxoyvq"; // secret
+$db   = $TESTING ? "www-data" : "geotales";
+//$charset = "utf8mb4";
+
+$dsn = "pgsql:host=$host;dbname=$db;options='--client_encoding=UTF8'";
+$options = array(
+	PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+	PDO::ATTR_EMULATE_PREPARES   => false
+);
+try {
+	$PDO = new PDO($dsn, $user, $pass, $options);
+} catch (\PDOException $e) {
+	throw new \PDOException($e->getMessage(), (int)$e->getCode());
+}
