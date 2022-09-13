@@ -353,10 +353,10 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 						<div class="col">
 							<ul role="tablist" class="nav nav-pills justify-content-center mb-3" id="infoTab">
 								<li role="presentation" class="nav-item">
-									<button type="button" role="tab" class="nav-link active" id="suggested-tab" data-bs-toggle="pill" data-bs-target="#suggested" aria-controls="suggested" aria-selected="true">Suggested</button>
+									<button type="button" role="tab" class="nav-link btn-sm py-1 px-2 active" id="suggested-tab" data-bs-toggle="pill" data-bs-target="#suggested" aria-controls="suggested" aria-selected="true">Suggested</button>
 								</li>
 								<li role="presentation" class="nav-item">
-									<button type="button" role="tab" class="nav-link" id="comments-tab" data-bs-toggle="pill" data-bs-target="#comments" aria-controls="comments" aria-selected="false">Comments</button>
+									<button type="button" role="tab" class="nav-link btn-sm py-1 px-2" id="comments-tab" data-bs-toggle="pill" data-bs-target="#comments" aria-controls="comments" aria-selected="false">Comments</button>
 								</li>
 							</ul>
 							<div class="tab-content" id="infoTabContent">
