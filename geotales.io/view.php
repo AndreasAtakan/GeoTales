@@ -135,6 +135,8 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 			html, body {
 				/**/
 			}
+			html.noOverflow { overflow-y: hidden; }
+			body.noOverflow { overflow-y: hidden; }
 
 			#main {
 				background-color: #333333;
@@ -361,17 +363,16 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 							</ul>
 							<div class="tab-content" id="infoTabContent">
 								<div role="tabpanel" class="tab-pane fade show active" id="suggested" aria-labelledby="suggested-tab">
-						<?php
-							if($suggestedNum > 0) {
-								foreach($suggested as $r) {
+						<?php if($suggestedNum > 0) { ?>
+									<div class="row row-cols-1 row-cols-lg-2 g-2">
+							<?php foreach($suggested as $r) {
 									$href = "view.php?id={$r['id']}";
 									$published_date = date_format(date_create($r['published_date']), "d.M Y, H:i");
-						?>
-									<div class="row g-0 mb-3">
+							?>
 										<div class="col">
 											<div class="card text-white bg-dark">
 												<a class="text-decoration-none" href="<?php echo $href; ?>">
-													<img src="<?php echo $r['thumbnail']; ?>" class="card-img-top" alt="&nbsp;" />
+													<img src="<?php echo $r['thumbnail']; ?>" class="card-img-top" alt="" <?php if(sane_is_null($r['thumbnail'])) { echo "height=\"0\""; } ?> />
 													<div class="card-body py-2">
 												<?php if(!sane_is_null($r['user_photo'])) { ?>
 														<img class="rounded float-end" src="<?php echo $r['user_photo']; ?>" width="auto" height="20" alt="&nbsp" />
@@ -382,10 +383,9 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 												</a>
 											</div>
 										</div>
+							<?php } ?>
 									</div>
-						<?php
-								}
-							}else{ ?>
+						<?php }else{ ?>
 									<div class="row g-0">
 										<div class="col">
 											<p class="text-muted text-center text-shadow">None found</p>
@@ -411,52 +411,6 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 								<?php foreach($comments as $c) {
 										$created_date = date_format(date_create($c['created_date']), "d.M Y, H:i");
 								?>
-											<div class="row g-0 mb-2">
-												<div class="col-2">
-													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
-												</div>
-												<div class="col-10 ps-1">
-													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <?php echo $created_date; ?></p>
-													<p class="small mb-0"><?php echo $c['content']; ?></p>
-												</div>
-											</div>
-
-											<div class="row g-0 mb-2">
-												<div class="col-2">
-													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
-												</div>
-												<div class="col-10 ps-1">
-													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <?php echo $created_date; ?></p>
-													<p class="small mb-0"><?php echo $c['content']; ?></p>
-												</div>
-											</div>
-											<div class="row g-0 mb-2">
-												<div class="col-2">
-													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
-												</div>
-												<div class="col-10 ps-1">
-													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <?php echo $created_date; ?></p>
-													<p class="small mb-0"><?php echo $c['content']; ?></p>
-												</div>
-											</div>
-											<div class="row g-0 mb-2">
-												<div class="col-2">
-													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
-												</div>
-												<div class="col-10 ps-1">
-													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <?php echo $created_date; ?></p>
-													<p class="small mb-0"><?php echo $c['content']; ?></p>
-												</div>
-											</div>
-											<div class="row g-0 mb-2">
-												<div class="col-2">
-													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
-												</div>
-												<div class="col-10 ps-1">
-													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <?php echo $created_date; ?></p>
-													<p class="small mb-0"><?php echo $c['content']; ?></p>
-												</div>
-											</div>
 											<div class="row g-0 mb-2">
 												<div class="col-2">
 													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
@@ -512,9 +466,15 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 				});
 
 				window.addEventListener("message", function(ev) {
-					if(ev.data == "fullscreenEnter") { $("#mapSection").addClass("fullscreen"); }
+					if(ev.data == "fullscreenEnter") {
+						$("html, body").addClass("noOverflow");
+						$("#mapSection").addClass("fullscreen");
+					}
 					else
-					if(ev.data == "fullscreenExit") { $("#mapSection").removeClass("fullscreen"); }
+					if(ev.data == "fullscreenExit") {
+						$("html, body").removeClass("noOverflow");
+						$("#mapSection").removeClass("fullscreen");
+					}
 				});
 
 				setTimeout(function() { $("button#closeAd").css("display", "block"); }, 5000);

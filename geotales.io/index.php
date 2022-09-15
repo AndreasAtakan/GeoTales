@@ -228,7 +228,7 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					<div class="col">
 						<div class="card">
 							<a class="text-decoration-none" href="<?php echo $href; ?>">
-								<img src="<?php echo $row['thumbnail']; ?>" class="card-img-top" alt="&nbsp;" />
+								<img src="<?php echo $row['thumbnail']; ?>" class="card-img-top" alt="" <?php if(sane_is_null($row['thumbnail'])) { echo "height=\"0\""; } ?> />
 								<div class="card-body">
 									<h5 class="card-title" style="color: black;"><?php echo $row['title']; ?></h5>
 									<h6 class="card-subtitle mb-2 text-muted"><?php echo $published_date; ?></h6>

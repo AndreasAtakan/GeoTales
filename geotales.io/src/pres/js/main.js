@@ -41,7 +41,7 @@ window.onload = function(ev) {
 			$(".leaflet-control.leaflet-bar, #sceneNav").css("opacity", v || 0);
 			$("#textbox").css("bottom", `${v ? "58" : "10"}px`);
 		};
-	$(window).on("mousemove", function() {
+	$(window).on("mousemove touchmove", function() {
 		btnToggle(0.8); clearTimeout(btnTimer);
 		btnTimer = setTimeout(btnToggle, btnFadeTime);
 	});
