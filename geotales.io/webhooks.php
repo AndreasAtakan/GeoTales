@@ -31,9 +31,7 @@ if(isset($_SERVER['HTTP_STRIPE_SIGNATURE'])
 	}
 
 	$sha = hash_hmac("sha256", "{$t}.{$payload}", $CONFIG['stripe_webhooks_secret']);
-	if($v1 != $sha) {
-		http_response_code(401); exit;
-	}
+	if($v1 != $sha) { http_response_code(401); exit; }
 
 	if($data['type'] == "customer.subscription.created"
 	|| $data['type'] == "customer.subscription.deleted") {

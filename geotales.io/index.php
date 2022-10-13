@@ -12,8 +12,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "api/init.php";
-include_once("api/helper.php");
+include "init.php";
+include_once("helper.php");
 
 $logged_in = false;
 if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
@@ -48,7 +48,6 @@ $stmt = $PDO->prepare("
 		M.published_date IS NOT NULL AND
 		UM.status = 'owner' AND
 		LOWER(M.title) LIKE LOWER(?)
-		OR true
 	LIMIT 150
 ");
 $stmt->execute([$search]);
@@ -80,9 +79,9 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>GeoTales – Map stories</title>
+		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Map stories" />
+		<meta name="description" content="Tales on a map" />
 
 		<link rel="icon" href="assets/logo.png" />
 
@@ -176,19 +175,13 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					<div class="col"></div>
 				</div>
 
-				<div class="row mb-3">
-					<div class="col">
-						<h2 class="text-muted text-shadow">GeoTales <span class="small">– Tales on a map</span></h2>
-					</div>
-				</div>
-
 				<div class="row">
 					<div class="col-sm-9">
 						<form method="get" id="search">
 							<div class="input-group mb-1" style="max-width: 650px;">
 								<a role="button" class="btn btn-outline-secondary" href="index.php" title="Clear search"><i class="fas fa-minus"></i></a>
 								<input type="text" class="form-control" name="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" value="<?php echo $_GET['search'] ?? ""; ?>" />
-								<button type="submit" class="btn btn-outline-light" id="search-button">Search</button>
+								<button type="submit" class="btn btn-outline-secondary" id="search-button">Search</button>
 							</div>
 							<div class="input-group" style="max-width: 150px; margin-left: 40px;">
 								<select class="form-select form-select-sm" name="order" id="sortBy" aria-label="Sort by">
@@ -202,7 +195,7 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					</div>
 					<div class="col-sm-3 mt-sm-0 mt-4">
 						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" class="btn btn-info" href="stage.php" style="color: white;">Create</a>
+							<a role="button" class="btn btn-info text-white" href="stage.php">Create</a>
 						</div>
 						<p class="text-muted text-center text-shadow mt-2">Create your own GeoTale for <strong>free</strong></p>
 					</div>
@@ -309,8 +302,8 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 
 				$.ajax({
 					type: "POST",
-					url: "api/analytics.php",
-					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api.php",
+					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }

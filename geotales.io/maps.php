@@ -12,8 +12,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "api/init.php";
-include_once("api/helper.php");
+include "init.php";
+include_once("helper.php");
 
 // Not logged in
 if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
@@ -22,6 +22,63 @@ if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $username = getUsername($PDO, $user_id);
 $photo = getUserPhoto($PDO, $user_id);
+
+
+$op = $_REQUEST['op'] ?? null;
+if($op == "create") {
+	if(!isset($_POST['title'])
+	|| !isset($_POST['description'])
+	|| !isset($_POST['password'])) { http_response_code(422); exit; }
+
+	$title = sanitize($_POST['title']);
+	$description = sanitize($_POST['description']);
+	$thumbnail = uploadCreate($PDO, $user_id, "thumbnail", $_FILES["thumbnail"]["tmp_name"], $_FILES["thumbnail"]["name"]);
+	$password = $_POST['password']; mb_substr($password, 0, 64);
+
+	$id = mapCreate($PDO, $user_id, $title, $description, $thumbnail, $password);
+	if(!$id) {
+		$checkout = paymentCreateCheckout($PDO, $user_id);
+		header("location: {$checkout}"); exit;
+	}
+
+	header("location: edit.php?id={$id}"); exit;
+}
+else
+if($op == "edit") {
+	if(!isset($_POST['id'])
+	|| !isset($_POST['title'])
+	|| !isset($_POST['description'])
+	|| !isset($_POST['password'])) { http_response_code(422); exit; }
+	$id = $_POST['id'];
+
+	if(!userMapCanWrite($PDO, $user_id, $id)) { http_response_code(401); exit; }
+
+	$title = sanitize($_POST['title']);
+	$description = sanitize($_POST['description']);
+	$thumbnail = uploadCreate($PDO, $user_id, "thumbnail", $_FILES["thumbnail"]["tmp_name"], $_FILES["thumbnail"]["name"]);
+	$password = $_POST['password']; mb_substr($password, 0, 64);
+
+	$r = mapUpdate($PDO, $id, $title, $description, $thumbnail, $password);
+	if(!$r) { http_response_code(500); exit; }
+}
+else
+if($op == "delete") {
+	if(!isset($_POST['id'])) { http_response_code(422); exit; }
+	$id = $_POST['id'];
+	if(!userMapCanWrite($PDO, $user_id, $id)) { http_response_code(401); exit; }
+
+	$r = mapDelete($PDO, $id);
+	if(!$r) { http_response_code(500); exit; }
+}
+else
+if($op == "republish") {
+	if(!isset($_POST['id'])) { http_response_code(422); exit; }
+	$id = $_POST['id'];
+	if(!userMapCanWrite($PDO, $user_id, $id)) { http_response_code(401); exit; }
+
+	mapRepublish($PDO, $id);
+}
+
 
 $search = "%";
 if(isset($_GET['search'])) { $search .= "{$_GET['search']}%"; }
@@ -32,7 +89,8 @@ $stmt = $PDO->prepare("
 		M.title AS title,
 		M.description AS description,
 		M.created_date AS created_date,
-		M.thumbnail AS thumbnail
+		M.thumbnail AS thumbnail,
+		M.published_date IS NOT NULL AS published
 	FROM
 		\"User_Map\" AS UM INNER JOIN
 		\"Map\" AS M
@@ -57,9 +115,9 @@ $count = $stmt->rowCount();
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>GeoTales – Map stories</title>
+		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Map stories" />
+		<meta name="description" content="Tales on a map" />
 
 		<link rel="icon" href="assets/logo.png" />
 
@@ -91,12 +149,16 @@ $count = $stmt->rowCount();
 						<h5 class="modal-title" id="newModalLabel">New</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
+			<form method="post" enctype="multipart/form-data">
 					<div class="modal-body">
 						<div class="container-fluid">
+							<input type="hidden" name="op" value="create" />
+							<input type="hidden" name="password" value="" />
+
 							<div class="row mb-3">
 								<div class="col">
 									<label for="titleInput" class="form-label">Title</label>
-									<input type="text" class="form-control" id="titleInput" aria-describedby="titleHelp" maxlength="65" />
+									<input type="text" class="form-control" name="title" id="titleInput" aria-describedby="titleHelp" maxlength="65" />
 									<div id="titleHelp" class="form-text">Max 65 characters</div>
 								</div>
 							</div>
@@ -104,45 +166,55 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="descriptionInput" class="form-label">Description</label>
-									<textarea class="form-control" id="descriptionInput" rows="5"></textarea>
+									<textarea class="form-control" name="description" id="descriptionInput" rows="5"></textarea>
 								</div>
 							</div>
 
 							<div class="row mb-3">
 								<div class="col">
 									<label for="passwordInput" class="form-label">Password</label>
-									<input type="text" class="form-control" id="passwordInput" aria-describedby="passwordHelp" />
+									<input type="text" class="form-control form-control-sm" id="passwordInput" aria-describedby="passwordHelp" />
 									<div id="passwordHelp" class="form-text">Will be required when viewing the GeoTale</div>
 								</div>
 								<div class="col">
 									<label for="thumbnailInput" class="form-label">Thumbnail</label>
-									<input type="file" class="form-control form-control-sm" id="thumbnailInput" accept="image/gif, image/jpeg, image/png, image/webp" />
+									<input type="file" class="form-control form-control-sm" name="thumbnail" id="thumbnailInput" accept="image/gif, image/jpeg, image/png, image/webp" />
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" id="create">Create</button>
+						<button type="submit" class="btn btn-primary">Create</button>
 					</div>
+			</form>
 				</div>
 			</div>
 		</div>
 
-		<!-- Edit map modal -->
-		<div class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+<?php
+if($count > 0) {
+	foreach($rows as $row) {
+?>
+		<!-- Edit modal -->
+		<div class="modal fade editModal" id="editModal_<?php echo $row['id']; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="editModalLabel">Options</h5>
+						<h5 class="modal-title" id="editModalLabel">Edit</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
+			<form method="post" enctype="multipart/form-data">
 					<div class="modal-body">
 						<div class="container-fluid">
+							<input type="hidden" name="op" value="edit" />
+							<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
+							<input type="hidden" name="password" value="" />
+
 							<div class="row mb-3">
 								<div class="col">
 									<label for="titleInput" class="form-label">Title</label>
-									<input type="text" class="form-control" id="titleInput" aria-describedby="titleHelp" maxlength="65" placeholder="Loading..." disabled />
+									<input type="text" class="form-control" name="title" id="titleInput" aria-describedby="titleHelp" maxlength="65" value="<?php echo $row['title']; ?>" />
 									<div id="titleHelp" class="form-text">Max 65 characters</div>
 								</div>
 							</div>
@@ -150,33 +222,38 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="descriptionInput" class="form-label">Description</label>
-									<textarea class="form-control" id="descriptionInput" rows="5" placeholder="Loading..." disabled></textarea>
+									<textarea class="form-control" name="description" id="descriptionInput" rows="5"><?php echo $row['description']; ?></textarea>
 								</div>
 							</div>
 
 							<div class="row mb-3">
 								<div class="col">
 									<label for="passwordInput" class="form-label">Password</label>
-									<input type="text" class="form-control" id="passwordInput" aria-describedby="passwordHelp" disabled />
+									<div class="input-group input-group-sm">
+										<button type="button" class="btn btn-outline-secondary" id="pwRemove" title="Remove password" data-id="<?php echo $row['id']; ?>"><i class="fas fa-minus"></i></button>
+										<input type="text" class="form-control" id="passwordInput" aria-describedby="passwordHelp" data-id="<?php echo $row['id']; ?>" />
+									</div>
 									<div id="passwordHelp" class="form-text">Will be required when viewing the GeoTale</div>
 								</div>
 								<div class="col">
 									<label for="thumbnailInput" class="form-label">Thumbnail</label>
-									<input type="file" class="form-control form-control-sm" id="thumbnailInput" accept="image/gif, image/jpeg, image/png, image/webp" disabled />
+									<input type="file" class="form-control form-control-sm" name="thumbnail" id="thumbnailInput" accept="image/gif, image/jpeg, image/png, image/webp" />
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" id="save" data-id="" disabled>Save changes</button>
+						<button type="submit" class="btn btn-primary">Save changes</button>
 					</div>
+			</form>
 				</div>
 			</div>
 		</div>
 
+<?php $link = "{$CONFIG['host']}/view.php?id={$row['id']}"; ?>
 		<!-- Share modal -->
-		<div class="modal fade" id="shareModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+		<div class="modal fade shareModal" id="shareModal_<?php echo $row['id']; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -188,8 +265,8 @@ $count = $stmt->rowCount();
 							<div class="row mb-1">
 								<div class="col">
 									<div class="input-group input-group-lg">
-										<input type="text" class="form-control" id="linkInput" aria-label="linkInput" aria-describedby="copyLink" readonly />
-										<button class="btn btn-outline-secondary" type="button" id="copyLink" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+										<input type="text" class="form-control" id="linkInput" aria-label="linkInput" aria-describedby="copyLink" readonly value="<?php echo $link; ?>" />
+										<button type="button" class="btn btn-outline-secondary" id="copyLink" title="Copy to clipboard" data-id="<?php echo $row['id']; ?>"><i class="fas fa-copy"></i></button>
 									</div>
 								</div>
 							</div>
@@ -197,8 +274,8 @@ $count = $stmt->rowCount();
 							<div class="row">
 								<div class="col">
 									<div class="input-group input-group-sm">
-										<input type="text" class="form-control" id="embedInput" aria-label="embedInput" aria-describedby="copyEmbed" readonly />
-										<button class="btn btn-outline-secondary" type="button" id="copyEmbed" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+										<input type="text" class="form-control" id="embedInput" aria-label="embedInput" aria-describedby="copyEmbed" readonly value="" />
+										<button type="button" class="btn btn-outline-secondary" id="copyEmbed" title="Copy to clipboard" data-id="<?php echo $row['id']; ?>"><i class="fas fa-copy"></i></button>
 									</div>
 								</div>
 							</div>
@@ -209,22 +286,26 @@ $count = $stmt->rowCount();
 
 							<div class="row">
 								<div class="col-sm-7">
-									<button type="button" class="btn btn-sm btn-outline-secondary" id="publish" title="Will make your GeoTale visible on the home-page" data-id="">Publish to gallery</button>
+						<form method="post">
+									<input type="hidden" name="op" value="republish" />
+									<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
+									<button type="submit" class="btn btn-sm btn-outline-secondary" title="<?php echo $row['published'] ? "GeoTale no longer visible on the home-page" : "Will make your GeoTale visible on the home-page"; ?>"><?php echo $row['published'] ? "Unpublish" : "Publish to gallery"; ?></button>
+						</form>
 								</div>
 								<div class="col-sm-1">
-									<a role="button" class="btn btn-outline-light" href="#" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
+									<a role="button" class="btn btn-outline-light" href="https://www.facebook.com/sharer/sharer.php?u=<?php echo $link; ?>" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
 								</div>
 								<div class="col-sm-1">
-									<a role="button" class="btn btn-outline-light" href="#" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
+									<a role="button" class="btn btn-outline-light" href="https://twitter.com/intent/tweet?url=<?php echo $link; ?>&text=" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
 								</div>
 								<div class="col-sm-1">
-									<a role="button" class="btn btn-outline-light" href="#" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
+									<a role="button" class="btn btn-outline-light" href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo $link; ?>" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
 								</div>
 								<div class="col-sm-1">
-									<a role="button" class="btn btn-outline-light" href="#" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
+									<a role="button" class="btn btn-outline-light" href="https://pinterest.com/pin/create/button/?url=<?php echo $link; ?>&media=&description=" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
 								</div>
 								<div class="col-sm-1">
-									<a role="button" class="btn btn-outline-light" href="#" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
+									<a role="button" class="btn btn-outline-light" href="mailto:?&subject=&cc=&bcc=&body=<?php echo $link; ?>%0A" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
 								</div>
 							</div>
 						</div>
@@ -234,7 +315,7 @@ $count = $stmt->rowCount();
 		</div>
 
 		<!-- Delete modal -->
-		<div class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		<div class="modal fade" id="deleteModal_<?php echo $row['id']; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -246,11 +327,19 @@ $count = $stmt->rowCount();
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-danger" id="deleteConfirm" data-id="">Delete</button>
+			<form method="post">
+						<input type="hidden" name="op" value="delete" />
+						<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
+						<button type="submit" class="btn btn-danger">Delete</button>
+			</form>
 					</div>
 				</div>
 			</div>
 		</div>
+<?php
+	}
+}
+?>
 
 		<!-- Loading modal -->
 		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
@@ -350,7 +439,7 @@ $count = $stmt->rowCount();
 								<div class="col-sm-9 order-sm-1">
 									<div class="input-group d-inline-flex" style="max-width: 650px;">
 										<a role="button" class="btn btn-outline-secondary" href="maps.php" title="Clear search"><i class="fas fa-minus"></i></a>
-										<input type="text" class="form-control" name="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" />
+										<input type="text" class="form-control" name="search" placeholder="Search title" aria-label="search" aria-describedby="search-button" value="<?php echo $_GET['search'] ?? ""; ?>" />
 										<button type="submit" class="btn btn-secondary" id="search-button">Search</button>
 									</div>
 								</div>
@@ -405,10 +494,10 @@ $count = $stmt->rowCount();
 													<i class="fas fa-ellipsis-v"></i>
 												</button>
 												<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="optionsDropdown<?php echo $row['id']; ?>" style="min-width: 0;">
-													<li><button type="button" class="dropdown-item" id="edit" data-id="<?php echo $row['id']; ?>"><i class="fas fa-pen"></i></button></li>
-													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>"><i class="fas fa-share-alt"></i></button></li>
+													<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal_<?php echo $row['id']; ?>"><i class="fas fa-pen"></i></button></li>
+													<li><button type="button" class="dropdown-item" id="share" data-id="<?php echo $row['id']; ?>" data-bs-toggle="modal" data-bs-target="#shareModal_<?php echo $row['id']; ?>"><i class="fas fa-share-alt"></i></button></li>
 													<li><hr class="dropdown-divider"></li>
-													<li><button type="button" class="dropdown-item" id="delete" data-id="<?php echo $row['id']; ?>"><i class="fas fa-trash"></i></button></li>
+													<li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal_<?php echo $row['id']; ?>"><i class="fas fa-trash"></i></button></li>
 												</ul>
 											</div>
 										</td>
@@ -481,8 +570,8 @@ $count = $stmt->rowCount();
 
 				$.ajax({
 					type: "POST",
-					url: "api/analytics.php",
-					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api.php",
+					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -493,228 +582,48 @@ $count = $stmt->rowCount();
 					if(v.length > 65) { $(ev.target).val(v.substring(0, 65)); }
 				});
 
-				$("#newModal button#create").click(ev => {
-					let title = $("#newModal input#titleInput").val().substring(0, 65),
-						description = $("#newModal textarea#descriptionInput").val(),
-						password = $("#newModal input#passwordInput").val(),
-						thumbnail = $("#newModal input#thumbnailInput").prop("files")[0];
-					password = password === "" ? null : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
-
-					$("#newModal").modal("hide");
-					$("#loadingModal").modal("show");
-
-					let callback = ref => {
-						$.ajax({
-							type: "POST",
-							url: "api/map.php",
-							data: {
-								"op": "create",
-								"title": title,
-								"description": description,
-								"thumbnail": ref,
-								"password": password
-							},
-							dataType: "json",
-							success: function(result, status, xhr) {
-								window.location.assign(`edit.php?id=${result.id}`);
-							},
-							error: function(xhr, status, error) {
-								console.log(xhr.status, error);
-
-								if(xhr.status == 401) { window.location.assign("profile.php"); }
-								else{ setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750); }
-							}
-						});
-					};
-
-					if(thumbnail) {
-						let data = new FormData();
-						data.append("op", "create");
-						data.append("type", "thumbnail");
-						data.append("image", thumbnail);
-
-						$.ajax({
-							type: "POST",
-							url: "api/upload.php",
-							data: data,
-							contentType: false,
-							processData: false,
-							success: function(result, status, xhr) {
-								callback(result);
-								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-							},
-							error: function(xhr, status, error) {
-								console.error(xhr.status, error);
-								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-							}
-						});
-					}else{ callback(null); }
+				$("#newModal input#passwordInput").change(ev => {
+					let v = $(ev.target).val();
+					$("#newModal input[name=\"password\"]").val(
+						v === "" ? null : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( v ))
+					);
+				});
+				$(".editModal input#passwordInput").change(ev => {
+					let v = $(ev.target).val();
+					$(`#editModal_${$(ev.target).data("id")} input[name=\"password\"]`).val(
+						v === "" ? null : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( v ))
+					);
 				});
 
-				$("button#edit").click(ev => {
-					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
-					$("#editModal").modal("show");
-
-					$.ajax({
-						type: "GET",
-						url: "api/map.php",
-						data: {
-							"op": "get",
-							"id": id
-						},
-						dataType: "json",
-						success: function(result, status, xhr) {
-							$("#editModal input#titleInput").val(result.title);
-							$("#editModal textarea#descriptionInput").val(result.description);
-							$("#editModal input#passwordInput").val(null);
-
-							$("#editModal input#titleInput, #editModal textarea#descriptionInput, #editModal input#thumbnailInput, #editModal input#passwordInput, #editModal button#save").prop("disabled", false);
-							$("#editModal button#save").data("id", id);
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-						}
-					});
-				});
-				$("#editModal button#save").click(ev => {
-					let id = $(ev.target).data("id"),
-						title = $("#editModal input#titleInput").val().substring(0, 65),
-						description = $("#editModal textarea#descriptionInput").val(),
-						password = $("#editModal input#passwordInput").val(),
-						thumbnail = $("#editModal input#thumbnailInput").prop("files")[0];
-					password = password === "" ? null : sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( password ));
-
-					$("#editModal").modal("hide");
-					$("#loadingModal").modal("show");
-
-					let callback = ref => {
-						$.ajax({
-							type: "POST",
-							url: "api/map.php",
-							data: {
-								"op": "update",
-								"id": id,
-								"title": title,
-								"description": description,
-								"thumbnail": ref,
-								"password": password
-							},
-							dataType: "json",
-							success: function(result, status, xhr) {
-								window.location.reload();
-							},
-							error: function(xhr, status, error) {
-								console.log(xhr.status, error);
-								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-							}
-						});
-					};
-
-					if(thumbnail) {
-						let data = new FormData();
-						data.append("op", "create");
-						data.append("type", "thumbnail");
-						data.append("image", thumbnail);
-
-						$.ajax({
-							type: "POST",
-							url: "api/upload.php",
-							data: data,
-							contentType: false,
-							processData: false,
-							success: function(result, status, xhr) {
-								callback(result);
-								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-							},
-							error: function(xhr, status, error) {
-								console.error(xhr.status, error);
-								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-							}
-						});
-					}else{ callback(null); }
-				});
-
-				$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
-				$("#shareModal button#copyEmbed").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#embedInput").val() ); });
 				$("button#share").click(ev => {
+					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id"), host = window.location.host;
+					$(`#shareModal_${id} input#embedInput`).val(`<iframe src="https://${host}/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
+				});
+				$(".shareModal button#copyLink").click(ev => {
 					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
-					const host = window.location.host;
-
-					$("#shareModal").modal("show");
-
-					$("#shareModal input#linkInput").val(`https://${host}/view.php?id=${id}`);
-					$("#shareModal input#embedInput").val(`<iframe src="https://${host}/pres.php?id=${id}" width="100%" height="450" allowfullscreen="true" style="border:none !important;"></iframe>`);
-					$("#shareModal a#facebook").prop("href", `https://www.facebook.com/sharer/sharer.php?u=https://${host}/view.php?id=${id}`);
-					$("#shareModal a#twitter").prop("href", `https://twitter.com/intent/tweet?url=https://${host}/view.php?id=${id}&text=`);
-					$("#shareModal a#linkedin").prop("href", `https://www.linkedin.com/shareArticle?mini=true&url=https://${host}/view.php?id=${id}`);
-					$("#shareModal a#pinterest").prop("href", `https://pinterest.com/pin/create/button/?url=https://${host}/view.php?id=${id}&media=&description=`);
-					$("#shareModal a#email").prop("href", `mailto:?&subject=&cc=&bcc=&body=https://${host}/view.php?id=${id}%0A`);
-					$("#shareModal button#publish").data("id", id);
-
-					$.ajax({
-						type: "GET",
-						url: "api/map.php",
-						data: {
-							"op": "get",
-							"id": id
-						},
-						dataType: "json",
-						success: function(result, status, xhr) {
-							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish to gallery");
-							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible on the home-page" : "Will make your GeoTale visible on the home-page");
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-						}
-					});
+					navigator.clipboard.writeText( $(`#shareModal_${id} input#linkInput`).val() );
 				});
-				$("#shareModal button#publish").click(ev => {
-					let id = $(ev.target).data("id");
-					$.ajax({
-						type: "POST",
-						url: "api/map.php",
-						data: {
-							"op": "republish",
-							"id": id
-						},
-						dataType: "json",
-						success: function(result, status, xhr) {
-							$("#shareModal button#publish").html(result.published ? "Unpublish" : "Publish to gallery");
-							$("#shareModal button#publish").prop("title", result.published ? "GeoTale no longer visible on the home-page" : "Will make your GeoTale visible on the home-page");
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							setTimeout(function() { $("#editModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-						}
-					});
-				});
-
-				$("button#delete").click(ev => {
+				$(".shareModal button#copyEmbed").click(ev => {
 					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
-					$("#deleteModal").modal("show");
-					$("#deleteModal button#deleteConfirm").data("id", id);
+					navigator.clipboard.writeText( $(`#shareModal_${id} input#embedInput`).val() );
 				});
-				$("#deleteModal button#deleteConfirm").click(ev => {
-					let id = $(ev.target).data("id");
-					$("#deleteModal").modal("hide");
+
+				$(".editModal button#pwRemove").click(ev => {
+					let id = $(ev.target).data("id") || $(ev.target).parents("button").data("id");
+
 					$("#loadingModal").modal("show");
 
 					$.ajax({
 						type: "POST",
-						url: "api/map.php",
-						data: {
-							"op": "delete",
-							"id": id
-						},
+						url: "api.php",
+						data: { "op": "map_password_remove", "id": id },
 						dataType: "json",
 						success: function(result, status, xhr) {
-							window.location.reload();
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 						},
 						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+							console.error(xhr.status, error);
+							setTimeout(function() { $(`#editModal_${id}`).modal("hide"); $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 						}
 					});
 				});

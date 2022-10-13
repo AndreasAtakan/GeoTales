@@ -10,7 +10,7 @@ package-lock.json
 */coverage
 
 # production
-dist
+build/
 
 # firebase
 .firebase
@@ -25,5 +25,5 @@ dist
 
 */temp.*
 temp/
-
 */assets/img/*
+*dump*.sql

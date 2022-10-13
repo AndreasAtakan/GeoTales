@@ -24,6 +24,7 @@ $CONFIG = array(
 	"aws_secret_access_key" => "ihjmxCZgQBCdH+4zpoOQUPDSgMc8uXsamB5YoemD", // secret
 	"aws_bucket_name" => "geotales", // secret
 	"aws_region" => "eu-north-1", // secret
+	"aws_ses_region" => "email.eu-north-1.amazonaws.com", // secret
 
 	"stripe_publishable_key" => $TESTING ? "pk_test_51LUu5CHd8g1LTf9T1EmnnA4u8pEN9KrUuF2LJOQBMt9u22sCUaTBw43L6dhKYyG2daCrMNeHFEyBNjigxlmhQpRf00u2N9fFaQ" : "pk_live_51LUu5CHd8g1LTf9TjhRd9vfUpk5sctMg2HpeyNRHxU14IWuqavOOlSXYdOfx2GF3Bl6QQ9N7KRswdITm40S0NeYj00Oqfxraht",
 	"stripe_secret_key" => $TESTING ? "sk_test_51LUu5CHd8g1LTf9TmgT5T4M5QeBi7RRtFCGv5rlfMX2gwRuQ0Go5hGUqwmkBXpVdOt959kBD9ylhDyhq9ZbMU3gq00zr9sNaVS" : "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", // secret
@@ -36,7 +37,7 @@ $CONFIG = array(
 
 // DB init
 
-$host = $TESTING ? "localhost" : "geotales-database.cotdsywrzgyt.eu-north-1.rds.amazonaws.com";
+$host = $TESTING ? "localhost" : "ec2-13-49-137-26.eu-north-1.compute.amazonaws.com";
 $user = $TESTING ? "www-data" : "postgres";
 $pass = "vleowemnxoyvq"; // secret
 $db   = $TESTING ? "www-data" : "geotales";

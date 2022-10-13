@@ -12,8 +12,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "api/init.php";
-include_once("api/helper.php");
+include "init.php";
+include_once("helper.php");
 
 $logged_in = false;
 if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
@@ -31,9 +31,9 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>GeoTales – Map stories</title>
+		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Map stories" />
+		<meta name="description" content="Tales on a map" />
 
 		<link rel="icon" href="assets/logo.png" />
 
@@ -185,7 +185,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Password-protected GeoTales</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Option to create organization-account</p>
 								<div class="d-grid">
-									<a role="button" class="btn btn-primary" href="<?php echo $logged_in ? "profile.php" : "signup.php?return_url=profile.php" ?>">Sign up <br /> <small>and add a subscription</small></a>
+									<a role="button" class="btn btn-primary" href="<?php echo $logged_in ? "profile.php?op=payment" : "signup.php?return_url=profile.php?op=payment" ?>">Sign up <br /> <small>and add a subscription</small></a>
 								</div>
 							</div>
 						</div>
@@ -207,7 +207,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Dedicated customer-support</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Dedicated server for hosting</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Custom integrations <br /> (GPS-hardware, CMS, website-embedding, etc.)</p>
-								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Much more</p>
+								<p class="card-text small ms-md-4">...</p>
 								<div class="d-grid">
 									<a role="button" class="btn btn-primary" href="mailto:<?php echo $CONFIG['email'] ?>?subject=GeoTales Enterprise account" target="_blank">Contact us</a>
 								</div>
@@ -272,8 +272,8 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 
 				$.ajax({
 					type: "POST",
-					url: "api/analytics.php",
-					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api.php",
+					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }

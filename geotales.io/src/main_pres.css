@@ -21,7 +21,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 
 #main {
 	height: 100vh;
-	background-color: #333333;
+	background-color: #e6e6e6;
 }
 
 .leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }

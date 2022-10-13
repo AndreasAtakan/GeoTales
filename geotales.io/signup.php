@@ -11,36 +11,17 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 session_start();
 
-include "api/init.php";
-include_once("api/helper.php");
+include "init.php";
+include_once("helper.php");
 
 $loc = "maps.php";
-if(isset($_GET['return_url'])) {
-	$loc = $_GET['return_url'];
+if(isset($_REQUEST['return_url'])) {
+	$loc = $_REQUEST['return_url'];
 }
 
 // user is already logged in
 if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 	header("location: $loc"); exit;
-}
-
-if(isset($_POST['username'])
-&& isset($_POST['email'])
-&& isset($_POST['password'])) { // arriving from signup
-
-	$username = sanitize($_POST['username']);
-	$email = sanitize($_POST['email']);
-	$password = sanitize($_POST['password']);
-
-	if(isUsernameRegistered($PDO, $username)) { http_response_code(500); exit; }
-
-	$user_id = registerUser($PDO, $username, $password, $email); // register user
-	$_SESSION['user_id'] = $user_id; // log user in
-
-	header("Access-Control-Allow-Origin: *");
-	header("location: $loc");
-	exit;
-
 }
 
 ?>
@@ -52,9 +33,9 @@ if(isset($_POST['username'])
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>GeoTales – Map stories</title>
+		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Map stories" />
+		<meta name="description" content="Tales on a map" />
 
 		<link rel="icon" href="assets/logo.png" />
 
@@ -133,7 +114,7 @@ if(isset($_POST['username'])
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-						<form method="post" autocomplete="on" id="signup">
+						<form action="signauth.php" method="post" autocomplete="on" id="signup">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
 								<input type="text" name="username" class="form-control" id="username" required />
@@ -146,7 +127,7 @@ if(isset($_POST['username'])
 								<label for="pw1" class="form-label">Password</label>
 								<div class="input-group">
 									<input type="password" name="pw1" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
-									<button type="button" class="btn btn-outline-light" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
+									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>
 							<div class="mb-3">
@@ -154,6 +135,7 @@ if(isset($_POST['username'])
 								<label for="pw2" class="form-label small text-muted">Confirm password</label>
 							</div>
 							<input type="hidden" name="password" />
+							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
 							<button type="submit" class="btn btn-primary">Sign up</button>
 						</form>
 
@@ -216,8 +198,8 @@ if(isset($_POST['username'])
 
 				$.ajax({
 					type: "POST",
-					url: "api/analytics.php",
-					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api.php",
+					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -229,9 +211,9 @@ if(isset($_POST['username'])
 
 					$.ajax({
 						type: "GET",
-						url: "api/user.php",
+						url: "api.php",
 						data: {
-							"op": "unique",
+							"op": "user_is_username_unique",
 							"username": username
 						},
 						dataType: "json",

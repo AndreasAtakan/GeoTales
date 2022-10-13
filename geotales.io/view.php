@@ -11,8 +11,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
 session_start();
 
-include "api/init.php";
-include_once("api/helper.php");
+include "init.php";
+include_once("helper.php");
 
 $logged_in = false; $photo = ""; $paid = false;
 if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
@@ -27,6 +27,25 @@ if(!isset($_GET['id'])) {
 	http_response_code(422); exit;
 }
 $id = $_GET['id'];
+
+
+$op = $_REQUEST['op'] ?? null;
+if($op == "clone") {
+	if(!$logged_in) { http_response_code(401); exit; }
+
+	if(!isset($_POST['password'])) {
+		http_response_code(422); exit;
+	}
+	$password = $_POST['password'];
+
+	$id = mapClone($PDO, $user_id, $id, $password);
+	if(!$id) {
+		$checkout = paymentCreateCheckout($PDO, $user_id);
+		header("location: {$checkout}"); exit;
+	}
+
+	header("location: edit.php?id={$id}"); exit;
+}
 
 
 $stmt = $PDO->prepare("
@@ -46,11 +65,11 @@ $stmt = $PDO->prepare("
 			ON UM.user_id = U.id
 	WHERE
 		M.published_date IS NOT NULL AND
-		UM.status = 'owner'
-		OR true
+		UM.status = 'owner' AND
+		M.id != ?
 	LIMIT 10
 ");
-$stmt->execute();
+$stmt->execute([$id]);
 $suggested = $stmt->fetchAll();
 $suggestedNum = $stmt->rowCount();
 
@@ -76,6 +95,7 @@ $row = $stmt->fetch();
 
 $likes = getLikes($PDO, $id);
 $views = getViews($PDO, $id);
+$flags = getFlags($PDO, $id);
 $comments = getAllComments($PDO, $id);
 
 $has_liked = false; $has_flagged = false;
@@ -85,7 +105,7 @@ if($logged_in) {
 }
 
 $link = "{$CONFIG['host']}/view.php?id={$id}";
-$embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' height='650' allowfullscreen='true' style='border:none !important;'></iframe>";
+$embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\" height=\"650\" allowfullscreen=\"true\" style=\"border:none !important;\"></iframe>";
 
 ?>
 
@@ -111,8 +131,8 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta name="twitter:site" content="@TellusMap" />
-		<meta name="twitter:creator" content="@TellusMap" />
+		<meta name="twitter:site" content="@Geotales_io" />
+		<meta name="twitter:creator" content="@Geotales_io" />
 		<meta property="twitter:url" content="https://geotales.io/" />
 		<meta property="twitter:title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta property="twitter:description" content="<?php echo $row['description']; ?>" />
@@ -132,20 +152,21 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
+			:root {
+				--app-height: 100%;
+			}
+
 			html, body {
 				/**/
 			}
 			html.noOverflow { overflow-y: hidden; }
 			body.noOverflow { overflow-y: hidden; }
 
-			#main {
-				background-color: #333333;
-			}
+			#main { background-color: #e6e6e6; }
 
 			#header { height: 39px; }
 			#content {
 				height: calc(100vh - 39px);
-				color: lightgrey;
 			}
 
 			#mapSection { overflow-y: hidden; }
@@ -160,11 +181,13 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 				left: 0;
 				width: 100vw;
 				height: 100vh;
+				height: var(--app-height);
 				z-index: 1031;
+				padding: 0 !important;
 			}
 
-			#infoTab .nav-link { color: inherit; }
-			#infoTab .nav-link.active { background-color: grey; }
+			#infoTab .nav-link { color: grey; }
+			#infoTab .nav-link.active { background-color: grey; color: white; }
 
 			@media (max-width: 575.98px) {
 				#content { height: auto; }
@@ -195,7 +218,7 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 							<div class="row">
 								<div class="col">
 									<div class="input-group input-group-sm">
-										<input type="text" class="form-control" id="embedInput" aria-label="embedInput" aria-describedby="copyEmbed" readonly value="<?php echo $embedLink; ?>" />
+										<input type="text" class="form-control" id="embedInput" aria-label="embedInput" aria-describedby="copyEmbed" readonly value="" />
 										<button class="btn btn-outline-secondary" type="button" id="copyEmbed" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
 									</div>
 								</div>
@@ -208,7 +231,11 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 							<div class="row">
 								<div class="col col-md-7">
 							<?php if($logged_in) { ?>
-									<button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="clone" title="Make a clone of this GeoTale">Clone</button>
+						<form method="post" id="clone">
+									<input type="hidden" name="op" value="clone" />
+									<input type="hidden" name="password" value="" />
+									<button type="submit" class="btn btn-sm btn-outline-secondary mb-2" title="Make a clone of this GeoTale">Clone</button>
+						</form>
 							<?php } ?>
 								</div>
 								<div class="col col-md-1">
@@ -284,7 +311,7 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 						<?php if($logged_in) { ?>
 								<li class="nav-item dropdown ms-sm-auto">
 									<a class="nav-link dropdown-toggle py-1 py-sm-0" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-										<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="25" />
+										<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="31" />
 									</a>
 									<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
 										<li><a class="dropdown-item" href="maps.php">My GeoTales</a></li>
@@ -305,7 +332,7 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 			</div>
 
 			<div class="row g-0" id="content">
-				<div class="col-12 col-sm-7 col-md-8 col-lg-9 col-xl-10" id="mapSection">
+				<div class="col-12 col-sm-7 col-md-8 col-lg-9 col-xl-10 px-1" id="mapSection">
 					<iframe id="pres" src="pres.php?id=<?php echo $id; ?>" width="100%" height="100%" allowfullscreen="true" style="border: none !important;"></iframe>
 				</div>
 				<div class="col-12 col-sm-5 col-md-4 col-lg-3 col-xl-2 p-3" id="infoSection">
@@ -327,12 +354,13 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 
 					<div class="row g-0 mb-2">
 						<div class="col">
-							<h4 class="m-0"><?php echo $row['title']; ?></h4>
-							<p class="m-0 mb-2"><?php echo $row['description']; ?></p>
-					<?php $published_date = date_format(date_create($row['published_date']), "d.M Y, H:i"); ?>
-							<p class="m-0 small">
-								By: <?php echo $row['username']; ?> <br />
-								<i class="fas fa-eye"></i> <?php echo "{$views} – {$published_date}"; ?>
+							<h4 class="text-muted m-0"><?php echo $row['title']; ?></h4>
+							<p class="text-muted m-0 mb-2" style="max-height: 150px; overflow-y: auto;"><?php echo $row['description']; ?></p>
+					<?php $published_date = date_format(date_create($row['published_date'] ?? ""), "d.M Y, H:i"); ?>
+							<p class="text-muted small m-0">
+								<i class="fas fa-user"></i> <?php echo $row['username']; ?>
+								<i class="fas fa-eye"></i> <?php echo $views; ?> <br />
+								<?php echo $published_date; ?>
 							</p>
 						</div>
 					</div>
@@ -340,13 +368,13 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 					<div class="row g-0 mb-4">
 						<div class="col">
 							<input type="checkbox" class="btn-check" id="like-check" autocomplete="off" <?php if($has_liked) { echo "checked"; } ?> <?php if(!$logged_in) { echo "disabled"; } ?> />
-							<label class="btn btn-sm btn-outline-light" for="like-check" title="Like this GeoTale"><i class="fas fa-thumbs-up"></i> <span id="likes"><?php echo $likes; ?></span></label>
+							<label class="btn btn-sm btn-outline-secondary" for="like-check" title="Like this GeoTale"><i class="fas fa-thumbs-up"></i> <span id="likes"><?php echo $likes; ?></span></label>
 
-							<button type="button" class="btn btn-sm btn-outline-light" id="share" title="Share" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="fas fa-share-alt"></i></button>
+							<button type="button" class="btn btn-sm btn-outline-secondary" id="share" title="Share" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="fas fa-share-alt"></i></button>
 
 					<?php if($logged_in) { ?>
 							<input type="checkbox" class="btn-check" id="flag-check" autocomplete="off" <?php if($has_flagged) { echo "checked"; } ?> />
-							<label class="btn btn-sm btn-outline-light float-end" for="flag-check" title="Flag as inappropriate"><i class="fas fa-flag"></i></label>
+							<label class="btn btn-sm btn-outline-secondary float-end" for="flag-check" title="Flag as inappropriate"><i class="fas fa-flag"></i> <span id="flags"><?php echo $flags; ?></span></label>
 					<?php } ?>
 						</div>
 					</div>
@@ -364,21 +392,21 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 							<div class="tab-content" id="infoTabContent">
 								<div role="tabpanel" class="tab-pane fade show active" id="suggested" aria-labelledby="suggested-tab">
 						<?php if($suggestedNum > 0) { ?>
-									<div class="row row-cols-1 row-cols-lg-2 g-2">
+									<div class="row row-cols-1 g-1">
 							<?php foreach($suggested as $r) {
 									$href = "view.php?id={$r['id']}";
-									$published_date = date_format(date_create($r['published_date']), "d.M Y, H:i");
+									$published_date = date_format(date_create($r['published_date'] ?? ""), "d.M Y, H:i");
 							?>
 										<div class="col">
-											<div class="card text-white bg-dark">
+											<div class="card text-dark bg-light">
 												<a class="text-decoration-none" href="<?php echo $href; ?>">
 													<img src="<?php echo $r['thumbnail']; ?>" class="card-img-top" alt="" <?php if(sane_is_null($r['thumbnail'])) { echo "height=\"0\""; } ?> />
 													<div class="card-body py-2">
 												<?php if(!sane_is_null($r['user_photo'])) { ?>
 														<img class="rounded float-end" src="<?php echo $r['user_photo']; ?>" width="auto" height="20" alt="&nbsp" />
 												<?php } ?>
-														<h5 class="card-title" style="color: lightgrey;"><?php echo $r['title']; ?></h5>
-														<h6 class="card-subtitle" style="color: lightgrey;"><?php echo $published_date; ?></h6>
+														<h5 class="card-title" style="color: grey;"><?php echo $r['title']; ?></h5>
+														<h6 class="card-subtitle" style="color: grey;"><?php echo $published_date; ?></h6>
 													</div>
 												</a>
 											</div>
@@ -400,36 +428,37 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 									<?php if($logged_in) { ?>
 											<div class="input-group input-group-sm">
 												<input type="text" name="comment" class="form-control" id="comment" aria-label="Comment" aria-describedby="send" placeholder="Comment" />
-												<button type="button" class="btn btn-outline-light" id="send" title="Post comment"><i class="fas fa-share"></i></button>
+												<button type="button" class="btn btn-outline-secondary" id="send" title="Post comment"><i class="fas fa-share"></i></button>
 											</div>
 									<?php } ?>
 										</div>
 									</div>
-					<?php if(count($comments) > 0) { ?>
 									<div class="row g-0" id="allComments">
 										<div class="col">
-								<?php foreach($comments as $c) {
-										$created_date = date_format(date_create($c['created_date']), "d.M Y, H:i");
-								?>
+							<?php if(count($comments) > 0) {
+									foreach($comments as $c) {
+										$created_date_full = date_format(date_create($c['created_date']), "d.M Y, H:i");
+										$created_date = date_format(date_create($c['created_date']), "d.M");
+							?>
 											<div class="row g-0 mb-2">
 												<div class="col-2">
 													<img class="rounded" src="<?php echo $c['user_photo']; ?>" width="auto" height="35" />
 												</div>
 												<div class="col-10 ps-1">
-													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <?php echo $created_date; ?></p>
+													<p class="text-muted small mb-1"><?php echo $c['username']; ?> – <span title="<?php echo $created_date_full; ?>"><?php echo $created_date; ?></span></p>
 													<p class="small mb-0"><?php echo $c['content']; ?></p>
 												</div>
 											</div>
-								<?php } ?>
+								<?php }
+									}else{ ?>
+											<div class="row g-0" id="noComments">
+												<div class="col">
+													<p class="text-muted small">No comments yet</p>
+												</div>
+											</div>
+							<?php } ?>
 										</div>
 									</div>
-					<?php }else{ ?>
-									<div class="row g-0" id="noComments">
-										<div class="col">
-											<p class="text-muted small">No comments yet</p>
-										</div>
-									</div>
-					<?php } ?>
 								</div>
 							</div>
 						</div>
@@ -456,14 +485,19 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 					  _USERNAME = `<?php echo $username; ?>`,
 					  _USER_PHOTO = `<?php echo $photo; ?>`;
 
+				$("#shareModal input#embedInput").val(`<?php echo $embedLink; ?>`);
+
 				$.ajax({
 					type: "POST",
-					url: "api/analytics.php",
-					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api.php",
+					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
+
+				const appHeight = ev => { document.documentElement.style.setProperty("--app-height", `${window.innerHeight}px`); };
+				$(window).on("resize", appHeight); appHeight();
 
 				window.addEventListener("message", function(ev) {
 					if(ev.data == "fullscreenEnter") {
@@ -482,39 +516,23 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 
 				$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
 				$("#shareModal button#copyEmbed").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#embedInput").val() ); });
-				$("#shareModal button#clone").click(ev => {
-					$("#loadingModal").modal("show");
-
-					let password = $("iframe#pres")[0].contentWindow["_PASSWORD"];
-
-					$.ajax({
-						type: "POST",
-						url: "api/map.php",
-						data: {
-							"op": "clone",
-							"id": _ID,
-							"password": password
-						},
-						dataType: "json",
-						success: function(result, status, xhr) {
-							window.location.assign(`edit.php?id=${result.id}`);
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							if(xhr.status == 401) { window.location.assign("profile.php"); }
-							else{ setTimeout(function() { $("#loadingModal").modal("hide"); $("#shareModal").modal("hide"); $("#errorModal").modal("show"); }, 750); }
-						}
-					});
-				});
+				if(document.forms.clone) {
+					document.forms.clone.onsubmit = function(ev) { ev.preventDefault();
+						$(ev.target.elements.password).val(
+							$("iframe#pres")[0].contentWindow["_PASSWORD"]
+						);
+						ev.target.submit();
+					};
+				}
 
 				$("input#like-check").change(ev => {
 					let checked = $(ev.target).is(":checked"),
 						likes = parseInt($("span#likes").html());
 					$.ajax({
 						type: "POST",
-						url: "api/map.php",
+						url: "api.php",
 						data: {
-							"op": checked ? "like" : "unlike",
+							"op": checked ? "map_like" : "map_unlike",
 							"id": _ID
 						},
 						dataType: "json",
@@ -529,16 +547,19 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 				});
 
 				$("input#flag-check").change(ev => {
-					let checked = $(ev.target).is(":checked");
+					let checked = $(ev.target).is(":checked"),
+						flags = parseInt($("span#flags").html());
 					$.ajax({
 						type: "POST",
-						url: "api/map.php",
+						url: "api.php",
 						data: {
-							"op": checked ? "flag" : "unflag",
+							"op": checked ? "map_flag" : "map_unflag",
 							"id": _ID
 						},
 						dataType: "json",
-						success: function(result, status, xhr) { console.log(result.status); },
+						success: function(result, status, xhr) {
+							$("span#flags").html( checked ? flags + 1 : flags - 1 );
+						},
 						error: function(xhr, status, error) {
 							console.log(xhr.status, error);
 							setTimeout(function() { $("#errorModal").modal("show"); }, 750);
@@ -554,9 +575,9 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 
 					$.ajax({
 						type: "POST",
-						url: "api/map.php",
+						url: "api.php",
 						data: {
-							"op": "comment",
+							"op": "map_comment",
 							"id": _ID,
 							"content": comment
 						},
@@ -564,7 +585,7 @@ $embedLink = "<iframe src='{$CONFIG['host']}/pres.php?id={$id}' width='100%' hei
 						success: function(result, status, xhr) {
 							$("#noComments").remove();
 
-							$("#allComments").prepend(`
+							$("#allComments .col").prepend(`
 								<div class="row g-0 mb-2">
 									<div class="col-2">
 										<img class="rounded" src="${_USER_PHOTO}" width="auto" height="35" />

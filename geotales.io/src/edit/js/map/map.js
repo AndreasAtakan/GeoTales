@@ -8,7 +8,7 @@
 
 "use strict";
 
-import { uuid, save_data, get_aspect_ratio_dimentions } from "../helpers.js";
+import { uuid, save_data, get_aspect_ratio_dimentions, init_img_basemaps } from "../helpers.js";
 import { avatar_popup, polyline_popup, polygon_popup } from "../generate.js";
 import { bind_setup } from "./layers.js";
 

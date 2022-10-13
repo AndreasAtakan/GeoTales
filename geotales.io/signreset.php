@@ -24,11 +24,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 	header("location: $loc"); exit;
 }
 
-$signin_failed = $_GET['signin_failed'] ?? false; $signin_failed = $signin_failed == "true" ? true : false;
-$signin_username = null;
-if($signin_failed) { $signin_username = $_GET['username']; }
-
-$password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_reset == "true" ? true : false;
+$username = $_GET['username'] ?? null;
 
 ?>
 
@@ -120,40 +116,22 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-					<?php if($signin_failed) { ?>
-						<div role="alert" class="alert alert-danger alert-dismissible fade show">
-							Username or password is <strong>incorrect</strong>.
-							<a href="signreset.php?username=<?php echo $signin_username; ?>">Reset password</a>
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						</div>
-					<?php } ?>
-
-					<?php if($password_reset) { ?>
-						<div role="alert" class="alert alert-info alert-dismissible fade show">
-							Your password was reset and your new password was sent by email.
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						</div>
-					<?php } ?>
-
-						<form action="signauth.php" method="post" autocomplete="on" id="signin">
+						<form action="signauth.php" method="post" autocomplete="on" id="signreset">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" name="username" class="form-control" id="username" required />
+								<input type="text" name="username" class="form-control" id="username" required value="<?php echo $username; ?>" />
 							</div>
 							<div class="mb-3">
-								<label for="pw" class="form-label">Password</label>
-								<div class="input-group">
-									<input type="password" name="pw" class="form-control" id="pw" aria-label="Password" aria-describedby="pwShow" required />
-									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
-								</div>
+								<label for="email" class="form-label">E-Mail</label>
+								<input type="email" name="email" class="form-control" id="email" required />
 							</div>
-							<input type="hidden" name="password" />
+							<input type="hidden" name="pw_reset" value="true" />
 							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
-							<button type="submit" class="btn btn-primary">Sign in</button>
+							<button type="submit" class="btn btn-primary">Reset</button>
 						</form>
 
 						<p class="text-muted my-3">
-							Don't have an account? <strong><a href="signup.php?return_url=<?php echo $loc; ?>">Sign up here</a></strong>
+							Or <strong><a href="signin.php?return_url=<?php echo $loc; ?>">sign in</a></strong>
 						</p>
 					</div>
 				</div>
@@ -218,19 +196,37 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
 
-				let pwShow = false;
-				$("button#pwShow").click(ev => {
-					pwShow = !pwShow;
-					$("form#signin input#pw").prop("type", pwShow ? "text" : "password");
+				$("form#signreset input#username, form#signreset input#email").change(ev => {
+					let el = document.forms.signreset.elements;
+					let username = $(el.username).val(),
+						email = $(el.email).val();
+
+					$.ajax({
+						type: "GET",
+						url: "api.php",
+						data: {
+							"op": "user_username_email_correct",
+							"username": username,
+							"email": email
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							if(result.isValid) {
+								$(el.username, el.email).removeClass("is-invalid");
+								el.username.setCustomValidity("");
+								el.email.setCustomValidity("");
+							}else{
+								$(el.username, el.email).addClass("is-invalid");
+								el.username.setCustomValidity("Username and email does not match");
+								el.email.setCustomValidity("Username and email does not match");
+							}
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							$("#errorModal").modal("show");
+						}
+					});
 				});
-
-				document.forms.signin.onsubmit = function(ev) { ev.preventDefault();
-					let form = ev.target;
-					let el = form.elements;
-
-					$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw.value )) );
-					form.submit();
-				};
 
 			};
 		</script>

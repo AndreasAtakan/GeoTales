@@ -109,13 +109,13 @@ window.onload = function(ev) {
 		$("#loadingModal").modal("show");
 
 		let data = new FormData();
-		data.append("op", "create");
+		data.append("op", "upload_create");
 		data.append("type", "basemap");
 		data.append("image", file);
 
 		$.ajax({
 			type: "POST",
-			url: "api/upload.php",
+			url: "api.php",
 			data: data,
 			contentType: false,
 			processData: false,
@@ -231,9 +231,9 @@ window.onload = function(ev) {
 	$("#loadingModal").modal("show");
 	$.ajax({
 		type: "GET",
-		url: "api/map.php",
+		url: "api.php",
 		data: {
-			"op": "read",
+			"op": "map_read",
 			"id": _ID,
 			"password": ""
 		},
@@ -254,8 +254,8 @@ window.onload = function(ev) {
 
 	$.ajax({
 		type: "GET",
-		url: "api/upload.php",
-		data: { "op": "get" },
+		url: "api.php",
+		data: { "op": "upload_get" },
 		dataType: "json",
 		success: function(result, status, xhr) {
 			for(let r of result) {

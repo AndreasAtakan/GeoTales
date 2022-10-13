@@ -9,7 +9,7 @@
 "use strict";
 
 import { import_data } from "./helpers.js";
-import { init, reset } from "./generate.js";
+//import { init, reset } from "./generate.js";
 
 import { Scenes } from "./scenes.js";
 import { Textboxes } from "./textboxes.js";
@@ -36,16 +36,16 @@ window.onload = function(ev) {
 	}).on("resizeend", function() { _SCENES.resize(); });
 
 	// Set up nav-btn-fade-out
-	let btnTimer = null, btnFadeTime = 5000,
+	let btnTimer = null,
 		btnToggle = v => {
 			$(".leaflet-control.leaflet-bar, #sceneNav").css("opacity", v || 0);
 			$("#textbox").css("bottom", `${v ? "58" : "10"}px`);
 		};
 	$(window).on("mousemove touchmove", function() {
 		btnToggle(0.8); clearTimeout(btnTimer);
-		btnTimer = setTimeout(btnToggle, btnFadeTime);
+		btnTimer = setTimeout(btnToggle, 5000);
 	});
-	setTimeout(btnToggle, btnFadeTime);
+	setTimeout(btnToggle, 5000);
 
 
 
@@ -86,8 +86,8 @@ window.onload = function(ev) {
 		]
 	});
 
-	document.addEventListener("_setup", ev => { init(); _MAP.setup(); _TEXTBOXES.setup(); _SCENES.setup(); });
-	document.addEventListener("_reset", ev => { _SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset(); reset(); });
+	document.addEventListener("_setup", ev => { _MAP.setup(); _TEXTBOXES.setup(); _SCENES.setup(); });
+	document.addEventListener("_reset", ev => { _SCENES.reset(); _TEXTBOXES.reset(); _MAP.reset(); });
 
 
 
@@ -95,9 +95,9 @@ window.onload = function(ev) {
 	$("#loadingModal").modal("show");
 	$.ajax({
 		type: "GET",
-		url: "api/map.php",
+		url: "api.php",
 		data: {
-			"op": "read",
+			"op": "map_read",
 			"id": _ID,
 			"password": ""
 		},
@@ -125,9 +125,9 @@ window.onload = function(ev) {
 
 		$.ajax({
 			type: "GET",
-			url: "api/map.php",
+			url: "api.php",
 			data: {
-				"op": "read",
+				"op": "map_read",
 				"id": _ID,
 				"password": password
 			},

@@ -53,7 +53,7 @@ export function generate_basemaps(isUpload) {
 				<div class="card mt-2">
 					<div class="card-body">
 						<div class="d-grid">
-							<button type="button" class="btn btn-outline-secondary" id="uploadBasemap">+</button>
+							<button type="button" class="btn btn-outline-secondary" id="uploadBasemap" ${!_USER_PAID ? "disabled" : ""}>+</button>
 						</div>
 					</div>
 				</div>

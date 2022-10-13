@@ -12,8 +12,8 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 //session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
-include "api/init.php";
-include_once("api/helper.php");
+include "init.php";
+include_once("helper.php");
 
 // Not logged in
 if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
@@ -22,33 +22,26 @@ if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $paid = getUserPaid($PDO, $user_id);
 
-if(isset($_POST['username'])
-&& !sane_is_null($_POST['username'])) { // arriving from edit
-	$username = sanitize($_POST['username']);
+$op = $_REQUEST['op'] ?? null;
+if($op == "update") {
+	$photo = uploadCreate($PDO, $user_id, "profile_photo", $_FILES["photo"]["tmp_name"], $_FILES["photo"]["name"]);
 
-	if(isUsernameRegistered($PDO, $username)
-	&& $username != getUsername($PDO, $user_id)) { http_response_code(500); exit; }
-
-	$stmt = $PDO->prepare("UPDATE \"User\" SET username = ? WHERE id = ?");
-	$stmt->execute([$username, $user_id]);
+	$r = updateUser(
+		$PDO,
+		$user_id,
+		isset($_POST['username']) ? sanitize($_POST['username']) : null,
+		isset($_POST['email']) ? sanitize($_POST['email']) : null,
+		$photo,
+		isset($_POST['password']) ? sanitize($_POST['password']) : null
+	);
+	if(!$r) { http_response_code(500); exit; }
 }
-if(isset($_POST['email'])
-&& !sane_is_null($_POST['email'])) {
-	$email = sanitize($_POST['email']);
-	$stmt = $PDO->prepare("UPDATE \"User\" SET email = ? WHERE id = ?");
-	$stmt->execute([$email, $user_id]);
-}
-if(isset($_POST['photo'])
-&& !sane_is_null($_POST['photo'])) {
-	$photo = sanitize($_POST['photo']);
-	$stmt = $PDO->prepare("UPDATE \"User\" SET photo = ? WHERE id = ?");
-	$stmt->execute([$photo, $user_id]);
-}
-if(isset($_POST['password'])
-&& !sane_is_null($_POST['password'])) {
-	$password = sanitize($_POST['password']);
-	$stmt = $PDO->prepare("UPDATE \"User\" SET password = ? WHERE id = ?");
-	$stmt->execute([$password, $user_id]);
+else
+if($op == "payment") {
+	$ref = null;
+	if($paid) { $ref = paymentCreatePortal($PDO, $user_id); }
+	else{ $ref = paymentCreateCheckout($PDO, $user_id); }
+	header("location: {$ref}"); exit;
 }
 
 $username = getUsername($PDO, $user_id);
@@ -64,9 +57,9 @@ $photo = getUserPhoto($PDO, $user_id);
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-		<title>GeoTales – Map stories</title>
+		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Map stories" />
+		<meta name="description" content="Tales on a map" />
 
 		<link rel="icon" href="assets/logo.png" />
 
@@ -192,7 +185,9 @@ $photo = getUserPhoto($PDO, $user_id);
 
 				<div class="row" style="max-width: 550px;">
 					<div class="col">
-						<form method="post" autocomplete="on" id="edit">
+						<form method="post" autocomplete="on" enctype="multipart/form-data" id="edit">
+							<input type="hidden" name="op" value="update" />
+
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
 								<input type="text" name="username" class="form-control" id="username" value="<?php echo $username; ?>" />
@@ -203,9 +198,8 @@ $photo = getUserPhoto($PDO, $user_id);
 							</div>
 							<div class="mb-5">
 								<label for="photoUpload" class="form-label">Profile picture</label>
-								<input type="file" name="photoUpload" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" />
+								<input type="file" name="photo" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" />
 							</div>
-							<input type="hidden" name="photo" />
 							<div class="mb-1">
 								<label for="pw1" class="form-label">New password</label>
 								<div class="input-group">
@@ -304,8 +298,8 @@ $photo = getUserPhoto($PDO, $user_id);
 
 				$.ajax({
 					type: "POST",
-					url: "api/analytics.php",
-					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api.php",
+					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -317,9 +311,9 @@ $photo = getUserPhoto($PDO, $user_id);
 
 					$.ajax({
 						type: "GET",
-						url: "api/user.php",
+						url: "api.php",
 						data: {
-							"op": "unique",
+							"op": "user_is_username_unique",
 							"username": username
 						},
 						dataType: "json",
@@ -360,54 +354,17 @@ $photo = getUserPhoto($PDO, $user_id);
 						$("form#edit input#pw1, form#edit input#pw2").removeClass("is-invalid");
 						el.pw1.setCustomValidity("");
 						el.pw2.setCustomValidity("");
+						$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) );
 					}
 				});
-
-				document.forms.edit.onsubmit = function(ev) { ev.preventDefault();
-					let form = ev.target;
-					let el = form.elements;
-
-					$("#loadingModal").modal("show");
-
-					if(el.pw1.value !== el.pw2.value) { setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750); return; }
-					$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) );
-
-					let photo = $(el.photoUpload).prop("files")[0];
-					if(photo) {
-						let data = new FormData();
-						data.append("op", "create");
-						data.append("type", "profile_photo");
-						data.append("image", photo);
-
-						$.ajax({
-							type: "POST",
-							url: "api/upload.php",
-							data: data,
-							contentType: false,
-							processData: false,
-							success: function(result, status, xhr) {
-								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
-								$(el.photo).val(result);
-								form.submit();
-							},
-							error: function(xhr, status, error) {
-								console.error(xhr.status, error);
-								setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-							}
-						});
-					}
-					else{ form.submit(); }
-				};
 
 				$("button#addPayment").click(ev => {
 					$("#loadingModal").modal("show");
 
 					$.ajax({
 						type: "POST",
-						url: "api/payment.php",
-						data: {
-							"op": "create_checkout_session"
-						},
+						url: "api.php",
+						data: { "op": "payment_create_checkout_session" },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign(result.url);
@@ -424,10 +381,8 @@ $photo = getUserPhoto($PDO, $user_id);
 
 					$.ajax({
 						type: "POST",
-						url: "api/payment.php",
-						data: {
-							"op": "create_portal_session"
-						},
+						url: "api.php",
+						data: { "op": "payment_create_portal_session" },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign(result.url);

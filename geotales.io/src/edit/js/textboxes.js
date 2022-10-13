@@ -20,12 +20,12 @@ export function Textboxes() {
 
 		$("#loadingModal").modal("show");
 		let data = new FormData();
-		data.append("op", "create");
+		data.append("op", "upload_create");
 		data.append("type", "image");
 		data.append("image", file);
 		$.ajax({
 			type: "POST",
-			url: "api/upload.php",
+			url: "api.php",
 			data: data,
 			contentType: false,
 			processData: false,
@@ -189,7 +189,8 @@ export function Textboxes() {
 		for(let o of data) {
 			let t = new Textbox(o.id);
 			t.sceneId = o.sceneId;
-			t.pos = o.pos; t.dim = o.dim;
+			if(o.pos) { t.pos = o.pos; }
+			if(o.dim) { t.dim = o.dim; }
 			t.content = o.content;
 			t.locked = o.locked;
 

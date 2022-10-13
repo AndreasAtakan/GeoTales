@@ -198,13 +198,13 @@ export function bind_setup(o) {
 				o.options.angle = 0;
 
 				let data = new FormData();
-				data.append("op", "create");
+				data.append("op", "upload_create");
 				data.append("type", "icon");
 				data.append("image", file);
 
 				$.ajax({
 					type: "POST",
-					url: "api/upload.php",
+					url: "api.php",
 					data: data,
 					contentType: false,
 					processData: false,
