@@ -75,7 +75,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/main_pres.css" />
+		<link rel="stylesheet" href="assets/main_pres_1665944821.css" />
 
 		<style type="text/css"></style>
 	</head>
@@ -293,7 +293,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/main_pres_1665694039.js"></script>
+		<script type="text/javascript" src="assets/main_pres_1665944821.js"></script>
 
 	</body>
 </html>

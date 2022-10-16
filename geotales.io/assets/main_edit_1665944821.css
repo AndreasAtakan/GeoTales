@@ -37,7 +37,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 .leaflet-tooltip::before { display: none; }
 
 .leaflet-pm-toolbar .leaflet-pm-icon-marker {
-	background-image: url('../../../assets/user-circle-solid.svg');
+	background-image: url('user-circle-solid.svg');
 }
 .leaflet-pm-toolbar .button-container { display: inline-block; }
 .leaflet-pm-toolbar .button-container .leaflet-pm-actions-container {

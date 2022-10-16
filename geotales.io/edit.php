@@ -72,7 +72,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/trumbowyg/plugins/table/ui/trumbowyg.table.min.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="src/main_edit.css" />
+		<link rel="stylesheet" href="assets/main_edit_1665944821.css" />
 	</head>
 	<body>
 
@@ -677,7 +677,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="src/main_edit_1665694039.js"></script>
+		<script type="text/javascript" src="assets/main_edit_1665944821.js"></script>
 
 	</body>
 </html>

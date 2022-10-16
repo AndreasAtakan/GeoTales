@@ -26,7 +26,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 }
 
 
-if($TESTING && false) {
+if($TESTING) {
 
 	$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = 'andreas'");
 	$stmt->execute();
@@ -88,7 +88,12 @@ if(isset($_POST['username'])
 		$stmt = $PDO->prepare("SELECT id FROM \"User\" WHERE username = ? AND password = ?");
 		$stmt->execute([$username, $password]);
 		$row = $stmt->fetch();
-		$_SESSION['user_id'] = $row['id']; // log user in
+		$user_id = $row['id'];
+
+		$stmt = $PDO->prepare("UPDATE \"User\" SET last_signin_date = NOW() WHERE id = ?");
+		$stmt->execute([$user_id]);
+
+		$_SESSION['user_id'] = $user_id; // log user in
 	}
 	elseif($check < 1) {
 		header("Access-Control-Allow-Origin: *");
