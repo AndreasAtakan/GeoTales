@@ -11,9 +11,8 @@ package-lock.json
 
 # production
 build/
-
-# firebase
-.firebase
+assets/main_*.js*
+assets/main_*.css
 
 # misc
 */.DS_Store
