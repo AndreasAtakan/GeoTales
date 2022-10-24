@@ -393,9 +393,14 @@ if($count > 0) {
 									<i class="fas fa-home"></i> Home
 								</a>
 							</li>
-							<li class="nav-item me-sm-auto">
+							<li class="nav-item">
 								<a class="nav-link" href="pricing.php">
 									<i class="fas fa-tag"></i> Pricing
+								</a>
+							</li>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link" href="about.php">
+									<i class="fas fa-info-circle"></i> About
 								</a>
 							</li>
 

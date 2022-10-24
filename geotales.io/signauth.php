@@ -35,33 +35,6 @@ if($TESTING) {
 
 }
 else
-if(isset($_POST['pw_reset'])
-&& isset($_POST['username'])
-&& isset($_POST['email'])) { // arriving from reset password
-
-	$username = $_POST['username'];
-	$email = $_POST['email'];
-
-	if(!validUserEmail($PDO, $username, $email)) {
-		http_response_code(401); exit;
-	}
-
-	$password = random_string(12);
-
-	$stmt = $PDO->prepare("UPDATE \"User\" SET password = ? WHERE username = ? AND email = ?");
-	$stmt->execute([hash("sha256", $password), $username, $email]);
-
-	$subject = "GeoTales: password reset";
-	$body = "A password-reset has been triggered on the user {$username} \n The new password is: {$password}";
-
-	sendSESEmail($username, $email, $subject, $body);
-
-	header("Access-Control-Allow-Origin: *");
-	header("location: signin.php?return_url={$loc}&password_reset=true");
-	exit;
-
-}
-else
 if(isset($_POST['username'])
 && isset($_POST['email'])
 && isset($_POST['password'])) { // arriving from signup
@@ -101,6 +74,32 @@ if(isset($_POST['username'])
 		exit;
 	}
 	else{ http_response_code(500); exit; }
+
+}
+else
+if(isset($_POST['username'])
+&& isset($_POST['email'])) { // arriving from reset password
+
+	$username = $_POST['username'];
+	$email = $_POST['email'];
+
+	if(!validUserEmail($PDO, $username, $email)) {
+		http_response_code(401); exit;
+	}
+
+	$password = random_string(12);
+
+	$stmt = $PDO->prepare("UPDATE \"User\" SET password = ? WHERE username = ? AND email = ?");
+	$stmt->execute([hash("sha256", $password), $username, $email]);
+
+	$subject = "GeoTales: password reset";
+	$body = "A password-reset has been triggered on the user {$username} \n The new password is: {$password}";
+
+	sendSESEmail($username, $email, $subject, $body);
+
+	header("Access-Control-Allow-Origin: *");
+	header("location: signin.php?return_url={$loc}&password_reset=true");
+	exit;
 
 }
 

@@ -56,10 +56,10 @@ function validSignIn($PDO, $username, $password) {
 
 //
 function validUserEmail($PDO, $username, $email) {
-	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE username = ? AND email = ?");
+	$stmt = $PDO->prepare("SELECT COUNT(id) = 1 AS c FROM \"User\" WHERE username = ? AND email = ?");
 	$stmt->execute([$username, $email]);
 	$row = $stmt->fetch();
-	return $row['c'] == 1;
+	return $row['c'] ?? false;
 }
 
 //

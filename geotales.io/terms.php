@@ -109,9 +109,14 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 									<i class="fas fa-home"></i> Home
 								</a>
 							</li>
-							<li class="nav-item me-sm-auto">
+							<li class="nav-item">
 								<a class="nav-link" href="pricing.php">
 									<i class="fas fa-tag"></i> Pricing
+								</a>
+							</li>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link" href="about.php">
+									<i class="fas fa-info-circle"></i> About
 								</a>
 							</li>
 
@@ -262,7 +267,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 						<h1>Copyright Policy</h1>
 						<h2>Intellectual Property Infringement</h2>
 						<p>We respect the intellectual property rights of others. It is Our policy to respond to any claim that Content posted on the Service infringes a copyright or other intellectual property infringement of any person.</p>
-						<p>If You are a copyright owner, or authorized on behalf of one, and You believe that the copyrighted work has been copied in a way that constitutes copyright infringement that is taking place through the Service, You must submit Your notice in writing to the attention of our copyright agent via email at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dbb8b4b5afbab8af9bbcbeb4afbab7bea8f5b2b4">[email&#160;protected]</a> and include in Your notice a detailed description of the alleged infringement.</p>
+						<p>If You are a copyright owner, or authorized on behalf of one, and You believe that the copyrighted work has been copied in a way that constitutes copyright infringement that is taking place through the Service, You must submit Your notice in writing to the attention of our copyright agent via email at <a href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a> and include in Your notice a detailed description of the alleged infringement.</p>
 						<p>You may be held accountable for damages (including costs and attorneys' fees) for misrepresenting that any Content is infringing Your copyright.</p>
 						<h2>DMCA Notice and DMCA Procedure for Copyright Infringement Claims</h2>
 						<p>You may submit a notification pursuant to the Digital Millennium Copyright Act (DMCA) by providing our Copyright Agent with the following information in writing (see 17 U.S.C 512(c)(3) for further detail):</p>

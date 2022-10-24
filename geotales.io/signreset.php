@@ -125,7 +125,6 @@ $username = $_GET['username'] ?? null;
 								<label for="email" class="form-label">E-Mail</label>
 								<input type="email" name="email" class="form-control" id="email" required />
 							</div>
-							<input type="hidden" name="pw_reset" value="true" />
 							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
 							<button type="submit" class="btn btn-primary">Reset</button>
 						</form>

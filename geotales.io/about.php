@@ -4,31 +4,23 @@
 *                                                                              *
 * Unauthorized copying of this file, via any medium is strictly prohibited     *
 * Proprietary and confidential                                                 *
-* Written by Andreas Atakan <aca@geotales.io>, January 2022                  *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
+//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
 session_start();
 
 include "init.php";
 include_once("helper.php");
 
-$loc = "maps.php";
-if(isset($_REQUEST['return_url'])) {
-	$loc = $_REQUEST['return_url'];
-}
-
-// user is already logged in
+$logged_in = false;
 if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
-	header("location: $loc"); exit;
+	$logged_in = true;
+	$user_id = $_SESSION['user_id'];
+	$photo = getUserPhoto($PDO, $user_id);
 }
-
-$signin_failed = $_GET['signin_failed'] ?? false; $signin_failed = $signin_failed == "true" ? true : false;
-$signin_username = null;
-if($signin_failed) { $signin_username = $_GET['username']; }
-
-$password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_reset == "true" ? true : false;
 
 ?>
 
@@ -63,6 +55,11 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 				background-size: cover;
 				background-repeat: no-repeat;
 				background-position: center;
+			}
+
+			.text-shadow {
+				text-shadow: #fff -1px 1px 3px;
+				-webkit-font-smoothing: antialiased;
 			}
 		</style>
 	</head>
@@ -106,8 +103,55 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
 				<div class="container">
 					<a class="navbar-brand" href="index.php">
-						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" />
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" /><small>eoTales</small>
 					</a>
+
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+
+					<div class="collapse navbar-collapse" id="navbarContent">
+						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
+							<li class="nav-item">
+								<a class="nav-link" href="index.php">
+									<i class="fas fa-home"></i> Home
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="pricing.php">
+									<i class="fas fa-tag"></i> Pricing
+								</a>
+							</li>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link active" aria-current="page" href="about.php">
+									<i class="fas fa-info-circle"></i> About
+								</a>
+							</li>
+
+					<?php if($logged_in) { ?>
+							<li class="nav-item me-sm-2">
+								<a class="nav-link" href="maps.php">
+									<i class="fas fa-map"></i> My GeoTales
+								</a>
+							</li>
+
+							<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<img class="rounded" src="<?php echo $photo; ?>" alt="&nbsp;" width="auto" height="25" />
+								</a>
+								<ul class="dropdown-menu dropdown-menu-sm-end" aria-labelledby="navbarUserDropdown">
+									<li><a class="dropdown-item" href="profile.php">Profile</a></li>
+									<li><hr class="dropdown-divider"></li>
+									<li><a class="dropdown-item" href="signout.php">Sign out</a></li>
+								</ul>
+							</li>
+					<?php }else{ ?>
+							<li class="nav-item">
+								<a role="button" class="btn btn-sm btn-light" href="signin.php" style="margin-top: 0.35rem;">Sign in</a>
+							</li>
+					<?php } ?>
+						</ul>
+					</div>
 				</div>
 			</nav>
 		</header>
@@ -118,48 +162,32 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 					<div class="col"></div>
 				</div>
 
-				<div class="row mx-auto" style="max-width: 350px;">
+				<div class="row mb-5">
 					<div class="col">
-					<?php if($signin_failed) { ?>
-						<div role="alert" class="alert alert-danger alert-dismissible fade show">
-							Username or password is <strong>incorrect</strong>.
-							<a href="signreset.php?return_url=<?php echo $loc; ?>&username=<?php echo $signin_username; ?>">Reset password</a>
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						</div>
-					<?php } ?>
+						<h1>GeoTales</h1>
+						<h3 class="text-muted">Tell your story with maps</h3>
+					</div>
+				</div>
 
-					<?php if($password_reset) { ?>
-						<div role="alert" class="alert alert-info alert-dismissible fade show">
-							Your password was reset and your new password was sent by email.
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						</div>
-					<?php } ?>
+				<div class="row mb-5">
+					<div class="col">
+						<h3 class="text-shadow">GeoTales is a map based presentation tool designed to help users create animated episodic stories on maps and maplike surfaces.</h3>
+					</div>
+				</div>
 
-						<form action="signauth.php" method="post" autocomplete="on" id="signin">
-							<div class="mb-3">
-								<label for="username" class="form-label">Username</label>
-								<input type="text" name="username" class="form-control" id="username" required />
-							</div>
-							<div class="mb-3">
-								<label for="pw" class="form-label">Password</label>
-								<div class="input-group">
-									<input type="password" name="pw" class="form-control" id="pw" aria-label="Password" aria-describedby="pwShow" required />
-									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
-								</div>
-							</div>
-							<input type="hidden" name="password" />
-							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
-							<button type="submit" class="btn btn-primary">Sign in</button>
-						</form>
-
-						<p class="text-muted mt-3">
-							Don't have an account? <strong><a href="signup.php?return_url=<?php echo $loc; ?>">Sign up here</a></strong>
+				<div class="row mb-5">
+					<div class="col">
+						<p class="lead text-shadow">
+							If you want to get in touch with us, please do so at <a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
-
-						<p class="text-muted mb-3">
-							<strong><a href="signreset.php?return_url=<?php echo $loc; ?>">Reset password</a></strong>
+						<p class="lead text-shadow">
+							And read our <a class="text-decoration-none" href="terms.php">Terms and conditions</a>
 						</p>
 					</div>
+				</div>
+
+				<div class="row my-5">
+					<div class="col"></div>
 				</div>
 
 			</div>
@@ -205,7 +233,6 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load src/ JS -->
 		<script type="text/javascript">
@@ -221,20 +248,6 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
-
-				let pwShow = false;
-				$("button#pwShow").click(ev => {
-					pwShow = !pwShow;
-					$("form#signin input#pw").prop("type", pwShow ? "text" : "password");
-				});
-
-				document.forms.signin.onsubmit = function(ev) { ev.preventDefault();
-					let form = ev.target;
-					let el = form.elements;
-
-					$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw.value )) );
-					form.submit();
-				};
 
 			};
 		</script>

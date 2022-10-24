@@ -14,17 +14,12 @@
 
 	* Geo-Blog, bruke GeoTales til å kommunisere ut til publikum
 		- Mulighet for admins til å pinne-kart til toppen av landings-siden
-	* (Fixed?) Bugs with payment: kan lage ny bruker hos stripe, men får error når den prøver å gå til stripe-checkout
 
 	* Add ability to buy anually, create a new product in stripe with $5x12x0.8 price
 		- Add this info to Pricing page
-	* X Pricing side; På premium signup gå rett til stripe side etter signup, ikke til Profile
-
-	* X Fikse høyde på mobil i view-modus. Problemer med å bruke 100vh (det blir ikke den ekte høyre)
 
 - Edit-mode:
 	* Option for å ha hengelås åpen by-defualt i pres-modus
-	* X Alle betalte funksjoner er grået ut for gratis brukere
 	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
 	* Posibility to make hyperlink to other scenes in the textboxes
 	* GEDCOM import:
