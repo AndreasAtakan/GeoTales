@@ -13,7 +13,7 @@ apt install -y php-common php-fpm php-opcache php-bcmath php-curl php-gd php-jso
 cp local.ini /etc/php/8.1/fpm/conf.d/
 systemctl restart php8.1-fpm
 
-#certbot
+# certbot
 apt install -y certbot
 certbot certonly --standalone -d geotales.io
 certbot certonly --standalone -d www.geotales.io

@@ -3,10 +3,8 @@
 - Biz:
 	* IN markedsavklaring
 	* Gjøres etter Arendal og før Oktober:
-		- Omforme Trefadder syse server til enterprise-server
-			* Utvide kapasitet (hdd, ram og cpu)
-		- Sette opp ny GeoTales hoved-hosting server på Amazon
-			* [Pris](https://calculator.aws/#/estimate?id=a58b61ebdfa7889da4ac91c68cc76c20bc42f405)
+		- Overføre Trefadder syse server til AWS og gjøre til generell til enterprise-kunde server
+			* Hoste all data og servere WMS med GeoServer
 
 
 - Overall:
