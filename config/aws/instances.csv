@@ -1,0 +1,5 @@
+name;public ip;public dns
+GeoTales main;13.49.223.244;ec2-13-49-223-244.eu-north-1.compute.amazonaws.com
+GeoTales database;13.49.137.26;ec2-13-49-137-26.eu-north-1.compute.amazonaws.com
+GeoTales test;13.53.235.239;ec2-13-53-235-239.eu-north-1.compute.amazonaws.com
+NFEDB;13.51.36.118;ec2-13-51-36-118.eu-north-1.compute.amazonaws.com
