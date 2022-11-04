@@ -29,25 +29,6 @@ if(!isset($_GET['id'])) {
 $id = $_GET['id'];
 
 
-$op = $_REQUEST['op'] ?? null;
-if($op == "clone") {
-	if(!$logged_in) { http_response_code(401); exit; }
-
-	if(!isset($_POST['password'])) {
-		http_response_code(422); exit;
-	}
-	$password = $_POST['password'];
-
-	$id = mapClone($PDO, $user_id, $id, $password);
-	if(!$id) {
-		$checkout = paymentCreateCheckout($PDO, $user_id);
-		header("location: {$checkout}"); exit;
-	}
-
-	header("location: edit.php?id={$id}"); exit;
-}
-
-
 $stmt = $PDO->prepare("
 	SELECT
 		M.id AS id,
@@ -231,11 +212,7 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 							<div class="row">
 								<div class="col col-md-7">
 							<?php if($logged_in) { ?>
-						<form method="post" id="clone">
-									<input type="hidden" name="op" value="clone" />
-									<input type="hidden" name="password" value="" />
-									<button type="submit" class="btn btn-sm btn-outline-secondary mb-2" title="Make a clone of this GeoTale">Clone</button>
-						</form>
+									<button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="clone" title="Make a clone of this GeoTale">Clone</button>
 							<?php } ?>
 								</div>
 								<div class="col col-md-1">
@@ -356,11 +333,10 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 						<div class="col">
 							<h4 class="text-muted m-0"><?php echo $row['title']; ?></h4>
 							<p class="text-muted m-0 mb-2" style="max-height: 150px; overflow-y: auto;"><?php echo $row['description']; ?></p>
-					<?php $published_date = date_format(date_create($row['published_date'] ?? ""), "d.M Y, H:i"); ?>
 							<p class="text-muted small m-0">
 								<i class="fas fa-user"></i> <?php echo $row['username']; ?>
 								<i class="fas fa-eye"></i> <?php echo $views; ?> <br />
-								<?php echo $published_date; ?>
+								<?php echo date_format(date_create($row['published_date'] ?? ""), "d.M Y, H:i"); ?>
 							</p>
 						</div>
 					</div>
@@ -489,8 +465,8 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 
 				$.ajax({
 					type: "POST",
-					url: "api.php",
-					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -516,25 +492,33 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 
 				$("#shareModal button#copyLink").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#linkInput").val() ); });
 				$("#shareModal button#copyEmbed").click(ev => {  navigator.clipboard.writeText( $("#shareModal input#embedInput").val() ); });
-				if(document.forms.clone) {
-					document.forms.clone.onsubmit = function(ev) { ev.preventDefault();
-						$(ev.target.elements.password).val(
-							$("iframe#pres")[0].contentWindow["_PASSWORD"]
-						);
-						ev.target.submit();
-					};
-				}
+
+				$("#shareModal button#clone").click(ev => {
+					$("#loadingModal").modal("show");
+
+					let password = $("iframe#pres")[0].contentWindow["_PASSWORD"];
+					$.ajax({
+						type: "POST",
+						url: "api/map_clone.php",
+						data: { "id": _ID, "password": password },
+						dataType: "json",
+						success: function(result, status, xhr) {
+							window.location.assign(result.url);
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#shareModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				});
 
 				$("input#like-check").change(ev => {
 					let checked = $(ev.target).is(":checked"),
 						likes = parseInt($("span#likes").html());
 					$.ajax({
 						type: "POST",
-						url: "api.php",
-						data: {
-							"op": checked ? "map_like" : "map_unlike",
-							"id": _ID
-						},
+						url: `api/${checked ? "map_like" : "map_unlike"}.php`,
+						data: { "id": _ID },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							$("span#likes").html( checked ? likes + 1 : likes - 1 );
@@ -551,11 +535,8 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 						flags = parseInt($("span#flags").html());
 					$.ajax({
 						type: "POST",
-						url: "api.php",
-						data: {
-							"op": checked ? "map_flag" : "map_unflag",
-							"id": _ID
-						},
+						url: `api/${checked ? "map_flag" : "map_unflag"}.php`,
+						data: { "id": _ID },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							$("span#flags").html( checked ? flags + 1 : flags - 1 );
@@ -575,12 +556,8 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 
 					$.ajax({
 						type: "POST",
-						url: "api.php",
-						data: {
-							"op": "map_comment",
-							"id": _ID,
-							"content": comment
-						},
+						url: "api/map_comment.php",
+						data: { "id": _ID, "content": comment },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							$("#noComments").remove();

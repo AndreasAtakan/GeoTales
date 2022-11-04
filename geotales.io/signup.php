@@ -198,8 +198,8 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 
 				$.ajax({
 					type: "POST",
-					url: "api.php",
-					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -211,11 +211,8 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 
 					$.ajax({
 						type: "GET",
-						url: "api.php",
-						data: {
-							"op": "user_is_username_unique",
-							"username": username
-						},
+						url: "api/user_is_username_unique.php",
+						data: { "username": username },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							if(result.isUnique) {

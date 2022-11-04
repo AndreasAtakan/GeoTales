@@ -95,12 +95,8 @@ window.onload = function(ev) {
 	$("#loadingModal").modal("show");
 	$.ajax({
 		type: "GET",
-		url: "api.php",
-		data: {
-			"op": "map_read",
-			"id": _ID,
-			"password": ""
-		},
+		url: "api/map_read.php",
+		data: { "id": _ID, "password": "" },
 		dataType: "json",
 		success: function(result, status, xhr) {
 			if(result.data) { import_data( JSON.parse(result.data) ); }
@@ -125,12 +121,8 @@ window.onload = function(ev) {
 
 		$.ajax({
 			type: "GET",
-			url: "api.php",
-			data: {
-				"op": "map_read",
-				"id": _ID,
-				"password": password
-			},
+			url: "api/map_read.php",
+			data: { "id": _ID, "password": password },
 			dataType: "json",
 			success: function(result, status, xhr) {
 				if(result.data) { import_data( JSON.parse(result.data) ); }

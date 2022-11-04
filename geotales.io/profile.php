@@ -22,28 +22,6 @@ if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $paid = getUserPaid($PDO, $user_id);
 
-$op = $_REQUEST['op'] ?? null;
-if($op == "update") {
-	$photo = uploadCreate($PDO, $user_id, "profile_photo", $_FILES["photo"]["tmp_name"], $_FILES["photo"]["name"]);
-
-	$r = updateUser(
-		$PDO,
-		$user_id,
-		isset($_POST['username']) ? sanitize($_POST['username']) : null,
-		isset($_POST['email']) ? sanitize($_POST['email']) : null,
-		$photo,
-		isset($_POST['password']) ? sanitize($_POST['password']) : null
-	);
-	if(!$r) { http_response_code(500); exit; }
-}
-else
-if($op == "payment") {
-	$ref = null;
-	if($paid) { $ref = paymentCreatePortal($PDO, $user_id); }
-	else{ $ref = paymentCreateCheckout($PDO, $user_id); }
-	header("location: {$ref}"); exit;
-}
-
 $username = getUsername($PDO, $user_id);
 $email = getUserEmail($PDO, $user_id);
 $photo = getUserPhoto($PDO, $user_id);
@@ -190,33 +168,30 @@ $photo = getUserPhoto($PDO, $user_id);
 
 				<div class="row" style="max-width: 550px;">
 					<div class="col">
-						<form method="post" autocomplete="on" enctype="multipart/form-data" id="edit">
-							<input type="hidden" name="op" value="update" />
-
+						<form method="post" autocomplete="off" id="edit">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" name="username" class="form-control" id="username" value="<?php echo $username; ?>" />
+								<input type="text" class="form-control" id="username" value="<?php echo $username; ?>" />
 							</div>
 							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" name="email" class="form-control" id="email" value="<?php echo $email; ?>" />
+								<input type="email" class="form-control" id="email" value="<?php echo $email; ?>" />
 							</div>
 							<div class="mb-5">
 								<label for="photoUpload" class="form-label">Profile picture</label>
-								<input type="file" name="photo" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" />
+								<input type="file" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" />
 							</div>
 							<div class="mb-1">
 								<label for="pw1" class="form-label">New password</label>
 								<div class="input-group">
-									<input type="password" name="pw1" class="form-control" id="pw1" aria-label="New password" aria-describedby="pwShow" />
+									<input type="password" class="form-control" id="pw1" aria-label="New password" aria-describedby="pwShow" />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>
 							<div class="mb-3">
-								<input type="password" name="pw2" class="form-control" id="pw2" aria-label="Confirm password" />
+								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" />
 								<label for="pw2" class="form-label small text-muted">Confirm password</label>
 							</div>
-							<input type="hidden" name="password" />
 							<button type="submit" class="btn btn-secondary float-end">Save</button>
 						</form>
 					</div>
@@ -229,12 +204,12 @@ $photo = getUserPhoto($PDO, $user_id);
 				<div class="row">
 					<div class="col">
 				<?php if($paid) { ?>
-						<button type="button" class="btn btn-outline-secondary" id="managePayment">Manage my subscription</button>
+						<a role="button" class="btn btn-outline-secondary" href="<?php echo paymentCreatePortal($PDO, $user_id); ?>">Manage my subscription</a>
 						<p class="text-muted mt-3">
 							You have a premium account. Change or cancel your subscription here.
 						</p>
 				<?php }else{ ?>
-						<button type="button" class="btn btn-outline-secondary" id="addPayment">Add subscription</button>
+						<a role="button" class="btn btn-outline-secondary" href="<?php echo paymentCreateCheckout($PDO, $user_id); ?>">Add subscription</a>
 						<p class="text-muted mt-3">
 							You have a free account. Add a subscription to upgrade.
 						</p>
@@ -303,8 +278,8 @@ $photo = getUserPhoto($PDO, $user_id);
 
 				$.ajax({
 					type: "POST",
-					url: "api.php",
-					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -316,11 +291,8 @@ $photo = getUserPhoto($PDO, $user_id);
 
 					$.ajax({
 						type: "GET",
-						url: "api.php",
-						data: {
-							"op": "user_is_username_unique",
-							"username": username
-						},
+						url: "api/user_is_username_unique.php",
+						data: { "username": username },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							if(result.isUnique) {
@@ -348,10 +320,7 @@ $photo = getUserPhoto($PDO, $user_id);
 
 				$("form#edit input#pw1, form#edit input#pw2").change(ev => {
 					let el = document.forms.edit.elements;
-					let pw1 = $("form#edit input#pw1").val(),
-						pw2 = $("form#edit input#pw2").val();
-
-					if(pw1 !== pw2) {
+					if(el.pw1.value !== el.pw2.value) {
 						$("form#edit input#pw1, form#edit input#pw2").addClass("is-invalid");
 						el.pw1.setCustomValidity("Passwords unequal");
 						el.pw2.setCustomValidity("Passwords unequal");
@@ -359,45 +328,46 @@ $photo = getUserPhoto($PDO, $user_id);
 						$("form#edit input#pw1, form#edit input#pw2").removeClass("is-invalid");
 						el.pw1.setCustomValidity("");
 						el.pw2.setCustomValidity("");
-						$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) );
 					}
 				});
 
-				$("button#addPayment").click(ev => {
+				document.forms.edit.onsubmit = function(ev) { ev.preventDefault();
+					let form = ev.target;
+					let el = form.elements;
+
+					if(el.pw1.value !== el.pw2.value) { return; }
+
 					$("#loadingModal").modal("show");
+
+					let password = el.pw1.value && el.pw2.value ? sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) : null;
+					let photo = $(el.photoUpload).prop("files")[0];
+
+					/*
+					* BØG; IF ANY OF THE FORM FEILDS ARE EMPTY, NULL IS WRITTEN TO THE DB IN THAT COLUMN.
+					* MAKE IT SO THAT IF THE FIELD IS EMPTY NOTHING IS WRITEN IN THE DB IN THAT COLUMN
+					*/
+
+					let data = new FormData();
+					data.append("username", el.username.value);
+					data.append("email", el.email.value);
+					data.append("password", password);
+					data.append("photo", photo);
 
 					$.ajax({
 						type: "POST",
-						url: "api.php",
-						data: { "op": "payment_create_checkout_session" },
-						dataType: "json",
+						url: "api/user_update.php",
+						data: data,
+						contentType: false,
+						processData: false,
 						success: function(result, status, xhr) {
-							window.location.assign(result.url);
+							window.location.reload();
 						},
 						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
+							console.error(xhr.status, error);
 							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 						}
 					});
-				});
-
-				$("button#managePayment").click(ev => {
-					$("#loadingModal").modal("show");
-
-					$.ajax({
-						type: "POST",
-						url: "api.php",
-						data: { "op": "payment_create_portal_session" },
-						dataType: "json",
-						success: function(result, status, xhr) {
-							window.location.assign(result.url);
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
-						}
-					});
-				});
+				};
 
 			};
 		</script>

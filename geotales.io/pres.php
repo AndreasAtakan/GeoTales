@@ -75,7 +75,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" />
 
 		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="assets/main_pres_1666621876.css" />
+		<link rel="stylesheet" href="assets/main_pres_1667501653.css" />
 
 		<style type="text/css"></style>
 	</head>
@@ -218,8 +218,8 @@ $row = $stmt->fetch();
 
 			$.ajax({
 				type: "POST",
-				url: "api.php",
-				data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+				url: "api/analytics.php",
+				data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 				dataType: "json",
 				success: function(result, status, xhr) { console.log("Analytics registered"); },
 				error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -233,8 +233,8 @@ $row = $stmt->fetch();
 
 			$.ajax({
 				type: "POST",
-				url: "api.php",
-				data: { "op": "map_view", "id": _ID },
+				url: "api/map_view.php",
+				data: { "id": _ID },
 				dataType: "json",
 				success: function(result, status, xhr) { console.log("View registered"); },
 				error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -293,7 +293,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load src/ JS -->
-		<script type="text/javascript" src="assets/main_pres_1666621876.js"></script>
+		<script type="text/javascript" src="assets/main_pres_1667501653.js"></script>
 
 	</body>
 </html>

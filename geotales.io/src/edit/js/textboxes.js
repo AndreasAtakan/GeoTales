@@ -20,12 +20,11 @@ export function Textboxes() {
 
 		$("#loadingModal").modal("show");
 		let data = new FormData();
-		data.append("op", "upload_create");
 		data.append("type", "image");
 		data.append("image", file);
 		$.ajax({
 			type: "POST",
-			url: "api.php",
+			url: "api/upload_create.php",
 			data: data,
 			contentType: false,
 			processData: false,

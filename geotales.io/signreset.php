@@ -188,8 +188,8 @@ $username = $_GET['username'] ?? null;
 
 				$.ajax({
 					type: "POST",
-					url: "api.php",
-					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -202,12 +202,8 @@ $username = $_GET['username'] ?? null;
 
 					$.ajax({
 						type: "GET",
-						url: "api.php",
-						data: {
-							"op": "user_username_email_correct",
-							"username": username,
-							"email": email
-						},
+						url: "api/user_username_email_correct.php",
+						data: { "username": username, "email": email },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							if(result.isValid) {

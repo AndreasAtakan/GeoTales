@@ -16,13 +16,14 @@ include "init.php";
 
 
 //
-function sanitize($str) {
-	return htmlspecialchars($str);
+function sane_is_null($v) {
+	return is_null($v) || $v == "";
 }
 
 //
-function sane_is_null($v) {
-	return is_null($v) || $v == "";
+function sanitize($str) {
+	if(sane_is_null($str)) { return null; }
+	return htmlspecialchars($str);
 }
 
 //

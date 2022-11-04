@@ -215,8 +215,8 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 
 				$.ajax({
 					type: "POST",
-					url: "api.php",
-					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }

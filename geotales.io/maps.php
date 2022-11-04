@@ -575,8 +575,8 @@ if($count > 0) {
 
 				$.ajax({
 					type: "POST",
-					url: "api.php",
-					data: { "op": "analytics", "agent": window.navigator ? window.navigator.userAgent : "" },
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
 					dataType: "json",
 					success: function(result, status, xhr) { console.log("Analytics registered"); },
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
@@ -620,8 +620,8 @@ if($count > 0) {
 
 					$.ajax({
 						type: "POST",
-						url: "api.php",
-						data: { "op": "map_password_remove", "id": id },
+						url: "api/map_password_remove.php",
+						data: { "id": id },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);

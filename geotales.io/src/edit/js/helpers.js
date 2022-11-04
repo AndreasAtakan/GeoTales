@@ -200,9 +200,8 @@ export function export_data(type) {
 export function save_data(callback) {
 	$.ajax({
 		type: "POST",
-		url: "api.php",
+		url: "api/map_write.php",
 		data: {
-			"op": "map_write",
 			"id": _ID,
 			"data": export_project(),
 			"preview": _MAP.getCenterBasemapTile()
