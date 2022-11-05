@@ -26,7 +26,7 @@ echo json_encode(array(
 	"title" => $row['title'],
 	"description" => $row['description'],
 	"thumbnail" => $row['thumbnail'],
-	"published" => $row['published']
+	"published" => $row['published'] ?? false
 ));
 exit;
 

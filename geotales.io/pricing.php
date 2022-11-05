@@ -20,6 +20,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 	$logged_in = true;
 	$user_id = $_SESSION['user_id'];
 	$photo = getUserPhoto($PDO, $user_id);
+	$paid = getUserPaid($PDO, $user_id);
 }
 
 ?>
@@ -190,7 +191,14 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Password-protected GeoTales</p>
 								<p class="card-text small ms-md-4"><i class="fas fa-check" style="color: #00cc44;"></i> Option to create organization-account</p>
 								<div class="d-grid">
-									<a role="button" class="btn btn-primary" href="<?php echo $logged_in ? "profile.php?op=payment" : "signup.php?return_url=profile.php?op=payment" ?>">Sign up <br /> <small>and add a subscription</small></a>
+							<?php
+								$premiumLink = "signup.php?return_url=profile.php";
+								if($logged_in) {
+									if($paid) { $premiumLink = paymentCreatePortal($PDO, $user_id); }
+									else{ $premiumLink = paymentCreateCheckout($PDO, $user_id); }
+								}
+							?>
+									<a role="button" class="btn btn-primary" href="<?php echo $premiumLink ?>">Sign up <br /> <small>and add a subscription</small></a>
 								</div>
 							</div>
 						</div>

@@ -286,7 +286,6 @@ $photo = getUserPhoto($PDO, $user_id);
 				});
 
 				$("form#edit input#username").change(ev => {
-					let el = document.forms.edit.elements;
 					let username = $(ev.target).val();
 
 					$.ajax({
@@ -297,12 +296,12 @@ $photo = getUserPhoto($PDO, $user_id);
 						success: function(result, status, xhr) {
 							if(result.isUnique) {
 								$(ev.target).removeClass("is-invalid");
-								el.username.setCustomValidity("");
+								ev.target.setCustomValidity("");
 							}
 							else
 							if(username !== _USERNAME) {
 								$(ev.target).addClass("is-invalid");
-								el.username.setCustomValidity("Username taken");
+								ev.target.setCustomValidity("Username taken");
 							}
 						},
 						error: function(xhr, status, error) {
@@ -339,13 +338,8 @@ $photo = getUserPhoto($PDO, $user_id);
 
 					$("#loadingModal").modal("show");
 
-					let password = el.pw1.value && el.pw2.value ? sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) : null;
+					let password = el.pw1.value && el.pw2.value ? sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) : "";
 					let photo = $(el.photoUpload).prop("files")[0];
-
-					/*
-					* BØG; IF ANY OF THE FORM FEILDS ARE EMPTY, NULL IS WRITTEN TO THE DB IN THAT COLUMN.
-					* MAKE IT SO THAT IF THE FIELD IS EMPTY NOTHING IS WRITEN IN THE DB IN THAT COLUMN
-					*/
 
 					let data = new FormData();
 					data.append("username", el.username.value);

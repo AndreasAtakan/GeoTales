@@ -15,25 +15,25 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-if(!isset($_POST['username'])
-&& !isset($_POST['email'])
-&& !isset($_POST['password'])) { http_response_code(422); exit; }
+if(!isset($_POST['title'])
+|| !isset($_POST['description'])) { http_response_code(422); exit; }
 
 $user_id = $_SESSION['user_id'];
 
-$photo = isset($_FILES["photo"]) ? uploadCreate($PDO, $user_id, "profile_photo", $_FILES["photo"]["tmp_name"], $_FILES["photo"]["name"]) : null;
+$title = sanitize($_POST['title']);
+$description = sanitize($_POST['description']);
+$thumbnail = null;
+$password = $_POST['password'] ?? null;
 
-$r = updateUser(
-	$PDO,
-	$user_id,
-	isset($_POST['username']) ? sanitize($_POST['username']) : null,
-	isset($_POST['email']) ? sanitize($_POST['email']) : null,
-	$photo,
-	isset($_POST['password']) ? sanitize($_POST['password']) : null
-);
-if(!$r) { http_response_code(500); exit; }
+if(isset($_FILES["thumbnail"])) { $thumbnail = uploadCreate($PDO, $user_id, "thumbnail", $_FILES["thumbnail"]["tmp_name"], $_FILES["thumbnail"]["name"]); }
 
-echo json_encode(array("status" => "success"));
+$id = mapCreate($PDO, $user_id, $title, $description, $thumbnail, $password);
+
+$ref = "";
+if(!$id) { $ref = paymentCreateCheckout($PDO, $user_id); }
+else { $ref = "edit.php?id={$id}"; }
+
+echo json_encode(array("url" => $ref));
 exit;
 
 ?>

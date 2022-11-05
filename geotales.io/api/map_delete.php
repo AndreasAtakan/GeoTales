@@ -15,22 +15,14 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-if(!isset($_POST['username'])
-&& !isset($_POST['email'])
-&& !isset($_POST['password'])) { http_response_code(422); exit; }
+if(!isset($_POST['id'])) { http_response_code(422); exit; }
+$id = $_POST['id'];
 
 $user_id = $_SESSION['user_id'];
 
-$photo = isset($_FILES["photo"]) ? uploadCreate($PDO, $user_id, "profile_photo", $_FILES["photo"]["tmp_name"], $_FILES["photo"]["name"]) : null;
+if(!userMapCanWrite($PDO, $user_id, $id)) { http_response_code(401); exit; }
 
-$r = updateUser(
-	$PDO,
-	$user_id,
-	isset($_POST['username']) ? sanitize($_POST['username']) : null,
-	isset($_POST['email']) ? sanitize($_POST['email']) : null,
-	$photo,
-	isset($_POST['password']) ? sanitize($_POST['password']) : null
-);
+$r = mapDelete($PDO, $id);
 if(!$r) { http_response_code(500); exit; }
 
 echo json_encode(array("status" => "success"));

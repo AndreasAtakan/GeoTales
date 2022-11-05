@@ -173,8 +173,7 @@ function mapCreate($PDO, $user_id, $title, $description, $thumbnail, $password) 
 	}
 
 	if(!sane_is_null($password)) {
-		$pw = $password;
-		mb_substr($pw, 0, 64);
+		$pw = $password; mb_substr($pw, 0, 64);
 		$stmt = $PDO->prepare("UPDATE \"Map\" SET password = ? WHERE id = ?");
 		$stmt->execute([$pw, $id]);
 	}
