@@ -9,8 +9,6 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
@@ -19,8 +17,9 @@ if(isset($_REQUEST['return_url'])) {
 	$loc = $_REQUEST['return_url'];
 }
 
-// user is already logged in
-if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(!sane_is_null($user_id)) { // user is already logged in
 	header("location: $loc"); exit;
 }
 
@@ -35,6 +34,8 @@ $username = $_GET['username'] ?? null;
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
+
 		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
 		<meta name="description" content="Tales on a map" />
@@ -46,7 +47,7 @@ $username = $_GET['username'] ?? null;
 		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
-		<!-- Load src/ CSS -->
+		<!-- Load CSS -->
 		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
@@ -116,16 +117,15 @@ $username = $_GET['username'] ?? null;
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-						<form action="signauth.php" method="post" autocomplete="on" id="signreset">
+						<form method="post" autocomplete="off" id="signreset">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" name="username" class="form-control" id="username" required value="<?php echo $username; ?>" />
+								<input type="text" class="form-control" id="username" required value="<?php echo $username; ?>" />
 							</div>
 							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" name="email" class="form-control" id="email" required />
+								<input type="email" class="form-control" id="email" required />
 							</div>
-							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
 							<button type="submit" class="btn btn-primary">Reset</button>
 						</form>
 
@@ -149,6 +149,12 @@ $username = $_GET['username'] ?? null;
 								</a>
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.instagram.com/geotales.io/" target="_blank">
+									<i class="fab fa-instagram" style="color: #d62976;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.reddit.com/user/geotales/" target="_blank">
+									<i class="fab fa-reddit" style="color: #ff5700;"></i>
 								</a>
 							</div>
 						</center>
@@ -180,11 +186,14 @@ $username = $_GET['username'] ?? null;
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
-		<!-- Load src/ JS -->
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
 
 			window.onload = function(ev) {
+
+				const _RETURN_URL = `<?php echo $loc; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -222,6 +231,30 @@ $username = $_GET['username'] ?? null;
 						}
 					});
 				});
+
+				document.forms.signreset.onsubmit = function(ev) { ev.preventDefault();
+					let form = ev.target;
+					let el = form.elements;
+
+					$("#loadingModal").modal("show");
+
+					$.ajax({
+						type: "POST",
+						url: "/auth/login",
+						data: {
+							"username": el.username.value,
+							"email": el.email.value
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							window.location.assign(_RETURN_URL);
+						},
+						error: function(xhr, status, error) {
+							console.error(xhr.status, error);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				};
 
 			};
 		</script>

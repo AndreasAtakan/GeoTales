@@ -7,14 +7,13 @@
 * Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
-session_start();
-
 include "../init.php";
 include_once("../helper.php");
 
 
-if(!isset($_GET['username'])
-|| !isset($_GET['email'])) { http_response_code(422); exit; }
+/*if(!isset($_GET['username'])
+|| !isset($_GET['email'])) { http_response_code(422); exit; }*/
+
 $username = $_GET['username'];
 $email = $_GET['email'];
 

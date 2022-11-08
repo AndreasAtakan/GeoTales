@@ -9,19 +9,74 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
-// user is not logged in
-if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(sane_is_null($user_id)) { // user is not logged in
 	header("location: index.php"); exit;
 }
 
-session_destroy();
+?>
 
-header("location: index.php");
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
-exit;
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
+
+		<title>GeoTales – Tales on a map</title>
+		<meta name="title" content="GeoTales" />
+		<meta name="description" content="Tales on a map" />
+
+		<link rel="icon" href="assets/logo.png" />
+
+		<style type="text/css">
+			html, body {
+				/**/
+			}
+		</style>
+	</head>
+	<body>
+
+		<p>Signing out...</p>
+
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
+		<script type="text/javascript">
+			"use strict";
+
+			window.onload = function(ev) {
+
+				$.ajax({
+					type: "POST",
+					url: "api/analytics.php",
+					data: { "agent": window.navigator ? window.navigator.userAgent : "" },
+					dataType: "json",
+					success: function(result, status, xhr) { console.log("Analytics registered"); },
+					error: function(xhr, status, error) { console.log(xhr.status, error); }
+				});
+
+				$.ajax({
+					type: "POST",
+					url: "/auth/login",
+					data: { "signout": true },
+					dataType: "json",
+					success: function(result, status, xhr) {
+						window.location.assign("index.php");
+					},
+					error: function(xhr, status, error) {
+						console.error(xhr.status, error);
+						window.location.assign("index.php");
+					}
+				});
+
+			};
+		</script>
+
+	</body>
+</html>

@@ -9,8 +9,6 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
@@ -19,8 +17,9 @@ if(isset($_REQUEST['return_url'])) {
 	$loc = $_REQUEST['return_url'];
 }
 
-// user is already logged in
-if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(!sane_is_null($user_id)) { // user is already logged in
 	header("location: $loc"); exit;
 }
 
@@ -33,6 +32,8 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
+
 		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
 		<meta name="description" content="Tales on a map" />
@@ -44,7 +45,7 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
-		<!-- Load src/ CSS -->
+		<!-- Load CSS -->
 		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
@@ -114,28 +115,26 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-						<form action="signauth.php" method="post" autocomplete="on" id="signup">
+						<form method="post" autocomplete="off" id="signup">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" name="username" class="form-control" id="username" required />
+								<input type="text" class="form-control" id="username" required />
 							</div>
 							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" name="email" class="form-control" id="email" required />
+								<input type="email" class="form-control" id="email" required />
 							</div>
 							<div class="mb-1">
 								<label for="pw1" class="form-label">Password</label>
 								<div class="input-group">
-									<input type="password" name="pw1" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
+									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>
 							<div class="mb-3">
-								<input type="password" name="pw2" class="form-control" id="pw2" aria-label="Confirm password" required />
+								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" required />
 								<label for="pw2" class="form-label small text-muted">Confirm password</label>
 							</div>
-							<input type="hidden" name="password" />
-							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
 							<button type="submit" class="btn btn-primary">Sign up</button>
 						</form>
 
@@ -159,6 +158,12 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 								</a>
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.instagram.com/geotales.io/" target="_blank">
+									<i class="fab fa-instagram" style="color: #d62976;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.reddit.com/user/geotales/" target="_blank">
+									<i class="fab fa-reddit" style="color: #ff5700;"></i>
 								</a>
 							</div>
 						</center>
@@ -190,11 +195,14 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
-		<!-- Load src/ JS -->
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
 
 			window.onload = function(ev) {
+
+				const _RETURN_URL = `<?php echo $loc; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -257,9 +265,26 @@ if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
 					let el = form.elements;
 
 					if(el.pw1.value !== el.pw2.value) { $("#errorModal").modal("show"); return; }
-					$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) );
 
-					form.submit();
+					$("#loadingModal").modal("show");
+
+					$.ajax({
+						type: "POST",
+						url: "/auth/login",
+						data: {
+							"username": el.username.value,
+							"email": el.email.value,
+							"password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value ))
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							window.location.assign(_RETURN_URL);
+						},
+						error: function(xhr, status, error) {
+							console.error(xhr.status, error);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
 				};
 
 			};

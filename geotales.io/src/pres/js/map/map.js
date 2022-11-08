@@ -176,6 +176,7 @@ L.Map.addInitHook(function() {
 L.Map.include({
 
 	setup: function() {
+		$(".leaflet-control-attribution>span").before("<span aria-hidden=\"true\">|</span> <a href=\"https://geotales.io\">GeoTales</a> ");
 		$(".leaflet-control-attribution a").prop("target", "_blank");
 
 		$("#mapNav #zoomIn").click(ev => { this.zoomIn(); });
@@ -433,7 +434,7 @@ L.Map.include({
 			basemap = L.tileLayer(source.url, {
 				minZoom: source.minZoom || 0,
 				maxZoom: source.maxZoom || 22,
-				attribution: source.attribution || `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+				attribution: source.attribution || "&copy;"
 			});
 		}else
 		if(source.type == "image") {
@@ -465,7 +466,7 @@ L.Map.include({
 			basemap = L.imageOverlay(source.img, bounds, {
 				zIndex: 0,
 				minZoom: 0, maxZoom: 1000,
-				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+				attribution: "&copy;"
 			});
 		}
 		else{ return; }

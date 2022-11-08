@@ -9,8 +9,6 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
@@ -19,8 +17,9 @@ if(isset($_REQUEST['return_url'])) {
 	$loc = $_REQUEST['return_url'];
 }
 
-// user is already logged in
-if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(!sane_is_null($user_id)) { // user is already logged in
 	header("location: $loc"); exit;
 }
 
@@ -39,6 +38,8 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
+
 		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
 		<meta name="description" content="Tales on a map" />
@@ -50,7 +51,7 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
-		<!-- Load src/ CSS -->
+		<!-- Load CSS -->
 		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
@@ -135,20 +136,18 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 						</div>
 					<?php } ?>
 
-						<form action="signauth.php" method="post" autocomplete="on" id="signin">
+						<form method="post" autocomplete="on" id="signin">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" name="username" class="form-control" id="username" required />
+								<input type="text" class="form-control" id="username" required />
 							</div>
 							<div class="mb-3">
 								<label for="pw" class="form-label">Password</label>
 								<div class="input-group">
-									<input type="password" name="pw" class="form-control" id="pw" aria-label="Password" aria-describedby="pwShow" required />
+									<input type="password" class="form-control" id="password" aria-label="Password" aria-describedby="pwShow" required />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>
-							<input type="hidden" name="password" />
-							<input type="hidden" name="return_url" value="<?php echo $loc; ?>" />
 							<button type="submit" class="btn btn-primary">Sign in</button>
 						</form>
 
@@ -176,6 +175,12 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 								</a>
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.instagram.com/geotales.io/" target="_blank">
+									<i class="fab fa-instagram" style="color: #d62976;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.reddit.com/user/geotales/" target="_blank">
+									<i class="fab fa-reddit" style="color: #ff5700;"></i>
 								</a>
 							</div>
 						</center>
@@ -207,11 +212,14 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
-		<!-- Load src/ JS -->
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
 
 			window.onload = function(ev) {
+
+				const _RETURN_URL = `<?php echo $loc; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -232,8 +240,24 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 					let form = ev.target;
 					let el = form.elements;
 
-					$(el.password).val( sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw.value )) );
-					form.submit();
+					$("#loadingModal").modal("show");
+
+					$.ajax({
+						type: "POST",
+						url: "/auth/login",
+						data: {
+							"username": el.username.value,
+							"password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.password.value ))
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							window.location.assign(_RETURN_URL);
+						},
+						error: function(xhr, status, error) {
+							console.error(xhr.status, error);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
 				};
 
 			};

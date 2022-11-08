@@ -1,25 +1,12 @@
 ## TODO
 
 - Biz:
-	* IN markedsavklaring
 	* Gjøres etter Arendal og før Oktober:
 		- Overføre Trefadder syse server til AWS og gjøre til generell til enterprise-kunde server
 			* Hoste all data og servere WMS med GeoServer
 
 
-- Overall:
-	* (Fixed?) Reklamespalte i pres-modus for ubetalte brukere
-
-	* Geo-Blog, bruke GeoTales til å kommunisere ut til publikum
-		- Mulighet for admins til å pinne-kart til toppen av landings-siden
-
-	* Add ability to buy anually, create a new product in stripe with $5x12x0.8 price
-		- Add this info to Pricing page
-
 - Edit-mode:
-	* Option for å ha hengelås åpen by-defualt i pres-modus
-	* Mulighet til å rotere avatarer, slider i popup menyen, CSS transform
-	* Posibility to make hyperlink to other scenes in the textboxes
 	* GEDCOM import:
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)

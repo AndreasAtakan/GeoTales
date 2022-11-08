@@ -37,6 +37,16 @@ function random_string($length = 10) {
 	return $randomString;
 }
 
+//
+function headerUserID() {
+	return getallheaders()['X-User-ID'] ?? null;
+}
+
+//
+function headerCSRFToken() {
+	return getallheaders()['X-CSRF-Token'] ?? null;
+}
+
 
 
 //

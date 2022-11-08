@@ -9,17 +9,14 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
-// Not logged in
-if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(sane_is_null($user_id)) { // Not logged in
 	header("location: signin.php?return_url=stage.php"); exit;
 }
-$user_id = $_SESSION['user_id'];
 
 //
 // Onboarding users; "Try now" button on landing-page links here throught signin.php return_url parameter

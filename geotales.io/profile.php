@@ -9,22 +9,19 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
-// Not logged in
-if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(sane_is_null($user_id)) { // Not logged in
 	header("location: signin.php?return_url=profile.php"); exit;
 }
-$user_id = $_SESSION['user_id'];
-$paid = getUserPaid($PDO, $user_id);
 
 $username = getUsername($PDO, $user_id);
 $email = getUserEmail($PDO, $user_id);
 $photo = getUserPhoto($PDO, $user_id);
+$paid = getUserPaid($PDO, $user_id);
 
 ?>
 
@@ -34,6 +31,8 @@ $photo = getUserPhoto($PDO, $user_id);
 		<meta charset="utf-8" />
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
+
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
 
 		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
@@ -46,7 +45,7 @@ $photo = getUserPhoto($PDO, $user_id);
 		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 
-		<!-- Load src/ CSS -->
+		<!-- Load CSS -->
 		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
@@ -238,6 +237,12 @@ $photo = getUserPhoto($PDO, $user_id);
 								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
 									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
 								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.instagram.com/geotales.io/" target="_blank">
+									<i class="fab fa-instagram" style="color: #d62976;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://www.reddit.com/user/geotales/" target="_blank">
+									<i class="fab fa-reddit" style="color: #ff5700;"></i>
+								</a>
 							</div>
 						</center>
 					</div>
@@ -268,7 +273,8 @@ $photo = getUserPhoto($PDO, $user_id);
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
-		<!-- Load src/ JS -->
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
 

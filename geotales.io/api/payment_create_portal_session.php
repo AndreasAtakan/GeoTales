@@ -7,15 +7,13 @@
 * Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
-session_start();
-
 include "../init.php";
 include_once("../helper.php");
 
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-$user_id = $_SESSION['user_id'];
+$user_id = headerUserID();
 
 $portal = paymentCreatePortal($PDO, $user_id);
 if(!$portal) { http_response_code(500); exit; }

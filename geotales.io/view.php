@@ -9,15 +9,13 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
-$logged_in = false; $photo = ""; $paid = false;
-if(isset($_SESSION['user_id']) && validUserID($PDO, $_SESSION['user_id'])) {
-	$logged_in = true;
-	$user_id = $_SESSION['user_id'];
+$user_id = headerUserID();
+$logged_in = !sane_is_null($user_id);
+$photo = ""; $paid = false;
+if($logged_in) {
 	$username = getUsername($PDO, $user_id);
 	$photo = getUserPhoto($PDO, $user_id);
 	$paid = getUserPaid($PDO, $user_id);
@@ -97,6 +95,8 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
 
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
+
 		<title>GeoTales – <?php echo $row['title']; ?></title>
 		<meta name="title" content="GeoTales – <?php echo $row['title']; ?>" />
 		<meta name="description" content="<?php echo $row['description']; ?>" />
@@ -129,7 +129,7 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 		<!-- Google AdSense -->
 		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4056519983936625" crossorigin="anonymous"></script>
 
-		<!-- Load src/ CSS -->
+		<!-- Load CSS -->
 		<link rel="stylesheet" href="main.css" />
 
 		<style type="text/css">
@@ -219,16 +219,16 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 									<a role="button" class="btn btn-lg btn-outline-light" href="https://www.facebook.com/sharer/sharer.php?u=<?php echo $link; ?>" id="facebook" target="_blank"><i class="fab fa-facebook" style="color: #4267B2;"></i></a>
 								</div>
 								<div class="col col-md-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="https://twitter.com/intent/tweet?url=<?php echo $link; ?>&text=" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
+									<a role="button" class="btn btn-lg btn-outline-light" href="https://twitter.com/intent/tweet?url=<?php echo $link; ?>&text=<?php echo urlencode("Check out this GeoTale!")."%0A".urlencode($row['title']); ?>&via=geotales_io&hashtags=geotales" id="twitter" target="_blank"><i class="fab fa-twitter" style="color: #1DA1F2;"></i></a>
 								</div>
 								<div class="col col-md-1">
 									<a role="button" class="btn btn-lg btn-outline-light" href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo $link; ?>" id="linkedin" target="_blank"><i class="fab fa-linkedin" style="color: #0072b1;"></i></a>
 								</div>
 								<div class="col col-md-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="https://pinterest.com/pin/create/button/?url=<?php echo $link; ?>&media=&description=" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
+									<a role="button" class="btn btn-lg btn-outline-light" href="https://pinterest.com/pin/create/button/?url=<?php echo $link; ?>&media=&description=<?php echo urlencode('Check out this GeoTale! '.$row['title']); ?>" id="pinterest" target="_blank"><i class="fab fa-pinterest" style="color: #E60023;"></i></a>
 								</div>
 								<div class="col col-md-1">
-									<a role="button" class="btn btn-lg btn-outline-light" href="mailto:?&subject=&cc=&bcc=&body=<?php echo $link; ?>%0A" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
+									<a role="button" class="btn btn-lg btn-outline-light" href="mailto:?&subject=<?php echo "Check out this GeoTale! {$row['title']}"; ?>&cc=&bcc=&body=<?php echo "Check out this GeoTale!%0A{$row['title']}%0A%0A{$link}"; ?>" id="email"><i class="fas fa-envelope" style="color: grey;"></i></a>
 								</div>
 							</div>
 						</div>
@@ -451,7 +451,8 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-		<!-- Load src/ JS -->
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
 

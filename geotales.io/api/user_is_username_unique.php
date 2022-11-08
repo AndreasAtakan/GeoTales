@@ -7,8 +7,6 @@
 * Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
-session_start();
-
 include "../init.php";
 include_once("../helper.php");
 

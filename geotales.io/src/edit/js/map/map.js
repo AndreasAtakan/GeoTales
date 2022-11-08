@@ -242,7 +242,8 @@ L.Map.include({
 		this.basemapButton.enable();
 		this.textboxButton.enable();
 
-		$("div.leaflet-control-attribution a").prop("target", "_blank");
+		$(".leaflet-control-attribution>span").before("<span aria-hidden=\"true\">|</span> <a href=\"https://geotales.io\">GeoTales</a> ");
+		$(".leaflet-control-attribution a").prop("target", "_blank");
 	},
 	reset: function() {
 		this.clearLayers();
@@ -667,7 +668,7 @@ L.Map.include({
 			basemap = L.tileLayer(source.url, {
 				minZoom: source.minZoom || 0,
 				maxZoom: source.maxZoom || 22,
-				attribution: source.attribution || `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+				attribution: source.attribution || "&copy;"
 			});
 		}else
 		if(source.type == "image") {
@@ -700,7 +701,7 @@ L.Map.include({
 				pmIgnore: true,
 				zIndex: 0,
 				minZoom: 0, maxZoom: 1000,
-				attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>`
+				attribution: "&copy;"
 			});
 		}
 		else{ return; }

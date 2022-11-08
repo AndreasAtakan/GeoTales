@@ -7,20 +7,19 @@
 * Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
 *******************************************************************************/
 
-session_start();
-
 include "../init.php";
 include_once("../helper.php");
 
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-if(!isset($_POST['id'])
-|| !isset($_POST['password'])) { http_response_code(422); exit; }
+/*if(!isset($_POST['id'])
+|| !isset($_POST['password'])) { http_response_code(422); exit; }*/
+
+$user_id = headerUserID();
+
 $id = $_POST['id'];
 $password = $_POST['password'];
-
-$user_id = $_SESSION['user_id'];
 
 $id = mapClone($PDO, $user_id, $id, $password);
 

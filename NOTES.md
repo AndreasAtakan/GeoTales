@@ -1,9 +1,5 @@
 ## Notes
 
-##### Endringer – tilbakemeldinger runde 1:
-
-- Global redo/undo på all regidering (ctrl-z/ctrl-v på både kart og scener)
-
 ##### Endringer – tilbakemeldinger runde 3:
 
 - Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)

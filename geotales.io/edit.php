@@ -9,17 +9,15 @@
 
 ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 
-//session_set_cookie_params(['SameSite' => 'None', 'Secure' => true]);
-session_start();
-
 include "init.php";
 include_once("helper.php");
 
-// Not logged in
-if(!isset($_SESSION['user_id']) || !validUserID($PDO, $_SESSION['user_id'])) {
+$user_id = headerUserID();
+
+if(sane_is_null($user_id)) { // Not logged in
 	header("location: signin.php?return_url=maps.php"); exit;
 }
-$user_id = $_SESSION['user_id'];
+
 $username = getUsername($PDO, $user_id);
 $photo = getUserPhoto($PDO, $user_id);
 $paid = getUserPaid($PDO, $user_id);
@@ -43,6 +41,8 @@ $row = $stmt->fetch();
 		<meta charset="utf-8" />
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
+
+		<meta name="csrf-token" content="<?php echo headerCSRFToken(); ?>" />
 
 		<title>GeoTales – <?php echo $row['title']; ?></title>
 		<meta name="title" content="GeoTales – <?php echo $row['title']; ?>" />
@@ -71,8 +71,8 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/trumbowyg/plugins/specialchars/ui/trumbowyg.specialchars.min.css" />
 		<link rel="stylesheet" href="lib/trumbowyg/plugins/table/ui/trumbowyg.table.min.css" />
 
-		<!-- Load src/ CSS -->
-		<link rel="stylesheet" href="assets/main_edit_1667501653.css" />
+		<!-- Load CSS -->
+		<link rel="stylesheet" href="assets/main_edit_1667914630.css" />
 	</head>
 	<body>
 
@@ -600,6 +600,7 @@ $row = $stmt->fetch();
 		<script type="text/javascript" src="lib/leaflet.tilelayer.mars/L.TileLayer.Mars.js"></script>
 
 		<!-- Set superglobals and init -->
+		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
 
@@ -633,7 +634,7 @@ $row = $stmt->fetch();
 			];
 
 			let _BASEMAPS = [
-				{ name: "Blank",				tiles: L.tileLayer("",																																		{ minZoom: 0, maxZoom: 22, attribution: `&copy; <a href="https://${_HOST}" target="_blank">GeoTales</a>` }),																																																													preview: "assets/blank.png" },
+				{ name: "Blank",				tiles: L.tileLayer("",																																		{ minZoom: 0, maxZoom: 22, attribution: "&copy;" }),																																																													preview: "assets/blank.png" },
 				{ name: "OpenStreetMap",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",																					{ minZoom: 0, maxZoom: 19, attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																																							preview: "https://b.tile.openstreetmap.org/5/15/10.png" },
 				{ name: "OpenStreetMap.DE",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png",																			{ minZoom: 0, maxZoom: 18, attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																																							preview: "https://b.tile.openstreetmap.de/tiles/osmde/5/15/10.png" },
 				{ name: "OpenStreetMap.FR",		tiles: L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",																				{ minZoom: 0, maxZoom: 20, attribution: "&copy; OpenStreetMap France | &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors" }),																																															preview: "https://b.tile.openstreetmap.fr/osmfr/5/15/10.png" },
@@ -676,8 +677,8 @@ $row = $stmt->fetch();
 			];
 		</script>
 
-		<!-- Load src/ JS -->
-		<script type="text/javascript" src="assets/main_edit_1667501653.js"></script>
+		<!-- Load JS -->
+		<script type="text/javascript" src="assets/main_edit_1667914630.js"></script>
 
 	</body>
 </html>
