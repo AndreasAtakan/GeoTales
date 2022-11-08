@@ -198,7 +198,7 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 					</div>
 					<div class="col-sm-3 mt-sm-0 mt-4">
 						<div class="d-grid" style="text-shadow: none;">
-							<a role="button" class="btn btn-info text-white" href="stage.php">Create</a>
+							<a role="button" class="btn btn-info text-white" href="stage.php" style="border-color: #098faa; border-width: 2px;"><strong>Create</strong></a>
 						</div>
 						<p class="text-muted text-center text-shadow mt-2">Create your own GeoTale for <strong>free</strong></p>
 					</div>
