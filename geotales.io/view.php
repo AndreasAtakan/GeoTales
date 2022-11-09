@@ -359,46 +359,14 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 						<div class="col">
 							<ul role="tablist" class="nav nav-pills justify-content-center mb-3" id="infoTab">
 								<li role="presentation" class="nav-item">
-									<button type="button" role="tab" class="nav-link btn-sm py-1 px-2 active" id="suggested-tab" data-bs-toggle="pill" data-bs-target="#suggested" aria-controls="suggested" aria-selected="true">Suggested</button>
+									<button type="button" role="tab" class="nav-link btn-sm py-1 px-2 active" id="comments-tab" data-bs-toggle="pill" data-bs-target="#comments" aria-controls="comments" aria-selected="true">Comments</button>
 								</li>
 								<li role="presentation" class="nav-item">
-									<button type="button" role="tab" class="nav-link btn-sm py-1 px-2" id="comments-tab" data-bs-toggle="pill" data-bs-target="#comments" aria-controls="comments" aria-selected="false">Comments</button>
+									<button type="button" role="tab" class="nav-link btn-sm py-1 px-2" id="suggested-tab" data-bs-toggle="pill" data-bs-target="#suggested" aria-controls="suggested" aria-selected="false">Suggested</button>
 								</li>
 							</ul>
 							<div class="tab-content" id="infoTabContent">
-								<div role="tabpanel" class="tab-pane fade show active" id="suggested" aria-labelledby="suggested-tab">
-						<?php if($suggestedNum > 0) { ?>
-									<div class="row row-cols-1 g-1">
-							<?php foreach($suggested as $r) {
-									$href = "view.php?id={$r['id']}";
-									$published_date = date_format(date_create($r['published_date'] ?? ""), "d.M Y, H:i");
-							?>
-										<div class="col">
-											<div class="card text-dark bg-light">
-												<a class="text-decoration-none" href="<?php echo $href; ?>">
-													<img src="<?php echo $r['thumbnail']; ?>" class="card-img-top" alt="" <?php if(sane_is_null($r['thumbnail'])) { echo "height=\"0\""; } ?> />
-													<div class="card-body py-2">
-												<?php if(!sane_is_null($r['user_photo'])) { ?>
-														<img class="rounded float-end" src="<?php echo $r['user_photo']; ?>" width="auto" height="20" alt="&nbsp" />
-												<?php } ?>
-														<h5 class="card-title" style="color: grey;"><?php echo $r['title']; ?></h5>
-														<h6 class="card-subtitle" style="color: grey;"><?php echo $published_date; ?></h6>
-													</div>
-												</a>
-											</div>
-										</div>
-							<?php } ?>
-									</div>
-						<?php }else{ ?>
-									<div class="row g-0">
-										<div class="col">
-											<p class="text-muted text-center text-shadow">None found</p>
-										</div>
-									</div>
-						<?php } ?>
-								</div>
-
-								<div role="tabpanel" class="tab-pane fade" id="comments" aria-labelledby="comments-tab">
+								<div role="tabpanel" class="tab-pane fade show active" id="comments" aria-labelledby="comments-tab">
 									<div class="row g-0 mb-3">
 										<div class="col">
 									<?php if($logged_in) { ?>
@@ -435,6 +403,38 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 							<?php } ?>
 										</div>
 									</div>
+								</div>
+
+								<div role="tabpanel" class="tab-pane fade" id="suggested" aria-labelledby="suggested-tab">
+						<?php if($suggestedNum > 0) { ?>
+									<div class="row row-cols-1 g-1">
+							<?php foreach($suggested as $r) {
+									$href = "view.php?id={$r['id']}";
+									$published_date = date_format(date_create($r['published_date'] ?? ""), "d.M Y, H:i");
+							?>
+										<div class="col">
+											<div class="card text-dark bg-light">
+												<a class="text-decoration-none" href="<?php echo $href; ?>">
+													<img src="<?php echo $r['thumbnail']; ?>" class="card-img-top" alt="" <?php if(sane_is_null($r['thumbnail'])) { echo "height=\"0\""; } ?> />
+													<div class="card-body py-2">
+												<?php if(!sane_is_null($r['user_photo'])) { ?>
+														<img class="rounded float-end" src="<?php echo $r['user_photo']; ?>" width="auto" height="20" alt="&nbsp" />
+												<?php } ?>
+														<h5 class="card-title" style="color: grey;"><?php echo $r['title']; ?></h5>
+														<h6 class="card-subtitle" style="color: grey;"><?php echo $published_date; ?></h6>
+													</div>
+												</a>
+											</div>
+										</div>
+							<?php } ?>
+									</div>
+						<?php }else{ ?>
+									<div class="row g-0">
+										<div class="col">
+											<p class="text-muted text-center text-shadow">None found</p>
+										</div>
+									</div>
+						<?php } ?>
 								</div>
 							</div>
 						</div>
