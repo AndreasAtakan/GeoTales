@@ -95,7 +95,7 @@ if(isset($_POST['username'])
 	$subject = "GeoTales: password reset";
 	$body = "A password-reset has been triggered on the user {$username} \n The new password is: {$password}";
 
-	sendSESEmail($username, $email, $subject, $body);
+	sendSESEmail($email, $subject, $body);
 
 	header("Access-Control-Allow-Origin: *");
 	header("location: signin.php?return_url={$loc}&password_reset=true");

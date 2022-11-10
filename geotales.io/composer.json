@@ -1,0 +1,13 @@
+{
+	"name": "geotales/geotales.io",
+	"description": "GeoTales",
+	"require": {
+		"aws/aws-sdk-php": "^3.241"
+	},
+	"authors": [
+		{
+			"name": "AndreasAtakan",
+			"email": "aca@geotales.io"
+		}
+	]
+}

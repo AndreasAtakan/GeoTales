@@ -5,6 +5,8 @@ node_modules
 .cache
 .parcel-cache
 package-lock.json
+vendor
+composer.lock
 
 # testing
 */coverage
