@@ -1,9 +1,8 @@
 ## TODO
 
 - Biz:
-	* Gjøres etter Arendal og før Oktober:
-		- Overføre Trefadder syse server til AWS og gjøre til generell til enterprise-kunde server
-			* Hoste all data og servere WMS med GeoServer
+	* Overføre Trefadder syse server til AWS og gjøre til generell til enterprise-kunde server
+		* Hoste all data og servere WMS med GeoServer
 
 
 - Edit-mode:

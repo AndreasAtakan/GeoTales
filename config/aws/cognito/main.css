@@ -1,0 +1,21 @@
+
+html, body {
+	height: 100%;
+}
+
+body {
+	background-image: url('https://geotales.io/assets/background.png');
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.logo-customizable {
+	height: 45px;
+	width: auto;
+}
+
+.banner-customizable {
+	padding: 15px 0px 0px 0px;
+	background-color: inherit;
+}

@@ -79,7 +79,7 @@ if($order == "date") { usort($res, function($a, $b) { return date_format(date_cr
 
 		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Tales on a map" />
+		<meta name="description" content="GeoTales – Tell your story on maps and maplike surfaces" />
 
 		<link rel="icon" href="assets/logo.png" />
 

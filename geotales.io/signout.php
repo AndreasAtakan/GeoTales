@@ -31,7 +31,7 @@ if(sane_is_null($user_id)) { // user is not logged in
 
 		<title>GeoTales – Tales on a map</title>
 		<meta name="title" content="GeoTales" />
-		<meta name="description" content="Tales on a map" />
+		<meta name="description" content="GeoTales – Tell your story on maps and maplike surfaces" />
 
 		<link rel="icon" href="assets/logo.png" />
 

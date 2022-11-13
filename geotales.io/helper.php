@@ -576,7 +576,7 @@ function sendSESEmail($to_address, $subject, $body) {
 	]);
 
 	$char_set = "UTF-8";
-	$sender_email = "contact@geotales.io"
+	$sender_email = "contact@geotales.io";
 
 	try {
 		$res = $ses_client->sendEmail(array(
@@ -594,7 +594,7 @@ function sendSESEmail($to_address, $subject, $body) {
 					"Html" => array(
 						"Charset" => $char_set,
 						"Data" => $body
-					)
+					),
 					"Text" => array(
 						"Charset" => $char_set,
 						"Data" => $body
