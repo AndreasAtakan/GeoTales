@@ -142,43 +142,24 @@ if($table == "Map") {
 	<?php foreach($res as $row) { ?>
 				<tr>
 		<?php foreach($columns as $c) { ?> <td><?php echo $row[ $c ]; ?></td> <?php } ?>
-		<?php
-			if($table == "User"
-			|| $table == "Map"
-			|| $table == "Comment") {
-		?>
-					<td>
-						<form method="post">
-							<input type="hidden" name="op" value="delete" />
-							<input type="hidden" name="table" value="<?php echo $table; ?>" />
-							<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
-							<button type="submit">DELETE</button>
-						</form>
-					</td>
-		<?php } if($table == "User") { ?>
-					<td>
-						<form method="post">
-							<input type="hidden" name="op" value="make_premium" />
-							<input type="hidden" name="table" value="<?php echo $table; ?>" />
-							<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
-							<button type="submit">MAKE PREMIUM</button>
-						</form>
-					</td>
-					<td>
-						<form method="post">
-							<input type="hidden" name="op" value="reset_password" />
-							<input type="hidden" name="table" value="<?php echo $table; ?>" />
-							<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
-							<button type="submit">RESET PASSWORD</button>
-						</form>
-					</td>
+		<?php if($table == "User"
+			  || $table == "Map"
+			  || $table == "Comment") { ?>
+			  		<td>
+			  			<form method="post">
+			  				<input type="hidden" name="table" value="<?php echo $table; ?>" />
+			  				<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
+			  				<select name="op">
+			  					<option value="" disabled selected>Choose..</option>
+			  					<option value="delete">DELETE</option>
+		<?php if($table == "User") { ?>
+								<option value="make_premium">MAKE PREMIUM</option>
+								<option value="reset_password">RESET PASSWORD</option>
 		<?php } if($table == "Map") { ?>
-					<td>
-						<form method="post">
-							<input type="hidden" name="op" value="unpublish" />
-							<input type="hidden" name="table" value="<?php echo $table; ?>" />
-							<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
-							<button type="submit">UNPUBLISH</button>
+								<option value="unpublish">UNPUBLISH</option>
+		<?php } ?>
+							</select>
+							<button type="submit">EXECUTE</button>
 						</form>
 					</td>
 		<?php } ?>
