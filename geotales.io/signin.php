@@ -210,7 +210,6 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load JS -->
 		<script type="text/javascript" src="assets/ajax_setup.js"></script>
@@ -247,7 +246,7 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 						url: "/auth/login",
 						data: {
 							"username": el.username.value,
-							"password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.password.value ))
+							"password": el.password.value
 						},
 						dataType: "json",
 						success: function(result, status, xhr) {

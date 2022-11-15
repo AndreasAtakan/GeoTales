@@ -57,7 +57,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 		<!-- Load lib/ JS -->
 		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
 		<script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script>
-		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load JS -->
 		<script type="text/javascript" src="assets/ajax_setup.js"></script>
@@ -72,8 +71,8 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 					$.ajax({
 						type: "POST",
-						url: "/auth/login",
-						data: { "password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.password.value )) },
+						url: "/auth/login_admin",
+						data: { "password": el.password.value },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign("index.php");

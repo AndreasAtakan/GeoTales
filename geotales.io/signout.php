@@ -63,8 +63,8 @@ if(sane_is_null($user_id)) { // user is not logged in
 
 				$.ajax({
 					type: "POST",
-					url: "/auth/login",
-					data: { "signout": true },
+					url: "/auth/logout",
+					//data: {},
 					dataType: "json",
 					success: function(result, status, xhr) {
 						window.location.assign("index.php");

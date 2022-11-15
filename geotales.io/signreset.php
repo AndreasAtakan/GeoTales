@@ -23,6 +23,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 	header("location: $loc"); exit;
 }
 
+$token = $_GET['token'] ?? null;
 $username = $_GET['username'] ?? null;
 
 ?>
@@ -122,9 +123,16 @@ $username = $_GET['username'] ?? null;
 								<label for="username" class="form-label">Username</label>
 								<input type="text" class="form-control" id="username" required value="<?php echo $username; ?>" />
 							</div>
+							<div class="mb-1">
+								<label for="pw1" class="form-label">New password</label>
+								<div class="input-group">
+									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
+									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
+								</div>
+							</div>
 							<div class="mb-3">
-								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" class="form-control" id="email" required />
+								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" required />
+								<label for="pw2" class="form-label small text-muted">Confirm password</label>
 							</div>
 							<button type="submit" class="btn btn-primary">Reset</button>
 						</form>
@@ -184,7 +192,6 @@ $username = $_GET['username'] ?? null;
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load JS -->
 		<script type="text/javascript" src="assets/ajax_setup.js"></script>
@@ -193,7 +200,8 @@ $username = $_GET['username'] ?? null;
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`;
+				const _RETURN_URL = `<?php echo $loc; ?>`,
+					  _TOKEN = `<?php echo $token; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -204,46 +212,43 @@ $username = $_GET['username'] ?? null;
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
 
-				$("form#signreset input#username, form#signreset input#email").change(ev => {
-					let el = document.forms.signreset.elements;
-					let username = $(el.username).val(),
-						email = $(el.email).val();
+				let pwShow = false;
+				$("button#pwShow").click(ev => {
+					pwShow = !pwShow;
+					$("form#signreset input#pw1, form#signreset input#pw2").prop("type", pwShow ? "text" : "password");
+				});
 
-					$.ajax({
-						type: "GET",
-						url: "api/user_username_email_correct.php",
-						data: { "username": username, "email": email },
-						dataType: "json",
-						success: function(result, status, xhr) {
-							if(result.isValid) {
-								$(el.username, el.email).removeClass("is-invalid");
-								el.username.setCustomValidity("");
-								el.email.setCustomValidity("");
-							}else{
-								$(el.username, el.email).addClass("is-invalid");
-								el.username.setCustomValidity("Username and email does not match");
-								el.email.setCustomValidity("Username and email does not match");
-							}
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							$("#errorModal").modal("show");
-						}
-					});
+				$("form#signreset input#pw1, form#signreset input#pw2").change(ev => {
+					let el = document.forms.signreset.elements;
+					let pw1 = $("form#signreset input#pw1").val(),
+						pw2 = $("form#signreset input#pw2").val();
+
+					if(pw1 !== pw2) {
+						$("form#signreset input#pw1, form#signreset input#pw2").addClass("is-invalid");
+						el.pw1.setCustomValidity("Passwords unequal");
+						el.pw2.setCustomValidity("Passwords unequal");
+					}else{
+						$("form#signreset input#pw1, form#signreset input#pw2").removeClass("is-invalid");
+						el.pw1.setCustomValidity("");
+						el.pw2.setCustomValidity("");
+					}
 				});
 
 				document.forms.signreset.onsubmit = function(ev) { ev.preventDefault();
 					let form = ev.target;
 					let el = form.elements;
 
+					if(el.pw1.value !== el.pw2.value) { $("#errorModal").modal("show"); return; }
+
 					$("#loadingModal").modal("show");
 
 					$.ajax({
 						type: "POST",
-						url: "/auth/login",
+						url: "/auth/reset_password",
 						data: {
+							"token": _TOKEN,
 							"username": el.username.value,
-							"email": el.email.value
+							"password": el.pw2.value
 						},
 						dataType: "json",
 						success: function(result, status, xhr) {

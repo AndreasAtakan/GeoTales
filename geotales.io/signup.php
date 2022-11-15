@@ -193,7 +193,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load JS -->
 		<script type="text/javascript" src="assets/ajax_setup.js"></script>
@@ -270,11 +269,11 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 					$.ajax({
 						type: "POST",
-						url: "/auth/login",
+						url: "/auth/signup",
 						data: {
 							"username": el.username.value,
 							"email": el.email.value,
-							"password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value ))
+							"password": el.pw2.value
 						},
 						dataType: "json",
 						success: function(result, status, xhr) {
