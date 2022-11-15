@@ -177,7 +177,7 @@ if($logged_in) { $photo = getUserPhoto($PDO, $user_id); }
 							If you want to get in touch with us, please do so at <a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
 						</p>
 						<p class="lead text-shadow">
-							And read our <a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+							Read our <a class="text-decoration-none" href="terms.php">Terms and conditions</a> and <a class="text-decoration-none" href="privacy.php">Privacy Policy</a>
 						</p>
 					</div>
 				</div>
