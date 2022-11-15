@@ -50,7 +50,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 	<body>
 
 		<form method="post" autocomplete="on" id="signin">
-			<input type="text" id="username" placeholder="Username" required />
 			<input type="password" id="password" placeholder="Password" required />
 			<button type="submit">Sign in</button>
 		</form>
@@ -74,10 +73,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					$.ajax({
 						type: "POST",
 						url: "/auth/login",
-						data: {
-							"username": el.username.value,
-							"password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.password.value ))
-						},
+						data: { "password": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.password.value )) },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign("index.php");
