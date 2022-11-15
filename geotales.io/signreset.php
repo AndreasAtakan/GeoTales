@@ -174,8 +174,11 @@ $username = $_GET['username'] ?? null;
 					</div>
 					<div class="col-sm-4 mt-2">
 						<p class="text-muted text-center">© <?php echo date("Y"); ?> <a class="text-decoration-none" href="<?php echo $CONFIG['host']; ?>"><?php echo $CONFIG['host']; ?></a> – all rights reserved</p>
-						<p class="text-muted text-center">
+						<p class="text-muted text-center mb-1">
 							<a class="text-decoration-none" href="terms.php">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="privacy.php">Privacy Policy</a>
 						</p>
 						<p class="text-muted text-center">
 							<a class="text-decoration-none" href="mailto:<?php echo $CONFIG['email']; ?>"><?php echo $CONFIG['email']; ?></a>
