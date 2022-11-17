@@ -14,8 +14,7 @@ include_once("../helper.php");
 // KREVER AT CLIENTEN ER LOGGET INN
 
 /*if(!isset($_POST['username'])
-&& !isset($_POST['email'])
-&& !isset($_POST['password'])) { http_response_code(422); exit; }*/
+&& !isset($_POST['email'])) { http_response_code(422); exit; }*/
 
 $user_id = headerUserID();
 
@@ -26,8 +25,7 @@ $r = updateUser(
 	$user_id,
 	isset($_POST['username']) ? sanitize($_POST['username']) : null,
 	isset($_POST['email']) ? sanitize($_POST['email']) : null,
-	$photo,
-	isset($_POST['password']) ? sanitize($_POST['password']) : null
+	$photo
 );
 if(!$r) { http_response_code(500); exit; }
 

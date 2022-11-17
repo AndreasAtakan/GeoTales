@@ -14,8 +14,8 @@ $CONFIG = array(
 	"host" => $TESTING ? "http://localhost/geotales" : "https://{$_SERVER['SERVER_NAME']}",
 	"email" => "contact@geotales.io",
 
-	"aws_access_key_id" => "AKIA5RSTXAFR7IU7J467", // secret
-	"aws_secret_access_key" => "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", // secret
+	"aws_access_key_id" => "AKIA5RSTXAFR2WC5KUEB", // secret
+	"aws_secret_access_key" => "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", // secret
 	"aws_bucket_name" => "geotales", // secret
 	"aws_region" => "eu-north-1", // secret
 	"aws_ses_region" => "email.eu-north-1.amazonaws.com", // secret

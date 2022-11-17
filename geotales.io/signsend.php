@@ -19,10 +19,6 @@ if(isset($_REQUEST['return_url'])) {
 
 $user_id = headerUserID();
 
-if(!sane_is_null($user_id)) { // user is already logged in
-	header("location: $loc"); exit;
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -124,10 +120,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 						<form method="post" autocomplete="off" id="signsend">
 							<div class="mb-3">
-								<label for="username" class="form-label">Username</label>
-								<input type="text" class="form-control" id="username" required />
-							</div>
-							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
 								<input type="email" class="form-control" id="email" required />
 							</div>
@@ -211,33 +203,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
 
-				$("form#signsend input#username, form#signsend input#email").change(ev => {
-					let el = document.forms.signsend.elements;
-
-					$.ajax({
-						type: "GET",
-						url: "api/user_username_email_correct.php",
-						data: {
-							"username": el.username.value,
-							"email": el.email.value
-						},
-						dataType: "json",
-						success: function(result, status, xhr) {
-							if(result.isCorrect) {
-								$(ev.target).removeClass("is-invalid");
-								el.username.setCustomValidity("");
-							}else{
-								$(ev.target).addClass("is-invalid");
-								el.username.setCustomValidity("Username and E-Mail mismatch");
-							}
-						},
-						error: function(xhr, status, error) {
-							console.log(xhr.status, error);
-							$("#errorModal").modal("show");
-						}
-					});
-				});
-
 				document.forms.signsend.onsubmit = function(ev) { ev.preventDefault();
 					let form = ev.target;
 					let el = form.elements;
@@ -247,10 +212,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					$.ajax({
 						type: "POST",
 						url: "/auth/send-password-reset",
-						data: {
-							"username": el.username.value,
-							"email": el.email.value
-						},
+						data: { "email": el.email.value },
 						dataType: "json",
 						success: function(result, status, xhr) {
 							$("#reset_info").css("display", "block");

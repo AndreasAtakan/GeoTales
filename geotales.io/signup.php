@@ -204,8 +204,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`,
-					  re_email = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+				const _RETURN_URL = `<?php echo $loc; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -217,8 +216,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 				});
 
 				$("form#signup input#username, form#signup input#email").change(ev => {
-					let el = document.forms.signup.elements;
-
 					let data = {}, e = $(ev.target);
 					data[ e.prop("id") ] = e.val();
 
@@ -229,11 +226,11 @@ if(!sane_is_null($user_id)) { // user is already logged in
 						dataType: "json",
 						success: function(result, status, xhr) {
 							if(result.isUnique) {
-								$(ev.target).removeClass("is-invalid");
-								el.username.setCustomValidity("");
+								e.removeClass("is-invalid");
+								ev.target.setCustomValidity("");
 							}else{
-								$(ev.target).addClass("is-invalid");
-								el.username.setCustomValidity("Username taken");
+								e.addClass("is-invalid");
+								ev.target.setCustomValidity("Already taken");
 							}
 						},
 						error: function(xhr, status, error) {
@@ -270,8 +267,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					let el = form.elements;
 
 					if(el.pw1.value !== el.pw2.value
-					|| re_email.test(el.username.value)
-					|| !re_email.test(el.email.value)) { $("#errorModal").modal("show"); return; }
+					|| el.username.value.includes("@")) { $("#errorModal").modal("show"); return; }
 
 					$("#loadingModal").modal("show");
 

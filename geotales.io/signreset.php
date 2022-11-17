@@ -18,13 +18,15 @@ if(isset($_REQUEST['return_url'])) {
 }
 
 $user_id = headerUserID();
-
-if(!sane_is_null($user_id)) { // user is already logged in
-	header("location: $loc"); exit;
+$logged_in = !sane_is_null($user_id);
+if($logged_in) {
+	$username = getUsername($PDO, $user_id);
 }
 
-$token = $_GET['token'] ?? null;
-$username = $_GET['username'] ?? null;
+if(!isset($_GET['token'])) { // didn't get a token
+	header("location: index.php"); exit;
+}
+$token = $_GET['token'];
 
 ?>
 
@@ -119,7 +121,9 @@ $username = $_GET['username'] ?? null;
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
 						<form method="post" autocomplete="off" id="signreset">
+					<?php if($logged_in) { ?>
 							<p class="lead text-muted">User: <?php echo $username; ?></p>
+					<?php } ?>
 							<div class="mb-1">
 								<label for="pw1" class="form-label">New password</label>
 								<div class="input-group">
@@ -247,7 +251,6 @@ $username = $_GET['username'] ?? null;
 						url: "/auth/commit-password-reset",
 						data: {
 							"token": _TOKEN,
-							//"username": el.username.value,
 							"password": el.pw2.value
 						},
 						dataType: "json",

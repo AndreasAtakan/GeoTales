@@ -56,6 +56,8 @@ $paid = getUserPaid($PDO, $user_id);
 			main {
 				margin-top: calc(3rem + 50px);
 			}
+
+			#reset_info { display: none; }
 		</style>
 	</head>
 	<body>
@@ -167,6 +169,11 @@ $paid = getUserPaid($PDO, $user_id);
 
 				<div class="row" style="max-width: 550px;">
 					<div class="col">
+						<div role="alert" class="alert alert-info alert-dismissible fade show" id="reset_info">
+							A password-reset link has been sent to you by email.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+
 						<form method="post" autocomplete="off" id="edit">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
@@ -180,19 +187,18 @@ $paid = getUserPaid($PDO, $user_id);
 								<label for="photoUpload" class="form-label">Profile picture</label>
 								<input type="file" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" />
 							</div>
-							<div class="mb-1">
-								<label for="pw1" class="form-label">New password</label>
-								<div class="input-group">
-									<input type="password" class="form-control" id="pw1" aria-label="New password" aria-describedby="pwShow" />
-									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
-								</div>
-							</div>
-							<div class="mb-3">
-								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" />
-								<label for="pw2" class="form-label small text-muted">Confirm password</label>
-							</div>
 							<button type="submit" class="btn btn-secondary float-end">Save</button>
 						</form>
+					</div>
+				</div>
+
+				<div class="row my-5">
+					<div class="col"></div>
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<button type="button" class="btn btn-link" id="reset_password">Reset password</button>
 					</div>
 				</div>
 
@@ -281,7 +287,8 @@ $paid = getUserPaid($PDO, $user_id);
 		<script type="text/javascript">
 			"use strict";
 
-			const _USERNAME = `<?php echo $username; ?>`;
+			const _USERNAME = `<?php echo $username; ?>`,
+				  _EMAIL = `<?php echo $email; ?>`;
 
 			window.onload = function(ev) {
 
@@ -294,23 +301,44 @@ $paid = getUserPaid($PDO, $user_id);
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
 
-				$("form#edit input#username").change(ev => {
-					let username = $(ev.target).val();
+				$("button#reset_password").click(ev => {
+					$("#loadingModal").modal("show");
+
+					$.ajax({
+						type: "POST",
+						url: "/auth/send-password-reset",
+						data: { "email": _EMAIL },
+						dataType: "json",
+						success: function(result, status, xhr) {
+							$("#reset_info").css("display", "block");
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+						},
+						error: function(xhr, status, error) {
+							console.error(xhr.status, error);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+						}
+					});
+				});
+
+				$("form#edit input#username, form#edit input#email").change(ev => {
+					let data = {}, e = $(ev.target);
+					data[ e.prop("id") ] = e.val();
 
 					$.ajax({
 						type: "GET",
-						url: "api/user_is_username_unique.php",
-						data: { "username": username },
+						url: "api/user_is_unique.php",
+						data: data,
 						dataType: "json",
 						success: function(result, status, xhr) {
 							if(result.isUnique) {
-								$(ev.target).removeClass("is-invalid");
+								e.removeClass("is-invalid");
 								ev.target.setCustomValidity("");
 							}
 							else
-							if(username !== _USERNAME) {
-								$(ev.target).addClass("is-invalid");
-								ev.target.setCustomValidity("Username taken");
+							if(e.val() !== _USERNAME
+							|| e.val() !== _EMAIL) {
+								e.addClass("is-invalid");
+								ev.target.setCustomValidity("Already taken");
 							}
 						},
 						error: function(xhr, status, error) {
@@ -320,41 +348,16 @@ $paid = getUserPaid($PDO, $user_id);
 					});
 				});
 
-				let pwShow = false;
-				$("button#pwShow").click(ev => {
-					pwShow = !pwShow;
-					$("form#edit input#pw1, form#edit input#pw2").prop("type", pwShow ? "text" : "password");
-				});
-
-				$("form#edit input#pw1, form#edit input#pw2").change(ev => {
-					let el = document.forms.edit.elements;
-					if(el.pw1.value !== el.pw2.value) {
-						$("form#edit input#pw1, form#edit input#pw2").addClass("is-invalid");
-						el.pw1.setCustomValidity("Passwords unequal");
-						el.pw2.setCustomValidity("Passwords unequal");
-					}else{
-						$("form#edit input#pw1, form#edit input#pw2").removeClass("is-invalid");
-						el.pw1.setCustomValidity("");
-						el.pw2.setCustomValidity("");
-					}
-				});
-
 				document.forms.edit.onsubmit = function(ev) { ev.preventDefault();
 					let form = ev.target;
 					let el = form.elements;
 
-					if(el.pw1.value !== el.pw2.value) { return; }
-
 					$("#loadingModal").modal("show");
-
-					let password = el.pw1.value && el.pw2.value ? sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash( el.pw2.value )) : "";
-					let photo = $(el.photoUpload).prop("files")[0];
 
 					let data = new FormData();
 					data.append("username", el.username.value);
 					data.append("email", el.email.value);
-					data.append("password", password);
-					data.append("photo", photo);
+					data.append("photo", $(el.photoUpload).prop("files")[0]);
 
 					$.ajax({
 						type: "POST",

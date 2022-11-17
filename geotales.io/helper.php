@@ -60,14 +60,6 @@ function validUserID($PDO, $id) {
 }
 
 //
-function validSignIn($PDO, $username, $password) {
-	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE username = ? AND password = ?");
-	$stmt->execute([$username, $password]);
-	$row = $stmt->fetch();
-	return $row['c'] <= 1 ? $row['c'] : false;
-}
-
-//
 function validUserEmail($PDO, $username, $email) {
 	$stmt = $PDO->prepare("SELECT COUNT(id) = 1 AS c FROM \"User\" WHERE username = ? AND email = ?");
 	$stmt->execute([$username, $email]);
@@ -76,19 +68,10 @@ function validUserEmail($PDO, $username, $email) {
 }
 
 //
-function registerUser($PDO, $username, $password, $email) {
-	$stmt = $PDO->prepare("INSERT INTO \"User\" (username, password, email) VALUES (?, ?, ?) RETURNING id");
-	$stmt->execute([$username, $password, $email]);
-	$row = $stmt->fetch();
-	return $row['id'];
-}
-
-//
-function updateUser($PDO, $user_id, $username, $email, $photo, $password) {
+function updateUser($PDO, $user_id, $username, $email, $photo) {
 	if(sane_is_null($username)
 	&& sane_is_null($email)
-	&& sane_is_null($photo)
-	&& sane_is_null($password)) { return false; }
+	&& sane_is_null($photo)) { return false; }
 
 	if(!sane_is_null($username)) {
 		if(isUsernameRegistered($PDO, $username)
@@ -104,11 +87,6 @@ function updateUser($PDO, $user_id, $username, $email, $photo, $password) {
 	if(!sane_is_null($photo)) {
 		$stmt = $PDO->prepare("UPDATE \"User\" SET photo = ? WHERE id = ?");
 		$stmt->execute([$photo, $user_id]);
-	}
-	if(!sane_is_null($password)) {
-		$pw = $password; mb_substr($pw, 0, 64);
-		$stmt = $PDO->prepare("UPDATE \"User\" SET password = ? WHERE id = ?");
-		$stmt->execute([$pw, $user_id]);
 	}
 
 	return true;

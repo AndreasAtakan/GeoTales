@@ -23,10 +23,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 	header("location: $loc"); exit;
 }
 
-$signin_failed = $_GET['signin_failed'] ?? false; $signin_failed = $signin_failed == "true" ? true : false;
-$signin_username = null;
-if($signin_failed) { $signin_username = $_GET['username']; }
-
 ?>
 
 <!DOCTYPE html>
@@ -63,6 +59,8 @@ if($signin_failed) { $signin_username = $_GET['username']; }
 				background-repeat: no-repeat;
 				background-position: center;
 			}
+
+			#signin_failed { display: none; }
 		</style>
 	</head>
 	<body>
@@ -119,13 +117,11 @@ if($signin_failed) { $signin_username = $_GET['username']; }
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-					<?php if($signin_failed) { ?>
-						<div role="alert" class="alert alert-danger alert-dismissible fade show">
-							Username or password is <strong>incorrect</strong>.
-							<a href="signreset.php?return_url=<?php echo $loc; ?>&username=<?php echo $signin_username; ?>">Reset password</a>
+						<div role="alert" class="alert alert-danger alert-dismissible fade show" id="signin_failed">
+							Signin <strong>failed</strong>.
+							<a href="signsend.php">Reset password</a>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
-					<?php } ?>
 
 						<form method="post" autocomplete="on" id="signin">
 							<div class="mb-3">
@@ -133,7 +129,7 @@ if($signin_failed) { $signin_username = $_GET['username']; }
 								<input type="text" class="form-control" id="username_email" required />
 							</div>
 							<div class="mb-3">
-								<label for="pw" class="form-label">Password</label>
+								<label for="password" class="form-label">Password</label>
 								<div class="input-group">
 									<input type="password" class="form-control" id="password" aria-label="Password" aria-describedby="pwShow" required />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
@@ -212,8 +208,7 @@ if($signin_failed) { $signin_username = $_GET['username']; }
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`,
-					  re_email = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+				const _RETURN_URL = `<?php echo $loc; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -227,7 +222,7 @@ if($signin_failed) { $signin_username = $_GET['username']; }
 				let pwShow = false;
 				$("button#pwShow").click(ev => {
 					pwShow = !pwShow;
-					$("form#signin input#pw").prop("type", pwShow ? "text" : "password");
+					$("form#signin input#password").prop("type", pwShow ? "text" : "password");
 				});
 
 				document.forms.signin.onsubmit = function(ev) { ev.preventDefault();
@@ -236,21 +231,21 @@ if($signin_failed) { $signin_username = $_GET['username']; }
 
 					$("#loadingModal").modal("show");
 
-					let data = { "password": el.password.value },
-						is_email = re_email.test(el.username_email.value);
-					data[ is_email ? "email" : "username" ] = el.username_email.value;
-
 					$.ajax({
 						type: "POST",
 						url: "/auth/login",
-						data: data,
+						data: {
+							"id": el.username_email.value,
+							"password": el.password.value
+						},
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign(_RETURN_URL);
 						},
 						error: function(xhr, status, error) {
 							console.error(xhr.status, error);
-							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
+							$("#signin_failed").css("display", "block");
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 						}
 					});
 				};
