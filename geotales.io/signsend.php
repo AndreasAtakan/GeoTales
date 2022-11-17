@@ -23,9 +23,6 @@ if(!sane_is_null($user_id)) { // user is already logged in
 	header("location: $loc"); exit;
 }
 
-$token = $_GET['token'] ?? null;
-$username = $_GET['username'] ?? null;
-
 ?>
 
 <!DOCTYPE html>
@@ -62,6 +59,8 @@ $username = $_GET['username'] ?? null;
 				background-repeat: no-repeat;
 				background-position: center;
 			}
+
+			#reset_info { display: none; }
 		</style>
 	</head>
 	<body>
@@ -118,20 +117,21 @@ $username = $_GET['username'] ?? null;
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
-						<form method="post" autocomplete="off" id="signreset">
-							<p class="lead text-muted">User: <?php echo $username; ?></p>
-							<div class="mb-1">
-								<label for="pw1" class="form-label">New password</label>
-								<div class="input-group">
-									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
-									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
-								</div>
+						<div role="alert" class="alert alert-info alert-dismissible fade show" id="reset_info">
+							A password-reset link has been sent to you by email.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+
+						<form method="post" autocomplete="off" id="signsend">
+							<div class="mb-3">
+								<label for="username" class="form-label">Username</label>
+								<input type="text" class="form-control" id="username" required />
 							</div>
 							<div class="mb-3">
-								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" required />
-								<label for="pw2" class="form-label small text-muted">Confirm password</label>
+								<label for="email" class="form-label">E-Mail</label>
+								<input type="email" class="form-control" id="email" required />
 							</div>
-							<button type="submit" class="btn btn-primary">Reset password</button>
+							<button type="submit" class="btn btn-primary">Request reset</button>
 						</form>
 
 						<p class="text-muted my-3">
@@ -200,8 +200,7 @@ $username = $_GET['username'] ?? null;
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`,
-					  _TOKEN = `<?php echo $token; ?>`;
+				const _RETURN_URL = `<?php echo $loc; ?>`;
 
 				$.ajax({
 					type: "POST",
@@ -212,47 +211,50 @@ $username = $_GET['username'] ?? null;
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
 
-				let pwShow = false;
-				$("button#pwShow").click(ev => {
-					pwShow = !pwShow;
-					$("form#signreset input#pw1, form#signreset input#pw2").prop("type", pwShow ? "text" : "password");
+				$("form#signsend input#username, form#signsend input#email").change(ev => {
+					let el = document.forms.signsend.elements;
+
+					$.ajax({
+						type: "GET",
+						url: "api/user_username_email_correct.php",
+						data: {
+							"username": el.username.value,
+							"email": el.email.value
+						},
+						dataType: "json",
+						success: function(result, status, xhr) {
+							if(result.isCorrect) {
+								$(ev.target).removeClass("is-invalid");
+								el.username.setCustomValidity("");
+							}else{
+								$(ev.target).addClass("is-invalid");
+								el.username.setCustomValidity("Username and E-Mail mismatch");
+							}
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.status, error);
+							$("#errorModal").modal("show");
+						}
+					});
 				});
 
-				$("form#signreset input#pw1, form#signreset input#pw2").change(ev => {
-					let el = document.forms.signreset.elements;
-					let pw1 = $("form#signreset input#pw1").val(),
-						pw2 = $("form#signreset input#pw2").val();
-
-					if(pw1 !== pw2) {
-						$("form#signreset input#pw1, form#signreset input#pw2").addClass("is-invalid");
-						el.pw1.setCustomValidity("Passwords unequal");
-						el.pw2.setCustomValidity("Passwords unequal");
-					}else{
-						$("form#signreset input#pw1, form#signreset input#pw2").removeClass("is-invalid");
-						el.pw1.setCustomValidity("");
-						el.pw2.setCustomValidity("");
-					}
-				});
-
-				document.forms.signreset.onsubmit = function(ev) { ev.preventDefault();
+				document.forms.signsend.onsubmit = function(ev) { ev.preventDefault();
 					let form = ev.target;
 					let el = form.elements;
-
-					if(el.pw1.value !== el.pw2.value) { $("#errorModal").modal("show"); return; }
 
 					$("#loadingModal").modal("show");
 
 					$.ajax({
 						type: "POST",
-						url: "/auth/commit-password-reset",
+						url: "/auth/send-password-reset",
 						data: {
-							"token": _TOKEN,
-							//"username": el.username.value,
-							"password": el.pw2.value
+							"username": el.username.value,
+							"email": el.email.value
 						},
 						dataType: "json",
 						success: function(result, status, xhr) {
-							window.location.assign(_RETURN_URL);
+							$("#reset_info").css("display", "block");
+							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 						},
 						error: function(xhr, status, error) {
 							console.error(xhr.status, error);

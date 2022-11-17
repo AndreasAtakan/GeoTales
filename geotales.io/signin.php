@@ -27,8 +27,6 @@ $signin_failed = $_GET['signin_failed'] ?? false; $signin_failed = $signin_faile
 $signin_username = null;
 if($signin_failed) { $signin_username = $_GET['username']; }
 
-$password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_reset == "true" ? true : false;
-
 ?>
 
 <!DOCTYPE html>
@@ -129,13 +127,6 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 						</div>
 					<?php } ?>
 
-					<?php if($password_reset) { ?>
-						<div role="alert" class="alert alert-info alert-dismissible fade show">
-							Your password was reset and your new password was sent by email.
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						</div>
-					<?php } ?>
-
 						<form method="post" autocomplete="on" id="signin">
 							<div class="mb-3">
 								<label for="username_email" class="form-label">Username or E-Mail</label>
@@ -156,7 +147,7 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 						</p>
 
 						<p class="text-muted mb-3">
-							<strong><a href="signreset.php?return_url=<?php echo $loc; ?>">Reset password</a></strong>
+							<strong><a href="signsend.php">Reset password</a></strong>
 						</p>
 					</div>
 				</div>
