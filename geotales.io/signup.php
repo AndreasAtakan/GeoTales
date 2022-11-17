@@ -204,7 +204,8 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`;
+				const _RETURN_URL = `<?php echo $loc; ?>`,
+					  re_email = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
 				$.ajax({
 					type: "POST",
@@ -215,14 +216,16 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					error: function(xhr, status, error) { console.log(xhr.status, error); }
 				});
 
-				$("form#signup input#username").change(ev => {
+				$("form#signup input#username, form#signup input#email").change(ev => {
 					let el = document.forms.signup.elements;
-					let username = $(ev.target).val();
+
+					let data = {}, e = $(ev.target);
+					data[ e.prop("id") ] = e.val();
 
 					$.ajax({
 						type: "GET",
-						url: "api/user_is_username_unique.php",
-						data: { "username": username },
+						url: "api/user_is_unique.php",
+						data: data,
 						dataType: "json",
 						success: function(result, status, xhr) {
 							if(result.isUnique) {
@@ -266,7 +269,9 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					let form = ev.target;
 					let el = form.elements;
 
-					if(el.pw1.value !== el.pw2.value) { $("#errorModal").modal("show"); return; }
+					if(el.pw1.value !== el.pw2.value
+					|| re_email.test(el.username.value)
+					|| !re_email.test(el.email.value)) { $("#errorModal").modal("show"); return; }
 
 					$("#loadingModal").modal("show");
 

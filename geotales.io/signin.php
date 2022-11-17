@@ -138,8 +138,8 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 
 						<form method="post" autocomplete="on" id="signin">
 							<div class="mb-3">
-								<label for="username" class="form-label">Username</label>
-								<input type="text" class="form-control" id="username" required />
+								<label for="username_email" class="form-label">Username or E-Mail</label>
+								<input type="text" class="form-control" id="username_email" required />
 							</div>
 							<div class="mb-3">
 								<label for="pw" class="form-label">Password</label>
@@ -221,7 +221,8 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`;
+				const _RETURN_URL = `<?php echo $loc; ?>`,
+					  re_email = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
 				$.ajax({
 					type: "POST",
@@ -244,13 +245,14 @@ $password_reset = $_GET['password_reset'] ?? false; $password_reset = $password_
 
 					$("#loadingModal").modal("show");
 
+					let data = { "password": el.password.value },
+						is_email = re_email.test(el.username_email.value);
+					data[ is_email ? "email" : "username" ] = el.username_email.value;
+
 					$.ajax({
 						type: "POST",
 						url: "/auth/login",
-						data: {
-							"username": el.username.value,
-							"password": el.password.value
-						},
+						data: data,
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign(_RETURN_URL);

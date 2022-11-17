@@ -13,8 +13,6 @@
 		- User-defined options for import: only show one gene-line, ...
 		- Skal alle hendelser komme inn som scener? (Hver død/fødsel)
 		- Somehow mark relation between avatars (line between?, color-coding?, ect.)
-- Pres-mode:
-	* LEGGE INN LENKE TIL GEOTALES SAMMEN MED LEAFLET/BASEMAP LENKE NEDE TIL HØYRE I LEAFLET
 
 
 - Working TODO:

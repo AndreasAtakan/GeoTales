@@ -11,11 +11,21 @@ include "../init.php";
 include_once("../helper.php");
 
 
-if(!isset($_GET['username'])) { http_response_code(422); exit; }
-$username = $_GET['username'];
+if(!isset($_GET['username'])
+&& !isset($_GET['email'])) { http_response_code(422); exit; }
+$username = $_GET['username'] ?? null;
+$email = $_GET['email'] ?? null;
 
-$stmt = $PDO->prepare("SELECT COUNT(id) = 0 AS c FROM \"User\" WHERE username = ?");
-$stmt->execute([$username]);
+if(!sane_is_null($username)) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) = 0 AS c FROM \"User\" WHERE username = ?");
+	$stmt->execute([$username]);
+}
+else
+if(!sane_is_null($email)) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) = 0 AS c FROM \"User\" WHERE email = ?");
+	$stmt->execute([$email]);
+}
+
 $row = $stmt->fetch();
 
 echo json_encode(array(

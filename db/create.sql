@@ -16,9 +16,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS "User"(
 	id uuid DEFAULT uuid_generate_v4(),
-	username text NOT NULL,
+	username text UNIQUE NOT NULL,
 	password varchar(64) NOT NULL,
-	email text,
+	email text UNIQUE NOT NULL,
 	photo text,
 	paid bool DEFAULT false,
 	stripe_id text,
