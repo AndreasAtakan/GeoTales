@@ -41,12 +41,12 @@ function random_string($length = 10) {
 
 //
 function headerUserID() {
-	return getallheaders()['X-User-ID'] ?? null;
+	return $_SERVER["USER_ID"] ?? null;
 }
 
 //
 function headerCSRFToken() {
-	return getallheaders()['X-CSRF-Token'] ?? null;
+	return $_SERVER["CSRF_TOKEN"] ?? null;
 }
 
 
