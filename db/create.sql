@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS "User"(
 	username text UNIQUE NOT NULL,
 	password varchar(64) NOT NULL,
 	email text UNIQUE NOT NULL,
+	email_confirmed bool DEFAULT false,
 	photo text,
 	paid bool DEFAULT false,
 	stripe_id text,
