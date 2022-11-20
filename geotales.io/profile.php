@@ -57,7 +57,10 @@ $paid = getUserPaid($PDO, $user_id);
 				margin-top: calc(3rem + 50px);
 			}
 
-			#reset_info { display: none; }
+			#reset_info {
+				display: none;
+				max-width: 550px;
+			}
 		</style>
 	</head>
 	<body>
@@ -167,13 +170,8 @@ $paid = getUserPaid($PDO, $user_id);
 					</div>
 				</div>
 
-				<div class="row" style="max-width: 550px;">
+				<div class="row mb-4" style="max-width: 550px;">
 					<div class="col">
-						<div role="alert" class="alert alert-info alert-dismissible fade show" id="reset_info">
-							A password-reset link has been sent to you by email.
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						</div>
-
 						<form method="post" autocomplete="off" id="edit">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
@@ -192,18 +190,15 @@ $paid = getUserPaid($PDO, $user_id);
 					</div>
 				</div>
 
-				<div class="row my-5">
-					<div class="col"></div>
-				</div>
-
-				<div class="row">
+				<div class="row mb-5">
 					<div class="col">
-						<button type="button" class="btn btn-link" id="reset_password">Reset password</button>
-					</div>
-				</div>
+						<div role="alert" class="alert alert-info alert-dismissible fade show" id="reset_info">
+							A password-reset link has been sent to you by email.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
 
-				<div class="row my-5">
-					<div class="col"></div>
+						<button type="button" class="btn btn-outline-secondary" id="reset_password">Reset password</button>
+					</div>
 				</div>
 
 				<div class="row">
@@ -287,8 +282,8 @@ $paid = getUserPaid($PDO, $user_id);
 		<script type="text/javascript">
 			"use strict";
 
-			const _USERNAME = `<?php echo $username; ?>`,
-				  _EMAIL = `<?php echo $email; ?>`;
+			const _USERNAME = "<?php echo str_replace('"', '\"', $username); ?>",
+				  _EMAIL = "<?php echo str_replace('"', '\"', $email); ?>";
 
 			window.onload = function(ev) {
 
@@ -307,7 +302,7 @@ $paid = getUserPaid($PDO, $user_id);
 					$.ajax({
 						type: "POST",
 						url: "/auth/send-password-reset",
-						data: { "email": _EMAIL },
+						data: JSON.stringify({ "email": _EMAIL }),
 						dataType: "json",
 						success: function(result, status, xhr) {
 							$("#reset_info").css("display", "block");

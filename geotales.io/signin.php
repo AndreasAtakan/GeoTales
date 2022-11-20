@@ -14,7 +14,7 @@ include_once("helper.php");
 
 $loc = "maps.php";
 if(isset($_REQUEST['return_url'])) {
-	$loc = $_REQUEST['return_url'];
+	$loc = sanitize($_REQUEST['return_url']);
 }
 
 $user_id = headerUserID();
@@ -208,7 +208,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`;
+				const _RETURN_URL = "<?php echo str_replace('"', '\"', $loc); ?>";
 
 				$.ajax({
 					type: "POST",
@@ -234,10 +234,10 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					$.ajax({
 						type: "POST",
 						url: "/auth/login",
-						data: {
+						data: JSON.stringify({
 							"id": el.username_email.value,
 							"password": el.password.value
-						},
+						}),
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign(_RETURN_URL);

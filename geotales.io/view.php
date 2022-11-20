@@ -458,9 +458,9 @@ $embedLink = "<iframe src=\"{$CONFIG['host']}/pres.php?id={$id}\" width=\"100%\"
 
 			window.onload = function(ev) {
 
-				const _ID = `<?php echo $id; ?>`,
-					  _USERNAME = `<?php echo $username; ?>`,
-					  _USER_PHOTO = `<?php echo $photo; ?>`;
+				const _ID = "<?php echo $id; ?>",
+					  _USERNAME = "<?php echo str_replace('"', '\"', $username); ?>",
+					  _USER_PHOTO = "<?php echo $photo; ?>";
 
 				$("#shareModal input#embedInput").val(`<?php echo $embedLink; ?>`);
 

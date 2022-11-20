@@ -13,8 +13,8 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-/*if(!isset($_POST['id'])
-|| !isset($_POST['password'])) { http_response_code(422); exit; }*/
+if(!isset($_POST['id'])
+|| !isset($_POST['password'])) { http_response_code(422); exit; }
 
 $user_id = headerUserID();
 
@@ -24,11 +24,8 @@ $password = $_POST['password'];
 $id = mapClone($PDO, $user_id, $id, $password);
 
 $ref = "";
-if(!$id) {
-	$ref = paymentCreateCheckout($PDO, $user_id);
-}else{
-	$ref = "edit.php?id={$id}";
-}
+if(!$id) { $ref = paymentCreateCheckout($PDO, $user_id); }
+else{ $ref = "edit.php?id={$id}"; }
 
 echo json_encode(array("url" => $ref));
 exit;

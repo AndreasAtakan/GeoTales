@@ -14,7 +14,12 @@ include_once("../helper.php");
 $user_id = headerUserID();
 
 $stmt = $PDO->prepare("INSERT INTO \"Analytics\" (user_id, location, ip, agent) VALUES (?, ?, ?, ?)");
-$stmt->execute([$user_id, $_SERVER['HTTP_REFERER'], $_SERVER['REMOTE_ADDR'], $_POST['agent'] ?? $_SERVER['HTTP_USER_AGENT']]);
+$stmt->execute([
+	$user_id,
+	$_SERVER['SCRIPT_NAME'],
+	$_SERVER['HTTP_X_FORWARDED_FOR'],
+	isset($_POST['agent']) ? sanitize($_POST['agent']) : $_SERVER['HTTP_USER_AGENT']
+]);
 
 echo json_encode(array("status" => "success"));
 exit;

@@ -13,15 +13,15 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-/*if(!isset($_POST['id'])
+if(!isset($_POST['id'])
 || !isset($_POST['content'])
-|| sane_is_null($_POST['content'])) { http_response_code(422); exit; }*/
+|| sane_is_null($_POST['content'])) { http_response_code(422); exit; }
 
 $user_id = headerUserID();
 
 $id = $_POST['id'];
 $content = sanitize($_POST['content']);
-$ref = $_POST['ref'] ?? null;
+$ref = isset($_POST['ref']) ? sanitize($_POST['ref']) : null;
 
 $stmt = $PDO->prepare("INSERT INTO \"Comment\" (user_id, map_id, ref, content) VALUES (?, ?, ?, ?)");
 $stmt->execute([$user_id, $id, $ref, $content]);

@@ -31,6 +31,8 @@ server {
 	location ~ \.php$ {
 		include snippets/fastcgi-php.conf;
 		fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+		fastcgi_param CSRF_TOKEN $http_x_csrf_token;
+		fastcgi_param USER_ID $http_x_user_id;
 	}
 
 	# deny access to .htaccess files, if Apache's document root

@@ -14,7 +14,7 @@ include_once("helper.php");
 
 $loc = "maps.php";
 if(isset($_REQUEST['return_url'])) {
-	$loc = $_REQUEST['return_url'];
+	$loc = sanitize($_REQUEST['return_url']);
 }
 
 $user_id = headerUserID();
@@ -192,7 +192,7 @@ $user_id = headerUserID();
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`;
+				const _RETURN_URL = "<?php echo str_replace('"', '\"', $loc); ?>";
 
 				$.ajax({
 					type: "POST",
@@ -212,7 +212,7 @@ $user_id = headerUserID();
 					$.ajax({
 						type: "POST",
 						url: "/auth/send-password-reset",
-						data: { "email": el.email.value },
+						data: JSON.stringify({ "email": el.email.value }),
 						dataType: "json",
 						success: function(result, status, xhr) {
 							$("#reset_info").css("display", "block");

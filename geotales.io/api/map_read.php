@@ -11,8 +11,8 @@ include "../init.php";
 include_once("../helper.php");
 
 
-/*if(!isset($_GET['id'])
-|| !isset($_GET['password'])) { http_response_code(422); exit; }*/
+if(!isset($_GET['id'])
+|| !isset($_GET['password'])) { http_response_code(422); exit; }
 
 $id = $_GET['id'];
 $password = $_GET['password'];

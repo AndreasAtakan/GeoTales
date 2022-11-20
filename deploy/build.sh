@@ -1,5 +1,7 @@
 #!/bin/sh
 
+T=${1:-"test"}
+
 cd ../geotales.io/src/
 bash compile.sh
 cd ../../deploy/
@@ -8,9 +10,16 @@ rm -rf build/
 mkdir build
 
 cd ../geotales.io/
-cp -r assets/ \
+cp -r api/ \
+	  assets/ \
 	  lib/ \
+	  vendor/ \
 	  main.css \
 	  robots.txt \
 	  *.php \
 	  ../deploy/build/
+
+cd ../deploy/build/
+sed -i "s/5432/63333/" init.php
+sed -i "s/www-data/postgres/" init.php
+if [ $T == "prod" ]; then sed -i "s/geotales-test/geotales/" init.php; fi

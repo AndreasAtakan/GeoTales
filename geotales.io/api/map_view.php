@@ -11,7 +11,7 @@ include "../init.php";
 include_once("../helper.php");
 
 
-//if(!isset($_POST['id'])) { http_response_code(422); exit; }
+if(!isset($_POST['id'])) { http_response_code(422); exit; }
 
 $id = $_POST['id'];
 

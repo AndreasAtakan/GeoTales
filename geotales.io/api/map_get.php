@@ -13,7 +13,7 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-//if(!isset($_GET['id'])) { http_response_code(422); exit; }
+if(!isset($_GET['id'])) { http_response_code(422); exit; }
 
 $id = $_GET['id'];
 

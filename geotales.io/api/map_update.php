@@ -13,9 +13,9 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-/*if(!isset($_POST['id'])
+if(!isset($_POST['id'])
 || !isset($_POST['title'])
-|| !isset($_POST['description'])) { http_response_code(422); exit; }*/
+|| !isset($_POST['description'])) { http_response_code(422); exit; }
 
 $user_id = headerUserID();
 

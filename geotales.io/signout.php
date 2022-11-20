@@ -46,6 +46,7 @@ if(sane_is_null($user_id)) { // user is not logged in
 		<p>Signing out...</p>
 
 		<!-- Load JS -->
+		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
 		<script type="text/javascript" src="assets/ajax_setup.js"></script>
 		<script type="text/javascript">
 			"use strict";
@@ -64,7 +65,7 @@ if(sane_is_null($user_id)) { // user is not logged in
 				$.ajax({
 					type: "POST",
 					url: "/auth/logout",
-					//data: {},
+					data: JSON.stringify({}),
 					dataType: "json",
 					success: function(result, status, xhr) {
 						window.location.assign("index.php");

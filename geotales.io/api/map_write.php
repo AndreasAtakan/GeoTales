@@ -13,8 +13,8 @@ include_once("../helper.php");
 
 // KREVER AT CLIENTEN ER LOGGET INN
 
-/*if(!isset($_POST['id'])
-|| !isset($_POST['data'])) { http_response_code(422); exit; }*/
+if(!isset($_POST['id'])
+|| !isset($_POST['data'])) { http_response_code(422); exit; }
 
 $user_id = headerUserID();
 

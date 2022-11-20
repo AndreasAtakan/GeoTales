@@ -11,7 +11,7 @@
 
 $TESTING = true;
 $CONFIG = array(
-	"host" => $TESTING ? "http://localhost/geotales" : "https://{$_SERVER['SERVER_NAME']}",
+	"host" => "https://{$_SERVER['SERVER_NAME']}",
 	"email" => "contact@geotales.io",
 
 	"aws_access_key_id" => "AKIA5RSTXAFR2WC5KUEB", // secret
@@ -32,10 +32,10 @@ $CONFIG = array(
 // DB init
 
 $host = "localhost";
-$port = $TESTING ? "5432" : "63333";
-$user = $TESTING ? "www-data" : "postgres";
+$port = "5432";
+$user = "www-data";
 $pass = "vleowemnxoyvq"; // secret
-$db   = $TESTING ? "www-data" : "geotales";
+$db   = "geotales-test";
 //$charset = "utf8mb4";
 
 $dsn = "pgsql:host={$host};port={$port};dbname={$db};options='--client_encoding=UTF8'";

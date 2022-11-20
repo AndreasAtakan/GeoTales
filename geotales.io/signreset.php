@@ -14,7 +14,7 @@ include_once("helper.php");
 
 $loc = "maps.php";
 if(isset($_REQUEST['return_url'])) {
-	$loc = $_REQUEST['return_url'];
+	$loc = sanitize($_REQUEST['return_url']);
 }
 
 $user_id = headerUserID();
@@ -204,8 +204,8 @@ $token = $_GET['token'];
 
 			window.onload = function(ev) {
 
-				const _RETURN_URL = `<?php echo $loc; ?>`,
-					  _TOKEN = `<?php echo $token; ?>`;
+				const _RETURN_URL = "<?php echo str_replace('"', '\"', $loc); ?>",
+					  _TOKEN = "<?php echo str_replace('"', '\"', $token); ?>";
 
 				$.ajax({
 					type: "POST",
@@ -249,10 +249,10 @@ $token = $_GET['token'];
 					$.ajax({
 						type: "POST",
 						url: "/auth/commit-password-reset",
-						data: {
+						data: JSON.stringify({
 							"token": _TOKEN,
 							"password": el.pw2.value
-						},
+						}),
 						dataType: "json",
 						success: function(result, status, xhr) {
 							window.location.assign(_RETURN_URL);

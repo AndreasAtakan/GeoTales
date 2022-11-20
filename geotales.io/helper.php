@@ -29,45 +29,17 @@ function sanitize($str) {
 }
 
 //
-function random_string($length = 10) {
-	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	$charactersLength = strlen($characters);
-	$randomString = '';
-	for($i = 0; $i < $length; $i++) {
-		$randomString .= $characters[rand(0, $charactersLength - 1)];
-	}
-	return $randomString;
-}
-
-//
 function headerUserID() {
-	return getallheaders()['X-User-ID'] ?? null;
+	return $_SERVER["HTTP_X_USER_ID"] ?? null;
 }
 
 //
 function headerCSRFToken() {
-	return getallheaders()['X-CSRF-Token'] ?? null;
+	return $_SERVER["HTTP_X_CSRF_TOKEN"] ?? null;
 }
 
 
 
-//
-function validUserID($PDO, $id) {
-	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE id = ?");
-	$stmt->execute([$id]);
-	$row = $stmt->fetch();
-	return $row['c'] == 1;
-}
-
-//
-function validUserEmail($PDO, $username, $email) {
-	$stmt = $PDO->prepare("SELECT COUNT(id) = 1 AS c FROM \"User\" WHERE username = ? AND email = ?");
-	$stmt->execute([$username, $email]);
-	$row = $stmt->fetch();
-	return $row['c'] ?? false;
-}
-
-//
 function updateUser($PDO, $user_id, $username, $email, $photo) {
 	if(sane_is_null($username)
 	&& sane_is_null($email)
@@ -81,6 +53,9 @@ function updateUser($PDO, $user_id, $username, $email, $photo) {
 		$stmt->execute([$username, $user_id]);
 	}
 	if(!sane_is_null($email)) {
+		if(isEmailRegistered($PDO, $email)
+		&& $email != getUserEmail($PDO, $user_id)) { return false; }
+
 		$stmt = $PDO->prepare("UPDATE \"User\" SET email = ? WHERE id = ?");
 		$stmt->execute([$email, $user_id]);
 	}
@@ -137,10 +112,18 @@ function getUserStripeID($PDO, $id) {
 
 //
 function isUsernameRegistered($PDO, $username) {
-	$stmt = $PDO->prepare("SELECT COUNT(id) AS c FROM \"User\" WHERE username = ?");
+	$stmt = $PDO->prepare("SELECT COUNT(id) >= 1 AS c FROM \"User\" WHERE username = ?");
 	$stmt->execute([$username]);
 	$row = $stmt->fetch();
-	return $row['c'] >= 1;
+	return $row['c'] ?? false;
+}
+
+//
+function isEmailRegistered($PDO, $email) {
+	$stmt = $PDO->prepare("SELECT COUNT(id) >= 1 AS c FROM \"User\" WHERE email = ?");
+	$stmt->execute([$email]);
+	$row = $stmt->fetch();
+	return $row['c'] ?? false;
 }
 
 
@@ -541,7 +524,7 @@ function uploadToS3($file_path, $file_name) {
 
 
 //
-function sendSESEmail($to_address, $subject, $body) {
+/*function sendSESEmail($to_address, $subject, $body) {
 	global $CONFIG;
 
 	$ses_client = new Aws\Ses\SesClient([
@@ -586,4 +569,4 @@ function sendSESEmail($to_address, $subject, $body) {
 	catch(Aws\Exception\AwsException $e) { echo $e->getMessage(); }
 
 	return false;
-}
+}*/

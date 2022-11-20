@@ -71,7 +71,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" />
 
 		<!-- Load CSS -->
-		<link rel="stylesheet" href="assets/main_pres_1667914630.css" />
+		<link rel="stylesheet" href="assets/main_pres_1668946508.css" />
 
 		<style type="text/css"></style>
 	</head>
@@ -222,8 +222,8 @@ $row = $stmt->fetch();
 				error: function(xhr, status, error) { console.log(xhr.status, error); }
 			});
 
-			const _ID = `<?php echo $id; ?>`,
-				  _TITLE = `<?php echo $row['title']; ?>`,
+			const _ID = "<?php echo str_replace('"', '\"', $id); ?>",
+				  _TITLE = "<?php echo str_replace('"', '\"', $row['title']); ?>",
 				  _HOST = window.location.host,
 				  _IS_MOBILE = window.navigator ? /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent) : false;
 			var _PASSWORD = "";
@@ -290,7 +290,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load JS -->
-		<script type="text/javascript" src="assets/main_pres_1667914630.js"></script>
+		<script type="text/javascript" src="assets/main_pres_1668946508.js"></script>
 
 	</body>
 </html>

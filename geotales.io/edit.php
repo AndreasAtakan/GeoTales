@@ -26,7 +26,7 @@ $paid = getUserPaid($PDO, $user_id);
 if(!isset($_GET['id'])) {
 	http_response_code(422); exit;
 }
-$id = $_GET['id'];
+$id = sanitize($_GET['id']);
 
 
 $stmt = $PDO->prepare("SELECT title, description FROM \"Map\" WHERE id = ?");
@@ -72,7 +72,7 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/trumbowyg/plugins/table/ui/trumbowyg.table.min.css" />
 
 		<!-- Load CSS -->
-		<link rel="stylesheet" href="assets/main_edit_1667914630.css" />
+		<link rel="stylesheet" href="assets/main_edit_1668946508.css" />
 	</head>
 	<body>
 
@@ -613,8 +613,8 @@ $row = $stmt->fetch();
 				error: function(xhr, status, error) { console.log(xhr.status, error); }
 			});
 
-			const _ID = `<?php echo $id; ?>`,
-				  _TITLE = `<?php echo $row['title']; ?>`,
+			const _ID = "<?php echo str_replace('"', '\"', $id); ?>",
+				  _TITLE = "<?php echo str_replace('"', '\"', $row['title']); ?>",
 				  _HOST = window.location.host,
 				  _USER_PAID = `<?php echo $paid; ?>`;
 
@@ -678,7 +678,7 @@ $row = $stmt->fetch();
 		</script>
 
 		<!-- Load JS -->
-		<script type="text/javascript" src="assets/main_edit_1667914630.js"></script>
+		<script type="text/javascript" src="assets/main_edit_1668946508.js"></script>
 
 	</body>
 </html>
