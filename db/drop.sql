@@ -8,6 +8,7 @@
 
 BEGIN;
 
+DROP TABLE "Email_Confirmation_Token";
 DROP TABLE "Analytics";
 DROP TABLE "User_Upload";
 DROP TABLE "Upload";

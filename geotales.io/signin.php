@@ -234,18 +234,22 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					$.ajax({
 						type: "POST",
 						url: "/auth/login",
+						contentType: "application/json",
 						data: JSON.stringify({
 							"id": el.username_email.value,
 							"password": el.password.value
 						}),
 						dataType: "json",
 						success: function(result, status, xhr) {
-							window.location.assign(_RETURN_URL);
+							if(result.status == "ok") { window.location.assign(_RETURN_URL); }
+							else{
+								$("#signin_failed").css("display", "block");
+								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							}
 						},
 						error: function(xhr, status, error) {
 							console.error(xhr.status, error);
-							$("#signin_failed").css("display", "block");
-							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							setTimeout(function() { $("#loadingModal").modal("hide"); $("#errorModal").modal("show"); }, 750);
 						}
 					});
 				};

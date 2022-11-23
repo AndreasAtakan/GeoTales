@@ -8,6 +8,7 @@
 
 BEGIN;
 
+DELETE FROM "Email_Confirmation_Token";
 DELETE FROM "Analytics";
 DELETE FROM "User_Upload";
 DELETE FROM "Upload";

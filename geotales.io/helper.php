@@ -487,38 +487,31 @@ function uploadCreate($PDO, $user_id, $type, $path, $name) {
 function uploadToS3($file_path, $file_name) {
 	global $CONFIG;
 
-	$s3_client = new Aws\S3\S3Client(array(
-		"region" => $CONFIG['aws_region'],
-		"version" => "2006-03-01",
-		"credentials" => array(
-			"key" => $CONFIG['aws_access_key_id'],
-			"secret" => $CONFIG['aws_secret_access_key']
-		)
-	));
+	try {
+		$s3_client = new Aws\S3\S3Client(array(
+			"region" => $CONFIG['aws_region'],
+			"version" => "2006-03-01",
+			"credentials" => array(
+				"key" => $CONFIG['aws_access_key_id'],
+				"secret" => $CONFIG['aws_secret_access_key']
+			)
+		));
 
-	$key = uniqid() . "." . strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-	$src = fopen($file_path, "rb");
+		$key = uniqid() . "." . strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
-	$uploader = new Aws\S3\ObjectUploader(
-		$s3_client,
-		$CONFIG['aws_bucket_name'],
-		$key,
-		$src
-	);
+		$res = $s3_client->putObject(array(
+			"Bucket" => $CONFIG['aws_bucket_name'],
+			"Key" => $key,
+			"SourceFile" => $file_path,
+			"ACL" => "public-read",
+			"ContentType" => mime_content_type($file_path)
+		));
 
-	do {
-		try { $res = $uploader->upload(); }
-		catch(Aws\Exception\MultipartUploadException $e) {
-			rewind($src);
-			$uploader = new Aws\S3\MultipartUploader($s3_client, $source, array(
-				"state" => $e->getState()
-			));
-		}
-	} while(!isset($res));
+		return $res['ObjectURL'];
+	}
+	catch(Aws\Exception\AwsException $e) { echo $e->getMessage(); }
 
-	fclose($src);
-
-	return $res['@metadata']['statusCode'] == "200" ? $res['ObjectURL'] : null;
+	return null;
 }
 
 

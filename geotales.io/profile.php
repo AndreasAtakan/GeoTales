@@ -23,6 +23,8 @@ $email = getUserEmail($PDO, $user_id);
 $photo = getUserPhoto($PDO, $user_id);
 $paid = getUserPaid($PDO, $user_id);
 
+$email_confirmed = isset($_GET['camefrom']) ? urldecode($_GET['camefrom']) == "/auth/commit-password-reset" : false;
+
 ?>
 
 <!DOCTYPE html>
@@ -172,6 +174,12 @@ $paid = getUserPaid($PDO, $user_id);
 
 				<div class="row mb-4" style="max-width: 550px;">
 					<div class="col">
+				<?php if($email_confirmed) { ?>
+						<div role="alert" class="alert alert-info alert-dismissible fade show">
+							Email confirmation registered.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+				<?php } ?>
 						<form method="post" autocomplete="off" id="edit">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
@@ -302,6 +310,7 @@ $paid = getUserPaid($PDO, $user_id);
 					$.ajax({
 						type: "POST",
 						url: "/auth/send-password-reset",
+						contentType: "application/json",
 						data: JSON.stringify({ "email": _EMAIL }),
 						dataType: "json",
 						success: function(result, status, xhr) {

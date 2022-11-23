@@ -12,15 +12,11 @@ ini_set('display_errors', 'On'); ini_set('html_errors', 0); error_reporting(-1);
 include "init.php";
 include_once("helper.php");
 
-$user_id = headerUserID();
-
-if(sane_is_null($user_id)) { // Not logged in
-	header("location: signin.php"); exit;
-}
-
 
 // Operations
-if(isset($_POST['op']) && isset($_POST['table']) && isset($_POST['id'])) {
+if(isset($_POST['op'])
+&& isset($_POST['table'])
+&& isset($_POST['id'])) {
 	$op = $_POST['op'];
 	$table = $_POST['table'];
 	$id = $_POST['id'];
@@ -57,6 +53,10 @@ foreach($cs as $c) { array_push($columns, $c['n']); }
 
 $res = $rows;
 
+if($table == "User") {
+	$columns = array_diff($columns, array("password", "password_old"));
+}
+else
 if($table == "Map") {
 	array_push($columns, "likes", "views", "flags");
 	$columns = array_diff($columns, array("data"));
@@ -110,6 +110,7 @@ if($table == "Map") {
 	<body>
 
 		<form method="post" autocomplete="off" id="search">
+			<input type="hidden" name="X-CSRF-Token" value="<?php echo headerCSRFToken(); ?>" />
 			<select name="table">
 				<option value="" disabled selected>Choose..</option>
 				<option value="User">User</option>
@@ -121,8 +122,9 @@ if($table == "Map") {
 
 		<br />
 
-		<form method="post">
-			<input type="hidden" name="table" value="<?php echo $table; ?>">
+		<form method="post" id="refresh">
+			<input type="hidden" name="X-CSRF-Token" value="<?php echo headerCSRFToken(); ?>" />
+			<input type="hidden" name="table" value="<?php echo $table; ?>" />
 			<button type="submit">REFRESH LIST</button>
 		</form>
 
@@ -146,7 +148,8 @@ if($table == "Map") {
 			  || $table == "Map"
 			  || $table == "Comment") { ?>
 			  		<td>
-			  			<form method="post">
+			  			<form method="post" id="execute">
+			  				<input type="hidden" name="X-CSRF-Token" value="<?php echo headerCSRFToken(); ?>" />
 			  				<input type="hidden" name="table" value="<?php echo $table; ?>" />
 			  				<input type="hidden" name="id" value="<?php echo $row['id']; ?>" />
 			  				<select name="op">

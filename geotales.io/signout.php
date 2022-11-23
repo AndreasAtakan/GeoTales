@@ -43,7 +43,7 @@ if(sane_is_null($user_id)) { // user is not logged in
 	</head>
 	<body>
 
-		<p>Signing out...</p>
+		<p id="status">Signing out...</p>
 
 		<!-- Load JS -->
 		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
@@ -65,14 +65,16 @@ if(sane_is_null($user_id)) { // user is not logged in
 				$.ajax({
 					type: "POST",
 					url: "/auth/logout",
+					contentType: "application/json",
 					data: JSON.stringify({}),
 					dataType: "json",
 					success: function(result, status, xhr) {
-						window.location.assign("index.php");
+						if(result.status == "ok") { window.location.assign("index.php"); }
+						else{ $("#status").html("Failed to sign out."); }
 					},
 					error: function(xhr, status, error) {
 						console.error(xhr.status, error);
-						window.location.assign("index.php");
+						$("#status").html("An error has occurred.");
 					}
 				});
 

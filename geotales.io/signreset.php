@@ -64,6 +64,8 @@ $token = $_GET['token'];
 				background-repeat: no-repeat;
 				background-position: center;
 			}
+
+			#reset_failed { display: none; }
 		</style>
 	</head>
 	<body>
@@ -120,6 +122,11 @@ $token = $_GET['token'];
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
+						<div role="alert" class="alert alert-danger alert-dismissible fade show" id="reset_failed">
+							<strong>Failed</strong> to reset password.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+
 						<form method="post" autocomplete="off" id="signreset">
 					<?php if($logged_in) { ?>
 							<p class="lead text-muted">User: <?php echo $username; ?></p>
@@ -249,13 +256,18 @@ $token = $_GET['token'];
 					$.ajax({
 						type: "POST",
 						url: "/auth/commit-password-reset",
+						contentType: "application/json",
 						data: JSON.stringify({
 							"token": _TOKEN,
 							"password": el.pw2.value
 						}),
 						dataType: "json",
 						success: function(result, status, xhr) {
-							window.location.assign(_RETURN_URL);
+							if(result.status == "ok") { window.location.assign(_RETURN_URL); }
+							else{
+								$("#reset_failed").css("display", "block");
+								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							}
 						},
 						error: function(xhr, status, error) {
 							console.error(xhr.status, error);

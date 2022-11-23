@@ -27,24 +27,8 @@ function sanitize($str) {
 }
 
 //
-function random_string($length = 10) {
-	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	$charactersLength = strlen($characters);
-	$randomString = '';
-	for($i = 0; $i < $length; $i++) {
-		$randomString .= $characters[rand(0, $charactersLength - 1)];
-	}
-	return $randomString;
-}
-
-//
-function headerUserID() {
-	return getallheaders()['X-User-ID'] ?? null;
-}
-
-//
 function headerCSRFToken() {
-	return getallheaders()['X-CSRF-Token'] ?? null;
+	return $_SERVER["HTTP_X_CSRF_TOKEN"] ?? null;
 }
 
 

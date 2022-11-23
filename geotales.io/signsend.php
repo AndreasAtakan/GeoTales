@@ -56,7 +56,8 @@ $user_id = headerUserID();
 				background-position: center;
 			}
 
-			#reset_info { display: none; }
+			#reset_info,
+			#reset_failed { display: none; }
 		</style>
 	</head>
 	<body>
@@ -115,6 +116,11 @@ $user_id = headerUserID();
 					<div class="col">
 						<div role="alert" class="alert alert-info alert-dismissible fade show" id="reset_info">
 							A password-reset link has been sent to you by email.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+
+						<div role="alert" class="alert alert-danger alert-dismissible fade show" id="reset_failed">
+							<strong>Failed</strong> to reset password.
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 
@@ -212,10 +218,11 @@ $user_id = headerUserID();
 					$.ajax({
 						type: "POST",
 						url: "/auth/send-password-reset",
+						contentType: "application/json",
 						data: JSON.stringify({ "email": el.email.value }),
 						dataType: "json",
 						success: function(result, status, xhr) {
-							$("#reset_info").css("display", "block");
+							$(result.status == "ok" ? "#reset_info" : "#reset_failed").css("display", "block");
 							setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
 						},
 						error: function(xhr, status, error) {

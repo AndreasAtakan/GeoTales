@@ -59,6 +59,8 @@ if(!sane_is_null($user_id)) { // user is already logged in
 				background-repeat: no-repeat;
 				background-position: center;
 			}
+
+			#signup_failed { display: none; }
 		</style>
 	</head>
 	<body>
@@ -115,6 +117,11 @@ if(!sane_is_null($user_id)) { // user is already logged in
 
 				<div class="row mx-auto" style="max-width: 350px;">
 					<div class="col">
+						<div role="alert" class="alert alert-danger alert-dismissible fade show" id="signup_failed">
+							<strong>Failed</strong> to sign up.
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+
 						<form method="post" autocomplete="off" id="signup">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
@@ -134,6 +141,12 @@ if(!sane_is_null($user_id)) { // user is already logged in
 							<div class="mb-3">
 								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" required />
 								<label for="pw2" class="form-label small text-muted">Confirm password</label>
+							</div>
+							<div class="form-check mb-3">
+								<input type="checkbox" class="form-check-input" id="flexCheckDefault" value="" required />
+								<label class="form-check-label" for="flexCheckDefault">
+									Agree to our <a href="terms.php">Terms and conditions</a> and <a href="privacy.php">Privacy Policy</a>
+								</label>
 							</div>
 							<button type="submit" class="btn btn-primary">Sign up</button>
 						</form>
@@ -274,6 +287,7 @@ if(!sane_is_null($user_id)) { // user is already logged in
 					$.ajax({
 						type: "POST",
 						url: "/auth/signup",
+						contentType: "application/json",
 						data: JSON.stringify({
 							"username": el.username.value,
 							"email": el.email.value,
@@ -281,7 +295,11 @@ if(!sane_is_null($user_id)) { // user is already logged in
 						}),
 						dataType: "json",
 						success: function(result, status, xhr) {
-							window.location.assign(_RETURN_URL);
+							if(result.status == "ok") { window.location.assign(_RETURN_URL); }
+							else{
+								$("#signup_failed").css("display", "block");
+								setTimeout(function() { $("#loadingModal").modal("hide"); }, 750);
+							}
 						},
 						error: function(xhr, status, error) {
 							console.error(xhr.status, error);

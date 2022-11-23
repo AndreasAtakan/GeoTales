@@ -2,7 +2,8 @@
 	"name": "geotales/geotales.io",
 	"description": "GeoTales",
 	"require": {
-		"aws/aws-sdk-php": "^3.241"
+		"aws/aws-sdk-php": "^3.241",
+		"geoip2/geoip2": "~2.0"
 	},
 	"authors": [
 		{

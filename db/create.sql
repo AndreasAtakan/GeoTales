@@ -17,7 +17,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS "User"(
 	id uuid DEFAULT uuid_generate_v4(),
 	username text UNIQUE NOT NULL,
-	password varchar(64) NOT NULL,
+	password varchar(128) NOT NULL,
 	email text UNIQUE NOT NULL,
 	email_confirmed bool DEFAULT false,
 	photo text,
@@ -64,9 +64,9 @@ CREATE TABLE IF NOT EXISTS "Comment"(
 	content text,
 	created_date timestamp DEFAULT NOW(),
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id) REFERENCES "User" (id) ON UPDATE CASCADE,
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE SET NULL ON UPDATE CASCADE,
 	FOREIGN KEY (map_id) REFERENCES "Map" (id) ON DELETE CASCADE ON UPDATE CASCADE,
-	FOREIGN KEY (ref) REFERENCES "Comment" (id) ON UPDATE CASCADE
+	FOREIGN KEY (ref) REFERENCES "Comment" (id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "Reaction"(
@@ -123,11 +123,21 @@ CREATE TABLE IF NOT EXISTS "Analytics"(
 	id uuid DEFAULT uuid_generate_v4(),
 	user_id uuid,
 	location text,
-	ip text,
+	city text,
 	agent text,
 	created_date timestamp DEFAULT NOW(),
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id) REFERENCES "User" (id) ON UPDATE CASCADE
+	FOREIGN KEY (user_id) REFERENCES "User" (id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+--
+
+CREATE TABLE IF NOT EXISTS "Email_Confirmation_Token"(
+	id uuid DEFAULT uuid_generate_v4(),
+	email text UNIQUE NOT NULL,
+	token varchar(64) NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (email) REFERENCES "User" (email) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 --
