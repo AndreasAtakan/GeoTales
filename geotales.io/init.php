@@ -32,8 +32,8 @@ $CONFIG = array(
 // DB init
 
 $host = "localhost";
-$port = "5432";
-$user = "www-data";
+$port = "63333";
+$user = "postgres";
 $pass = "vleowemnxoyvq"; // secret
 $db   = "geotales-test";
 //$charset = "utf8mb4";

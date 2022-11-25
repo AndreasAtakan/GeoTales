@@ -33,7 +33,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 	white-space: nowrap;
 }
 
-.leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
+/*.leaflet-tooltip { padding-top: 1px; padding-bottom: 1px; margin-top: 0; }
 .leaflet-tooltip::before { display: none; }
 
 .leaflet-pm-toolbar .leaflet-pm-icon-marker {
@@ -43,7 +43,7 @@ input:not([type="radio"]):not([type="checkbox"]), textarea, select, button, ul, 
 .leaflet-pm-toolbar .button-container .leaflet-pm-actions-container {
 	top: 100% !important; left: 0 !important;
 }
-.leaflet-pm-toolbar { height: 34px; }
+.leaflet-pm-toolbar { height: 34px; }*/
 
 
 #sceneRow { background-color: #f2f2f2; }

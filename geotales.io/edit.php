@@ -54,16 +54,17 @@ $row = $stmt->fetch();
 		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
 		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
-		<!--link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" /-->
+		<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" />
+		<!--link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="lib/leaflet.fullscreen/leaflet.fullscreen.css" />
 		<link rel="stylesheet" href="lib/leaflet.zoomhome/leaflet.zoomhome.css" />
-		<!--link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" /-->
-		<!--link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" /-->
+		<link rel="stylesheet" href="lib/leaflet.locatecontrol/L.Control.Locate.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.draw/leaflet.draw.css" />
 		<link rel="stylesheet" href="lib/leaflet.geoman/leaflet-geoman.css" />
 		<link rel="stylesheet" href="lib/leaflet.easybutton/easy-button.css" />
-		<!--link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" /-->
+		<link rel="stylesheet" href="lib/leaflet.htmllegend/L.Control.HtmlLegend.css" />
 		<link rel="stylesheet" href="lib/leaflet.contextmenu/leaflet.contextmenu.min.css" />
-		<!--link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" /-->
+		<link rel="stylesheet" href="lib/leaflet.centercontrol/leaflet-control-topcenter.css" /-->
 		<!--link rel="stylesheet" href="lib/prism/prism.css" /-->
 		<link rel="stylesheet" href="lib/trumbowyg/ui/trumbowyg.min.css" />
 		<link rel="stylesheet" href="lib/trumbowyg/plugins/colors/ui/trumbowyg.colors.min.css" />

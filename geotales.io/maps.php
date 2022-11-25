@@ -99,7 +99,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="title" class="form-label">Title</label>
-									<input type="text" class="form-control" id="title" aria-describedby="titleHelp" maxlength="65" required />
+									<input type="text" class="form-control" id="title" aria-describedby="titleHelp" maxlength="65" tabindex="1" required />
 									<div id="titleHelp" class="form-text">Max 65 characters</div>
 								</div>
 							</div>
@@ -107,7 +107,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="description" class="form-label">Description</label>
-									<textarea class="form-control" id="description" rows="5" required></textarea>
+									<textarea class="form-control" id="description" rows="5" tabindex="2" required></textarea>
 								</div>
 							</div>
 
@@ -148,7 +148,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="title" class="form-label">Title</label>
-									<input type="text" class="form-control" id="title" aria-describedby="titleHelp" maxlength="65" required />
+									<input type="text" class="form-control" id="title" aria-describedby="titleHelp" maxlength="65" tabindex="1" required />
 									<div id="titleHelp" class="form-text">Max 65 characters</div>
 								</div>
 							</div>
@@ -156,7 +156,7 @@ $count = $stmt->rowCount();
 							<div class="row mb-3">
 								<div class="col">
 									<label for="description" class="form-label">Description</label>
-									<textarea class="form-control" id="description" rows="5" required></textarea>
+									<textarea class="form-control" id="description" rows="5" tabindex="2" required></textarea>
 								</div>
 							</div>
 

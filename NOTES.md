@@ -48,19 +48,3 @@
 		- [Cool font](https://exeterbookhand.com/)
 	4. Linje koblinger mellom avatarer; brukeren tegner en linje som kobler avatarene og denne koblingen følger avatarene fra scene-til-scene
 	5. Problem hvis grunnkart forsvinner fra grunnkart-leverandørene; Vi bør ha et mellom-system som behandler alle grunnkart-leverandørene, slik at edit-mode kobler selg til dette mellom-systemet og ikke direkte til leverandørene. Da kan vi kontrollere hvis et grunnkart forsvinner.
-
-
-
-
-
-------------------------
-
-### Endringer gjort i /lib
-
-- **leaflet.draw**
-	- Erstattet alle `L.Point(20,20)` med `L.Point(12,12)` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å gjøre resize/move boksene på polyline/polygon objekter mindre
-	- ~Fjernet alle kall til `_toggleMarkerHighlight` og fjernet selve metoden og medfølgende hjelpe-metoder på `L.Edit.Marker` i *leaflet.draw-src.js* og *leaflet.draw.js*. For å fjerne objekt-styling på markers i editLayer~
-	- ~Fjernet `selectedPathOptions.fillOpacity` på `L.EditToolbar` i *leaflet.draw-src.js* og *leaflet.draw.js*. Slik at polyline/polygon fillOpacity beholdes~
-
-- **leaflet.zoomhome**
-	- Endret `setHomeBounds` metode til å bruke `_map._getBoundsCenterZoom` i stedet for `_map.getBoundsZoom` og `bounds.getCenter`. `bounds.getCenter` produserer et annet senter-punkt enn `_getBoundsCenterZoom`, og vil dermed flytte kartet til et annet sted enn når scenen først blir satt

@@ -126,12 +126,12 @@ if(!sane_is_null($user_id)) { // user is already logged in
 						<form method="post" autocomplete="on" id="signin">
 							<div class="mb-3">
 								<label for="username_email" class="form-label">Username or E-Mail</label>
-								<input type="text" class="form-control" id="username_email" required />
+								<input type="text" class="form-control" id="username_email" tabindex="1" required />
 							</div>
 							<div class="mb-3">
 								<label for="password" class="form-label">Password</label>
 								<div class="input-group">
-									<input type="password" class="form-control" id="password" aria-label="Password" aria-describedby="pwShow" required />
+									<input type="password" class="form-control" id="password" aria-label="Password" aria-describedby="pwShow" tabindex="2" required />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>

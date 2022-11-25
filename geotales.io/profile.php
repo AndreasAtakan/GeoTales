@@ -183,15 +183,15 @@ $email_confirmed = isset($_GET['camefrom']) ? urldecode($_GET['camefrom']) == "/
 						<form method="post" autocomplete="off" id="edit">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" class="form-control" id="username" value="<?php echo $username; ?>" />
+								<input type="text" class="form-control" id="username" tabindex="1" value="<?php echo $username; ?>" />
 							</div>
 							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" class="form-control" id="email" value="<?php echo $email; ?>" />
+								<input type="email" class="form-control" id="email" tabindex="2" value="<?php echo $email; ?>" />
 							</div>
 							<div class="mb-5">
 								<label for="photoUpload" class="form-label">Profile picture</label>
-								<input type="file" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" />
+								<input type="file" class="form-control" id="photoUpload" accept="image/gif, image/jpeg, image/png, image/webp" tabindex="3" />
 							</div>
 							<button type="submit" class="btn btn-secondary float-end">Save</button>
 						</form>
@@ -283,7 +283,6 @@ $email_confirmed = isset($_GET['camefrom']) ? urldecode($_GET['camefrom']) == "/
 		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
 		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-		<script type="text/javascript" src="lib/sjcl/sjcl.js"></script>
 
 		<!-- Load JS -->
 		<script type="text/javascript" src="assets/ajax_setup.js"></script>

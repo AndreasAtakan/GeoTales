@@ -20,6 +20,4 @@ cp -r api/ \
 	  ../deploy/build/
 
 cd ../deploy/build/
-sed -i "s/5432/63333/" init.php
-sed -i "s/www-data/postgres/" init.php
 if [ $T == "prod" ]; then sed -i "s/geotales-test/geotales/" init.php; fi

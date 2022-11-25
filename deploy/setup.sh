@@ -2,4 +2,20 @@
 
 # ssh tunnel to database server
 # FIRST TRANSFER SSH KEYS TO THE SERVER
-ssh -o ExitOnForwardFailure=yes -f -N -L 63333:localhost:5432 ubuntu@ec2-13-49-137-26.eu-north-1.compute.amazonaws.com
+
+echo "
+[Unit]
+Description=database server tunnel
+Requires=network.target network-online.target
+
+[Service]
+Type=simple
+ExecStart=ssh -o ExitOnForwardFailure=yes -NTL 63333:localhost:5432 ubuntu@db.geotales.io
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target
+" > /etc/systemd/system/postgres-db-tunnel.service
+
+systemctl daemon-reload
+systemctl enable --now postgres-db-tunnel

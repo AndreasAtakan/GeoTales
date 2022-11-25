@@ -15,8 +15,7 @@ systemctl restart php8.1-fpm
 
 # certbot
 apt install -y certbot
-certbot certonly --standalone -d geotales.io
-certbot certonly --standalone -d www.geotales.io
+certbot certonly --standalone -d geotales.io -d www.geotales.io
 cp options-ssl-nginx.conf /etc/letsencrypt/
 
 # nginx

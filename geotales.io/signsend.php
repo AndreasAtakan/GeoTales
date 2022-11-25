@@ -127,7 +127,7 @@ $user_id = headerUserID();
 						<form method="post" autocomplete="off" id="signsend">
 							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" class="form-control" id="email" required />
+								<input type="email" class="form-control" id="email" tabindex="1" required />
 							</div>
 							<button type="submit" class="btn btn-primary">Request reset</button>
 						</form>

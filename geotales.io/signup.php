@@ -125,25 +125,25 @@ if(!sane_is_null($user_id)) { // user is already logged in
 						<form method="post" autocomplete="off" id="signup">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input type="text" class="form-control" id="username" required />
+								<input type="text" class="form-control" id="username" tabindex="1" required />
 							</div>
 							<div class="mb-3">
 								<label for="email" class="form-label">E-Mail</label>
-								<input type="email" class="form-control" id="email" required />
+								<input type="email" class="form-control" id="email" tabindex="2" required />
 							</div>
 							<div class="mb-1">
 								<label for="pw1" class="form-label">Password</label>
 								<div class="input-group">
-									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
+									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" tabindex="3" required />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>
 							<div class="mb-3">
-								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" required />
+								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" tabindex="4" required />
 								<label for="pw2" class="form-label small text-muted">Confirm password</label>
 							</div>
 							<div class="form-check mb-3">
-								<input type="checkbox" class="form-check-input" id="flexCheckDefault" value="" required />
+								<input type="checkbox" class="form-check-input" id="flexCheckDefault" value="" tabindex="5" required />
 								<label class="form-check-label" for="flexCheckDefault">
 									Agree to our <a href="terms.php">Terms and conditions</a> and <a href="privacy.php">Privacy Policy</a>
 								</label>

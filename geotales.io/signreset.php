@@ -134,12 +134,12 @@ $token = $_GET['token'];
 							<div class="mb-1">
 								<label for="pw1" class="form-label">New password</label>
 								<div class="input-group">
-									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" required />
+									<input type="password" class="form-control" id="pw1" aria-label="Password" aria-describedby="pwShow" tabindex="1" required />
 									<button type="button" class="btn btn-outline-secondary" id="pwShow" title="Toggle password"><i class="fas fa-eye"></i></button>
 								</div>
 							</div>
 							<div class="mb-3">
-								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" required />
+								<input type="password" class="form-control" id="pw2" aria-label="Confirm password" tabindex="2" required />
 								<label for="pw2" class="form-label small text-muted">Confirm password</label>
 							</div>
 							<button type="submit" class="btn btn-primary">Reset password</button>
