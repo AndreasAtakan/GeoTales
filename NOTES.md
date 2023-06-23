@@ -1,12 +1,5 @@
 ## Notes
 
-##### Endringer – tilbakemeldinger runde 3:
-
-- Legge inn mulighet for å "trace path" for avatarer (legge en linje etter avataren som viser bevegelsen, enten avtagende linje-styrke eller annet)
-
-
-###### Misc.
-
 - Gi brukeren muligheten til å plassere/posisjonere bilde-grunnkart i forhold til de innebygde grunnkartene
 	- Fremtidig utvidelse: en full grunnkart-editor hvor brukeren kan lage sine egne grunnkart med bilder og/eller innebygde grunnkart, og lagre dem til "Avaiable basemaps"
 	  [Alternativ til grunnkart-editor](https://github.com/maputnik/editor)
