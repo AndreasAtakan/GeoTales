@@ -32,10 +32,10 @@ $CONFIG = array(
 // DB init
 
 $host = "localhost";
-$port = "63333";
+$port = $TESTING ? "5432" : "63333";
 $user = "postgres";
 $pass = "vleowemnxoyvq"; // secret
-$db   = "geotales-test";
+$db   = $TESTING ? "geotales-test" : "geotales";
 //$charset = "utf8mb4";
 
 $dsn = "pgsql:host={$host};port={$port};dbname={$db};options='--client_encoding=UTF8'";
