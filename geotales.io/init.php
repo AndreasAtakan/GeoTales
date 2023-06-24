@@ -20,8 +20,10 @@ $CONFIG = array(
 	//"discourse_sso_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
 	//"discourse_webhooks_secret" => "xnUhKjs4HfYqmPhLTgKFutvN7", // secret
 
-	"aws_access_key_id" => "AKIA5RSTXAFR7IU7J467", // secret
-	"aws_secret_access_key" => "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", // secret
+	//"aws_access_key_id" => "AKIA5RSTXAFR7IU7J467", // old
+	//"aws_secret_access_key" => "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", // old
+	"aws_access_key_id" => "AKIA5RSTXAFR2WC5KUEB", // secret
+	"aws_secret_access_key" => "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", // secret
 	"aws_bucket_name" => "geotales", // secret
 	"aws_region" => "eu-north-1", // secret
 	"aws_ses_region" => "email.eu-north-1.amazonaws.com", // secret
@@ -37,13 +39,15 @@ $CONFIG = array(
 
 // DB init
 
-$host = $TESTING ? "localhost" : "ec2-13-49-137-26.eu-north-1.compute.amazonaws.com";
+//$host = $TESTING ? "localhost" : "ec2-13-49-137-26.eu-north-1.compute.amazonaws.com";
+$host = "localhost";
+$port = $TESTING ? "5432" : "63333";
 $user = $TESTING ? "www-data" : "postgres";
 $pass = "vleowemnxoyvq"; // secret
 $db   = $TESTING ? "www-data" : "geotales";
 //$charset = "utf8mb4";
 
-$dsn = "pgsql:host=$host;dbname=$db;options='--client_encoding=UTF8'";
+$dsn = "pgsql:host=$host;port=$port;dbname=$db;options='--client_encoding=UTF8'";
 $options = array(
 	PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
 	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
