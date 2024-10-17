@@ -1,0 +1,243 @@
+<!--
+/*******************************************************************************
+* Copyright (C) Nordfjord EDB AS - All Rights Reserved                         *
+*                                                                              *
+* Unauthorized copying of this file, via any medium is strictly prohibited     *
+* Proprietary and confidential                                                 *
+* Written by Andreas Atakan <aca@geotales.io>, January 2022                    *
+*******************************************************************************/
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi" />
+
+		<title>GeoTales – Tales on a map</title>
+		<meta name="title" content="GeoTales" />
+		<meta name="description" content="Tales on a map" />
+
+		<link rel="icon" href="assets/logo.png" />
+
+		<!-- Load lib/ CSS -->
+		<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
+		<link rel="stylesheet" href="lib/jquery-ui/jquery-ui.min.css" />
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+
+		<!-- Load src/ CSS -->
+		<link rel="stylesheet" href="main.css" />
+
+		<style type="text/css">
+			html, body {
+				/**/
+			}
+
+			main {
+				background-image: url('assets/background.png');
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: center;
+			}
+
+			.fa-check { color: #00cc44; }
+			.fa-minus { color: #e68a00; }
+			.fa-times { color: #cc2900; }
+		</style>
+	</head>
+	<body>
+
+		<!-- Loading modal -->
+		<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadingModalLabel">Loading</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Error modal -->
+		<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="errorModalLabel">Error</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Something went wrong. Please try again.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<header>
+			<nav class="navbar navbar-expand-sm navbar-dark fixed-top shadow px-2 px-sm-3 py-1" style="background-color: #eba937;">
+				<div class="container">
+					<a class="navbar-brand" href="index.html">
+						<img src="assets/logo.png" alt="GeoTales" width="auto" height="30" /><small>eoTales</small>
+					</a>
+
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+
+					<div class="collapse navbar-collapse" id="navbarContent">
+						<ul class="navbar-nav mb-2 mb-sm-0 px-2 px-sm-0 w-100">
+							<li class="nav-item">
+								<a class="nav-link" href="index.html">
+									<i class="fas fa-home"></i> Home
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" href="pricing.html">
+									<i class="fas fa-tag"></i> Pricing
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="contact.html">
+									<i class="fas fa-envelope"></i> Contact
+								</a>
+							</li>
+							<li class="nav-item me-sm-auto">
+								<a class="nav-link" href="about.html">
+									<i class="fas fa-info-circle"></i> About
+								</a>
+							</li>
+
+							<li class="nav-item">
+								<a role="button" class="btn btn-sm btn-outline-light" href="https://alpha.geotales.io" target="_blank" style="margin-top: 0.35rem;">GeoTales Alpha</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<main role="main">
+			<div class="container" id="main">
+				<div class="row my-5"></div>
+
+				<div class="row row-cols-1 row-cols-md-2 g-3">
+					<div class="col">
+						<div class="card">
+							<div class="card-body">
+								<h4 class="card-title text-center">GeoTales Alpha</h4>
+								<h6 class="card-subtitle mb-3 text-center text-muted">
+									<i class="fas fa-check"></i> Free &nbsp; / &nbsp; <i class="fas fa-minus"></i> $5 per month
+								</h6>
+								<p class="card-text small ms-md-4"><i class="fas fa-check"></i> Create and publish your own GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check"></i> 5 GeoTales for free</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-check"></i> 40+ free basemaps</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-minus"></i> Unlimited GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-minus"></i> Custom basemaps</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-minus"></i> WMS-layers</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-minus"></i> Import and export of data-files</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-minus"></i> Password-protected GeoTales</p>
+								<p class="card-text small ms-md-4"><i class="fas fa-minus"></i> Option to create organization-account</p>
+								<div class="d-grid">
+									<a role="button" class="btn btn-primary" href="https://alpha.geotales.io/signup.php">Sign up for free</a>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col">
+						<div class="card">
+							<div class="card-body">
+								<h4 class="card-title text-center">GeoTales ARV</h4>
+								<h6 class="card-subtitle text-center text-muted">Contact us</h6>
+								<p class="card-text ms-md-4 mt-4">
+									GeoTales ARV is an interactive map solution that provides an overview of a projects' area-accounts. <br />
+									Read more <a class="text-dark" href="arv.html">here</a>.
+								</p>
+								<p class="card-text ms-md-4 mb-5">
+									For more information about pricing, please contact us.
+								</p>
+								<div class="d-grid">
+									<a role="button" class="btn btn-primary" href="mailto:contact@geotales.io?subject=GeoTales ARV account">Contact us</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row my-5"></div>
+			</div>
+		</main>
+
+		<footer class="py-3 shadow" style="background-color: #e6e6e6;">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-4 mt-2">
+						<center>
+							<div class="btn-group btn-group-lg" role="group" aria-label="Socials">
+								<a role="button" class="btn btn-outline-light" href="https://www.facebook.com/Geotales-107125105285825" target="_blank">
+									<i class="fab fa-facebook" style="color: #4267b2;"></i>
+								</a>
+								<a role="button" class="btn btn-outline-light" href="https://twitter.com/Geotales_io" target="_blank">
+									<i class="fab fa-twitter" style="color: #1da1f2;"></i>
+								</a>
+							</div>
+						</center>
+					</div>
+					<div class="col-sm-4 mt-2">
+						<center>
+							<img class="d-none d-sm-block" src="assets/logo.png" alt="GeoTales" width="auto" height="40" />
+						</center>
+					</div>
+					<div class="col-sm-4 mt-2">
+						<p class="text-muted text-center">© <span id="ccYear">2023</span> <a class="text-decoration-none" href="#" id="host">_</a> – all rights reserved</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="https://alpha.geotales.io/">GeoTales Alpha</a> <br />
+							<small>Previous version of GeoTales</small>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="terms.html">Terms and conditions</a>
+						</p>
+						<p class="text-muted text-center">
+							<a class="text-decoration-none" href="#" id="email">_</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Load lib/ JS -->
+		<script type="text/javascript" src="lib/fontawesome/js/all.min.js"></script>
+		<!--script type="text/javascript" src="lib/jquery/jquery-3.6.0.slim.min.js"></script-->
+		<script type="text/javascript" src="lib/jquery-ui/external/jquery/jquery.js"></script>
+		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="lib/jquery-resizable/jquery-resizable.min.js"></script>
+		<script type="text/javascript" src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+		<script type="text/javascript" src="main.js"></script>
+
+		<!-- Load src/ JS -->
+		<script type="text/javascript">
+			"use strict";
+
+			window.onload = function(ev) {
+				$("span#ccYear").html( (new Date()).getFullYear() );
+
+				$("a#host").html( _CONFIG["host"] );
+				$("a#host").attr("href", _CONFIG["host"]);
+
+				$("a#email").html( _CONFIG["email"] );
+				$("a#email").attr("href", `mailto:${_CONFIG["email"]}`);
+			};
+		</script>
+
+	</body>
+</html>
